@@ -7,17 +7,35 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ED3204FE293E61240055CD73 /* AXSplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FD293E61240055CD73 /* AXSplitView.swift */; };
+		ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FF293E632A0055CD73 /* AXAppProperties.swift */; };
+		ED956093293FFFB900AC1C15 /* AXHoverButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED956092293FFFB900AC1C15 /* AXHoverButton.swift */; };
+		ED95609729400AC700AC1C15 /* AXWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED95609629400AC700AC1C15 /* AXWebView.swift */; };
+		ED95609A2940339800AC1C15 /* AXTabContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9560992940339800AC1C15 /* AXTabContainerView.swift */; };
+		ED95609D294033D400AC1C15 /* AXTabItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED95609C294033D400AC1C15 /* AXTabItem.swift */; };
+		ED989DA6293D25E90081ABCF /* AXSideBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED989DA5293D25E90081ABCF /* AXSideBarView.swift */; };
 		EDD71EC8293BD96600256EA9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD71EC7293BD96600256EA9 /* AppDelegate.swift */; };
 		EDD71ECA293BD96700256EA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EDD71EC9293BD96700256EA9 /* Assets.xcassets */; };
 		EDD71ECD293BD96700256EA9 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = EDD71ECB293BD96700256EA9 /* MainMenu.xib */; };
+		EDD71ED9293BECE700256EA9 /* AXWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD71ED8293BECE700256EA9 /* AXWindow.swift */; };
+		EDD71EDB293BF0F900256EA9 /* AXContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD71EDA293BF0F900256EA9 /* AXContentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		EDD71EC4293BD96600256EA9 /* AXMalvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AXMalvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED3204FD293E61240055CD73 /* AXSplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSplitView.swift; sourceTree = "<group>"; };
+		ED3204FF293E632A0055CD73 /* AXAppProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXAppProperties.swift; sourceTree = "<group>"; };
+		ED956092293FFFB900AC1C15 /* AXHoverButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXHoverButton.swift; sourceTree = "<group>"; };
+		ED95609629400AC700AC1C15 /* AXWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWebView.swift; sourceTree = "<group>"; };
+		ED9560992940339800AC1C15 /* AXTabContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTabContainerView.swift; sourceTree = "<group>"; };
+		ED95609C294033D400AC1C15 /* AXTabItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTabItem.swift; sourceTree = "<group>"; };
+		ED989DA5293D25E90081ABCF /* AXSideBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSideBarView.swift; sourceTree = "<group>"; };
+		EDD71EC4293BD96600256EA9 /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EDD71EC7293BD96600256EA9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EDD71EC9293BD96700256EA9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EDD71ECC293BD96700256EA9 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		EDD71ECE293BD96700256EA9 /* AXMalvon.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AXMalvon.entitlements; sourceTree = "<group>"; };
+		EDD71ED8293BECE700256EA9 /* AXWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWindow.swift; sourceTree = "<group>"; };
+		EDD71EDA293BF0F900256EA9 /* AXContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXContentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,6 +49,42 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		ED9560942940065600AC1C15 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				EDD71EDA293BF0F900256EA9 /* AXContentView.swift */,
+				ED989DA5293D25E90081ABCF /* AXSideBarView.swift */,
+				ED95609629400AC700AC1C15 /* AXWebView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		ED9560952940066300AC1C15 /* Subclass Views */ = {
+			isa = PBXGroup;
+			children = (
+				ED3204FD293E61240055CD73 /* AXSplitView.swift */,
+				ED956092293FFFB900AC1C15 /* AXHoverButton.swift */,
+			);
+			path = "Subclass Views";
+			sourceTree = "<group>";
+		};
+		ED9560982940334B00AC1C15 /* Custom Views */ = {
+			isa = PBXGroup;
+			children = (
+				ED95609B294033C600AC1C15 /* AXTab */,
+			);
+			path = "Custom Views";
+			sourceTree = "<group>";
+		};
+		ED95609B294033C600AC1C15 /* AXTab */ = {
+			isa = PBXGroup;
+			children = (
+				ED9560992940339800AC1C15 /* AXTabContainerView.swift */,
+				ED95609C294033D400AC1C15 /* AXTabItem.swift */,
+			);
+			path = AXTab;
+			sourceTree = "<group>";
+		};
 		EDD71EBB293BD96600256EA9 = {
 			isa = PBXGroup;
 			children = (
@@ -42,7 +96,7 @@
 		EDD71EC5293BD96600256EA9 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				EDD71EC4293BD96600256EA9 /* AXMalvon.app */,
+				EDD71EC4293BD96600256EA9 /* Malvon.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -50,7 +104,12 @@
 		EDD71EC6293BD96600256EA9 /* AXMalvon */ = {
 			isa = PBXGroup;
 			children = (
+				ED3204FF293E632A0055CD73 /* AXAppProperties.swift */,
 				EDD71EC7293BD96600256EA9 /* AppDelegate.swift */,
+				EDD71ED8293BECE700256EA9 /* AXWindow.swift */,
+				ED9560942940065600AC1C15 /* Views */,
+				ED9560982940334B00AC1C15 /* Custom Views */,
+				ED9560952940066300AC1C15 /* Subclass Views */,
 				EDD71EC9293BD96700256EA9 /* Assets.xcassets */,
 				EDD71ECB293BD96700256EA9 /* MainMenu.xib */,
 				EDD71ECE293BD96700256EA9 /* AXMalvon.entitlements */,
@@ -75,7 +134,7 @@
 			);
 			name = AXMalvon;
 			productName = AXMalvon;
-			productReference = EDD71EC4293BD96600256EA9 /* AXMalvon.app */;
+			productReference = EDD71EC4293BD96600256EA9 /* Malvon.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -85,8 +144,10 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
+				CLASSPREFIX = AX;
 				LastSwiftUpdateCheck = 1410;
 				LastUpgradeCheck = 1410;
+				ORGANIZATIONNAME = "Aayam(X)";
 				TargetAttributes = {
 					EDD71EC3293BD96600256EA9 = {
 						CreatedOnToolsVersion = 14.1;
@@ -128,6 +189,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */,
+				ED989DA6293D25E90081ABCF /* AXSideBarView.swift in Sources */,
+				EDD71ED9293BECE700256EA9 /* AXWindow.swift in Sources */,
+				ED956093293FFFB900AC1C15 /* AXHoverButton.swift in Sources */,
+				ED95609729400AC700AC1C15 /* AXWebView.swift in Sources */,
+				ED3204FE293E61240055CD73 /* AXSplitView.swift in Sources */,
+				EDD71EDB293BF0F900256EA9 /* AXContentView.swift in Sources */,
+				ED95609D294033D400AC1C15 /* AXTabItem.swift in Sources */,
+				ED95609A2940339800AC1C15 /* AXTabContainerView.swift in Sources */,
 				EDD71EC8293BD96600256EA9 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -196,7 +266,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -250,7 +320,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -271,16 +341,18 @@
 				DEVELOPMENT_TEAM = B29PGN9AG4;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 Aayam(X) Inc. All rights reserved.";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ashwin.AXMalvon;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Malvon;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -298,16 +370,18 @@
 				DEVELOPMENT_TEAM = B29PGN9AG4;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 Aayam(X) Inc. All rights reserved.";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MACOSX_DEPLOYMENT_TARGET = 11.0;
+				MARKETING_VERSION = 0.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ashwin.AXMalvon;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = Malvon;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
