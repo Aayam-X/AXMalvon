@@ -26,12 +26,18 @@ class AXWebContainerView: NSView {
         subviews[0].layer?.cornerRadius = 5.0
     }
     
-    func update() {
-        // TODO: Would this be more efficient than appProperties.currentTab.webView.removeFromSuper()
-        subviews.removeAll()
+    func update(_ oldPosition: Int) {
+        appProperties.tabs[safe: oldPosition]?.view.removeFromSuperview()
         
         let webView = appProperties.tabs[appProperties.currentTab].view
-        webView.frame = appProperties.isFullScreen ? bounds : bounds.insetBy(dx: 14, dy: 14)
+        if appProperties.isFullScreen {
+            webView.frame = bounds
+            webView.layer?.cornerRadius = 0.0
+        } else {
+            webView.frame = bounds.insetBy(dx: 14, dy: 14)
+            webView.layer?.cornerRadius = 5.0
+        }
+        
         webView.navigationDelegate = self
         webView.uiDelegate = self
         addSubview(webView)
@@ -41,12 +47,6 @@ class AXWebContainerView: NSView {
 
 extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate {
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-        let tabItem = AXTabItem.create(appProperties.currentTab + 1, configuration, appProperties: appProperties)
-        appProperties.tabs.append(tabItem)
-        appProperties.currentTab = appProperties.tabs.count - 1
-        appProperties.sidebarView.didCreateTab(appProperties.tabs[appProperties.currentTab])
-        appProperties.webContainerView.update()
-        
-        return tabItem.view
+        return appProperties.tabManager.createNewTab(config: configuration)
     }
 }

@@ -11,6 +11,11 @@ import AppKit
 class AXHoverButton: NSButton {
     var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
     var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
+    public var originalColor: CGColor? {
+        didSet {
+            self.layer?.backgroundColor = originalColor
+        }
+    }
     
     var isMouseDown = false
     
@@ -21,7 +26,7 @@ class AXHoverButton: NSButton {
         self.wantsLayer = true
         self.layer?.cornerRadius = 5
         self.isBordered = false
-        self.bezelStyle = .texturedRounded
+        self.bezelStyle = .shadowlessSquare
         self.setTrackingArea(WithDrag: false)
     }
     
@@ -60,6 +65,6 @@ class AXHoverButton: NSButton {
     }
     
     override func mouseExited(with event: NSEvent) {
-        self.layer?.backgroundColor = .none
+        self.layer?.backgroundColor = originalColor ?? .none
     }
 }

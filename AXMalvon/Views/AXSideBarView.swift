@@ -37,16 +37,78 @@ class AXSideBarView: NSView {
         return button
     }()
     
+    lazy var backButton: AXHoverButton = {
+        let button = AXHoverButton()
+        
+        button.imagePosition = .imageOnly
+        button.image = NSImage(systemSymbolName: "arrow.backward", accessibilityDescription: nil)
+        button.imageScaling = .scaleProportionallyUpOrDown
+        button.target = self
+        button.action = #selector(backButtonAction)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        return button
+    }()
+    
+    lazy var forwardButton: AXHoverButton = {
+        let button = AXHoverButton()
+        
+        button.imagePosition = .imageOnly
+        button.image = NSImage(systemSymbolName: "arrow.forward", accessibilityDescription: nil)
+        button.imageScaling = .scaleProportionallyUpOrDown
+        button.target = self
+        button.action = #selector(forwardButtonAction)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        return button
+    }()
+    
+    lazy var reloadButton: AXHoverButton = {
+        let button = AXHoverButton()
+        
+        button.imagePosition = .imageOnly
+        button.image = NSImage(systemSymbolName: "arrow.clockwise", accessibilityDescription: nil)
+        button.imageScaling = .scaleProportionallyUpOrDown
+        button.keyEquivalentModifierMask = .command
+        button.keyEquivalent = "r"
+        button.target = self
+        button.action = #selector(reloadButtonAction)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        
+        return button
+    }()
+    
     weak var toggleSidebarButtonLeftConstaint: NSLayoutConstraint?
     
     override func viewWillDraw() {
         // Constraints for toggleSidebarButton
         addSubview(toggleSidebarButton)
-        toggleSidebarButton.topAnchor.constraint(equalTo: topAnchor, constant: 8).isActive = true
-        toggleSidebarButtonLeftConstaint = toggleSidebarButton.leftAnchor.constraint(equalTo: leftAnchor, constant: 76)
+        toggleSidebarButton.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
+        toggleSidebarButtonLeftConstaint = toggleSidebarButton.leftAnchor.constraint(equalTo: leftAnchor, constant: appProperties.isFullScreen ? 5 : 76)
         toggleSidebarButtonLeftConstaint?.isActive = true
-        toggleSidebarButton.widthAnchor.constraint(equalToConstant: 23).isActive = true
-        toggleSidebarButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        toggleSidebarButton.widthAnchor.constraint(equalToConstant: 25).isActive = true
+        toggleSidebarButton.heightAnchor.constraint(equalToConstant: 25).isActive = true
+        
+        // Constaints for reloadButton
+        addSubview(reloadButton)
+        reloadButton.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
+        reloadButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -10).isActive = true
+        reloadButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
+        reloadButton.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        
+        // Constaints for forwardButton
+        addSubview(forwardButton)
+        forwardButton.topAnchor.constraint(equalTo: topAnchor, constant: 8).isActive = true
+        forwardButton.rightAnchor.constraint(equalTo: reloadButton.leftAnchor, constant: -10).isActive = true
+        forwardButton.widthAnchor.constraint(equalToConstant: 23).isActive = true
+        forwardButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        
+        // Constaints for backButton
+        addSubview(backButton)
+        backButton.topAnchor.constraint(equalTo: topAnchor, constant: 8).isActive = true
+        backButton.rightAnchor.constraint(equalTo: forwardButton.leftAnchor, constant: -10).isActive = true
+        backButton.widthAnchor.constraint(equalToConstant: 23).isActive = true
+        backButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
         
         // Setup the scrollview
         scrollView.translatesAutoresizingMaskIntoConstraints = false
@@ -71,9 +133,8 @@ class AXSideBarView: NSView {
         stackView.spacing = 1.08
         stackView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.documentView = stackView
-        stackView.leftAnchor.constraint(equalTo: clipView.leftAnchor).isActive = true
         stackView.topAnchor.constraint(equalTo: clipView.topAnchor).isActive = true
-        stackView.rightAnchor.constraint(equalTo: clipView.rightAnchor).isActive = true
+        stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor).isActive = true
     }
     
     func enteredFullScreen() {
@@ -85,16 +146,49 @@ class AXSideBarView: NSView {
     }
     
     @objc func toggleSidebar() {
-        appProperties!.sidebarToggled.toggle()
+        appProperties.sidebarToggled.toggle()
         
-        if appProperties!.sidebarToggled {
-            // TODO: THINK PROPERLY | toggleSidebarButtonLeftConstaint?.constant = appProperties!.isFullScreen ? 5 : 76
-            appProperties?.splitView.insertArrangedSubview(self, at: 0)
-            (self.window as! AXWindow).hideTrafficLights(false)
+        if appProperties.sidebarToggled {
+            appProperties.window.hideTrafficLights(false)
+            appProperties.splitView.insertArrangedSubview(self, at: 0)
         } else {
-            (self.window as! AXWindow).hideTrafficLights(true)
+            appProperties.window.hideTrafficLights(true)
             self.removeFromSuperview()
-            
+        }
+    }
+    
+    @objc func backButtonAction() {
+        let webView = appProperties.tabs[appProperties.currentTab].view
+        if webView.canGoBack {
+            webView.goBack()
+        }
+    }
+    
+    @objc func forwardButtonAction() {
+        let webView = appProperties.tabs[appProperties.currentTab].view
+        if webView.canGoForward {
+            webView.goForward()
+        }
+    }
+    
+    @objc func reloadButtonAction() {
+        appProperties.tabs[appProperties.currentTab].view.reload()
+    }
+    
+    override func viewDidEndLiveResize() {
+        appProperties.sidebarWidth = self.frame.size.width
+        self.layer?.backgroundColor = .clear
+    }
+    
+    override func resizeSubviews(withOldSize oldSize: NSSize) {
+        if oldSize.height == frame.height {
+            if !appProperties.isFullScreen {
+                if frame.width >= 210 {
+                    self.layer?.backgroundColor = .clear
+                } else {
+                    self.layer?.backgroundColor = NSColor.red.cgColor
+                }
+            }
         }
     }
     
@@ -103,11 +197,11 @@ class AXSideBarView: NSView {
     }
     
     override func viewDidHide() {
-        (self.window as! AXWindow).hideTrafficLights(true)
+        appProperties.window.hideTrafficLights(true)
     }
     
     override func viewDidUnhide() {
-        (self.window as! AXWindow).hideTrafficLights(false)
+        appProperties.window.hideTrafficLights(false)
     }
     
     override public func mouseDown(with event: NSEvent) {
@@ -115,18 +209,30 @@ class AXSideBarView: NSView {
     }
     
     @objc func tabClick(_ sender: NSButton) {
+        let pos = appProperties.tabs[appProperties.currentTab].position
+        (stackView.arrangedSubviews[pos] as! AXHoverButton).originalColor = nil
+        
         appProperties.currentTab = sender.tag
-        appProperties.webContainerView.update()
+        
+        appProperties.webContainerView.update(sender.tag)
+        (stackView.arrangedSubviews[sender.tag] as! AXHoverButton).originalColor = NSColor.lightGray.withAlphaComponent(0.3).cgColor
     }
     
     // Add a new item into the stackview
-    func didCreateTab(_ t: AXTabItem) {
+    func didCreateTab(_ oldPos: Int) {
+        (stackView.arrangedSubviews[safe: oldPos] as? AXHoverButton)?.originalColor = nil
+        let t = appProperties.tabs[appProperties.currentTab]
+        
         let button = AXHoverButton()
+        
         button.tag = t.position
+        button.alignment = .natural
         button.target = self
         button.action = #selector(tabClick)
         button.title = t.title ?? "Untitled"
         stackView.addArrangedSubview(button)
+        button.originalColor = NSColor.lightGray.withAlphaComponent(0.3).cgColor
+        
         button.heightAnchor.constraint(equalToConstant: 30).isActive = true
         button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
     }
@@ -134,5 +240,11 @@ class AXSideBarView: NSView {
     func titleChanged(_ p: Int) {
         let button = stackView.arrangedSubviews[p] as! AXHoverButton
         button.title = appProperties.tabs[p].title ?? "Untitled"
+    }
+}
+
+extension Array {
+    subscript (safe index: Index) -> Element? {
+        0 <= index && index < count ? self[index] : nil
     }
 }

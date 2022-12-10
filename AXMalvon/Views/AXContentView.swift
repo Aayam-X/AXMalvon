@@ -24,7 +24,7 @@ class AXContentView: NSView {
         visualEffectView.autoresizingMask = [.height, .width]
         
         // To not have it collapsed at the start
-        appProperties.sidebarView.frame.size.width = 160
+        appProperties.sidebarView.frame.size.width = appProperties.sidebarWidth
         
         // Show/hide the sidebar
         if appProperties.sidebarToggled {
@@ -39,6 +39,6 @@ class AXContentView: NSView {
         addSubview(appProperties.splitView)
         appProperties.splitView.autoresizingMask = [.height, .width]
         
-        appProperties.webContainerView.update()
+        appProperties.tabManager.createNewTab()
     }
 }

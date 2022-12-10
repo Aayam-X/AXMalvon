@@ -23,10 +23,10 @@ class AXWebView: WKWebView {
         self.configuration.preferences.setValue(true, forKey: "canvasUsesAcceleratedDrawing")
         self.configuration.preferences.setValue(true, forKey: "localFileContentSniffingEnabled")
         self.configuration.preferences.setValue(true, forKey: "usesPageCache")
-        self.configuration.preferences.setValue(false, forKey: "backspaceKeyNavigationEnabled")
         self.configuration.preferences.setValue(true, forKey: "aggressiveTileRetentionEnabled")
         self.configuration.preferences.setValue(true, forKey: "appNapEnabled")
         self.configuration.preferences.setValue(true, forKey: "aggressiveTileRetentionEnabled")
+        self.configuration.preferences.setValue(false, forKey: "backspaceKeyNavigationEnabled")
         
         self.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.2 Safari/605.1.15"
         

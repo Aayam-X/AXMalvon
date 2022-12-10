@@ -45,8 +45,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
         }
         
         self.contentView = appProperties.contentView
-        appProperties.tabs.append(AXTabItem.create(0, appProperties: appProperties))
-        appProperties.sidebarView.didCreateTab(appProperties.tabs[appProperties.currentTab])
+        appProperties.window = self
     }
     
     
@@ -89,9 +88,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
     func windowDidExitFullScreen(_ notification: Notification) {
         appProperties.isFullScreen = false
         shouldEnableButtons(false)
-        if !appProperties.sidebarToggled {
-            hideTrafficLights(true)
-        }
+        hideTrafficLights(!appProperties.sidebarToggled)
         appProperties.sidebarView.exitedFullScreen()
         appProperties.webContainerView.exitedFullScreen()
     }

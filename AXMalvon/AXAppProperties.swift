@@ -15,18 +15,24 @@ class AXAppProperties {
     let splitView: AXSplitView
     let contentView: AXContentView
     let webContainerView: AXWebContainerView
+    var window: AXWindow! = nil
+    
+    // Other
+    let tabManager: AXTabManager
     
     // State Variables
     var isFullScreen: Bool = false
     var sidebarToggled: Bool
     var windowFrame: NSRect
+    var sidebarWidth: CGFloat
     
     // Variables
     var tabs = [AXTabItem]()
-    var currentTab = 0
+    var currentTab = -1
     
     init() {
-        sidebarToggled = (UserDefaults.standard.object(forKey: "sidebarToggled") as? Bool) ?? true
+        sidebarToggled = UserDefaults.standard.bool(forKey: "sidebarToggled")
+        sidebarWidth = (UserDefaults.standard.object(forKey: "sidebarWidth") as? CGFloat) ?? 225.0
         
         if let s = UserDefaults.standard.string(forKey: "windowFrame") {
             windowFrame = NSRectFromString(s)
@@ -38,14 +44,17 @@ class AXAppProperties {
         splitView = AXSplitView()
         contentView = AXContentView()
         webContainerView = AXWebContainerView()
+        tabManager = AXTabManager()
         
         sidebarView.appProperties = self
         contentView.appProperties = self
         webContainerView.appProperties = self
+        tabManager.appProperties = self
     }
     
     func saveProperties() {
         UserDefaults.standard.set(sidebarToggled, forKey: "sidebarToggled")
         UserDefaults.standard.set(NSStringFromRect(windowFrame), forKey: "windowFrame")
+        UserDefaults.standard.set(sidebarWidth, forKey: "sidebarWidth")
     }
 }

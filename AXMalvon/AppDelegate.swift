@@ -65,15 +65,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @IBAction func toggleSidebar(_ sender: Any) {
-        (NSApplication.shared.keyWindow as! AXWindow).appProperties.sidebarView.toggleSidebar()
+        (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.sidebarView.toggleSidebar()
     }
     
     @IBAction func createNewTab(_ sender: Any) {
-        let appProperties = (NSApplication.shared.keyWindow as! AXWindow).appProperties
-        appProperties.tabs.append(AXTabItem.create(appProperties.currentTab + 1, appProperties: appProperties))
-        appProperties.currentTab = appProperties.tabs.count - 1
-        appProperties.sidebarView.didCreateTab(appProperties.tabs[appProperties.currentTab])
-        appProperties.webContainerView.update()
+        let tabManager = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.tabManager
+        tabManager?.createNewTab()
     }
     
     @IBAction func createNewWindow(_ sender: Any) {
