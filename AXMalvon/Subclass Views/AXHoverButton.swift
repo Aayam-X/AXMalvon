@@ -9,12 +9,11 @@
 import AppKit
 
 class AXHoverButton: NSButton {
-    var originalColor : NSColor = NSColor.white
-    var hoverColor : NSColor = NSColor.lightGray.withAlphaComponent(0.3)
-    var selectedColor : NSColor = NSColor.lightGray.withAlphaComponent(0.6)
-
+    var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
+    var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
+    
     var isMouseDown = false
-
+    
     var trackingArea : NSTrackingArea!
     
     init(isSelected: Bool = false) {

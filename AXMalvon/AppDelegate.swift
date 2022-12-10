@@ -8,8 +8,6 @@
 
 import AppKit
 
-fileprivate let appVersion = "0.0.1"
-
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
     let window = AXWindow()
@@ -22,6 +20,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func checkForUpdates() {
+        let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
+        
         if let url = URL(string: "https://raw.githubusercontent.com/pdlashwin/update/main/latest.txt") {
             URLSession.shared.dataTask(with: url) { (data, response, error) in
                 if let data = data {
@@ -29,11 +29,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         let contents = String(data: data, encoding: .utf8)
                         let trimmed = contents!.trimmingCharacters(in: .whitespacesAndNewlines)
                         
-                        #if !DEBUG
+#if !DEBUG
                         if trimmed != appVersion {
                             self.showAlert(title: "New Update Avaliable!", description: "Version: \(trimmed)")
                         }
-                        #endif
+#endif
                     }
                 } else {
                     self.showAlert(title: "Unable to check for updates", description: "Invalid Data")
@@ -51,15 +51,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         alert.addButton(withTitle: "Ok")
         alert.runModal()
     }
-
+    
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
-        
-        NSApplication.shared.windows.forEach { window in
-            (window as! AXWindow).appProperties.saveProperties()
+        if let window = NSApplication.shared.keyWindow as? AXWindow {
+            window.appProperties.windowFrame = window.frame
+            window.appProperties.saveProperties()
         }
     }
-
+    
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
         return true
     }
@@ -70,9 +70,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @IBAction func createNewTab(_ sender: Any) {
         let appProperties = (NSApplication.shared.keyWindow as! AXWindow).appProperties
-        appProperties.tabs.append(AXTabItem.create())
+        appProperties.tabs.append(AXTabItem.create(appProperties.currentTab + 1, appProperties: appProperties))
         appProperties.currentTab = appProperties.tabs.count - 1
-        appProperties.sidebarView.tableView.reloadData()
+        appProperties.sidebarView.didCreateTab(appProperties.tabs[appProperties.currentTab])
         appProperties.webContainerView.update()
     }
     

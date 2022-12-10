@@ -7,6 +7,7 @@
 //
 
 import AppKit
+import WebKit
 
 class AXWebContainerView: NSView {
     var appProperties: AXAppProperties!
@@ -30,8 +31,22 @@ class AXWebContainerView: NSView {
         subviews.removeAll()
         
         let webView = appProperties.tabs[appProperties.currentTab].view
-        webView.frame = bounds.insetBy(dx: 14, dy: 14)
+        webView.frame = appProperties.isFullScreen ? bounds : bounds.insetBy(dx: 14, dy: 14)
+        webView.navigationDelegate = self
+        webView.uiDelegate = self
         addSubview(webView)
         webView.autoresizingMask = [.height, .width]
+    }
+}
+
+extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate {
+    func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+        let tabItem = AXTabItem.create(appProperties.currentTab + 1, configuration, appProperties: appProperties)
+        appProperties.tabs.append(tabItem)
+        appProperties.currentTab = appProperties.tabs.count - 1
+        appProperties.sidebarView.didCreateTab(appProperties.tabs[appProperties.currentTab])
+        appProperties.webContainerView.update()
+        
+        return tabItem.view
     }
 }

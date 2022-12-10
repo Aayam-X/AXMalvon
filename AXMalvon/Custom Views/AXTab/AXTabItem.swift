@@ -7,15 +7,19 @@
 //
 
 import AppKit
+import WebKit
 
 class AXTabItem {
     var title: String?
     var view: AXWebView
     var position: Int = 0
     var titleObserver: NSKeyValueObservation?
+    var appProperties: AXAppProperties
     
-    init(view: AXWebView) {
+    init(view: AXWebView, position: Int, appProperties: AXAppProperties) {
         self.view = view
+        self.position = position
+        self.appProperties = appProperties
         
         startObserving()
     }
@@ -27,25 +31,28 @@ class AXTabItem {
     private func startObserving() {
         titleObserver = self.view.observe(\.title, changeHandler: { [self] webView, value in
             title = webView.title
-            // TODO: FIX THIS IMPLEMENTATION
-            if let window = NSApplication.shared.keyWindow as? AXWindow {
-                window.appProperties.sidebarView.tableView.reloadData()
-            }
-//            (NSApplication.shared.keyWindow as! AXWindow).appProperties.sidebarView.tableView.reloadData()
-//            (view.window as! AXWindow).appProperties.sidebarView.tableView.reloadData()
-//            Shared.Action.updateTabTitle(title: webView.title ?? "Untitled", position: self.position)
+            appProperties.sidebarView.titleChanged(position)
         })
     }
     
-    static public func create() -> AXTabItem {
+    static public func create(_ p: Int, appProperties: AXAppProperties) -> AXTabItem {
+        
         let webView = AXWebView()
-
+        
         webView.addConfigurations()
         webView.layer?.cornerRadius = 5.0
         webView.load(URLRequest(url: URL(string: "https://www.google.com")!))
-
-//        return .init(title: webView, view: 0)
-        return .init(view: webView)
+        
+        return .init(view: webView, position: p, appProperties: appProperties)
+    }
+    
+    static public func create(_ p: Int, _ config: WKWebViewConfiguration, appProperties: AXAppProperties) -> AXTabItem {
+        let webView = AXWebView(frame: .zero, configuration: config)
+        
+        webView.addConfigurations()
+        webView.layer?.cornerRadius = 5.0
+        
+        return .init(view: webView, position: p, appProperties: appProperties)
     }
     
 }

@@ -15,7 +15,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
     
     init() {
         super.init(
-            contentRect: NSMakeRect(100, 100, NSScreen.main!.frame.width/2, NSScreen.main!.frame.height/2),
+            contentRect: appProperties.windowFrame,
             styleMask: [.closable, .titled, .resizable, .miniaturizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
@@ -45,7 +45,8 @@ class AXWindow: NSWindow, NSWindowDelegate {
         }
         
         self.contentView = appProperties.contentView
-        appProperties.tabs.append(AXTabItem.create())
+        appProperties.tabs.append(AXTabItem.create(0, appProperties: appProperties))
+        appProperties.sidebarView.didCreateTab(appProperties.tabs[appProperties.currentTab])
     }
     
     
@@ -112,7 +113,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
         func offset(_ x: NSButton) {
             x.frame.origin.x += 6.0
             x.frame.origin.y -= 6.0
-
+            
             // x.frame.size.width = 14.5
             // x.frame.size.height = 16.5
         }

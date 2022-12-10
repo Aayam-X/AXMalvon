@@ -22,6 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		ED27D69E2944B5F000CA1911 /* Suggestions.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Suggestions.md; sourceTree = "<group>"; };
 		ED3204FD293E61240055CD73 /* AXSplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSplitView.swift; sourceTree = "<group>"; };
 		ED3204FF293E632A0055CD73 /* AXAppProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXAppProperties.swift; sourceTree = "<group>"; };
 		ED956092293FFFB900AC1C15 /* AXHoverButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXHoverButton.swift; sourceTree = "<group>"; };
@@ -88,6 +89,7 @@
 		EDD71EBB293BD96600256EA9 = {
 			isa = PBXGroup;
 			children = (
+				ED27D69E2944B5F000CA1911 /* Suggestions.md */,
 				EDD71EC6293BD96600256EA9 /* AXMalvon */,
 				EDD71EC5293BD96600256EA9 /* Products */,
 			);
@@ -342,6 +344,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 Aayam(X) Inc. All rights reserved.";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -350,7 +353,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 0.0.1;
+				MARKETING_VERSION = 0.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ashwin.AXMalvon;
 				PRODUCT_NAME = Malvon;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -371,6 +374,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 Aayam(X) Inc. All rights reserved.";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -379,7 +383,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 0.0.1;
+				MARKETING_VERSION = 0.0.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ashwin.AXMalvon;
 				PRODUCT_NAME = Malvon;
 				SWIFT_EMIT_LOC_STRINGS = YES;

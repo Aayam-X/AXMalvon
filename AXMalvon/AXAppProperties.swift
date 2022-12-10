@@ -6,7 +6,7 @@
 //  Copyright © 2022 Aayam(X). All rights reserved.
 //
 
-import Foundation
+import AppKit
 
 // Every AXWindow will have one instance of this
 class AXAppProperties {
@@ -19,6 +19,7 @@ class AXAppProperties {
     // State Variables
     var isFullScreen: Bool = false
     var sidebarToggled: Bool
+    var windowFrame: NSRect
     
     // Variables
     var tabs = [AXTabItem]()
@@ -26,6 +27,12 @@ class AXAppProperties {
     
     init() {
         sidebarToggled = (UserDefaults.standard.object(forKey: "sidebarToggled") as? Bool) ?? true
+        
+        if let s = UserDefaults.standard.string(forKey: "windowFrame") {
+            windowFrame = NSRectFromString(s)
+        } else {
+            windowFrame = NSMakeRect(100, 100, NSScreen.main!.frame.width/2, NSScreen.main!.frame.height/2)
+        }
         
         sidebarView = AXSideBarView()
         splitView = AXSplitView()
@@ -39,5 +46,6 @@ class AXAppProperties {
     
     func saveProperties() {
         UserDefaults.standard.set(sidebarToggled, forKey: "sidebarToggled")
+        UserDefaults.standard.set(NSStringFromRect(windowFrame), forKey: "windowFrame")
     }
 }
