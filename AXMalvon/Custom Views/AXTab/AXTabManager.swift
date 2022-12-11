@@ -13,7 +13,18 @@ class AXTabManager {
     var appProperties: AXAppProperties!
     
     func createNewTab() {
+        if appProperties.isPrivate {
+            createNewPrivateTab()
+            return
+        }
         let tabItem = AXTabItem.create(appProperties.currentTab + 1, appProperties: appProperties)
+        appProperties.tabs.append(tabItem)
+        
+        self.switch(appProperties.currentTab + 1)
+    }
+    
+    func createNewPrivateTab() {
+        let tabItem = AXTabItem.createPrivate(appProperties.currentTab + 1, appProperties: appProperties)
         appProperties.tabs.append(tabItem)
         
         self.switch(appProperties.currentTab + 1)

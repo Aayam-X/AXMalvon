@@ -1,22 +1,28 @@
 //
-//  AXHoverButton.swift
+//  AXSidebarTabButton.swift
 //  AXMalvon
 //
-//  Created by Ashwin Paudel on 2022-12-06.
+//  Created by Ashwin Paudel on 2022-12-11.
 //  Copyright © 2022 Aayam(X). All rights reserved.
 //
 
 import AppKit
 
-class AXHoverButton: NSButton {
+class AXSidebarTabButton: NSButton {
     var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
     var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
+    
+    var isSelected: Bool = false {
+        didSet {
+            self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .clear
+        }
+    }
     
     var isMouseDown = false
     
     var trackingArea : NSTrackingArea!
     
-    init(isSelected: Bool = false) {
+    init() {
         super.init(frame: .zero)
         self.wantsLayer = true
         self.layer?.cornerRadius = 5
@@ -39,27 +45,29 @@ class AXHoverButton: NSButton {
     }
     
     override func mouseUp(with event: NSEvent) {
-        if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
-            sendAction(action, to: target)
-        }
         self.isMouseDown = false
         self.removeTrackingArea(self.trackingArea)
         self.setTrackingArea(WithDrag: false)
-        layer?.backgroundColor = .none
+        layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
     }
     
     override func mouseDown(with event: NSEvent) {
         self.removeTrackingArea(self.trackingArea)
+        if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
+            sendAction(action, to: target)
+        }
         self.setTrackingArea(WithDrag: true)
         self.isMouseDown = true
-        self.layer?.backgroundColor = hoverColor.cgColor
+        self.layer?.backgroundColor = selectedColor.cgColor
     }
     
     override func mouseEntered(with event: NSEvent) {
-        self.layer?.backgroundColor = self.isMouseDown ? selectedColor.cgColor : hoverColor.cgColor
+        if !isSelected {
+            self.layer?.backgroundColor = self.isMouseDown ? selectedColor.cgColor : hoverColor.cgColor
+        }
     }
     
     override func mouseExited(with event: NSEvent) {
-        self.layer?.backgroundColor = .none
+        self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
     }
 }

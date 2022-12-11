@@ -33,8 +33,9 @@ class AXSplitView: NSSplitView, NSSplitViewDelegate {
         return false
     }
     
-    // override func drawDivider(in rect: NSRect) {
-    // }
+    override func drawDivider(in rect: NSRect) {
+        // Writing nothing here makes the divider invisible
+    }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

@@ -7,6 +7,7 @@
 //
 
 import AppKit
+import WebKit
 
 // Every AXWindow will have one instance of this
 class AXAppProperties {
@@ -25,6 +26,18 @@ class AXAppProperties {
     var sidebarToggled: Bool
     var windowFrame: NSRect
     var sidebarWidth: CGFloat
+    
+    // Private Browsing
+    var configuration: WKWebViewConfiguration?
+    
+    var isPrivate = false {
+        didSet {
+            // No need to check if true or false cause it's always going to be set to false.
+            configuration = WKWebViewConfiguration()
+            configuration?.processPool = WKProcessPool()
+            configuration?.websiteDataStore = .nonPersistent()
+        }
+    }
     
     // Variables
     var tabs = [AXTabItem]()

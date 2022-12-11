@@ -74,6 +74,11 @@
                                     <action selector="createNewWindow:" target="-1" id="7Go-51-RPc"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="New Private Window" keyEquivalent="N" id="U2f-TN-Z1u">
+                                <connections>
+                                    <action selector="createNewPrivateWindow:" target="-1" id="Iq4-T0-GCh"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="Doa-M5-kdc"/>
                             <menuItem title="Open…" keyEquivalent="o" id="IAo-SY-fd9">
                                 <connections>

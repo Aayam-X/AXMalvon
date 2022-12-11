@@ -78,4 +78,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
     }
     
+    @IBAction func createNewPrivateWindow(_ sender: Any) {
+        let window = AXWindow()
+        window.appProperties.isPrivate = true
+        window.makeKeyAndOrderFront(nil)
+    }
+    
 }

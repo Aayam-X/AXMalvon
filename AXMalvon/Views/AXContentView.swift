@@ -12,33 +12,39 @@ import WebKit
 class AXContentView: NSView {
     var appProperties: AXAppProperties!
     
+    var hasDrawn = false
+    
     override func viewWillDraw() {
-        // Create NSVisualEffectView
-        let visualEffectView = NSVisualEffectView()
-        visualEffectView.material = .popover
-        visualEffectView.blendingMode = .behindWindow
-        visualEffectView.state = .followsWindowActiveState
-        
-        visualEffectView.frame = bounds
-        addSubview(visualEffectView)
-        visualEffectView.autoresizingMask = [.height, .width]
-        
-        // To not have it collapsed at the start
-        appProperties.sidebarView.frame.size.width = appProperties.sidebarWidth
-        
-        // Show/hide the sidebar
-        if appProperties.sidebarToggled {
-            appProperties.splitView.addArrangedSubview(appProperties.sidebarView)
+        if !hasDrawn {
+            if appProperties.isPrivate {
+                self.layer?.backgroundColor = .black
+            } else {
+                // Create NSVisualEffectView
+                let visualEffectView = NSVisualEffectView()
+                visualEffectView.material = .popover
+                visualEffectView.blendingMode = .behindWindow
+                visualEffectView.state = .followsWindowActiveState
+                
+                visualEffectView.frame = bounds
+                addSubview(visualEffectView)
+                visualEffectView.autoresizingMask = [.height, .width]
+            }
+            
+            // To not have it collapsed at the start
+            appProperties.sidebarView.frame.size.width = appProperties.sidebarWidth
+            
+            // Show/hide the sidebar
+            if appProperties.sidebarToggled {
+                appProperties.splitView.addArrangedSubview(appProperties.sidebarView)
+            }
+            
+            appProperties.splitView.addArrangedSubview(appProperties.webContainerView)
+            
+            appProperties.splitView.frame = bounds
+            addSubview(appProperties.splitView)
+            appProperties.splitView.autoresizingMask = [.height, .width]
+            
+            appProperties.tabManager.createNewTab()
         }
-        
-        appProperties.webContainerView.frame = bounds.insetBy(dx: 14, dy: 14)
-        appProperties.webContainerView.autoresizingMask = [.height, .width]
-        appProperties.splitView.addArrangedSubview(appProperties.webContainerView)
-        
-        appProperties.splitView.frame = bounds
-        addSubview(appProperties.splitView)
-        appProperties.splitView.autoresizingMask = [.height, .width]
-        
-        appProperties.tabManager.createNewTab()
     }
 }

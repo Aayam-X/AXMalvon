@@ -80,61 +80,67 @@ class AXSideBarView: NSView {
     
     weak var toggleSidebarButtonLeftConstaint: NSLayoutConstraint?
     
+    var hasDrawn = false
+    
     override func viewWillDraw() {
-        // Constraints for toggleSidebarButton
-        addSubview(toggleSidebarButton)
-        toggleSidebarButton.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
-        toggleSidebarButtonLeftConstaint = toggleSidebarButton.leftAnchor.constraint(equalTo: leftAnchor, constant: appProperties.isFullScreen ? 5 : 76)
-        toggleSidebarButtonLeftConstaint?.isActive = true
-        toggleSidebarButton.widthAnchor.constraint(equalToConstant: 25).isActive = true
-        toggleSidebarButton.heightAnchor.constraint(equalToConstant: 25).isActive = true
-        
-        // Constaints for reloadButton
-        addSubview(reloadButton)
-        reloadButton.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
-        reloadButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -10).isActive = true
-        reloadButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
-        reloadButton.heightAnchor.constraint(equalToConstant: 20).isActive = true
-        
-        // Constaints for forwardButton
-        addSubview(forwardButton)
-        forwardButton.topAnchor.constraint(equalTo: topAnchor, constant: 8).isActive = true
-        forwardButton.rightAnchor.constraint(equalTo: reloadButton.leftAnchor, constant: -10).isActive = true
-        forwardButton.widthAnchor.constraint(equalToConstant: 23).isActive = true
-        forwardButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
-        
-        // Constaints for backButton
-        addSubview(backButton)
-        backButton.topAnchor.constraint(equalTo: topAnchor, constant: 8).isActive = true
-        backButton.rightAnchor.constraint(equalTo: forwardButton.leftAnchor, constant: -10).isActive = true
-        backButton.widthAnchor.constraint(equalToConstant: 23).isActive = true
-        backButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
-        
-        // Setup the scrollview
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(scrollView)
-        scrollView.drawsBackground = false
-        scrollView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
-        scrollView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-        scrollView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-        scrollView.topAnchor.constraint(equalTo: topAnchor, constant: 35).isActive = true
-        
-        // Setup clipview
-        clipView.translatesAutoresizingMaskIntoConstraints = false
-        clipView.drawsBackground = false
-        scrollView.contentView = clipView
-        clipView.leftAnchor.constraint(equalTo: scrollView.leftAnchor).isActive = true
-        clipView.rightAnchor.constraint(equalTo: scrollView.rightAnchor).isActive = true
-        clipView.topAnchor.constraint(equalTo: scrollView.topAnchor).isActive = true
-        clipView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor).isActive = true
-        
-        // Setup stackview
-        stackView.orientation = .vertical
-        stackView.spacing = 1.08
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.documentView = stackView
-        stackView.topAnchor.constraint(equalTo: clipView.topAnchor).isActive = true
-        stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor).isActive = true
+        if !hasDrawn {
+            // Constraints for toggleSidebarButton
+            addSubview(toggleSidebarButton)
+            toggleSidebarButton.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
+            toggleSidebarButtonLeftConstaint = toggleSidebarButton.leftAnchor.constraint(equalTo: leftAnchor, constant: appProperties.isFullScreen ? 5 : 76)
+            toggleSidebarButtonLeftConstaint?.isActive = true
+            toggleSidebarButton.widthAnchor.constraint(equalToConstant: 25).isActive = true
+            toggleSidebarButton.heightAnchor.constraint(equalToConstant: 25).isActive = true
+            
+            // Constaints for reloadButton
+            addSubview(reloadButton)
+            reloadButton.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
+            reloadButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -10).isActive = true
+            reloadButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
+            reloadButton.heightAnchor.constraint(equalToConstant: 20).isActive = true
+            
+            // Constaints for forwardButton
+            addSubview(forwardButton)
+            forwardButton.topAnchor.constraint(equalTo: topAnchor, constant: 8).isActive = true
+            forwardButton.rightAnchor.constraint(equalTo: reloadButton.leftAnchor, constant: -10).isActive = true
+            forwardButton.widthAnchor.constraint(equalToConstant: 23).isActive = true
+            forwardButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
+            
+            // Constaints for backButton
+            addSubview(backButton)
+            backButton.topAnchor.constraint(equalTo: topAnchor, constant: 8).isActive = true
+            backButton.rightAnchor.constraint(equalTo: forwardButton.leftAnchor, constant: -10).isActive = true
+            backButton.widthAnchor.constraint(equalToConstant: 23).isActive = true
+            backButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
+            
+            // Setup the scrollview
+            scrollView.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(scrollView)
+            scrollView.drawsBackground = false
+            scrollView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+            scrollView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+            scrollView.topAnchor.constraint(equalTo: topAnchor, constant: 35).isActive = true
+            
+            // Setup clipview
+            clipView.translatesAutoresizingMaskIntoConstraints = false
+            clipView.drawsBackground = false
+            scrollView.contentView = clipView
+            clipView.leftAnchor.constraint(equalTo: scrollView.leftAnchor).isActive = true
+            clipView.rightAnchor.constraint(equalTo: scrollView.rightAnchor).isActive = true
+            clipView.topAnchor.constraint(equalTo: scrollView.topAnchor).isActive = true
+            clipView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor).isActive = true
+            
+            // Setup stackview
+            stackView.orientation = .vertical
+            stackView.spacing = 1.08
+            stackView.translatesAutoresizingMaskIntoConstraints = false
+            scrollView.documentView = stackView
+            stackView.topAnchor.constraint(equalTo: clipView.topAnchor).isActive = true
+            stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor).isActive = true
+            
+            hasDrawn = true
+        }
     }
     
     func enteredFullScreen() {
@@ -151,8 +157,14 @@ class AXSideBarView: NSView {
         if appProperties.sidebarToggled {
             appProperties.window.hideTrafficLights(false)
             appProperties.splitView.insertArrangedSubview(self, at: 0)
+            if !appProperties.isFullScreen {
+                appProperties.webContainerView.customInsetWebviewFrame()
+            }
         } else {
             appProperties.window.hideTrafficLights(true)
+            if !appProperties.isFullScreen {
+                appProperties.webContainerView.insetWebviewFrame()
+            }
             self.removeFromSuperview()
         }
     }
@@ -196,34 +208,26 @@ class AXSideBarView: NSView {
         return 0x01
     }
     
-    override func viewDidHide() {
-        appProperties.window.hideTrafficLights(true)
-    }
-    
-    override func viewDidUnhide() {
-        appProperties.window.hideTrafficLights(false)
-    }
-    
     override public func mouseDown(with event: NSEvent) {
         window?.performDrag(with: event)
     }
     
     @objc func tabClick(_ sender: NSButton) {
         let pos = appProperties.tabs[appProperties.currentTab].position
-        (stackView.arrangedSubviews[pos] as! AXHoverButton).originalColor = nil
+        (stackView.arrangedSubviews[pos] as! AXSidebarTabButton).isSelected = false
         
         appProperties.currentTab = sender.tag
         
         appProperties.webContainerView.update(sender.tag)
-        (stackView.arrangedSubviews[sender.tag] as! AXHoverButton).originalColor = NSColor.lightGray.withAlphaComponent(0.3).cgColor
+        (stackView.arrangedSubviews[sender.tag] as! AXSidebarTabButton).isSelected = true
     }
     
     // Add a new item into the stackview
     func didCreateTab(_ oldPos: Int) {
-        (stackView.arrangedSubviews[safe: oldPos] as? AXHoverButton)?.originalColor = nil
+        (stackView.arrangedSubviews[safe: oldPos] as? AXSidebarTabButton)?.isSelected = false
         let t = appProperties.tabs[appProperties.currentTab]
         
-        let button = AXHoverButton()
+        let button = AXSidebarTabButton()
         
         button.tag = t.position
         button.alignment = .natural
@@ -231,14 +235,14 @@ class AXSideBarView: NSView {
         button.action = #selector(tabClick)
         button.title = t.title ?? "Untitled"
         stackView.addArrangedSubview(button)
-        button.originalColor = NSColor.lightGray.withAlphaComponent(0.3).cgColor
+        button.isSelected = true
         
         button.heightAnchor.constraint(equalToConstant: 30).isActive = true
         button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
     }
     
     func titleChanged(_ p: Int) {
-        let button = stackView.arrangedSubviews[p] as! AXHoverButton
+        let button = stackView.arrangedSubviews[p] as! AXSidebarTabButton
         button.title = appProperties.tabs[p].title ?? "Untitled"
     }
 }

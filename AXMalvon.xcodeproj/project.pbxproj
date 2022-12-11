@@ -14,6 +14,7 @@
 		ED95609A2940339800AC1C15 /* AXTabContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9560992940339800AC1C15 /* AXTabContainerView.swift */; };
 		ED95609D294033D400AC1C15 /* AXTabItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED95609C294033D400AC1C15 /* AXTabItem.swift */; };
 		ED989DA6293D25E90081ABCF /* AXSideBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED989DA5293D25E90081ABCF /* AXSideBarView.swift */; };
+		ED9FE65E29464E1C00323453 /* AXSidebarTabButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9FE65D29464E1C00323453 /* AXSidebarTabButton.swift */; };
 		EDB514A42945219800EB0E8F /* AXTabManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB514A32945219800EB0E8F /* AXTabManager.swift */; };
 		EDD71EC8293BD96600256EA9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD71EC7293BD96600256EA9 /* AppDelegate.swift */; };
 		EDD71ECA293BD96700256EA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EDD71EC9293BD96700256EA9 /* Assets.xcassets */; };
@@ -23,7 +24,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		ED27D69E2944B5F000CA1911 /* Suggestions.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Suggestions.md; sourceTree = "<group>"; };
+		ED27D69E2944B5F000CA1911 /* Log.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Log.md; sourceTree = "<group>"; };
 		ED3204FD293E61240055CD73 /* AXSplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSplitView.swift; sourceTree = "<group>"; };
 		ED3204FF293E632A0055CD73 /* AXAppProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXAppProperties.swift; sourceTree = "<group>"; };
 		ED956092293FFFB900AC1C15 /* AXHoverButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXHoverButton.swift; sourceTree = "<group>"; };
@@ -31,6 +32,7 @@
 		ED9560992940339800AC1C15 /* AXTabContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTabContainerView.swift; sourceTree = "<group>"; };
 		ED95609C294033D400AC1C15 /* AXTabItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTabItem.swift; sourceTree = "<group>"; };
 		ED989DA5293D25E90081ABCF /* AXSideBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSideBarView.swift; sourceTree = "<group>"; };
+		ED9FE65D29464E1C00323453 /* AXSidebarTabButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSidebarTabButton.swift; sourceTree = "<group>"; };
 		EDB514A32945219800EB0E8F /* AXTabManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTabManager.swift; sourceTree = "<group>"; };
 		EDD71EC4293BD96600256EA9 /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EDD71EC7293BD96600256EA9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -67,6 +69,7 @@
 			children = (
 				ED3204FD293E61240055CD73 /* AXSplitView.swift */,
 				ED956092293FFFB900AC1C15 /* AXHoverButton.swift */,
+				ED9FE65D29464E1C00323453 /* AXSidebarTabButton.swift */,
 			);
 			path = "Subclass Views";
 			sourceTree = "<group>";
@@ -92,7 +95,7 @@
 		EDD71EBB293BD96600256EA9 = {
 			isa = PBXGroup;
 			children = (
-				ED27D69E2944B5F000CA1911 /* Suggestions.md */,
+				ED27D69E2944B5F000CA1911 /* Log.md */,
 				EDD71EC6293BD96600256EA9 /* AXMalvon */,
 				EDD71EC5293BD96600256EA9 /* Products */,
 			);
@@ -199,6 +202,7 @@
 				ED989DA6293D25E90081ABCF /* AXSideBarView.swift in Sources */,
 				EDD71ED9293BECE700256EA9 /* AXWindow.swift in Sources */,
 				ED956093293FFFB900AC1C15 /* AXHoverButton.swift in Sources */,
+				ED9FE65E29464E1C00323453 /* AXSidebarTabButton.swift in Sources */,
 				ED95609729400AC700AC1C15 /* AXWebView.swift in Sources */,
 				ED3204FE293E61240055CD73 /* AXSplitView.swift in Sources */,
 				EDD71EDB293BF0F900256EA9 /* AXContentView.swift in Sources */,
@@ -357,7 +361,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 0.0.3;
+				MARKETING_VERSION = 0.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ashwin.AXMalvon;
 				PRODUCT_NAME = Malvon;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -387,7 +391,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
-				MARKETING_VERSION = 0.0.3;
+				MARKETING_VERSION = 0.0.4;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ashwin.AXMalvon;
 				PRODUCT_NAME = Malvon;
 				SWIFT_EMIT_LOC_STRINGS = YES;

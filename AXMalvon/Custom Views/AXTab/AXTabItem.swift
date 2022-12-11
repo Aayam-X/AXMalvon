@@ -55,4 +55,12 @@ class AXTabItem {
         return .init(view: webView, position: p, appProperties: appProperties)
     }
     
+    static public func createPrivate(_ p: Int, appProperties: AXAppProperties) -> AXTabItem {
+        let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
+        webView.addConfigurations()
+        
+        webView.load(URLRequest(url: URL(string: "https://www.google.com")!))
+        
+        return .init(view: webView, position: p, appProperties: appProperties)
+    }
 }

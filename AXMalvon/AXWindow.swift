@@ -13,6 +13,13 @@ class AXWindow: NSWindow, NSWindowDelegate {
     
     var appProperties = AXAppProperties()
     
+    override var title: String {
+        didSet {
+            updateTrafficLights()
+            super.title = title
+        }
+    }
+    
     init() {
         super.init(
             contentRect: appProperties.windowFrame,
@@ -33,9 +40,6 @@ class AXWindow: NSWindow, NSWindowDelegate {
         // Which is why we must set the background color
         backgroundColor = .textColor
         
-        updateTrafficLights()
-        
-        
         updateTrackingAreas(true)
         
         shouldEnableButtons(false)
@@ -46,6 +50,8 @@ class AXWindow: NSWindow, NSWindowDelegate {
         
         self.contentView = appProperties.contentView
         appProperties.window = self
+        
+        updateTrafficLights()
     }
     
     
@@ -107,17 +113,26 @@ class AXWindow: NSWindow, NSWindowDelegate {
     
     /// Update the position of the window buttons
     fileprivate func updateTrafficLights() {
-        func offset(_ x: NSButton) {
-            x.frame.origin.x += 6.0
-            x.frame.origin.y -= 6.0
-            
-            // x.frame.size.width = 14.5
-            // x.frame.size.height = 16.5
-        }
+        // func offset(_ x: NSButton) {
+        // print(x, x.frame.origin)
+        // x.frame.origin.x += 6.0
+        // x.frame.origin.y -= 6.0
+        //
+        // x.frame.size.width = 14.5
+        // x.frame.size.height = 16.5
+        // }
         
-        offset(standardWindowButton(.closeButton)!)
-        offset(standardWindowButton(.miniaturizeButton)!)
-        offset(standardWindowButton(.zoomButton)!)
+        let closeButton = standardWindowButton(.closeButton)!
+        closeButton.frame.origin.x = 13.0
+        closeButton.frame.origin.y = 0
+        
+        let miniaturizeButton = standardWindowButton(.miniaturizeButton)!
+        miniaturizeButton.frame.origin.x = 33.0
+        miniaturizeButton.frame.origin.y = 0
+        
+        let zoomButton = standardWindowButton(.zoomButton)!
+        zoomButton.frame.origin.x = 53.0
+        zoomButton.frame.origin.y = 0
     }
     
     fileprivate func shouldEnableButtons(_ b: Bool) {
