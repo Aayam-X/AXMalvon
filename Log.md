@@ -3,8 +3,18 @@
 # BEFORE RELEASING, MAKE SURE TO UPDATE XCODE PROJECT NUMBER
 
 ## 0.0.5
-- [ ] Closing tabs
-- [ ] Add the close tab icon in the buttons
+- [x] Closing tabs & windows
+- [x] Creating tab bug fix (Improved Algorithm)
+- [x] Add the close tab icon in the buttons
+- [x] Add padding to the sidebar
+- [x] Fix the title problem in the tab button
+- [x] Fix bug with opening target_blank links with more than one tab
+- [x] Memory Improvements
+- [x] Improved traffic lights when entering full screen
+- [x] New App Icon
+
+Custom Popover: https://youtu.be/FgCIRMz_3dE
+Custom NSTextField: https://stackoverflow.com/a/11833209
 
 ## 0.0.4
 - [x] Show the webView Title as the window title

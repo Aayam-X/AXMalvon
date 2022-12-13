@@ -10,7 +10,7 @@ import AppKit
 import WebKit
 
 class AXWebContainerView: NSView {
-    var appProperties: AXAppProperties!
+    unowned var appProperties: AXAppProperties!
     
     var hasDrawn = false
     
@@ -34,8 +34,7 @@ class AXWebContainerView: NSView {
         subviews[0].layer?.cornerRadius = 5.0
     }
     
-    func update(_ oldPosition: Int) {
-        // appProperties.tabs[safe: oldPosition]?.view.removeFromSuperview()
+    func update() {
         subviews.removeAll()
         
         let webView = appProperties.tabs[appProperties.currentTab].view

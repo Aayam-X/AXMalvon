@@ -9,8 +9,17 @@
 import AppKit
 
 class AXSidebarTabButton: NSButton {
+    let titleView = NSTextField(frame: .zero)
+    
+    var closeButton = AXHoverButton()
+    
     var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
     var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
+    var titleObserver: NSKeyValueObservation?
+    
+    weak var titleViewWidthAnchor: NSLayoutConstraint?
+    
+    unowned var appProperties: AXAppProperties
     
     var isSelected: Bool = false {
         didSet {
@@ -18,17 +27,65 @@ class AXSidebarTabButton: NSButton {
         }
     }
     
+    var tabTitle: String = "Untitled" {
+        didSet {
+            titleView.stringValue = tabTitle
+        }
+    }
+    
     var isMouseDown = false
     
     var trackingArea : NSTrackingArea!
     
-    init() {
+    init(_ appProperties: AXAppProperties) {
+        self.appProperties = appProperties
         super.init(frame: .zero)
         self.wantsLayer = true
         self.layer?.cornerRadius = 5
         self.isBordered = false
         self.bezelStyle = .shadowlessSquare
+        title = ""
+        
         self.setTrackingArea(WithDrag: false)
+        
+        // Setup closeButton
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        closeButton.target = self
+        closeButton.action = #selector(closeTab)
+        addSubview(closeButton)
+        closeButton.image = NSImage(systemSymbolName: "xmark", accessibilityDescription: nil)
+        closeButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
+        closeButton.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        closeButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -5).isActive = true
+        closeButton.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        closeButton.isHidden = true
+        
+        // Setup titleView
+        titleView.translatesAutoresizingMaskIntoConstraints = false
+        titleView.isEditable = false // This should be set to true in a while :)
+        titleView.alignment = .left
+        titleView.isBordered = false
+        titleView.usesSingleLineMode = true
+        titleView.drawsBackground = false
+        addSubview(titleView)
+        titleView.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
+        titleView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        titleView.rightAnchor.constraint(equalTo: closeButton.leftAnchor).isActive = true
+    }
+    
+    public func stopObserving() {
+        titleObserver?.invalidate()
+    }
+    
+    public func startObserving() {
+        titleObserver = self.appProperties.tabs[tag].view.observe(\.title, changeHandler: { [self] webView, value in
+            appProperties.tabs[tag].title = appProperties.tabs[tag].view.title ?? "Untitled"
+            tabTitle = appProperties.tabs[tag].title ?? "Untitled"
+        })
+    }
+    
+    @objc func closeTab() {
+        appProperties.tabManager.removeTab(self.tag)
     }
     
     required init?(coder: NSCoder) {
@@ -46,6 +103,7 @@ class AXSidebarTabButton: NSButton {
     
     override func mouseUp(with event: NSEvent) {
         self.isMouseDown = false
+        closeButton.isHidden = true
         self.removeTrackingArea(self.trackingArea)
         self.setTrackingArea(WithDrag: false)
         layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
@@ -62,12 +120,18 @@ class AXSidebarTabButton: NSButton {
     }
     
     override func mouseEntered(with event: NSEvent) {
+        titleViewWidthAnchor?.constant = 0
+        
+        closeButton.isHidden = false
+        
         if !isSelected {
             self.layer?.backgroundColor = self.isMouseDown ? selectedColor.cgColor : hoverColor.cgColor
         }
     }
     
     override func mouseExited(with event: NSEvent) {
+        titleViewWidthAnchor?.constant = 20
+        closeButton.isHidden = true
         self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
     }
 }

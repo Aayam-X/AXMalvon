@@ -89,6 +89,8 @@ class AXWindow: NSWindow, NSWindowDelegate {
         appProperties.isFullScreen = true
         appProperties.sidebarView.enteredFullScreen()
         appProperties.webContainerView.enteredFullScreen()
+        _hideTrafficLights(false)
+        shouldEnableButtons(true)
     }
     
     func windowDidExitFullScreen(_ notification: Notification) {
@@ -99,14 +101,30 @@ class AXWindow: NSWindow, NSWindowDelegate {
         appProperties.webContainerView.exitedFullScreen()
     }
     
+    func windowWillClose(_ notification: Notification) {
+        appProperties.tabs.forEach { tab in
+            tab.view.removeFromSuperview()
+        }
+        
+        appProperties.sidebarView.stackView.arrangedSubviews.forEach { view in
+            (view as! AXSidebarTabButton).stopObserving()
+        }
+        
+        appProperties.tabs.removeAll()
+    }
+    
     // MARK: - Public
     
     public func hideTrafficLights(_ b: Bool) {
         if !appProperties.isFullScreen {
-            standardWindowButton(.closeButton)?.isHidden = b
-            standardWindowButton(.miniaturizeButton)!.isHidden = b
-            standardWindowButton(.zoomButton)!.isHidden = b
+            _hideTrafficLights(b)
         }
+    }
+    
+    private func _hideTrafficLights(_ b: Bool) {
+        standardWindowButton(.closeButton)?.isHidden = b
+        standardWindowButton(.miniaturizeButton)!.isHidden = b
+        standardWindowButton(.zoomButton)!.isHidden = b
     }
     
     // MARK: - Private

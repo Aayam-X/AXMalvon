@@ -79,6 +79,17 @@
                                     <action selector="createNewPrivateWindow:" target="-1" id="Iq4-T0-GCh"/>
                                 </connections>
                             </menuItem>
+                            <menuItem isSeparatorItem="YES" id="olL-yy-84U"/>
+                            <menuItem title="Close Tab" keyEquivalent="w" id="GfT-pQ-vaX">
+                                <connections>
+                                    <action selector="removeCurrentTab:" target="-1" id="nXx-4f-4Bl"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Close Window" keyEquivalent="W" id="b1S-8x-boj">
+                                <connections>
+                                    <action selector="closeWindow:" target="Voe-Tx-rLC" id="gxs-nu-8fm"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="Doa-M5-kdc"/>
                             <menuItem title="Open…" keyEquivalent="o" id="IAo-SY-fd9">
                                 <connections>

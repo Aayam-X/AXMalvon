@@ -10,7 +10,7 @@ import AppKit
 import WebKit
 
 class AXContentView: NSView {
-    var appProperties: AXAppProperties!
+    unowned var appProperties: AXAppProperties!
     
     var hasDrawn = false
     
@@ -45,6 +45,15 @@ class AXContentView: NSView {
             appProperties.splitView.autoresizingMask = [.height, .width]
             
             appProperties.tabManager.createNewTab()
+            
+            // testFunction()
         }
+    }
+    
+    // Show a searchbar popover
+    func testFunction() {
+        let popOver = AXSearchFieldPopoverView()
+        popOver.frame = bounds.insetBy(dx: 250, dy: 250)
+        addSubview(popOver)
     }
 }

@@ -12,30 +12,13 @@ import WebKit
 class AXTabItem {
     var title: String?
     var view: AXWebView
-    var position: Int = 0
-    var titleObserver: NSKeyValueObservation?
-    var appProperties: AXAppProperties
     
-    init(view: AXWebView, position: Int, appProperties: AXAppProperties) {
+    init(view: AXWebView) {
         self.view = view
-        self.position = position
-        self.appProperties = appProperties
-        
-        startObserving()
     }
     
-    public func stopObserving() {
-        titleObserver?.invalidate()
-    }
     
-    private func startObserving() {
-        titleObserver = self.view.observe(\.title, changeHandler: { [self] webView, value in
-            title = webView.title
-            appProperties.sidebarView.titleChanged(position)
-        })
-    }
-    
-    static public func create(_ p: Int, appProperties: AXAppProperties) -> AXTabItem {
+    static public func create() -> AXTabItem {
         
         let webView = AXWebView()
         
@@ -43,24 +26,24 @@ class AXTabItem {
         webView.layer?.cornerRadius = 5.0
         webView.load(URLRequest(url: URL(string: "https://www.google.com")!))
         
-        return .init(view: webView, position: p, appProperties: appProperties)
+        return .init(view: webView)
     }
     
-    static public func create(_ p: Int, _ config: WKWebViewConfiguration, appProperties: AXAppProperties) -> AXTabItem {
+    static public func create(_ config: WKWebViewConfiguration) -> AXTabItem {
         let webView = AXWebView(frame: .zero, configuration: config)
         
         webView.addConfigurations()
         webView.layer?.cornerRadius = 5.0
         
-        return .init(view: webView, position: p, appProperties: appProperties)
+        return .init(view: webView)
     }
     
-    static public func createPrivate(_ p: Int, appProperties: AXAppProperties) -> AXTabItem {
+    static public func createPrivate(appProperties: AXAppProperties) -> AXTabItem {
         let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
         webView.addConfigurations()
         
         webView.load(URLRequest(url: URL(string: "https://www.google.com")!))
         
-        return .init(view: webView, position: p, appProperties: appProperties)
+        return .init(view: webView)
     }
 }

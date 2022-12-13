@@ -60,6 +60,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            createNewWindow(self)
+            return true
+        }
+        return false
+    }
+    
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
         return true
     }
@@ -73,6 +81,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         tabManager?.createNewTab()
     }
     
+    @IBAction func removeCurrentTab(_ sender: Any) {
+        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
+        appProperties?.tabManager.removeTab(appProperties!.currentTab)
+    }
+    
     @IBAction func createNewWindow(_ sender: Any) {
         let window = AXWindow()
         window.makeKeyAndOrderFront(nil)
@@ -82,6 +95,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let window = AXWindow()
         window.appProperties.isPrivate = true
         window.makeKeyAndOrderFront(nil)
+    }
+    
+    @IBAction func closeWindow(_ sender: Any) {
+        if let window = NSApplication.shared.keyWindow {
+            window.close()
+        }
     }
     
 }

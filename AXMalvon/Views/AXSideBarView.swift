@@ -15,13 +15,15 @@ fileprivate final class FlippedClipView: NSClipView {
 }
 
 class AXSideBarView: NSView {
-    var appProperties: AXAppProperties!
+    unowned var appProperties: AXAppProperties!
     
     let scrollView = NSScrollView()
     
     fileprivate let clipView = FlippedClipView()
     
     var stackView = NSStackView()
+    
+    weak var toggleSidebarButtonLeftConstaint: NSLayoutConstraint?
     
     lazy var toggleSidebarButton: AXHoverButton = {
         let button = AXHoverButton()
@@ -78,8 +80,6 @@ class AXSideBarView: NSView {
         return button
     }()
     
-    weak var toggleSidebarButtonLeftConstaint: NSLayoutConstraint?
-    
     var hasDrawn = false
     
     override func viewWillDraw() {
@@ -115,6 +115,8 @@ class AXSideBarView: NSView {
             
             // Setup the scrollview
             scrollView.translatesAutoresizingMaskIntoConstraints = false
+            scrollView.automaticallyAdjustsContentInsets = false
+            scrollView.contentInsets = .init(top: 0, left: 9, bottom: 0, right: 0)
             addSubview(scrollView)
             scrollView.drawsBackground = false
             scrollView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
@@ -136,8 +138,7 @@ class AXSideBarView: NSView {
             stackView.spacing = 1.08
             stackView.translatesAutoresizingMaskIntoConstraints = false
             scrollView.documentView = stackView
-            stackView.topAnchor.constraint(equalTo: clipView.topAnchor).isActive = true
-            stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor).isActive = true
+            stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
             
             hasDrawn = true
         }
@@ -213,12 +214,11 @@ class AXSideBarView: NSView {
     }
     
     @objc func tabClick(_ sender: NSButton) {
-        let pos = appProperties.tabs[appProperties.currentTab].position
-        (stackView.arrangedSubviews[pos] as! AXSidebarTabButton).isSelected = false
+        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = false
         
         appProperties.currentTab = sender.tag
         
-        appProperties.webContainerView.update(sender.tag)
+        appProperties.webContainerView.update()
         (stackView.arrangedSubviews[sender.tag] as! AXSidebarTabButton).isSelected = true
     }
     
@@ -227,13 +227,14 @@ class AXSideBarView: NSView {
         (stackView.arrangedSubviews[safe: oldPos] as? AXSidebarTabButton)?.isSelected = false
         let t = appProperties.tabs[appProperties.currentTab]
         
-        let button = AXSidebarTabButton()
+        let button = AXSidebarTabButton(appProperties)
+        button.tag = appProperties.currentTab
+        button.startObserving()
         
-        button.tag = t.position
         button.alignment = .natural
         button.target = self
         button.action = #selector(tabClick)
-        button.title = t.title ?? "Untitled"
+        button.tabTitle = t.title ?? "Untitled"
         stackView.addArrangedSubview(button)
         button.isSelected = true
         
@@ -241,9 +242,23 @@ class AXSideBarView: NSView {
         button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
     }
     
+    func removedTab(_ at: Int) {
+        let tab = stackView.arrangedSubviews[at] as! AXSidebarTabButton
+        tab.stopObserving()
+        tab.removeFromSuperview()
+        
+        // Fix tab.position
+        for index in at..<stackView.arrangedSubviews.count {
+            let tab = stackView.arrangedSubviews[index] as! AXSidebarTabButton
+            tab.tag -= 1
+        }
+        
+        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
+    }
+    
     func titleChanged(_ p: Int) {
         let button = stackView.arrangedSubviews[p] as! AXSidebarTabButton
-        button.title = appProperties.tabs[p].title ?? "Untitled"
+        button.tabTitle = appProperties.tabs[p].title ?? "Untitled"
     }
 }
 
