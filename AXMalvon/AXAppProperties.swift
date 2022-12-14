@@ -27,6 +27,10 @@ class AXAppProperties {
     var windowFrame: NSRect
     var sidebarWidth: CGFloat
     
+    // Variables
+    var tabs: [AXTabItem] = []
+    var currentTab = -1
+    
     // Private Browsing
     var configuration: WKWebViewConfiguration?
     
@@ -38,10 +42,6 @@ class AXAppProperties {
             configuration?.websiteDataStore = .nonPersistent()
         }
     }
-    
-    // Variables
-    var tabs = [AXTabItem]()
-    var currentTab = -1
     
     init() {
         sidebarToggled = UserDefaults.standard.bool(forKey: "sidebarToggled")
@@ -69,5 +69,39 @@ class AXAppProperties {
         UserDefaults.standard.set(sidebarToggled, forKey: "sidebarToggled")
         UserDefaults.standard.set(NSStringFromRect(windowFrame), forKey: "windowFrame")
         UserDefaults.standard.set(sidebarWidth, forKey: "sidebarWidth")
+    }
+    
+    // NSApplication Encode Restorable State
+    func restore_saveProperties() {
+        saveProperties()
+        
+        do {
+            // Create JSON Encoder
+            let encoder = JSONEncoder()
+            
+            // Encode Note
+            let data = try encoder.encode(tabs)
+            
+            // Write/Set Data
+            UserDefaults.standard.set(data, forKey: "tabs")
+        } catch {
+            print("Unable to Encode Array of Tabs (\(error))")
+        }
+    }
+    
+    func restore_getProperties() {
+        if let data = UserDefaults.standard.data(forKey: "tabs") {
+            do {
+                // Create JSON Decoder
+                let decoder = JSONDecoder()
+                
+                // Decode Tabs
+                let tabs = try decoder.decode([AXTabItem].self, from: data)
+                self.tabs = tabs
+                
+            } catch {
+                print("Unable to Decode Tabs (\(error))")
+            }
+        }
     }
 }

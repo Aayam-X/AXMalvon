@@ -12,6 +12,20 @@ import WebKit
 class AXTabManager {
     unowned var appProperties: AXAppProperties!
     
+    // Updates every single view
+    func updateAll() {
+        appProperties.currentTab = 0
+        appProperties.sidebarView.updateAll()
+        appProperties.webContainerView.update()
+    }
+    
+    func createNewTabFromAppLaunch(url: URL) {
+        let tabItem = AXTabItem.create(url: url)
+        appProperties.tabs.append(tabItem)
+        
+        self.didCreateNewTab(appProperties.tabs.count - 1)
+    }
+    
     func createNewTab() {
         if appProperties.isPrivate {
             createNewPrivateTab()
@@ -21,27 +35,28 @@ class AXTabManager {
         let tabItem = AXTabItem.create()
         appProperties.tabs.append(tabItem)
         
-        self.switch(appProperties.tabs.count - 1)
+        self.didCreateNewTab(appProperties.tabs.count - 1)
     }
     
     func createNewPrivateTab() {
         let tabItem = AXTabItem.createPrivate(appProperties: appProperties)
         appProperties.tabs.append(tabItem)
         
-        self.switch(appProperties.tabs.count - 1)
+        self.didCreateNewTab(appProperties.tabs.count - 1)
     }
     
     func createNewTab(config: WKWebViewConfiguration) -> AXWebView {
         let tabItem = AXTabItem.create(config)
         appProperties.tabs.append(tabItem)
-        self.switch(appProperties.tabs.count - 1)
+        self.didCreateNewTab(appProperties.tabs.count - 1)
         
         return tabItem.view
     }
     
-    func `switch`(_ toTabNo: Int) {
+    /// After creating a new tab, you will update the sidebar and the web container view
+    func didCreateNewTab(_ at: Int) {
         let oldTab = appProperties.currentTab
-        appProperties.currentTab = toTabNo
+        appProperties.currentTab = at
         
         appProperties.webContainerView.update()
         appProperties.sidebarView.didCreateTab(oldTab)
@@ -75,5 +90,11 @@ class AXTabManager {
             // Close window
             appProperties.window.close()
         }
+    }
+    
+    func swapAt(_ first: Int, _ second: Int) {
+        appProperties.tabs.swapAt(first, second)
+        appProperties.currentTab = second
+        appProperties.sidebarView.swapAt(first, second)
     }
 }

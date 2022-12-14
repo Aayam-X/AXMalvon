@@ -121,13 +121,13 @@ class AXWindow: NSWindow, NSWindowDelegate {
         }
     }
     
+    // MARK: - Private
+    
     private func _hideTrafficLights(_ b: Bool) {
         standardWindowButton(.closeButton)?.isHidden = b
         standardWindowButton(.miniaturizeButton)!.isHidden = b
         standardWindowButton(.zoomButton)!.isHidden = b
     }
-    
-    // MARK: - Private
     
     /// Update the position of the window buttons
     fileprivate func updateTrafficLights() {

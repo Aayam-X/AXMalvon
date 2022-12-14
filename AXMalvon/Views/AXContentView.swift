@@ -45,8 +45,6 @@ class AXContentView: NSView {
             appProperties.splitView.autoresizingMask = [.height, .width]
             
             appProperties.tabManager.createNewTab()
-            
-            // testFunction()
         }
     }
     

@@ -12,12 +12,99 @@ import AppKit
 class AppDelegate: NSObject, NSApplicationDelegate {
     let window = AXWindow()
     
+    // MARK: - Delegates
+    
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
         
         window.makeKeyAndOrderFront(nil)
         checkForUpdates()
     }
+    
+    func application(_ app: NSApplication, didDecodeRestorableState coder: NSCoder) {
+        window.appProperties.restore_getProperties()
+        window.appProperties.tabManager.updateAll()
+    }
+    
+    func application(_ app: NSApplication, willEncodeRestorableState coder: NSCoder) {
+        if let window = app.keyWindow as? AXWindow {
+            window.appProperties.restore_saveProperties()
+        }
+    }
+    
+    func applicationWillTerminate(_ aNotification: Notification) {
+        // Insert code here to tear down your application
+        if let window = NSApplication.shared.keyWindow as? AXWindow {
+            window.appProperties.windowFrame = window.frame
+            window.appProperties.saveProperties()
+        }
+    }
+    
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        if !flag {
+            createNewWindow(self)
+            return true
+        }
+        return false
+    }
+    
+    func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
+        return true
+    }
+    
+    func application(_ application: NSApplication, open urls: [URL]) {
+        if application.windows.count > 1 {
+            if let window = application.keyWindow as? AXWindow {
+                for url in urls {
+                    window.appProperties.tabManager.createNewTabFromAppLaunch(url: url)
+                }
+            }
+        } else {
+            for url in urls {
+                window.appProperties.tabManager.createNewTabFromAppLaunch(url: url)
+            }
+        }
+    }
+    
+    // MARK: - Actions
+    
+    @IBAction func toggleSidebar(_ sender: Any) {
+        (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.sidebarView.toggleSidebar()
+    }
+    
+    @IBAction func createNewTab(_ sender: Any) {
+        let tabManager = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.tabManager
+        tabManager?.createNewTab()
+    }
+    
+    @IBAction func removeCurrentTab(_ sender: Any) {
+        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
+        appProperties?.tabManager.removeTab(appProperties!.currentTab)
+    }
+    
+    @IBAction func createNewWindow(_ sender: Any) {
+        let window = AXWindow()
+        window.makeKeyAndOrderFront(nil)
+    }
+    
+    @IBAction func createNewPrivateWindow(_ sender: Any) {
+        let window = AXWindow()
+        window.appProperties.isPrivate = true
+        window.makeKeyAndOrderFront(nil)
+    }
+    
+    @IBAction func closeWindow(_ sender: Any) {
+        if let window = NSApplication.shared.keyWindow {
+            window.close()
+        }
+    }
+    
+    @IBAction func setAsDefaultBrowser(_ sender: Any) {
+        setAsDefaultBrowser()
+    }
+    
+    
+    // MARK: - Functions
     
     func checkForUpdates() {
         let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
@@ -52,55 +139,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         alert.runModal()
     }
     
-    func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
-        if let window = NSApplication.shared.keyWindow as? AXWindow {
-            window.appProperties.windowFrame = window.frame
-            window.appProperties.saveProperties()
+    func setAsDefaultBrowser() {
+        let bundleID = Bundle.main.bundleIdentifier as CFString?
+        
+        if let bundleID = bundleID {
+            LSSetDefaultHandlerForURLScheme("http" as CFString, bundleID)
+            LSSetDefaultHandlerForURLScheme("https" as CFString, bundleID)
+            LSSetDefaultHandlerForURLScheme("HTML document" as CFString, bundleID)
+            LSSetDefaultHandlerForURLScheme("XHTML document" as CFString, bundleID)
         }
     }
-    
-    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if !flag {
-            createNewWindow(self)
-            return true
-        }
-        return false
-    }
-    
-    func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
-        return true
-    }
-    
-    @IBAction func toggleSidebar(_ sender: Any) {
-        (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.sidebarView.toggleSidebar()
-    }
-    
-    @IBAction func createNewTab(_ sender: Any) {
-        let tabManager = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.tabManager
-        tabManager?.createNewTab()
-    }
-    
-    @IBAction func removeCurrentTab(_ sender: Any) {
-        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
-        appProperties?.tabManager.removeTab(appProperties!.currentTab)
-    }
-    
-    @IBAction func createNewWindow(_ sender: Any) {
-        let window = AXWindow()
-        window.makeKeyAndOrderFront(nil)
-    }
-    
-    @IBAction func createNewPrivateWindow(_ sender: Any) {
-        let window = AXWindow()
-        window.appProperties.isPrivate = true
-        window.makeKeyAndOrderFront(nil)
-    }
-    
-    @IBAction func closeWindow(_ sender: Any) {
-        if let window = NSApplication.shared.keyWindow {
-            window.close()
-        }
-    }
-    
 }

@@ -2,6 +2,18 @@
 
 # BEFORE RELEASING, MAKE SURE TO UPDATE XCODE PROJECT NUMBER
 
+## Links:
+Custom Popover: https://youtu.be/FgCIRMz_3dE
+Custom NSTextField: https://stackoverflow.com/a/11833209
+
+## 0.0.6
+- [x] Be able to set as default browser
+- [x] URL opening
+- [x] Saving tabs
+- [x] Window title not updating
+- [x] Custom start page (Should change in the future)
+- [x] Dragging tabs
+
 ## 0.0.5
 - [x] Closing tabs & windows
 - [x] Creating tab bug fix (Improved Algorithm)
@@ -12,9 +24,6 @@
 - [x] Memory Improvements
 - [x] Improved traffic lights when entering full screen
 - [x] New App Icon
-
-Custom Popover: https://youtu.be/FgCIRMz_3dE
-Custom NSTextField: https://stackoverflow.com/a/11833209
 
 ## 0.0.4
 - [x] Show the webView Title as the window title

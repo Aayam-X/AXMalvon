@@ -15,7 +15,9 @@ class AXSidebarTabButton: NSButton {
     
     var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
     var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
+    
     var titleObserver: NSKeyValueObservation?
+    var urlObserver: NSKeyValueObservation?
     
     weak var titleViewWidthAnchor: NSLayoutConstraint?
     
@@ -75,12 +77,17 @@ class AXSidebarTabButton: NSButton {
     
     public func stopObserving() {
         titleObserver?.invalidate()
+        urlObserver?.invalidate()
     }
     
     public func startObserving() {
-        titleObserver = self.appProperties.tabs[tag].view.observe(\.title, changeHandler: { [self] webView, value in
+        titleObserver = self.appProperties.tabs[tag].view.observe(\.title, changeHandler: { [self] _, _ in
             appProperties.tabs[tag].title = appProperties.tabs[tag].view.title ?? "Untitled"
             tabTitle = appProperties.tabs[tag].title ?? "Untitled"
+        })
+        
+        urlObserver = self.appProperties.tabs[tag].view.observe(\.url, changeHandler: { [self] _, _ in
+            appProperties.tabs[tag].url = appProperties.tabs[tag].view.url
         })
     }
     
@@ -133,5 +140,14 @@ class AXSidebarTabButton: NSButton {
         titleViewWidthAnchor?.constant = 20
         closeButton.isHidden = true
         self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
+    }
+    
+    override func mouseDragged(with event: NSEvent) {
+        // We gotta subtract cause we're using a FlippedView
+        let index = abs(Int((event.locationInWindow.y - appProperties.sidebarView.scrollView.frame.height) / 31))
+        
+        if index <= appProperties.sidebarView.stackView.arrangedSubviews.count - 1 {
+            appProperties.tabManager.swapAt(self.tag, index)
+        }
     }
 }
