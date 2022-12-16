@@ -3,8 +3,20 @@
 # BEFORE RELEASING, MAKE SURE TO UPDATE XCODE PROJECT NUMBER
 
 ## Links:
-Custom Popover: https://youtu.be/FgCIRMz_3dE
 Custom NSTextField: https://stackoverflow.com/a/11833209
+
+## 0.0.8
+- [ ] Improve updater to show release notes
+- [ ] Improve splitview functionality
+- [ ] Make a UI for download files
+
+## 0.0.7
+- [x] Do not save the state of private windows
+- [x] Custom searchfield, custom popover
+- [x] Create new window from dragging buttons
+- [x] SplitView in WebView (CurrentTab + 1 is the second view in the splitview)
+- [x] Fixed code style and optimize the code and fix bugs
+- [x] Downloading files!
 
 ## 0.0.6
 - [x] Be able to set as default browser

@@ -44,14 +44,30 @@ class AXContentView: NSView {
             addSubview(appProperties.splitView)
             appProperties.splitView.autoresizingMask = [.height, .width]
             
-            appProperties.tabManager.createNewTab()
+            if appProperties.tabs.isEmpty {
+                // Create a tab
+                appProperties.tabManager.createNewTab()
+            }
         }
     }
     
     // Show a searchbar popover
-    func testFunction() {
-        let popOver = AXSearchFieldPopoverView()
-        popOver.frame = bounds.insetBy(dx: 250, dy: 250)
-        addSubview(popOver)
+    func displaySearchBarPopover() {
+        appProperties.popOver.frame = bounds.insetBy(dx: 250, dy: 250)
+        addSubview(appProperties.popOver)
+        appProperties.searchFieldShown = true
+        appProperties.popOver.searchField.becomeFirstResponder()
+    }
+    
+    func showSearchBar() {
+        if !appProperties.searchFieldShown {
+            appProperties.popOver.frame = bounds.insetBy(dx: 250, dy: 250)
+            addSubview(appProperties.popOver)
+            appProperties.popOver.searchField.stringValue = appProperties.tabs[appProperties.currentTab].view.url?.absoluteString ?? ""
+            appProperties.searchFieldShown = true
+            appProperties.popOver.searchField.becomeFirstResponder()
+        } else {
+            appProperties.popOver.close()
+        }
     }
 }

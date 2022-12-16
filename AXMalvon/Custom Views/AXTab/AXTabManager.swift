@@ -19,7 +19,37 @@ class AXTabManager {
         appProperties.webContainerView.update()
     }
     
-    func createNewTabFromAppLaunch(url: URL) {
+    func tabMovedToNewWindow(_ i: Int) {
+        let tab = appProperties.tabs[i]
+        tab.view.removeFromSuperview()
+        
+        if appProperties.tabs.count != 1 {
+            appProperties.currentTab = i - 1
+            appProperties.tabs.remove(at: i)
+            appProperties.sidebarView.removedTab(i)
+            appProperties.webContainerView.update()
+        } else {
+            // Close window
+            appProperties.window.close()
+        }
+    }
+    
+    func showSearchField() {
+        appProperties.contentView.showSearchBar()
+    }
+    
+    func openSearchBar() {
+        appProperties.contentView.displaySearchBarPopover()
+    }
+    
+    func createNewTab(fileURL: URL) {
+        let tabItem = AXTabItem.create(fileURL: fileURL)
+        appProperties.tabs.append(tabItem)
+        
+        self.didCreateNewTab(appProperties.tabs.count - 1)
+    }
+    
+    func createNewTab(url: URL) {
         let tabItem = AXTabItem.create(url: url)
         appProperties.tabs.append(tabItem)
         
@@ -67,13 +97,11 @@ class AXTabManager {
         tab.view.removeFromSuperview()
         
         if appProperties.tabs.count != 1 {
-            // My dumbass couldn't solve this so i had to put in OpenAI ChatGPT
-            // Update the current tab index if necessary
             if appProperties.currentTab == at {
                 if at == appProperties.tabs.count - 1 {
                     // If the removed tab is the last one, set the current tab to the previous one
                     appProperties.currentTab -= 1
-                } else {
+                } else if at != 0 {
                     // If the removed tab is not the last one, set the current tab to the next one
                     appProperties.currentTab += 1
                 }

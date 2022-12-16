@@ -636,6 +636,11 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="View" id="HyV-fh-RgO">
                         <items>
+                            <menuItem title="Show Search Field" keyEquivalent="l" id="Heo-Qq-PQ4">
+                                <connections>
+                                    <action selector="showSearchField:" target="Voe-Tx-rLC" id="hcd-pH-jJW"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Toggle Sidebar" keyEquivalent="s" id="SOD-Ll-RHQ">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                 <connections>

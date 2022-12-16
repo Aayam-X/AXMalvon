@@ -56,12 +56,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if application.windows.count > 1 {
             if let window = application.keyWindow as? AXWindow {
                 for url in urls {
-                    window.appProperties.tabManager.createNewTabFromAppLaunch(url: url)
+                    window.appProperties.tabManager.createNewTab(url: url)
                 }
             }
         } else {
             for url in urls {
-                window.appProperties.tabManager.createNewTabFromAppLaunch(url: url)
+                window.appProperties.tabManager.createNewTab(url: url)
             }
         }
     }
@@ -74,12 +74,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @IBAction func createNewTab(_ sender: Any) {
         let tabManager = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.tabManager
-        tabManager?.createNewTab()
+        tabManager?.openSearchBar()
     }
     
     @IBAction func removeCurrentTab(_ sender: Any) {
         let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
-        appProperties?.tabManager.removeTab(appProperties!.currentTab)
+        if appProperties!.searchFieldShown {
+            appProperties?.popOver.close()
+        } else {
+            appProperties?.tabManager.removeTab(appProperties!.currentTab)
+        }
     }
     
     @IBAction func createNewWindow(_ sender: Any) {
@@ -99,6 +103,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    @IBAction func showSearchField(_ sender: Any) {
+        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
+        appProperties?.popOver.newTabMode = false
+        appProperties?.tabManager.showSearchField()
+    }
+    
     @IBAction func setAsDefaultBrowser(_ sender: Any) {
         setAsDefaultBrowser()
     }
@@ -107,6 +117,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Functions
     
     func checkForUpdates() {
+#if !DEBUG
         let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
         
         if let url = URL(string: "https://raw.githubusercontent.com/pdlashwin/update/main/latest.txt") {
@@ -116,11 +127,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         let contents = String(data: data, encoding: .utf8)
                         let trimmed = contents!.trimmingCharacters(in: .whitespacesAndNewlines)
                         
-#if !DEBUG
                         if trimmed != appVersion {
                             self.showAlert(title: "New Update Avaliable!", description: "Version: \(trimmed)")
                         }
-#endif
                     }
                 } else {
                     self.showAlert(title: "Unable to check for updates", description: "Invalid Data")
@@ -129,6 +138,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             showAlert(title: "Could not check for updates", description: "Developer used faulty URL string")
         }
+#endif
     }
     
     func showAlert(title: String, description: String) {

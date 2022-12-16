@@ -92,12 +92,12 @@ class AXSideBarView: NSView {
             appProperties.window.hideTrafficLights(false)
             appProperties.splitView.insertArrangedSubview(self, at: 0)
             if !appProperties.isFullScreen {
-                appProperties.webContainerView.customInsetWebviewFrame()
+                appProperties.webContainerView.insetFrameSidebarOff()
             }
         } else {
             appProperties.window.hideTrafficLights(true)
             if !appProperties.isFullScreen {
-                appProperties.webContainerView.insetWebviewFrame()
+                appProperties.webContainerView.insetFrame()
             }
             self.removeFromSuperview()
         }

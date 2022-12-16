@@ -21,6 +21,8 @@ class AXSidebarTabButton: NSButton {
     
     weak var titleViewWidthAnchor: NSLayoutConstraint?
     
+    var tryingToCreateNewWindow: Bool = false
+    
     unowned var appProperties: AXAppProperties
     
     var isSelected: Bool = false {
@@ -46,6 +48,7 @@ class AXSidebarTabButton: NSButton {
         self.layer?.cornerRadius = 5
         self.isBordered = false
         self.bezelStyle = .shadowlessSquare
+        self.layer?.borderColor = .white
         title = ""
         
         self.setTrackingArea(WithDrag: false)
@@ -59,7 +62,7 @@ class AXSidebarTabButton: NSButton {
         closeButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
         closeButton.heightAnchor.constraint(equalToConstant: 16).isActive = true
         closeButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -5).isActive = true
-        closeButton.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        closeButton.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
         closeButton.isHidden = true
         
         // Setup titleView
@@ -71,7 +74,7 @@ class AXSidebarTabButton: NSButton {
         titleView.drawsBackground = false
         addSubview(titleView)
         titleView.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
-        titleView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        titleView.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
         titleView.rightAnchor.constraint(equalTo: closeButton.leftAnchor).isActive = true
     }
     
@@ -114,6 +117,17 @@ class AXSidebarTabButton: NSButton {
         self.removeTrackingArea(self.trackingArea)
         self.setTrackingArea(WithDrag: false)
         layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
+        
+        if tryingToCreateNewWindow {
+            let window = AXWindow()
+            window.setFrameOrigin(.init(x: NSEvent.mouseLocation.x, y: NSEvent.mouseLocation.y))
+            window.makeKeyAndOrderFront(nil)
+            window.appProperties.tabs.append(appProperties.tabs[tag])
+            appProperties.tabManager.tabMovedToNewWindow(tag)
+            DispatchQueue.main.async {
+                window.appProperties.tabManager.updateAll()
+            }
+        }
     }
     
     override func mouseDown(with event: NSEvent) {
@@ -143,11 +157,45 @@ class AXSidebarTabButton: NSButton {
     }
     
     override func mouseDragged(with event: NSEvent) {
-        // We gotta subtract cause we're using a FlippedView
-        let index = abs(Int((event.locationInWindow.y - appProperties.sidebarView.scrollView.frame.height) / 31))
-        
-        if index <= appProperties.sidebarView.stackView.arrangedSubviews.count - 1 {
-            appProperties.tabManager.swapAt(self.tag, index)
+        if event.locationInWindow.x <= appProperties.sidebarView.scrollView.frame.width && event.locationInWindow.x > 0.0 {
+            // We gotta subtract cause we're using a FlippedView
+            let index = abs(Int((event.locationInWindow.y - appProperties.sidebarView.scrollView.frame.height) / 31))
+            
+            if index <= appProperties.sidebarView.stackView.arrangedSubviews.count - 1 {
+                appProperties.tabManager.swapAt(self.tag, index)
+                
+                if tryingToCreateNewWindow {
+                    self.layer?.borderWidth = 0.0
+                    tryingToCreateNewWindow = false
+                    self.tabTitle = appProperties.tabs[tag].title ?? "Untitled"
+                }
+            } else {
+                // Create new window if the index dragged on isn't valid
+                tabTitle = "Create new window"
+                
+                self.layer?.borderWidth = 1.08
+                tryingToCreateNewWindow = true
+            }
+        } else {
+            // User wants to put in webView
+            if event.locationInWindow.x >= appProperties.sidebarView.scrollView.frame.width && event.locationInWindow.x <= appProperties.sidebarView.scrollView.frame.width + appProperties.webContainerView.frame.width {
+                // Other
+                self.layer?.borderWidth = 0.0
+                self.tabTitle = appProperties.tabs[tag].title ?? "Untitled"
+                tryingToCreateNewWindow = false
+                
+                if tag + 1 <= appProperties.tabs.count {
+                    appProperties.webContainerView.splitView.addArrangedSubview(appProperties.tabs[tag + 1].view)
+                    (appProperties.sidebarView.stackView.arrangedSubviews[tag + 1] as! AXSidebarTabButton).isSelected = true
+                }
+            } else {
+                // Create new window
+                tabTitle = "Create new window"
+                
+                self.layer?.borderWidth = 1.08
+                tryingToCreateNewWindow = true
+            }
         }
     }
+    
 }

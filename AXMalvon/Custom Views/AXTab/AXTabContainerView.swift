@@ -11,6 +11,7 @@ import WebKit
 
 class AXWebContainerView: NSView {
     unowned var appProperties: AXAppProperties!
+    var splitView = AXWebSplitView()
     
     var hasDrawn = false
     
@@ -21,23 +22,28 @@ class AXWebContainerView: NSView {
             layer?.shadowColor = NSColor.black.cgColor
             layer?.shadowOffset = .zero
             layer?.shadowRadius = 2
+            
+            splitView.frame = appProperties.sidebarToggled ? insetWebView(bounds) : bounds.insetBy(dx: 14, dy: 14)
+            addSubview(splitView)
+            splitView.autoresizingMask = [.height, .width]
         }
     }
     
     func enteredFullScreen() {
-        subviews[0].frame = bounds
-        subviews[0].layer?.cornerRadius = 0.0
+        splitView.frame = bounds
+        splitView.layer?.cornerRadius = 0.0
     }
     
     func exitedFullScreen() {
-        subviews[0].frame = appProperties.sidebarToggled ? insetWebView(bounds) : bounds.insetBy(dx: 14, dy: 14)
-        subviews[0].layer?.cornerRadius = 5.0
+        splitView.frame = appProperties.sidebarToggled ? insetWebView(bounds) : bounds.insetBy(dx: 14, dy: 14)
+        splitView.layer?.cornerRadius = 5.0
     }
     
     func update() {
-        subviews.removeAll()
+        splitView.subviews.removeAll()
         
         let webView = appProperties.tabs[appProperties.currentTab].view
+        
         if appProperties.isFullScreen {
             webView.frame = bounds
             webView.layer?.cornerRadius = 0.0
@@ -48,26 +54,63 @@ class AXWebContainerView: NSView {
         
         webView.navigationDelegate = self
         webView.uiDelegate = self
-        addSubview(webView)
+        splitView.addArrangedSubview(webView)
         webView.autoresizingMask = [.height, .width]
     }
     
-    func insetWebviewFrame() {
-        subviews[0].frame = bounds.insetBy(dx: 14, dy: 14)
+    func insetFrame() {
+        splitView.frame = bounds.insetBy(dx: 14, dy: 14)
     }
     
-    func customInsetWebviewFrame() {
-        subviews[0].frame = insetWebView(bounds)
+    func insetFrameSidebarOff() {
+        splitView.frame = insetWebView(bounds)
     }
 }
 
-extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate {
+extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDelegate {
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         return appProperties.tabManager.createNewTab(config: configuration)
     }
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         appProperties.window.title = appProperties.tabs[appProperties.currentTab].title ?? "Untitled"
+    }
+    
+    func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+        download.delegate = self
+    }
+    
+    func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+        download.delegate = self
+    }
+    
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+        if navigationAction.shouldPerformDownload {
+            decisionHandler(.download, preferences)
+        } else {
+            decisionHandler(.allow, preferences)
+        }
+    }
+    
+    func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
+        if navigationResponse.canShowMIMEType {
+            decisionHandler(.allow)
+        } else {
+            decisionHandler(.download)
+        }
+    }
+    
+    func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
+        let fileManager = FileManager.default
+        let documentDirectory = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
+        print(documentDirectory)
+        let fileUrl =  documentDirectory.appendingPathComponent("\(suggestedFilename)", isDirectory: false)
+        
+        completionHandler(fileUrl)
+    }
+    
+    func downloadDidFinish(_ download: WKDownload) {
+        print("Hellioewdjks")
     }
 }
 

@@ -58,6 +58,16 @@ struct AXTabItem: Codable {
         return .init(view: webView)
     }
     
+    static public func create(fileURL: URL) -> AXTabItem {
+        let webView = AXWebView()
+        
+        webView.addConfigurations()
+        webView.layer?.cornerRadius = 5.0
+        webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL)
+        
+        return .init(view: webView)
+    }
+    
     static public func create(_ config: WKWebViewConfiguration) -> AXTabItem {
         let webView = AXWebView(frame: .zero, configuration: config)
         

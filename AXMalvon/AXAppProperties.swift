@@ -16,6 +16,7 @@ class AXAppProperties {
     let splitView: AXSplitView
     let contentView: AXContentView
     let webContainerView: AXWebContainerView
+    let popOver: AXSearchFieldPopoverView
     var window: AXWindow! = nil
     
     // Other
@@ -23,6 +24,7 @@ class AXAppProperties {
     
     // State Variables
     var isFullScreen: Bool = false
+    var searchFieldShown: Bool = false
     var sidebarToggled: Bool
     var windowFrame: NSRect
     var sidebarWidth: CGFloat
@@ -58,11 +60,13 @@ class AXAppProperties {
         contentView = AXContentView()
         webContainerView = AXWebContainerView()
         tabManager = AXTabManager()
+        popOver = AXSearchFieldPopoverView()
         
         sidebarView.appProperties = self
         contentView.appProperties = self
         webContainerView.appProperties = self
         tabManager.appProperties = self
+        popOver.appProperties = self
     }
     
     func saveProperties() {
@@ -75,32 +79,25 @@ class AXAppProperties {
     func restore_saveProperties() {
         saveProperties()
         
-        do {
-            // Create JSON Encoder
-            let encoder = JSONEncoder()
-            
-            // Encode Note
-            let data = try encoder.encode(tabs)
-            
-            // Write/Set Data
-            UserDefaults.standard.set(data, forKey: "tabs")
-        } catch {
-            print("Unable to Encode Array of Tabs (\(error))")
+        if !isPrivate {
+            do {
+                let encoder = JSONEncoder()
+                let data = try encoder.encode(tabs)
+                UserDefaults.standard.set(data, forKey: "tabs")
+            } catch {
+                print("Unable to Encode Tabs (\(error.localizedDescription))")
+            }
         }
     }
     
     func restore_getProperties() {
         if let data = UserDefaults.standard.data(forKey: "tabs") {
             do {
-                // Create JSON Decoder
                 let decoder = JSONDecoder()
-                
-                // Decode Tabs
                 let tabs = try decoder.decode([AXTabItem].self, from: data)
                 self.tabs = tabs
-                
             } catch {
-                print("Unable to Decode Tabs (\(error))")
+                print("Unable to Decode Tabs (\(error.localizedDescription))")
             }
         }
     }
