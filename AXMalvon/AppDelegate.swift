@@ -68,6 +68,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     // MARK: - Actions
     
+    @IBAction func findInWebpage(_ sender: Any) {
+        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
+        appProperties?.webContainerView.showFindView()
+    }
+    
     @IBAction func toggleSidebar(_ sender: Any) {
         (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.sidebarView.toggleSidebar()
     }
@@ -132,7 +137,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         }
                     }
                 } else {
-                    self.showAlert(title: "Unable to check for updates", description: "Invalid Data")
+                    DispatchQueue.main.async {
+                        self.showAlert(title: "Unable to check for updates", description: "Invalid Data")
+                    }
                 }
             }.resume()
         } else {

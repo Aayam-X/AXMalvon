@@ -12,6 +12,7 @@
 		ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FF293E632A0055CD73 /* AXAppProperties.swift */; };
 		ED4262612948A63900D2478E /* Appicon.icns in Resources */ = {isa = PBXBuildFile; fileRef = ED4262602948A63900D2478E /* Appicon.icns */; };
 		ED474EFA29496EEF00268FBD /* newtab.html in Resources */ = {isa = PBXBuildFile; fileRef = ED474EF929496EEF00268FBD /* newtab.html */; };
+		ED907B33294DF4B30057A591 /* AXSidebarDownloadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED907B32294DF4B30057A591 /* AXSidebarDownloadButton.swift */; };
 		ED956093293FFFB900AC1C15 /* AXHoverButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED956092293FFFB900AC1C15 /* AXHoverButton.swift */; };
 		ED95609729400AC700AC1C15 /* AXWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED95609629400AC700AC1C15 /* AXWebView.swift */; };
 		ED95609A2940339800AC1C15 /* AXTabContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9560992940339800AC1C15 /* AXTabContainerView.swift */; };
@@ -19,6 +20,7 @@
 		ED989DA6293D25E90081ABCF /* AXSideBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED989DA5293D25E90081ABCF /* AXSideBarView.swift */; };
 		ED9FE65E29464E1C00323453 /* AXSidebarTabButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9FE65D29464E1C00323453 /* AXSidebarTabButton.swift */; };
 		EDB514A42945219800EB0E8F /* AXTabManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB514A32945219800EB0E8F /* AXTabManager.swift */; };
+		EDC611C1294E213A00524E88 /* AXWebViewFindView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDC611C0294E213A00524E88 /* AXWebViewFindView.swift */; };
 		EDD71EC8293BD96600256EA9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD71EC7293BD96600256EA9 /* AppDelegate.swift */; };
 		EDD71ECA293BD96700256EA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EDD71EC9293BD96700256EA9 /* Assets.xcassets */; };
 		EDD71ECD293BD96700256EA9 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = EDD71ECB293BD96700256EA9 /* MainMenu.xib */; };
@@ -34,6 +36,7 @@
 		ED4262602948A63900D2478E /* Appicon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Appicon.icns; sourceTree = "<group>"; };
 		ED4262622948A64B00D2478E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		ED474EF929496EEF00268FBD /* newtab.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = newtab.html; sourceTree = "<group>"; };
+		ED907B32294DF4B30057A591 /* AXSidebarDownloadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSidebarDownloadButton.swift; sourceTree = "<group>"; };
 		ED956092293FFFB900AC1C15 /* AXHoverButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXHoverButton.swift; sourceTree = "<group>"; };
 		ED95609629400AC700AC1C15 /* AXWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWebView.swift; sourceTree = "<group>"; };
 		ED9560992940339800AC1C15 /* AXTabContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTabContainerView.swift; sourceTree = "<group>"; };
@@ -41,6 +44,7 @@
 		ED989DA5293D25E90081ABCF /* AXSideBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSideBarView.swift; sourceTree = "<group>"; };
 		ED9FE65D29464E1C00323453 /* AXSidebarTabButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSidebarTabButton.swift; sourceTree = "<group>"; };
 		EDB514A32945219800EB0E8F /* AXTabManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTabManager.swift; sourceTree = "<group>"; };
+		EDC611C0294E213A00524E88 /* AXWebViewFindView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWebViewFindView.swift; sourceTree = "<group>"; };
 		EDD71EC4293BD96600256EA9 /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EDD71EC7293BD96600256EA9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EDD71EC9293BD96700256EA9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -65,6 +69,7 @@
 			isa = PBXGroup;
 			children = (
 				ED0B1AC82947910800524F08 /* AXSearchFieldPopoverView.swift */,
+				EDC611C0294E213A00524E88 /* AXWebViewFindView.swift */,
 			);
 			path = AXSearchField;
 			sourceTree = "<group>";
@@ -75,6 +80,15 @@
 				ED474EF929496EEF00268FBD /* newtab.html */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		ED907B34294DF4B50057A591 /* Sidebar */ = {
+			isa = PBXGroup;
+			children = (
+				ED9FE65D29464E1C00323453 /* AXSidebarTabButton.swift */,
+				ED907B32294DF4B30057A591 /* AXSidebarDownloadButton.swift */,
+			);
+			path = Sidebar;
 			sourceTree = "<group>";
 		};
 		ED9560942940065600AC1C15 /* Views */ = {
@@ -90,9 +104,9 @@
 		ED9560952940066300AC1C15 /* Subclass Views */ = {
 			isa = PBXGroup;
 			children = (
+				ED907B34294DF4B50057A591 /* Sidebar */,
 				ED3204FD293E61240055CD73 /* AXSplitView.swift */,
 				ED956092293FFFB900AC1C15 /* AXHoverButton.swift */,
-				ED9FE65D29464E1C00323453 /* AXSidebarTabButton.swift */,
 			);
 			path = "Subclass Views";
 			sourceTree = "<group>";
@@ -227,6 +241,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EDB514A42945219800EB0E8F /* AXTabManager.swift in Sources */,
+				ED907B33294DF4B30057A591 /* AXSidebarDownloadButton.swift in Sources */,
 				ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */,
 				ED0B1AC92947910800524F08 /* AXSearchFieldPopoverView.swift in Sources */,
 				ED989DA6293D25E90081ABCF /* AXSideBarView.swift in Sources */,
@@ -237,6 +252,7 @@
 				ED3204FE293E61240055CD73 /* AXSplitView.swift in Sources */,
 				EDD71EDB293BF0F900256EA9 /* AXContentView.swift in Sources */,
 				ED95609D294033D400AC1C15 /* AXTabItem.swift in Sources */,
+				EDC611C1294E213A00524E88 /* AXWebViewFindView.swift in Sources */,
 				ED95609A2940339800AC1C15 /* AXTabContainerView.swift in Sources */,
 				EDD71EC8293BD96600256EA9 /* AppDelegate.swift in Sources */,
 			);
@@ -396,7 +412,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
-				MARKETING_VERSION = 0.0.7;
+				MARKETING_VERSION = 0.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ashwin.AXMalvon;
 				PRODUCT_NAME = Malvon;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -429,7 +445,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
-				MARKETING_VERSION = 0.0.7;
+				MARKETING_VERSION = 0.0.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ashwin.AXMalvon;
 				PRODUCT_NAME = Malvon;
 				SWIFT_EMIT_LOC_STRINGS = YES;

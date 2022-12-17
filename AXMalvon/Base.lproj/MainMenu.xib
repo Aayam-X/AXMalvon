@@ -205,7 +205,7 @@
                                     <items>
                                         <menuItem title="Find…" tag="1" keyEquivalent="f" id="Xz5-n4-O0W">
                                             <connections>
-                                                <action selector="performFindPanelAction:" target="-1" id="cD7-Qs-BN4"/>
+                                                <action selector="findInWebpage:" target="Voe-Tx-rLC" id="Dz3-IS-B0d"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Find and Replace…" tag="12" keyEquivalent="f" id="YEy-JH-Tfz">

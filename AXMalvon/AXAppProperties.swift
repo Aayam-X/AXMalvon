@@ -16,8 +16,12 @@ class AXAppProperties {
     let splitView: AXSplitView
     let contentView: AXContentView
     let webContainerView: AXWebContainerView
-    let popOver: AXSearchFieldPopoverView
     var window: AXWindow! = nil
+    
+    // Other Views
+    let popOver: AXSearchFieldPopoverView
+    let progressBar: NSProgressIndicator
+    let findBar: AXWebViewFindView
     
     // Other
     let tabManager: AXTabManager
@@ -61,12 +65,15 @@ class AXAppProperties {
         webContainerView = AXWebContainerView()
         tabManager = AXTabManager()
         popOver = AXSearchFieldPopoverView()
+        progressBar = NSProgressIndicator()
+        findBar = AXWebViewFindView()
         
         sidebarView.appProperties = self
         contentView.appProperties = self
         webContainerView.appProperties = self
         tabManager.appProperties = self
         popOver.appProperties = self
+        findBar.appProperties = self
     }
     
     func saveProperties() {

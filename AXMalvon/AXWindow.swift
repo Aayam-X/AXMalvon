@@ -107,8 +107,10 @@ class AXWindow: NSWindow, NSWindowDelegate {
         }
         
         appProperties.sidebarView.stackView.arrangedSubviews.forEach { view in
-            (view as! AXSidebarTabButton).stopObserving()
+            (view as? AXSidebarTabButton)?.stopObserving()
         }
+        
+        appProperties.webContainerView.stopObserving()
         
         appProperties.tabs.removeAll()
     }

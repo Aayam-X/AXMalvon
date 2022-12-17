@@ -43,14 +43,14 @@ class AXTabManager {
     }
     
     func createNewTab(fileURL: URL) {
-        let tabItem = AXTabItem.create(fileURL: fileURL)
+        let tabItem = create(fileURL: fileURL)
         appProperties.tabs.append(tabItem)
         
         self.didCreateNewTab(appProperties.tabs.count - 1)
     }
     
     func createNewTab(url: URL) {
-        let tabItem = AXTabItem.create(url: url)
+        let tabItem = create(url: url)
         appProperties.tabs.append(tabItem)
         
         self.didCreateNewTab(appProperties.tabs.count - 1)
@@ -62,21 +62,21 @@ class AXTabManager {
             return
         }
         
-        let tabItem = AXTabItem.create()
+        let tabItem = create()
         appProperties.tabs.append(tabItem)
         
         self.didCreateNewTab(appProperties.tabs.count - 1)
     }
     
     func createNewPrivateTab() {
-        let tabItem = AXTabItem.createPrivate(appProperties: appProperties)
+        let tabItem = createPrivate(appProperties: appProperties)
         appProperties.tabs.append(tabItem)
         
         self.didCreateNewTab(appProperties.tabs.count - 1)
     }
     
     func createNewTab(config: WKWebViewConfiguration) -> AXWebView {
-        let tabItem = AXTabItem.create(config)
+        let tabItem = create(config)
         appProperties.tabs.append(tabItem)
         self.didCreateNewTab(appProperties.tabs.count - 1)
         
@@ -125,4 +125,54 @@ class AXTabManager {
         appProperties.currentTab = second
         appProperties.sidebarView.swapAt(first, second)
     }
+}
+
+
+fileprivate func create() -> AXTabItem {
+    let webView = AXWebView()
+    
+    webView.addConfigurations()
+    webView.layer?.cornerRadius = 5.0
+    
+    webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
+    
+    return .init(view: webView)
+}
+
+fileprivate func create(url: URL) -> AXTabItem {
+    let webView = AXWebView()
+    
+    webView.addConfigurations()
+    webView.layer?.cornerRadius = 5.0
+    webView.load(URLRequest(url: url))
+    
+    return .init(view: webView)
+}
+
+fileprivate func create(fileURL: URL) -> AXTabItem {
+    let webView = AXWebView()
+    
+    webView.addConfigurations()
+    webView.layer?.cornerRadius = 5.0
+    webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL)
+    
+    return .init(view: webView)
+}
+
+fileprivate func create(_ config: WKWebViewConfiguration) -> AXTabItem {
+    let webView = AXWebView(frame: .zero, configuration: config)
+    
+    webView.addConfigurations()
+    webView.layer?.cornerRadius = 5.0
+    
+    return .init(view: webView)
+}
+
+fileprivate func createPrivate(appProperties: AXAppProperties) -> AXTabItem {
+    let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
+    webView.addConfigurations()
+    
+    webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
+    
+    return .init(view: webView)
 }

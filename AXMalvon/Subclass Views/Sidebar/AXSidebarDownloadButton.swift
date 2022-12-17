@@ -1,27 +1,27 @@
 //
-//  AXSidebarTabButton.swift
+//  AXSidebarDownloadButton.swift
 //  AXMalvon
 //
-//  Created by Ashwin Paudel on 2022-12-11.
+//  Created by Ashwin Paudel on 2022-12-17.
 //  Copyright © 2022 Aayam(X). All rights reserved.
 //
 
 import AppKit
 
-class AXSidebarTabButton: NSButton {
+class AXSidebarDownloadButton: NSButton {
     let titleView = NSTextField(frame: .zero)
     
     var closeButton = AXHoverButton()
+    var progressBar = NSProgressIndicator()
     
     var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
     var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
     
-    var titleObserver: NSKeyValueObservation?
-    var urlObserver: NSKeyValueObservation?
+    var downloadItem: AXDownloadItem!
+    var estimatedTimeRemainingObserver: NSKeyValueObservation?
+    var isFinishedObserver: NSKeyValueObservation?
     
     weak var titleViewWidthAnchor: NSLayoutConstraint?
-    
-    var tryingToCreateNewWindow: Bool = false
     
     unowned var appProperties: AXAppProperties
     
@@ -49,9 +49,22 @@ class AXSidebarTabButton: NSButton {
         self.isBordered = false
         self.bezelStyle = .shadowlessSquare
         self.layer?.borderColor = .white
+        self.target = self
+        self.action = #selector(openInFinder)
         title = ""
         
         self.setTrackingArea(WithDrag: false)
+        
+        // Setup circular progress bar
+        progressBar.style = .spinning
+        progressBar.isIndeterminate = false
+        progressBar.minValue = 0
+        progressBar.maxValue = 100
+        progressBar.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(progressBar)
+        progressBar.controlSize = .small
+        progressBar.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
+        progressBar.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
         
         // Setup closeButton
         closeButton.translatesAutoresizingMaskIntoConstraints = false
@@ -73,29 +86,47 @@ class AXSidebarTabButton: NSButton {
         titleView.usesSingleLineMode = true
         titleView.drawsBackground = false
         addSubview(titleView)
-        titleView.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
+        titleView.leftAnchor.constraint(equalTo: progressBar.rightAnchor, constant: 5).isActive = true
         titleView.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
         titleView.rightAnchor.constraint(equalTo: closeButton.leftAnchor).isActive = true
     }
     
-    public func stopObserving() {
-        titleObserver?.invalidate()
-        urlObserver?.invalidate()
+    func startObserving() {
+        tabTitle = downloadItem.fileName
+        
+        estimatedTimeRemainingObserver = downloadItem.download.progress.observe(\.fractionCompleted) { [self] _, _ in
+            progressBar.doubleValue = downloadItem.download.progress.fractionCompleted * 100
+        }
+        
+        isFinishedObserver = downloadItem.download.progress.observe(\.isFinished) { [self] _, _ in
+            stopObserving()
+        }
     }
     
-    public func startObserving() {
-        titleObserver = self.appProperties.tabs[tag].view.observe(\.title, changeHandler: { [self] _, _ in
-            appProperties.tabs[tag].title = appProperties.tabs[tag].view.title ?? "Untitled"
-            tabTitle = appProperties.tabs[tag].title ?? "Untitled"
-        })
+    func stopObserving() {
+        estimatedTimeRemainingObserver?.invalidate()
+        isFinishedObserver?.invalidate()
+        progressBar.removeFromSuperview()
         
-        urlObserver = self.appProperties.tabs[tag].view.observe(\.url, changeHandler: { [self] _, _ in
-            appProperties.tabs[tag].url = appProperties.tabs[tag].view.url
-        })
+        let imageView = NSImageView()
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.image = NSWorkspace.shared.icon(forFile: downloadItem.location.relativePath)
+        addSubview(imageView)
+        imageView.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
+        imageView.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
+        imageView.widthAnchor.constraint(equalToConstant: 16).isActive = true
+        imageView.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        titleView.leftAnchor.constraint(equalTo: imageView.rightAnchor, constant: 5.0).isActive = true
+    }
+    
+    // Opens the file in finder
+    @objc func openInFinder() {
+        NSWorkspace.shared.open(downloadItem.location)
     }
     
     @objc func closeTab() {
-        appProperties.tabManager.removeTab(self.tag)
+        // TODO:::::
+        //        appProperties.tabManager.removeTab(self.tag)
     }
     
     required init?(coder: NSCoder) {
@@ -118,23 +149,13 @@ class AXSidebarTabButton: NSButton {
         self.setTrackingArea(WithDrag: false)
         layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
         
-        if tryingToCreateNewWindow {
-            let window = AXWindow()
-            window.setFrameOrigin(.init(x: NSEvent.mouseLocation.x, y: NSEvent.mouseLocation.y))
-            window.makeKeyAndOrderFront(nil)
-            window.appProperties.tabs.append(appProperties.tabs[tag])
-            appProperties.tabManager.tabMovedToNewWindow(tag)
-            DispatchQueue.main.async {
-                window.appProperties.tabManager.updateAll()
-            }
+        if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
+            sendAction(action, to: target)
         }
     }
     
     override func mouseDown(with event: NSEvent) {
         self.removeTrackingArea(self.trackingArea)
-        if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
-            sendAction(action, to: target)
-        }
         self.setTrackingArea(WithDrag: true)
         self.isMouseDown = true
         self.layer?.backgroundColor = selectedColor.cgColor
@@ -155,47 +176,4 @@ class AXSidebarTabButton: NSButton {
         closeButton.isHidden = true
         self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
     }
-    
-    override func mouseDragged(with event: NSEvent) {
-        if event.locationInWindow.x <= appProperties.sidebarView.scrollView.frame.width && event.locationInWindow.x > 0.0 {
-            // We gotta subtract cause we're using a FlippedView
-            let index = abs(Int((event.locationInWindow.y - appProperties.sidebarView.scrollView.frame.height) / 31))
-            
-            if index <= appProperties.sidebarView.stackView.arrangedSubviews.count - 1 {
-                appProperties.tabManager.swapAt(self.tag, index)
-                
-                if tryingToCreateNewWindow {
-                    self.layer?.borderWidth = 0.0
-                    tryingToCreateNewWindow = false
-                    self.tabTitle = appProperties.tabs[tag].title ?? "Untitled"
-                }
-            } else {
-                // Create new window if the index dragged on isn't valid
-                tabTitle = "Create new window"
-                
-                self.layer?.borderWidth = 1.08
-                tryingToCreateNewWindow = true
-            }
-        } else {
-            // User wants to put in webView
-            if event.locationInWindow.x >= appProperties.sidebarView.scrollView.frame.width && event.locationInWindow.x <= appProperties.sidebarView.scrollView.frame.width + appProperties.webContainerView.frame.width {
-                // Other
-                self.layer?.borderWidth = 0.0
-                self.tabTitle = appProperties.tabs[tag].title ?? "Untitled"
-                tryingToCreateNewWindow = false
-                
-                if tag + 1 <= appProperties.tabs.count {
-                    appProperties.webContainerView.splitView.addArrangedSubview(appProperties.tabs[tag + 1].view)
-                    (appProperties.sidebarView.stackView.arrangedSubviews[tag + 1] as! AXSidebarTabButton).isSelected = true
-                }
-            } else {
-                // Create new window
-                tabTitle = "Create new window"
-                
-                self.layer?.borderWidth = 1.08
-                tryingToCreateNewWindow = true
-            }
-        }
-    }
-    
 }

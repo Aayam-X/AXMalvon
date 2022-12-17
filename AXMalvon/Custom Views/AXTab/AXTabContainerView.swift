@@ -13,6 +13,8 @@ class AXWebContainerView: NSView {
     unowned var appProperties: AXAppProperties!
     var splitView = AXWebSplitView()
     
+    var progressBarObserver: NSKeyValueObservation?
+    
     var hasDrawn = false
     
     override func viewWillDraw() {
@@ -56,6 +58,22 @@ class AXWebContainerView: NSView {
         webView.uiDelegate = self
         splitView.addArrangedSubview(webView)
         webView.autoresizingMask = [.height, .width]
+        if let window = webView.window as? AXWindow {
+            window.makeFirstResponder(webView)
+        }
+        
+        progressBarObserver = webView.observe(\.estimatedProgress, changeHandler: { [self] _, _ in
+            let progress = webView.estimatedProgress * 100
+            if progress == 100 {
+                appProperties.progressBar.doubleValue = 0.0
+            } else {
+                appProperties.progressBar.doubleValue = progress
+            }
+        })
+    }
+    
+    func stopObserving() {
+        progressBarObserver?.invalidate()
     }
     
     func insetFrame() {
@@ -64,6 +82,16 @@ class AXWebContainerView: NSView {
     
     func insetFrameSidebarOff() {
         splitView.frame = insetWebView(bounds)
+    }
+    
+    func showFindView() {
+        appProperties.findBar.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(appProperties.findBar)
+        appProperties.findBar.widthAnchor.constraint(greaterThanOrEqualToConstant: 300).isActive = true
+        appProperties.findBar.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        appProperties.findBar.topAnchor.constraint(equalTo: topAnchor, constant: 20).isActive = true
+        appProperties.findBar.rightAnchor.constraint(equalTo: rightAnchor, constant: -20).isActive = true
+        appProperties.findBar.searchField.becomeFirstResponder()
     }
 }
 
@@ -103,15 +131,21 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
     func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String, completionHandler: @escaping (URL?) -> Void) {
         let fileManager = FileManager.default
         let documentDirectory = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask)[0]
-        print(documentDirectory)
-        let fileUrl =  documentDirectory.appendingPathComponent("\(suggestedFilename)", isDirectory: false)
+        
+        var fileUrl = documentDirectory.appendingPathComponent("\(suggestedFilename)", isDirectory: false)
+        
+        var index = 1
+        while fileManager.fileExists(atPath: fileUrl.relativePath) {
+            fileUrl = documentDirectory.appendingPathComponent("_\(index)\(suggestedFilename)", isDirectory: false)
+            index += 1
+        }
+        
+        appProperties.sidebarView.didDownload(.init(fileName: suggestedFilename, location: fileUrl, download: download))
         
         completionHandler(fileUrl)
     }
     
-    func downloadDidFinish(_ download: WKDownload) {
-        print("Hellioewdjks")
-    }
+    // func downloadDidFinish(_ download: WKDownload) { }
 }
 
 fileprivate func insetWebView(_ bounds: NSRect) -> NSRect {

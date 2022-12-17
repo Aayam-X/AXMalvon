@@ -30,6 +30,18 @@ class AXContentView: NSView {
                 visualEffectView.autoresizingMask = [.height, .width]
             }
             
+            appProperties.progressBar.translatesAutoresizingMaskIntoConstraints = false
+            appProperties.progressBar.style = .bar
+            appProperties.progressBar.controlSize = .small
+            appProperties.progressBar.isIndeterminate = false
+            appProperties.progressBar.minValue = 0
+            appProperties.progressBar.maxValue = 100
+            self.addSubview(appProperties.progressBar)
+            appProperties.progressBar.topAnchor.constraint(equalTo: topAnchor, constant: -5).isActive = true
+            appProperties.progressBar.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+            appProperties.progressBar.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+            appProperties.progressBar.doubleValue = 0.0
+            
             // To not have it collapsed at the start
             appProperties.sidebarView.frame.size.width = appProperties.sidebarWidth
             

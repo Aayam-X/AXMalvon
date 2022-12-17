@@ -5,10 +5,17 @@
 ## Links:
 Custom NSTextField: https://stackoverflow.com/a/11833209
 
-## 0.0.8
-- [ ] Improve updater to show release notes
+## 0.0.9
 - [ ] Improve splitview functionality
-- [ ] Make a UI for download files
+- [ ] Improve command-f finding text functionality to use less power
+
+## 0.0.8
+- [x] Command-F | Finding text in webView
+- [x] Application crashes on launch when wifi is turned off
+- [x] Make a UI for download files
+- [x] Duplicate file problem when downloading files
+- [x] Progress bar
+- [x] WebView not being selected when switching tabs
 
 ## 0.0.7
 - [x] Do not save the state of private windows
