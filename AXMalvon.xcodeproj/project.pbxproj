@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ED0ACB0A294FFB9900BFBFC9 /* MXSearchSuggestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0ACB09294FFB9900BFBFC9 /* MXSearchSuggestion.swift */; };
 		ED0B1AC92947910800524F08 /* AXSearchFieldPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0B1AC82947910800524F08 /* AXSearchFieldPopoverView.swift */; };
+		ED19C806294F904400E0924D /* WKWebViewSearch.js in Resources */ = {isa = PBXBuildFile; fileRef = ED19C805294F904400E0924D /* WKWebViewSearch.js */; };
+		ED212333294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED212332294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift */; };
 		ED3204FE293E61240055CD73 /* AXSplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FD293E61240055CD73 /* AXSplitView.swift */; };
 		ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FF293E632A0055CD73 /* AXAppProperties.swift */; };
 		ED4262612948A63900D2478E /* Appicon.icns in Resources */ = {isa = PBXBuildFile; fileRef = ED4262602948A63900D2478E /* Appicon.icns */; };
@@ -29,7 +32,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		ED0ACB09294FFB9900BFBFC9 /* MXSearchSuggestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MXSearchSuggestion.swift; sourceTree = "<group>"; };
 		ED0B1AC82947910800524F08 /* AXSearchFieldPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSearchFieldPopoverView.swift; sourceTree = "<group>"; };
+		ED19C805294F904400E0924D /* WKWebViewSearch.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = WKWebViewSearch.js; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.javascript; };
+		ED212332294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXRectangularProgressIndicator.swift; sourceTree = "<group>"; };
 		ED27D69E2944B5F000CA1911 /* Log.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Log.md; sourceTree = "<group>"; };
 		ED3204FD293E61240055CD73 /* AXSplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSplitView.swift; sourceTree = "<group>"; };
 		ED3204FF293E632A0055CD73 /* AXAppProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXAppProperties.swift; sourceTree = "<group>"; };
@@ -70,6 +76,7 @@
 			children = (
 				ED0B1AC82947910800524F08 /* AXSearchFieldPopoverView.swift */,
 				EDC611C0294E213A00524E88 /* AXWebViewFindView.swift */,
+				ED0ACB09294FFB9900BFBFC9 /* MXSearchSuggestion.swift */,
 			);
 			path = AXSearchField;
 			sourceTree = "<group>";
@@ -78,6 +85,7 @@
 			isa = PBXGroup;
 			children = (
 				ED474EF929496EEF00268FBD /* newtab.html */,
+				ED19C805294F904400E0924D /* WKWebViewSearch.js */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -116,6 +124,7 @@
 			children = (
 				ED0B1AC7294790EB00524F08 /* AXSearchField */,
 				ED95609B294033C600AC1C15 /* AXTab */,
+				ED212332294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift */,
 			);
 			path = "Custom Views";
 			sourceTree = "<group>";
@@ -228,6 +237,7 @@
 			files = (
 				EDD71ECA293BD96700256EA9 /* Assets.xcassets in Resources */,
 				EDD71ECD293BD96700256EA9 /* MainMenu.xib in Resources */,
+				ED19C806294F904400E0924D /* WKWebViewSearch.js in Resources */,
 				ED4262612948A63900D2478E /* Appicon.icns in Resources */,
 				ED474EFA29496EEF00268FBD /* newtab.html in Resources */,
 			);
@@ -240,8 +250,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED0ACB0A294FFB9900BFBFC9 /* MXSearchSuggestion.swift in Sources */,
 				EDB514A42945219800EB0E8F /* AXTabManager.swift in Sources */,
 				ED907B33294DF4B30057A591 /* AXSidebarDownloadButton.swift in Sources */,
+				ED212333294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift in Sources */,
 				ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */,
 				ED0B1AC92947910800524F08 /* AXSearchFieldPopoverView.swift in Sources */,
 				ED989DA6293D25E90081ABCF /* AXSideBarView.swift in Sources */,
@@ -396,7 +408,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = B29PGN9AG4;
 				ENABLE_HARDENED_RUNTIME = NO;
@@ -429,7 +441,7 @@
 				CODE_SIGN_IDENTITY = "-";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = B29PGN9AG4;
 				ENABLE_HARDENED_RUNTIME = NO;

@@ -20,7 +20,7 @@ class AXAppProperties {
     
     // Other Views
     let popOver: AXSearchFieldPopoverView
-    let progressBar: NSProgressIndicator
+    let progressBar: AXRectangularProgressIndicator
     let findBar: AXWebViewFindView
     
     // Other
@@ -40,16 +40,9 @@ class AXAppProperties {
     // Private Browsing
     var configuration: WKWebViewConfiguration?
     
-    var isPrivate = false {
-        didSet {
-            // No need to check if true or false cause it's always going to be set to false.
-            configuration = WKWebViewConfiguration()
-            configuration?.processPool = WKProcessPool()
-            configuration?.websiteDataStore = .nonPersistent()
-        }
-    }
+    var isPrivate: Bool
     
-    init() {
+    init(isPrivate: Bool = false, restoresTab: Bool = true) {
         sidebarToggled = UserDefaults.standard.bool(forKey: "sidebarToggled")
         sidebarWidth = (UserDefaults.standard.object(forKey: "sidebarWidth") as? CGFloat) ?? 225.0
         
@@ -65,8 +58,24 @@ class AXAppProperties {
         webContainerView = AXWebContainerView()
         tabManager = AXTabManager()
         popOver = AXSearchFieldPopoverView()
-        progressBar = NSProgressIndicator()
+        progressBar = AXRectangularProgressIndicator()
         findBar = AXWebViewFindView()
+        
+        if !isPrivate {
+            if restoresTab {
+                if let data = UserDefaults.standard.data(forKey: "tabs") {
+                    do {
+                        let decoder = JSONDecoder()
+                        let tabs = try decoder.decode([AXTabItem].self, from: data)
+                        self.tabs = tabs
+                    } catch {
+                        print("Unable to Decode Tabs (\(error.localizedDescription))")
+                    }
+                }
+            }
+        }
+        
+        self.isPrivate = isPrivate
         
         sidebarView.appProperties = self
         contentView.appProperties = self
@@ -74,17 +83,18 @@ class AXAppProperties {
         tabManager.appProperties = self
         popOver.appProperties = self
         findBar.appProperties = self
+        
+        if isPrivate {
+            configuration = WKWebViewConfiguration()
+            configuration?.processPool = WKProcessPool()
+            configuration?.websiteDataStore = .nonPersistent()
+        }
     }
     
     func saveProperties() {
         UserDefaults.standard.set(sidebarToggled, forKey: "sidebarToggled")
         UserDefaults.standard.set(NSStringFromRect(windowFrame), forKey: "windowFrame")
         UserDefaults.standard.set(sidebarWidth, forKey: "sidebarWidth")
-    }
-    
-    // NSApplication Encode Restorable State
-    func restore_saveProperties() {
-        saveProperties()
         
         if !isPrivate {
             do {
@@ -93,18 +103,6 @@ class AXAppProperties {
                 UserDefaults.standard.set(data, forKey: "tabs")
             } catch {
                 print("Unable to Encode Tabs (\(error.localizedDescription))")
-            }
-        }
-    }
-    
-    func restore_getProperties() {
-        if let data = UserDefaults.standard.data(forKey: "tabs") {
-            do {
-                let decoder = JSONDecoder()
-                let tabs = try decoder.decode([AXTabItem].self, from: data)
-                self.tabs = tabs
-            } catch {
-                print("Unable to Decode Tabs (\(error.localizedDescription))")
             }
         }
     }

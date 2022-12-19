@@ -19,7 +19,7 @@ class AXSidebarTabButton: NSButton {
     var titleObserver: NSKeyValueObservation?
     var urlObserver: NSKeyValueObservation?
     
-    weak var titleViewWidthAnchor: NSLayoutConstraint?
+    weak var titleViewRightAnchor: NSLayoutConstraint?
     
     var tryingToCreateNewWindow: Bool = false
     
@@ -39,7 +39,7 @@ class AXSidebarTabButton: NSButton {
     
     var isMouseDown = false
     
-    var trackingArea : NSTrackingArea!
+    var trackingArea: NSTrackingArea!
     
     init(_ appProperties: AXAppProperties) {
         self.appProperties = appProperties
@@ -75,7 +75,8 @@ class AXSidebarTabButton: NSButton {
         addSubview(titleView)
         titleView.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
         titleView.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
-        titleView.rightAnchor.constraint(equalTo: closeButton.leftAnchor).isActive = true
+        titleViewRightAnchor = titleView.rightAnchor.constraint(equalTo: closeButton.leftAnchor, constant: 20)
+        titleViewRightAnchor?.isActive = true
     }
     
     public func stopObserving() {
@@ -103,7 +104,7 @@ class AXSidebarTabButton: NSButton {
     }
     
     func setTrackingArea(WithDrag drag: Bool = false) {
-        var options : NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
+        var options : NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited, .enabledDuringMouseDrag]
         if drag {
             options.insert(.enabledDuringMouseDrag)
         }
@@ -113,13 +114,13 @@ class AXSidebarTabButton: NSButton {
     
     override func mouseUp(with event: NSEvent) {
         self.isMouseDown = false
-        closeButton.isHidden = true
         self.removeTrackingArea(self.trackingArea)
         self.setTrackingArea(WithDrag: false)
         layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
+        closeButton.isHidden = true
         
         if tryingToCreateNewWindow {
-            let window = AXWindow()
+            let window = AXWindow(restoresTab: false)
             window.setFrameOrigin(.init(x: NSEvent.mouseLocation.x, y: NSEvent.mouseLocation.y))
             window.makeKeyAndOrderFront(nil)
             window.appProperties.tabs.append(appProperties.tabs[tag])
@@ -141,7 +142,7 @@ class AXSidebarTabButton: NSButton {
     }
     
     override func mouseEntered(with event: NSEvent) {
-        titleViewWidthAnchor?.constant = 0
+        titleViewRightAnchor?.constant = 0
         
         closeButton.isHidden = false
         
@@ -151,7 +152,7 @@ class AXSidebarTabButton: NSButton {
     }
     
     override func mouseExited(with event: NSEvent) {
-        titleViewWidthAnchor?.constant = 20
+        titleViewRightAnchor?.constant = 20
         closeButton.isHidden = true
         self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
     }
@@ -159,9 +160,9 @@ class AXSidebarTabButton: NSButton {
     override func mouseDragged(with event: NSEvent) {
         if event.locationInWindow.x <= appProperties.sidebarView.scrollView.frame.width && event.locationInWindow.x > 0.0 {
             // We gotta subtract cause we're using a FlippedView
-            let index = abs(Int((event.locationInWindow.y - appProperties.sidebarView.scrollView.frame.height) / 31))
+            let index = Int((event.locationInWindow.y - appProperties.sidebarView.scrollView.frame.height) / -31)
             
-            if index <= appProperties.sidebarView.stackView.arrangedSubviews.count - 1 {
+            if index <= appProperties.sidebarView.stackView.arrangedSubviews.count - 1 && index >= 0 {
                 appProperties.tabManager.swapAt(self.tag, index)
                 
                 if tryingToCreateNewWindow {

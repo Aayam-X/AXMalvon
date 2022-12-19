@@ -42,41 +42,125 @@ class AXTabManager {
         appProperties.contentView.displaySearchBarPopover()
     }
     
+    // MARK: - Creating Tabs
+    func `switch`(to: Int) {
+        let oldTab = appProperties.currentTab
+        appProperties.sidebarView.moveSelectionTo(to: to)
+        appProperties.webContainerView.update()
+    }
+    
     func createNewTab(fileURL: URL) {
-        let tabItem = create(fileURL: fileURL)
-        appProperties.tabs.append(tabItem)
+        // Check if private
+        if appProperties.isPrivate {
+            createNewPrivateTab(fileURL: fileURL)
+            return
+        }
         
+        // Create webView
+        let webView = AXWebView()
+        webView.addConfigurations()
+        webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL)
+        
+        // Create tab
+        let tabItem = AXTabItem(view: webView)
+        appProperties.tabs.append(tabItem)
         self.didCreateNewTab(appProperties.tabs.count - 1)
     }
     
     func createNewTab(url: URL) {
-        let tabItem = create(url: url)
-        appProperties.tabs.append(tabItem)
+        // Check if private
+        if appProperties.isPrivate {
+            createNewPrivateTab(url: url)
+            return
+        }
         
+        // Create webView
+        let webView = AXWebView()
+        webView.addConfigurations()
+        webView.load(URLRequest(url: url))
+        
+        // Create tab
+        let tabItem = AXTabItem(view: webView)
+        appProperties.tabs.append(tabItem)
         self.didCreateNewTab(appProperties.tabs.count - 1)
     }
     
     func createNewTab() {
+        // Check if private
         if appProperties.isPrivate {
             createNewPrivateTab()
             return
         }
         
-        let tabItem = create()
-        appProperties.tabs.append(tabItem)
+        // Create webView
+        let webView = AXWebView()
+        webView.addConfigurations()
+        webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
         
-        self.didCreateNewTab(appProperties.tabs.count - 1)
-    }
-    
-    func createNewPrivateTab() {
-        let tabItem = createPrivate(appProperties: appProperties)
+        // Create tab
+        let tabItem = AXTabItem(view: webView)
         appProperties.tabs.append(tabItem)
-        
         self.didCreateNewTab(appProperties.tabs.count - 1)
     }
     
     func createNewTab(config: WKWebViewConfiguration) -> AXWebView {
-        let tabItem = create(config)
+        // Check if private
+        if appProperties.isPrivate {
+            return createNewPrivateTab(configuration: config)
+        }
+        
+        // Create webView
+        let webView = AXWebView(frame: .zero, configuration: config)
+        webView.addConfigurations()
+        
+        // Create tab
+        let tabItem = AXTabItem(view: webView)
+        appProperties.tabs.append(tabItem)
+        self.didCreateNewTab(appProperties.tabs.count - 1)
+        
+        return tabItem.view
+    }
+    
+    func createNewPrivateTab() {
+        // Create webView
+        let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
+        webView.addConfigurations()
+        webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
+        
+        // Create tab
+        let tabItem = AXTabItem(view: webView)
+        appProperties.tabs.append(tabItem)
+        self.didCreateNewTab(appProperties.tabs.count - 1)
+    }
+    
+    func createNewPrivateTab(fileURL: URL) {
+        let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
+        webView.addConfigurations()
+        webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL)
+        
+        // Create tab
+        let tabItem = AXTabItem(view: webView)
+        appProperties.tabs.append(tabItem)
+        self.didCreateNewTab(appProperties.tabs.count - 1)
+    }
+    
+    func createNewPrivateTab(url: URL) {
+        let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
+        webView.addConfigurations()
+        webView.load(URLRequest(url: url))
+        
+        // Create tab
+        let tabItem = AXTabItem(view: webView)
+        appProperties.tabs.append(tabItem)
+        self.didCreateNewTab(appProperties.tabs.count - 1)
+    }
+    
+    func createNewPrivateTab(configuration: WKWebViewConfiguration) -> AXWebView {
+        let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
+        webView.addConfigurations()
+        
+        // Create tab
+        let tabItem = AXTabItem(view: webView)
         appProperties.tabs.append(tabItem)
         self.didCreateNewTab(appProperties.tabs.count - 1)
         
@@ -125,54 +209,4 @@ class AXTabManager {
         appProperties.currentTab = second
         appProperties.sidebarView.swapAt(first, second)
     }
-}
-
-
-fileprivate func create() -> AXTabItem {
-    let webView = AXWebView()
-    
-    webView.addConfigurations()
-    webView.layer?.cornerRadius = 5.0
-    
-    webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
-    
-    return .init(view: webView)
-}
-
-fileprivate func create(url: URL) -> AXTabItem {
-    let webView = AXWebView()
-    
-    webView.addConfigurations()
-    webView.layer?.cornerRadius = 5.0
-    webView.load(URLRequest(url: url))
-    
-    return .init(view: webView)
-}
-
-fileprivate func create(fileURL: URL) -> AXTabItem {
-    let webView = AXWebView()
-    
-    webView.addConfigurations()
-    webView.layer?.cornerRadius = 5.0
-    webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL)
-    
-    return .init(view: webView)
-}
-
-fileprivate func create(_ config: WKWebViewConfiguration) -> AXTabItem {
-    let webView = AXWebView(frame: .zero, configuration: config)
-    
-    webView.addConfigurations()
-    webView.layer?.cornerRadius = 5.0
-    
-    return .init(view: webView)
-}
-
-fileprivate func createPrivate(appProperties: AXAppProperties) -> AXTabItem {
-    let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
-    webView.addConfigurations()
-    
-    webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
-    
-    return .init(view: webView)
 }

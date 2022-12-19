@@ -11,7 +11,7 @@ import AppKit
 class AXWindow: NSWindow, NSWindowDelegate {
     var trackingTag: NSView.TrackingRectTag?
     
-    var appProperties = AXAppProperties()
+    var appProperties: AXAppProperties
     
     override var title: String {
         didSet {
@@ -20,7 +20,8 @@ class AXWindow: NSWindow, NSWindowDelegate {
         }
     }
     
-    init() {
+    init(isPrivate: Bool = false, restoresTab: Bool = true) {
+        appProperties = AXAppProperties(isPrivate: isPrivate, restoresTab: restoresTab)
         super.init(
             contentRect: appProperties.windowFrame,
             styleMask: [.closable, .titled, .resizable, .miniaturizable, .fullSizeContentView],

@@ -103,6 +103,17 @@ class AXSideBarView: NSView {
         }
     }
     
+    func moveSelectionTo(to: Int) {
+        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = false
+        
+        appProperties.currentTab = to
+        
+        appProperties.webContainerView.update()
+        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
+        
+        appProperties.window.title = appProperties.tabs[to].title ?? "Untitled"
+    }
+    
     @objc func tabClick(_ sender: NSButton) {
         (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = false
         
@@ -116,16 +127,12 @@ class AXSideBarView: NSView {
     
     @objc func backButtonAction() {
         let webView = appProperties.tabs[appProperties.currentTab].view
-        if webView.canGoBack {
-            webView.goBack()
-        }
+        webView.goBack()
     }
     
     @objc func forwardButtonAction() {
         let webView = appProperties.tabs[appProperties.currentTab].view
-        if webView.canGoForward {
-            webView.goForward()
-        }
+        webView.goForward()
     }
     
     @objc func reloadButtonAction() {
@@ -252,6 +259,13 @@ class AXSideBarView: NSView {
         
         button.heightAnchor.constraint(equalToConstant: 30).isActive = true
         button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+    }
+    
+    func checkNavigationButtons() {
+        let webView = appProperties.tabs[appProperties.currentTab].view
+        
+        backButton.isEnabled = webView.canGoBack
+        forwardButton.isEnabled = webView.canGoForward
     }
     
     // Add a new item into the stackview

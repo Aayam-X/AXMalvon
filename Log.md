@@ -4,10 +4,21 @@
 
 ## Links:
 Custom NSTextField: https://stackoverflow.com/a/11833209
+Line animation: https://stackoverflow.com/a/42978938
 
 ## 0.0.9
+- [ ] Downloading Tabs cause entire tab view to crash
 - [ ] Improve splitview functionality
 - [ ] Improve command-f finding text functionality to use less power
+
+## 0.0.8 | Build 2
+- [x] Progress bar problem when going full screen
+- [x] Created entirely new style of progress bar
+- [x] Tabs are saved by default
+- [x] Back/Forward button enable/disable
+- [x] Command-1, Command-2 etc.. tab switching
+- [x] New cursor when dragging tabs
+- [x] Creating new windows will open with the same tabs
 
 ## 0.0.8
 - [x] Command-F | Finding text in webView

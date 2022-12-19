@@ -7,6 +7,7 @@
 //
 
 import AppKit
+import Carbon.HIToolbox
 import WebKit
 
 class AXWebContainerView: NSView {
@@ -33,16 +34,21 @@ class AXWebContainerView: NSView {
     
     func enteredFullScreen() {
         splitView.frame = bounds
-        splitView.layer?.cornerRadius = 0.0
+        splitView.arrangedSubviews.forEach { view in
+            view.layer?.cornerRadius = 0.0
+        }
     }
     
     func exitedFullScreen() {
         splitView.frame = appProperties.sidebarToggled ? insetWebView(bounds) : bounds.insetBy(dx: 14, dy: 14)
-        splitView.layer?.cornerRadius = 5.0
+        splitView.arrangedSubviews.forEach { view in
+            view.layer?.cornerRadius = 5.0
+        }
     }
     
     func update() {
         splitView.subviews.removeAll()
+        appProperties.progressBar.isHidden = true
         
         let webView = appProperties.tabs[appProperties.currentTab].view
         
@@ -63,11 +69,14 @@ class AXWebContainerView: NSView {
         }
         
         progressBarObserver = webView.observe(\.estimatedProgress, changeHandler: { [self] _, _ in
-            let progress = webView.estimatedProgress * 100
-            if progress == 100 {
-                appProperties.progressBar.doubleValue = 0.0
+            appProperties.sidebarView.checkNavigationButtons()
+            let progress = webView.estimatedProgress
+            if progress == 1.0 {
+                appProperties.progressBar.progress = 0.0
+                appProperties.progressBar.isHidden = true
             } else {
-                appProperties.progressBar.doubleValue = progress
+                appProperties.progressBar.isHidden = false
+                appProperties.progressBar.progress = progress
             }
         })
     }
@@ -93,6 +102,35 @@ class AXWebContainerView: NSView {
         appProperties.findBar.rightAnchor.constraint(equalTo: rightAnchor, constant: -20).isActive = true
         appProperties.findBar.searchField.becomeFirstResponder()
     }
+    
+    override func keyDown(with event: NSEvent) {
+        if event.modifierFlags.contains(.command) {
+            switch event.characters {
+            case "1": // There is always going to be one tab, so no checking
+                appProperties.tabManager.switch(to: 0)
+            case "2" where 2 <= appProperties.tabs.count:
+                appProperties.tabManager.switch(to: 1)
+            case "3" where 3 <= appProperties.tabs.count:
+                appProperties.tabManager.switch(to: 2)
+            case "4" where 4 <= appProperties.tabs.count:
+                appProperties.tabManager.switch(to: 3)
+            case "5" where 5 <= appProperties.tabs.count:
+                appProperties.tabManager.switch(to: 4)
+            case "6" where 6 <= appProperties.tabs.count:
+                appProperties.tabManager.switch(to: 5)
+            case "7" where 7 <= appProperties.tabs.count:
+                appProperties.tabManager.switch(to: 6)
+            case "8" where 8 <= appProperties.tabs.count:
+                appProperties.tabManager.switch(to: 7)
+            case "9":
+                appProperties.tabManager.switch(to: appProperties.tabs.count - 1)
+            default:
+                super.keyDown(with: event)
+            }
+        }
+    }
+    
+    
 }
 
 extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDelegate {

@@ -16,19 +16,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
-        
         window.makeKeyAndOrderFront(nil)
         checkForUpdates()
     }
     
     func application(_ app: NSApplication, didDecodeRestorableState coder: NSCoder) {
-        window.appProperties.restore_getProperties()
         window.appProperties.tabManager.updateAll()
     }
     
     func application(_ app: NSApplication, willEncodeRestorableState coder: NSCoder) {
         if let window = app.keyWindow as? AXWindow {
-            window.appProperties.restore_saveProperties()
+            window.appProperties.saveProperties()
         }
     }
     
@@ -45,6 +43,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             createNewWindow(self)
             return true
         }
+        
+        //        if sender.windows.count == 1 {
+        //            if sender.windows[0].isMiniaturized
+        //        }
         return false
     }
     
@@ -97,8 +99,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @IBAction func createNewPrivateWindow(_ sender: Any) {
-        let window = AXWindow()
-        window.appProperties.isPrivate = true
+        let window = AXWindow(isPrivate: true)
         window.makeKeyAndOrderFront(nil)
     }
     

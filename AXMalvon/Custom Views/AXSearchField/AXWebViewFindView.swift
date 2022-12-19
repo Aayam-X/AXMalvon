@@ -21,9 +21,20 @@ class AXWebViewFindView: NSView {
         searchField.controlSize = .large
         searchField.placeholderString = "Find in page..."
         searchField.focusRingType = .none
-        searchField.sendsSearchStringImmediately = true
+        searchField.sendsSearchStringImmediately = false
         
         return searchField
+    }()
+    
+    lazy var occurancesCountLabel: NSTextField = {
+        let label = NSTextField()
+        label.isEditable = false // This should be set to true in a while :)
+        label.alignment = .left
+        label.isBordered = false
+        label.usesSingleLineMode = true
+        label.drawsBackground = false
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
     
     lazy var previousButton: AXHoverButton = {
@@ -32,7 +43,7 @@ class AXWebViewFindView: NSView {
         button.image = NSImage(systemSymbolName: "chevron.backward", accessibilityDescription: nil)
         button.imageScaling = .scaleProportionallyDown
         button.target = self
-        //        button.action = #selector(backButtonAction)
+        button.action = #selector(previousButtonAction)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
@@ -43,24 +54,29 @@ class AXWebViewFindView: NSView {
         button.image = NSImage(systemSymbolName: "chevron.forward", accessibilityDescription: nil)
         button.imageScaling = .scaleProportionallyDown
         button.target = self
-        //        button.action = #selector(backButtonAction)
+        button.action = #selector(nextButtonAction)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
     override func viewWillDraw() {
         if !hasDrawn {
+            print("BROOOO")
             layer?.backgroundColor = .black
             layer?.cornerRadius = 5.0
             layer?.borderColor = NSColor.systemGray.cgColor
             layer?.borderWidth = 0.9
             hasDrawn = true
             
+            addSubview(occurancesCountLabel)
+            occurancesCountLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -5).isActive = true
+            occurancesCountLabel.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+            
             addSubview(nextButton)
             nextButton.widthAnchor.constraint(equalToConstant: 16).isActive = true
             nextButton.heightAnchor.constraint(equalToConstant: 16).isActive = true
             nextButton.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
-            nextButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -5).isActive = true
+            nextButton.rightAnchor.constraint(equalTo: occurancesCountLabel.leftAnchor, constant: -5).isActive = true
             
             addSubview(previousButton)
             previousButton.widthAnchor.constraint(equalToConstant: 16).isActive = true
@@ -87,23 +103,37 @@ class AXWebViewFindView: NSView {
         }
     }
     
-    func searchForText(){
+    func searchForText() {
+        let webView = appProperties.tabs[appProperties.currentTab].view
+        webView.removeAllHighlights()
         
+        let searchText = searchField.stringValue
         
-        
+        if !searchText.isEmpty {
+            webView.highlightAllOccurencesOfString(string: searchText)
+            
+            // Number of words found
+            let countCompletionHandler: (Int) -> Void = {
+                self.occurancesCountLabel.stringValue = "\($0) Found"
+            }
+            
+            // Get the count
+            webView.handleSearchResultCount( completionHandler: countCompletionHandler )
+        }
+    }
+    
+    @objc func nextButtonAction() {
+        let webView = appProperties.tabs[appProperties.currentTab].view
+        webView.searchNext()
+    }
+    
+    @objc func previousButtonAction() {
+        let webView = appProperties.tabs[appProperties.currentTab].view
+        webView.searchPrevious()
     }
     
     @objc func findInWebpage() {
-        let webView = appProperties.tabs[appProperties.currentTab].view
-        
-        webView.find(searchField.stringValue) { result in
-            guard result.matchFound else { return }
-            webView.evaluateJavaScript(
-                "window.getSelection().getRangeAt(0).getBoundingClientRect().top") { offset, _ in
-                    guard let offset = offset as? CGFloat else { return }
-                    webView.scroll(.init(x: 0, y: offset))
-                }
-        }
+        searchForText()
     }
     
     private func keyDown(with event: NSEvent) -> Bool {
