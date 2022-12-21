@@ -5,13 +5,19 @@
 ## Links:
 Custom NSTextField: https://stackoverflow.com/a/11833209
 Line animation: https://stackoverflow.com/a/42978938
+SplitView Animation: https://stackoverflow.com/questions/6315091/how-to-expand-and-collapse-nssplitview-subviews-with-animation
 
-## 0.0.9
+## 0.0.2
+- [x] Improved animations to the Progress Bar!!
+- [x] Fixed Command-1, Command-2, etc.. not working
+- [x] Closing tab algorithm perfected!
 - [ ] Downloading Tabs cause entire tab view to crash
 - [ ] Improve splitview functionality
 - [ ] Improve command-f finding text functionality to use less power
-
-## 0.0.8 | Build 2
+- [ ] Improve the search suggestions to use arrow keys and reduce the side of the frame
+- [ ] Fix closing tab
+- [ ] Do not have all the tabs loaded at the start
+---
 - [x] Progress bar problem when going full screen
 - [x] Created entirely new style of progress bar
 - [x] Tabs are saved by default
@@ -19,32 +25,29 @@ Line animation: https://stackoverflow.com/a/42978938
 - [x] Command-1, Command-2 etc.. tab switching
 - [x] New cursor when dragging tabs
 - [x] Creating new windows will open with the same tabs
-
-## 0.0.8
+- [x] Search suggestions
+---
 - [x] Command-F | Finding text in webView
 - [x] Application crashes on launch when wifi is turned off
 - [x] Make a UI for download files
 - [x] Duplicate file problem when downloading files
 - [x] Progress bar
 - [x] WebView not being selected when switching tabs
-
-## 0.0.7
+---
 - [x] Do not save the state of private windows
 - [x] Custom searchfield, custom popover
 - [x] Create new window from dragging buttons
 - [x] SplitView in WebView (CurrentTab + 1 is the second view in the splitview)
 - [x] Fixed code style and optimize the code and fix bugs
 - [x] Downloading files!
-
-## 0.0.6
+---
 - [x] Be able to set as default browser
 - [x] URL opening
 - [x] Saving tabs
 - [x] Window title not updating
 - [x] Custom start page (Should change in the future)
 - [x] Dragging tabs
-
-## 0.0.5
+---
 - [x] Closing tabs & windows
 - [x] Creating tab bug fix (Improved Algorithm)
 - [x] Add the close tab icon in the buttons
@@ -54,8 +57,7 @@ Line animation: https://stackoverflow.com/a/42978938
 - [x] Memory Improvements
 - [x] Improved traffic lights when entering full screen
 - [x] New App Icon
-
-## 0.0.4
+---
 - [x] Show the webView Title as the window title
 - [x] WebView would still be active underneath which is bad
 - [x] Private Browsing (https://stackoverflow.com/a/68389106/20489332)
@@ -66,16 +68,14 @@ Line animation: https://stackoverflow.com/a/42978938
 - [x] Remove the left side when doing inset(14, 14) on the webview when sidebar toggled
 - [x] Add a bit of drop shadow to the webView
 - [x] Performance Improvements
-
-## 0.0.3
+---
 - [x] Sidebar Close/Show Button Problem when entering full screen
 - [x] Back/Forward/Refresh Buttons
 - [x] Save the width of the vertical tab sidebar
 - [x] Displays whether the width of the sidebar is okay or not through colors
 - [x] Show the selected tab
 - [x] Performance Improvements
-
-## 0.0.2
+---
 - [x] Save window position
 - [x] Use scrollview and vertical stackview for tabs instead of tableView
 - [x] Open target_blank links 

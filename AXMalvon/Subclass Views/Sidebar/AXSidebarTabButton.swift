@@ -113,6 +113,7 @@ class AXSidebarTabButton: NSButton {
     }
     
     override func mouseUp(with event: NSEvent) {
+        NSCursor.arrow.set()
         self.isMouseDown = false
         self.removeTrackingArea(self.trackingArea)
         self.setTrackingArea(WithDrag: false)
@@ -158,6 +159,8 @@ class AXSidebarTabButton: NSButton {
     }
     
     override func mouseDragged(with event: NSEvent) {
+        NSCursor.closedHand.set()
+        
         if event.locationInWindow.x <= appProperties.sidebarView.scrollView.frame.width && event.locationInWindow.x > 0.0 {
             // We gotta subtract cause we're using a FlippedView
             let index = Int((event.locationInWindow.y - appProperties.sidebarView.scrollView.frame.height) / -31)

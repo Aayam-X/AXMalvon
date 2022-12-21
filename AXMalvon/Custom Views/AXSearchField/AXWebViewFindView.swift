@@ -142,6 +142,7 @@ class AXWebViewFindView: NSView {
             return true
         }
         
+        super.keyDown(with: event)
         return false
     }
     

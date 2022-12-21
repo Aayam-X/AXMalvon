@@ -181,16 +181,12 @@ class AXTabManager {
         tab.view.removeFromSuperview()
         
         if appProperties.tabs.count != 1 {
+            // Close tab algorithm
             if appProperties.currentTab == at {
                 if at == appProperties.tabs.count - 1 {
-                    // If the removed tab is the last one, set the current tab to the previous one
                     appProperties.currentTab -= 1
-                } else if at != 0 {
-                    // If the removed tab is not the last one, set the current tab to the next one
-                    appProperties.currentTab += 1
                 }
             } else if appProperties.currentTab > at {
-                // If the removed tab is before the current tab, decrement the current tab index
                 appProperties.currentTab -= 1
             }
             
