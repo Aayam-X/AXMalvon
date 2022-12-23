@@ -12,7 +12,7 @@ import Carbon.HIToolbox
 class AXWebViewFindView: NSView {
     unowned var appProperties: AXAppProperties!
     
-    var hasDrawn: Bool = false
+    fileprivate var hasDrawn = false
     
     lazy var searchField: NSSearchField = {
         let searchField = NSSearchField()
@@ -61,7 +61,6 @@ class AXWebViewFindView: NSView {
     
     override func viewWillDraw() {
         if !hasDrawn {
-            print("BROOOO")
             layer?.backgroundColor = .black
             layer?.cornerRadius = 5.0
             layer?.borderColor = NSColor.systemGray.cgColor

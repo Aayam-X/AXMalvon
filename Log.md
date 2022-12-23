@@ -8,15 +8,24 @@ Line animation: https://stackoverflow.com/a/42978938
 SplitView Animation: https://stackoverflow.com/questions/6315091/how-to-expand-and-collapse-nssplitview-subviews-with-animation
 
 ## 0.0.2
-- [x] Improved animations to the Progress Bar!!
-- [x] Fixed Command-1, Command-2, etc.. not working
-- [x] Closing tab algorithm perfected!
 - [ ] Downloading Tabs cause entire tab view to crash
 - [ ] Improve splitview functionality
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Improve the search suggestions to use arrow keys and reduce the side of the frame
 - [ ] Fix closing tab
 - [ ] Do not have all the tabs loaded at the start
+---
+- [x] Improved animations to the Progress Bar!!
+- [x] Fixed Command-1, Command-2, etc.. not working
+- [x] Closing tab algorithm perfected!
+- [x] Fixed progress bar animation getting stuck at 100
+- [x] Loading of http links
+- [x] Progress Indicator will be active when tab is closed, when it should not
+- [x] Progress Indicator Problem when resizing window
+- [x] Sidebar shows on hover!!
+- [x] Fixed redraw issue when switching to light/dark mode
+- [x] Title on top of view!!!
+- [x] Darkmode/Lightmode improvements
 ---
 - [x] Progress bar problem when going full screen
 - [x] Created entirely new style of progress bar

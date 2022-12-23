@@ -26,6 +26,8 @@ class AXSideBarView: NSView {
     
     weak var toggleSidebarButtonLeftConstaint: NSLayoutConstraint?
     
+    var trackingArea: NSTrackingArea!
+    
     lazy var toggleSidebarButton: AXHoverButton = {
         let button = AXHoverButton()
         
@@ -81,12 +83,21 @@ class AXSideBarView: NSView {
         return button
     }()
     
-    var hasDrawn = false
+    override func mouseExited(with event: NSEvent) {
+        if !appProperties.sidebarToggled {
+            self.removeFromSuperview()
+            appProperties.window.hideTrafficLights(true)
+            layer?.backgroundColor = .none
+        }
+    }
+    
+    fileprivate var hasDrawn = false
     
     // MARK: - Actions
     
     @objc func toggleSidebar() {
         appProperties.sidebarToggled.toggle()
+        layer?.backgroundColor = .none
         
         if appProperties.sidebarToggled {
             appProperties.window.hideTrafficLights(false)
@@ -141,7 +152,9 @@ class AXSideBarView: NSView {
     
     override func viewDidEndLiveResize() {
         appProperties.sidebarWidth = self.frame.size.width
-        self.layer?.backgroundColor = .clear
+        removeTrackingArea(trackingArea)
+        trackingArea = NSTrackingArea(rect: .init(x: bounds.origin.x - 100, y: bounds.origin.y, width: bounds.size.width + 100, height: bounds.size.height), options: [.activeAlways, .mouseEnteredAndExited], owner: self)
+        addTrackingArea(trackingArea)
     }
     
     override func resizeSubviews(withOldSize oldSize: NSSize) {
@@ -164,10 +177,17 @@ class AXSideBarView: NSView {
         window?.performDrag(with: event)
     }
     
+    override var registeredDraggedTypes: [NSPasteboard.PasteboardType] {
+        return [.string, .URL]
+    }
+    
     // MARK: Functions
     
     override func viewWillDraw() {
         if !hasDrawn {
+            trackingArea = NSTrackingArea(rect: .init(x: bounds.origin.x - 100, y: bounds.origin.y, width: bounds.size.width + 100, height: bounds.size.height), options: [.activeAlways, .mouseEnteredAndExited], owner: self)
+            addTrackingArea(trackingArea)
+            
             // Constraints for toggleSidebarButton
             addSubview(toggleSidebarButton)
             toggleSidebarButton.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
@@ -324,6 +344,9 @@ class AXSideBarView: NSView {
         
         (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
     }
+    
+    // MARK: - Drag and Drop
+    // TODO
 }
 
 extension Array {

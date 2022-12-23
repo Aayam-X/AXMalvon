@@ -12,7 +12,7 @@ import Carbon.HIToolbox
 class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     unowned var appProperties: AXAppProperties!
     
-    var hasDrawn: Bool = false
+    fileprivate var hasDrawn = false
     var newTabMode: Bool = true
     
     lazy var searchField: NSTextField = {

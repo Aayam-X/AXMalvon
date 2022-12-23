@@ -12,12 +12,17 @@ import WebKit
 class AXContentView: NSView {
     unowned var appProperties: AXAppProperties!
     
-    var hasDrawn = false
+    fileprivate var hasDrawn = false
+    
+    var sidebarTrackingArea: NSTrackingArea!
     
     override func viewWillDraw() {
         if !hasDrawn {
+            sidebarTrackingArea = NSTrackingArea(rect: .init(x: bounds.origin.x - 100, y: bounds.origin.y, width: 101, height: bounds.size.height), options: [.activeAlways, .mouseMoved], owner: self)
+            addTrackingArea(sidebarTrackingArea)
+            
             if appProperties.isPrivate {
-                self.layer?.backgroundColor = .black
+                self.layer?.backgroundColor = NSColor.systemGray.cgColor
             } else {
                 // Create NSVisualEffectView
                 let visualEffectView = NSVisualEffectView()
@@ -58,7 +63,27 @@ class AXContentView: NSView {
             } else {
                 appProperties.tabManager.updateAll()
             }
+            
+            appProperties.sidebarView.wantsLayer = true
+            
+            hasDrawn = true
         }
+    }
+    
+    override func mouseMoved(with event: NSEvent) {
+        if !appProperties.sidebarToggled && appProperties.sidebarView.superview == nil {
+            appProperties.sidebarView.setFrameSize(.init(width: appProperties.sidebarWidth, height: bounds.height))
+            addSubview(appProperties.sidebarView)
+            appProperties.sidebarView.autoresizingMask = [.height]
+            appProperties.sidebarView.layer?.backgroundColor = NSColor.systemGray.cgColor
+            appProperties.window.hideTrafficLights(false)
+        }
+    }
+    
+    override func viewDidEndLiveResize() {
+        removeTrackingArea(sidebarTrackingArea)
+        sidebarTrackingArea = NSTrackingArea(rect: .init(x: 0, y: 0, width: 5, height: bounds.height), options: [.activeAlways, .mouseMoved], owner: self)
+        addTrackingArea(sidebarTrackingArea)
     }
     
     // Show a searchbar popover
@@ -82,7 +107,7 @@ class AXContentView: NSView {
     }
     
     override func keyDown(with event: NSEvent) {
-        if event.modifierFlags.contains(.command) {
+        if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command {
             switch event.characters {
             case "1": // There is always going to be one tab, so no checking
                 appProperties.tabManager.switch(to: 0)

@@ -16,11 +16,27 @@ class AXWebContainerView: NSView {
     
     var progressBarObserver: NSKeyValueObservation?
     
-    var hasDrawn = false
+    fileprivate var hasDrawn = false
+    
+    lazy var windowTitleLabel: NSTextField = {
+        let title = NSTextField()
+        title.isEditable = false
+        title.alignment = .left
+        title.isBordered = false
+        title.usesSingleLineMode = true
+        title.drawsBackground = false
+        return title
+    }()
     
     override func viewWillDraw() {
         // self.layer?.backgroundColor = NSColor.systemGray.withAlphaComponent(0.2).cgColor
         if !hasDrawn {
+            // Setup title label
+            windowTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(windowTitleLabel)
+            windowTitleLabel.topAnchor.constraint(equalTo: topAnchor, constant: -0.5).isActive = true
+            windowTitleLabel.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+            
             layer?.shadowOpacity = 0.4
             layer?.shadowColor = NSColor.black.cgColor
             layer?.shadowOffset = .zero
@@ -31,6 +47,8 @@ class AXWebContainerView: NSView {
             splitView.autoresizingMask = [.height, .width]
         }
     }
+    
+    
     
     func enteredFullScreen() {
         splitView.frame = bounds
@@ -46,11 +64,23 @@ class AXWebContainerView: NSView {
         }
     }
     
+    //    override func viewDidEndLiveResize() {
+    //        splitView.frame = appProperties.sidebarToggled ? insetWebView(bounds) : bounds.insetBy(dx: 14, dy: 14)
+    //        splitView.autoresizingMask = [.height, .width]
+    //    }
+    //
+    //    override func viewWillStartLiveResize() {
+    //        splitView.autoresizingMask = .none
+    //    }
+    
     func update() {
         splitView.subviews.removeAll()
-//        appProperties.progressBar.isHidden = true
         
         let webView = appProperties.tabs[appProperties.currentTab].view
+        
+        if !webView.isLoading {
+            appProperties.progressBar.close()
+        }
         
         if appProperties.isFullScreen {
             webView.frame = bounds
@@ -69,7 +99,6 @@ class AXWebContainerView: NSView {
         }
         
         progressBarObserver = webView.observe(\.estimatedProgress, changeHandler: { [self] _, _ in
-            appProperties.sidebarView.checkNavigationButtons()
             let progress = webView.estimatedProgress
             if progress >= 0.93 {
                 // Go very fast to 100!
@@ -78,6 +107,11 @@ class AXWebContainerView: NSView {
                 appProperties.progressBar.smoothProgress(progress)
             }
         })
+        
+        self.windowTitleLabel.stringValue = webView.title ?? "Untitled"
+        if appProperties.isPrivate {
+            windowTitleLabel.stringValue += " - Private"
+        }
     }
     
     func stopObserving() {
@@ -110,6 +144,11 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         appProperties.window.title = appProperties.tabs[appProperties.currentTab].title ?? "Untitled"
+        appProperties.sidebarView.checkNavigationButtons()
+        self.windowTitleLabel.stringValue = webView.title ?? "Untitled"
+        if appProperties.isPrivate {
+            windowTitleLabel.stringValue += " - Private"
+        }
     }
     
     func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {

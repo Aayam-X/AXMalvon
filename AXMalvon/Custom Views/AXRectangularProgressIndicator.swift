@@ -90,6 +90,10 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
         leftBorderLayer.add(leftAnimation, forKey: "ANIMATION:Progress:left")
         
         leftAnimation.delegate = self
+        leftAnimation.isRemovedOnCompletion = true
+        rightAnimation.isRemovedOnCompletion = true
+        bottomAnimation.isRemovedOnCompletion = true
+        topAnimation.isRemovedOnCompletion = true
         
         progress = newValue
     }
@@ -102,6 +106,21 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
             bottomBorderLayer.removeFromSuperlayer()
             leftBorderLayer.removeFromSuperlayer()
         }
+    }
+    
+    override func viewDidEndLiveResize() {
+        topPointPath.removeAllPoints()
+        rightPointPath.removeAllPoints()
+        bottomPointPath.removeAllPoints()
+        leftPointPath.removeAllPoints()
+    }
+    
+    func close() {
+        progress = 0.0
+        topBorderLayer.removeFromSuperlayer()
+        rightBorderLayer.removeFromSuperlayer()
+        bottomBorderLayer.removeFromSuperlayer()
+        leftBorderLayer.removeFromSuperlayer()
     }
     
     init() {
@@ -118,30 +137,30 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
 }
 
 extension NSBezierPath {
-
-  var cgPath: CGPath {
-    let path = CGMutablePath()
-    var points = [CGPoint](repeating: .zero, count: 3)
-    for i in 0 ..< self.elementCount {
-      let type = self.element(at: i, associatedPoints: &points)
-
-      switch type {
-      case .moveTo:
-        path.move(to: points[0])
-
-      case .lineTo:
-        path.addLine(to: points[0])
-
-      case .curveTo:
-        path.addCurve(to: points[2], control1: points[0], control2: points[1])
-
-      case .closePath:
-        path.closeSubpath()
-
-      @unknown default:
-        break
-      }
+    
+    var cgPath: CGPath {
+        let path = CGMutablePath()
+        var points = [CGPoint](repeating: .zero, count: 3)
+        for i in 0 ..< self.elementCount {
+            let type = self.element(at: i, associatedPoints: &points)
+            
+            switch type {
+            case .moveTo:
+                path.move(to: points[0])
+                
+            case .lineTo:
+                path.addLine(to: points[0])
+                
+            case .curveTo:
+                path.addCurve(to: points[2], control1: points[0], control2: points[1])
+                
+            case .closePath:
+                path.closeSubpath()
+                
+            @unknown default:
+                break
+            }
+        }
+        return path
     }
-    return path
-  }
 }

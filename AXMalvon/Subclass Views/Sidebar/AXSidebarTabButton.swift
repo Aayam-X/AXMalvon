@@ -51,7 +51,7 @@ class AXSidebarTabButton: NSButton {
         self.layer?.borderColor = .white
         title = ""
         
-        self.setTrackingArea(WithDrag: false)
+        self.setTrackingArea()
         
         // Setup closeButton
         closeButton.translatesAutoresizingMaskIntoConstraints = false
@@ -103,11 +103,8 @@ class AXSidebarTabButton: NSButton {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setTrackingArea(WithDrag drag: Bool = false) {
-        var options : NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited, .enabledDuringMouseDrag]
-        if drag {
-            options.insert(.enabledDuringMouseDrag)
-        }
+    func setTrackingArea() {
+        let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited, .enabledDuringMouseDrag]
         trackingArea = NSTrackingArea.init(rect: self.bounds, options: options, owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
     }
@@ -115,10 +112,7 @@ class AXSidebarTabButton: NSButton {
     override func mouseUp(with event: NSEvent) {
         NSCursor.arrow.set()
         self.isMouseDown = false
-        self.removeTrackingArea(self.trackingArea)
-        self.setTrackingArea(WithDrag: false)
         layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
-        closeButton.isHidden = true
         
         if tryingToCreateNewWindow {
             let window = AXWindow(restoresTab: false)
@@ -133,18 +127,15 @@ class AXSidebarTabButton: NSButton {
     }
     
     override func mouseDown(with event: NSEvent) {
-        self.removeTrackingArea(self.trackingArea)
         if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
             sendAction(action, to: target)
         }
-        self.setTrackingArea(WithDrag: true)
         self.isMouseDown = true
         self.layer?.backgroundColor = selectedColor.cgColor
     }
     
     override func mouseEntered(with event: NSEvent) {
         titleViewRightAnchor?.constant = 0
-        
         closeButton.isHidden = false
         
         if !isSelected {
