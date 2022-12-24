@@ -4,7 +4,6 @@
 
 ## Links:
 Custom NSTextField: https://stackoverflow.com/a/11833209
-Line animation: https://stackoverflow.com/a/42978938
 SplitView Animation: https://stackoverflow.com/questions/6315091/how-to-expand-and-collapse-nssplitview-subviews-with-animation
 
 ## 0.0.2
@@ -12,8 +11,13 @@ SplitView Animation: https://stackoverflow.com/questions/6315091/how-to-expand-a
 - [ ] Improve splitview functionality
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Improve the search suggestions to use arrow keys and reduce the side of the frame
-- [ ] Fix closing tab
 - [ ] Do not have all the tabs loaded at the start
+---
+- [x] Make the window title less distractive
+- [x] Reload button doesn't work when sidebar isn't shown
+- [x] Do not show "Create new window" when using private window
+- [x] Uses native macOS API for Drag and Drop instead of custom made
+- [x] Search Bar: Text alignment problem
 ---
 - [x] Improved animations to the Progress Bar!!
 - [x] Fixed Command-1, Command-2, etc.. not working

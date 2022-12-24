@@ -127,6 +127,8 @@ class AXContentView: NSView {
                 appProperties.tabManager.switch(to: 7)
             case "9":
                 appProperties.tabManager.switch(to: appProperties.tabs.count - 1)
+            case "r":
+                appProperties.sidebarView.reloadButtonAction()
             default:
                 super.keyDown(with: event)
             }

@@ -22,7 +22,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         searchField.isBordered = false
         searchField.usesSingleLineMode = true
         searchField.drawsBackground = false
-        searchField.lineBreakStrategy = .pushOut
+        searchField.lineBreakMode = .byTruncatingTail
         searchField.placeholderString = "Search or Enter URL..."
         searchField.font = .systemFont(ofSize: 25)
         searchField.focusRingType = .none

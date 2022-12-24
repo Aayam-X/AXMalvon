@@ -28,6 +28,8 @@ class AXSideBarView: NSView {
     
     var trackingArea: NSTrackingArea!
     
+    let supportedDraggingTypes: [NSPasteboard.PasteboardType] = [.URL, .init("com.aayamx.malvon.tabButton")]
+    
     lazy var toggleSidebarButton: AXHoverButton = {
         let button = AXHoverButton()
         
@@ -74,8 +76,6 @@ class AXSideBarView: NSView {
         button.imagePosition = .imageOnly
         button.image = NSImage(systemSymbolName: "arrow.clockwise", accessibilityDescription: nil)
         button.imageScaling = .scaleProportionallyUpOrDown
-        button.keyEquivalentModifierMask = .command
-        button.keyEquivalent = "r"
         button.target = self
         button.action = #selector(reloadButtonAction)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -177,16 +177,14 @@ class AXSideBarView: NSView {
         window?.performDrag(with: event)
     }
     
-    override var registeredDraggedTypes: [NSPasteboard.PasteboardType] {
-        return [.string, .URL]
-    }
-    
     // MARK: Functions
     
     override func viewWillDraw() {
         if !hasDrawn {
+            // Configure Self
             trackingArea = NSTrackingArea(rect: .init(x: bounds.origin.x - 100, y: bounds.origin.y, width: bounds.size.width + 100, height: bounds.size.height), options: [.activeAlways, .mouseEnteredAndExited], owner: self)
             addTrackingArea(trackingArea)
+            self.registerForDraggedTypes(supportedDraggingTypes)
             
             // Constraints for toggleSidebarButton
             addSubview(toggleSidebarButton)
@@ -240,6 +238,7 @@ class AXSideBarView: NSView {
             // Setup stackview
             stackView.orientation = .vertical
             stackView.spacing = 1.08
+            stackView.detachesHiddenViews = false
             stackView.translatesAutoresizingMaskIntoConstraints = false
             scrollView.documentView = stackView
             stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
@@ -346,7 +345,99 @@ class AXSideBarView: NSView {
     }
     
     // MARK: - Drag and Drop
-    // TODO
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        let pasteBoardItemIsValid = sender.draggingPasteboard.canReadObject(forClasses: [NSURL.self, AXSidebarTabButton.self])
+        self.window?.orderFront(nil)
+        
+        if let button = sender.draggingSource as? AXSidebarTabButton {
+            if button.window?.windowNumber != self.window?.windowNumber {
+                /// **Button from a diff window**
+                // Update the tabs in the `appProperties`
+                let otherAppProperty = button.appProperties!
+                
+                
+                print(button.tag, otherAppProperty.tabs.count)
+                appProperties.tabs.append(otherAppProperty.tabs[button.tag])
+                otherAppProperty.tabs.remove(at: button.tag)
+                
+                // Last tab
+                if otherAppProperty.tabs.isEmpty {
+                    button.window?.close()
+                } else {
+                    // Update the current tab in that window
+                    // TODO: Fix problem here
+                    if otherAppProperty.currentTab == otherAppProperty.tabs.count - 1 {
+                        otherAppProperty.currentTab -= 1
+                    }
+                    
+                    // Fix tab.position
+                    for index in button.tag..<otherAppProperty.sidebarView.stackView.arrangedSubviews.count {
+                        let tab = otherAppProperty.sidebarView.stackView.arrangedSubviews[index] as! AXSidebarTabButton
+                        tab.tag -= 1
+                    }
+                    
+                    (otherAppProperty.sidebarView.stackView.arrangedSubviews[otherAppProperty.currentTab] as! AXSidebarTabButton).isSelected = true
+                    otherAppProperty.webContainerView.update()
+                }
+                
+                // Remove the button from the origin window
+                // And update the appProperties
+                button.removeFromSuperview()
+                button.appProperties = self.appProperties
+                button.tag = stackView.arrangedSubviews.count
+                button.startObserving()
+                
+                button.target = self
+                button.action = #selector(tabClick)
+                button.tabTitle = appProperties.tabs[button.tag].title ?? "Untitled"
+                stackView.addArrangedSubview(button)
+                
+                // Change selected button
+                (stackView.arrangedSubviews[safe: appProperties.currentTab] as? AXSidebarTabButton)?.isSelected = false
+                appProperties.currentTab = button.tag
+                button.isSelected = true
+                appProperties.webContainerView.update()
+                
+                button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+                
+                print("Button from another window")
+            }
+        }
+        
+        
+        if pasteBoardItemIsValid {
+            return .copy
+        }
+        
+        return NSDragOperation()
+    }
+    
+    
+    
+    override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        guard let pasteboardObjects = sender.draggingPasteboard.readObjects(forClasses: [NSURL.self, AXSidebarTabButton.self]), !pasteboardObjects.isEmpty else { return false }
+        
+        pasteboardObjects.forEach { object in
+            if let url = object as? NSURL {
+                NSCursor.dragLink.set()
+                appProperties.tabManager.createNewTab(url: url as URL)
+            }
+            
+            // if let tabButton = object as? AXSidebarTabButton {
+            //  print("BRUH")
+            // }
+        }
+        
+        return true
+    }
+    
+    override func draggingEnded(_ sender: NSDraggingInfo) {
+        NSCursor.arrow.set()
+    }
+    
+    override func draggingExited(_ sender: NSDraggingInfo?) {
+        NSCursor.arrow.set()
+    }
 }
 
 extension Array {

@@ -25,6 +25,7 @@ class AXWebContainerView: NSView {
         title.isBordered = false
         title.usesSingleLineMode = true
         title.drawsBackground = false
+        title.alphaValue = 0.3
         return title
     }()
     
@@ -64,14 +65,14 @@ class AXWebContainerView: NSView {
         }
     }
     
-    //    override func viewDidEndLiveResize() {
-    //        splitView.frame = appProperties.sidebarToggled ? insetWebView(bounds) : bounds.insetBy(dx: 14, dy: 14)
-    //        splitView.autoresizingMask = [.height, .width]
-    //    }
+    // override func viewDidEndLiveResize() {
+    //  splitView.frame = appProperties.sidebarToggled ? insetWebView(bounds) : bounds.insetBy(dx: 14, dy: 14)
+    //  splitView.autoresizingMask = [.height, .width]
+    // }
     //
-    //    override func viewWillStartLiveResize() {
-    //        splitView.autoresizingMask = .none
-    //    }
+    // override func viewWillStartLiveResize() {
+    //  splitView.autoresizingMask = .none
+    // }
     
     func update() {
         splitView.subviews.removeAll()

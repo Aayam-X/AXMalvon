@@ -8,8 +8,37 @@
 
 import AppKit
 
-class AXSidebarTabButton: NSButton {
+class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPasteboardReading {
+    func writableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard.PasteboardType] {
+        return [NSPasteboard.PasteboardType("com.aayamx.malvon.tabButton")]
+    }
+    
+    func pasteboardPropertyList(forType type: NSPasteboard.PasteboardType) -> Any? {
+        // return "\(appProperties.window.windowNumber),\(self.tag)"
+        return ""
+    }
+    
+    static func readableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard.PasteboardType] {
+        return [NSPasteboard.PasteboardType("com.aayamx.malvon.tabButton")]
+    }
+    
+    required init?(pasteboardPropertyList propertyList: Any, ofType type: NSPasteboard.PasteboardType) {
+        super.init(frame: .zero)
+        // if type == .init("com.aayamx.malvon.tabButton") {
+        //  let value = propertyList as! String
+        // }
+    }
+    
+    static func readingOptions(forType type: NSPasteboard.PasteboardType, pasteboard: NSPasteboard) -> NSPasteboard.ReadingOptions {
+        return .asString
+    }
+    
     let titleView = NSTextField(frame: .zero)
+    
+    // Drag and drop
+    fileprivate var isDragging = false
+    var dragOffset: CGFloat?
+    var draggingView: NSImageView?
     
     var closeButton = AXHoverButton()
     
@@ -23,7 +52,7 @@ class AXSidebarTabButton: NSButton {
     
     var tryingToCreateNewWindow: Bool = false
     
-    unowned var appProperties: AXAppProperties
+    unowned var appProperties: AXAppProperties!
     
     var isSelected: Bool = false {
         didSet {
@@ -124,14 +153,8 @@ class AXSidebarTabButton: NSButton {
                 window.appProperties.tabManager.updateAll()
             }
         }
-    }
-    
-    override func mouseDown(with event: NSEvent) {
-        if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
-            sendAction(action, to: target)
-        }
-        self.isMouseDown = true
-        self.layer?.backgroundColor = selectedColor.cgColor
+        
+        isDragging = false
     }
     
     override func mouseEntered(with event: NSEvent) {
@@ -143,53 +166,98 @@ class AXSidebarTabButton: NSButton {
         }
     }
     
+    override func mouseDown(with event: NSEvent) {
+        if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
+            sendAction(action, to: target)
+        }
+        self.isMouseDown = true
+        self.layer?.backgroundColor = selectedColor.cgColor
+    }
+    
+    override func mouseDragged(with event: NSEvent) {
+        if !isDragging {
+            let dragItem = NSDraggingItem(pasteboardWriter: self)
+            dragItem.setDraggingFrame(self.bounds, contents: self.toImage())
+            let draggingSession = self.beginDraggingSession(with: [dragItem], event: event, source: self)
+            draggingSession.animatesToStartingPositionsOnCancelOrFail = true
+            isHidden = true
+        }
+    }
+    
+    override func concludeDragOperation(_ sender: NSDraggingInfo?) {
+        isDragging = false
+        isHidden = false
+        closeButton.isHidden = false
+    }
+    
     override func mouseExited(with event: NSEvent) {
         titleViewRightAnchor?.constant = 20
         closeButton.isHidden = true
         self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
     }
     
-    override func mouseDragged(with event: NSEvent) {
-        NSCursor.closedHand.set()
+    func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
+        return .move
+    }
+    
+    func draggingSession(_ session: NSDraggingSession, willBeginAt screenPoint: NSPoint) {
+        dragOffset = self.frame.origin.x - screenPoint.x
+        closeButton.isHidden = true
+        let dragRect = self.bounds
+        let image = NSImage(data: self.dataWithPDF(inside: dragRect))
+        self.draggingView = NSImageView(frame: dragRect)
+        if let draggingView = self.draggingView {
+            draggingView.image = image
+            draggingView.translatesAutoresizingMaskIntoConstraints = false
+        }
+        isDragging = true
         
-        if event.locationInWindow.x <= appProperties.sidebarView.scrollView.frame.width && event.locationInWindow.x > 0.0 {
-            // We gotta subtract cause we're using a FlippedView
-            let index = Int((event.locationInWindow.y - appProperties.sidebarView.scrollView.frame.height) / -31)
-            
+        self.isHidden = true
+    }
+    
+    func draggingSession(_ session: NSDraggingSession, movedTo screenPoint: NSPoint) {
+        let offsetX = screenPoint.x - appProperties.window.frame.origin.x
+        let offsetY = screenPoint.y - appProperties.window.frame.origin.y
+        
+        if offsetX <= appProperties.sidebarWidth && offsetX >= 0.0 && offsetY <= appProperties.sidebarView.scrollView.frame.height && offsetY >= 0.0 {
+            let index = Int((offsetY - appProperties.sidebarView.scrollView.frame.size.height) / -31)
             if index <= appProperties.sidebarView.stackView.arrangedSubviews.count - 1 && index >= 0 {
                 appProperties.tabManager.swapAt(self.tag, index)
-                
-                if tryingToCreateNewWindow {
-                    self.layer?.borderWidth = 0.0
-                    tryingToCreateNewWindow = false
-                    self.tabTitle = appProperties.tabs[tag].title ?? "Untitled"
-                }
-            } else {
-                // Create new window if the index dragged on isn't valid
-                tabTitle = "Create new window"
-                
-                self.layer?.borderWidth = 1.08
-                tryingToCreateNewWindow = true
             }
         } else {
-            // User wants to put in webView
-            if event.locationInWindow.x >= appProperties.sidebarView.scrollView.frame.width && event.locationInWindow.x <= appProperties.sidebarView.scrollView.frame.width + appProperties.webContainerView.frame.width {
-                // Other
-                self.layer?.borderWidth = 0.0
-                self.tabTitle = appProperties.tabs[tag].title ?? "Untitled"
-                tryingToCreateNewWindow = false
-                
-                if tag + 1 < appProperties.tabs.count {
-                    appProperties.webContainerView.splitView.addArrangedSubview(appProperties.tabs[tag + 1].view)
-                    (appProperties.sidebarView.stackView.arrangedSubviews[tag + 1] as? AXSidebarTabButton)?.isSelected = true
-                }
-            } else {
-                // Create new window
-                tabTitle = "Create new window"
-                
-                self.layer?.borderWidth = 1.08
-                tryingToCreateNewWindow = true
+            // TODO: Implement this
+            // Also for splitview, maybe..
+            //            print("View entered Outside, should create new window")
+        }
+    }
+    
+    func draggingSession(_ session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
+        self.isHidden = false
+        let offsetX = screenPoint.x - appProperties.window.frame.origin.x
+        let offsetY = screenPoint.y - appProperties.window.frame.origin.y
+        
+        if offsetX <= appProperties.sidebarWidth && offsetX >= 0.0 && offsetY <= appProperties.sidebarView.scrollView.frame.height && offsetY >= 0.0 {
+            let index = Int((offsetY - appProperties.sidebarView.scrollView.frame.size.height) / -31)
+            if index <= appProperties.sidebarView.stackView.arrangedSubviews.count - 1 && index >= 0 {
+                appProperties.tabManager.swapAt(self.tag, index)
             }
         }
+        
+        isDragging = false
+    }
+}
+
+extension NSView {
+    func toImage() -> NSImage? {
+        guard let bitmapImageRepresentation = self.bitmapImageRepForCachingDisplay(in: bounds) else {
+            return nil
+        }
+        bitmapImageRepresentation.size = bounds.size
+        self.cacheDisplay(in: bounds, to: bitmapImageRepresentation)
+        
+        let image = NSImage(size: bounds.size)
+        image.addRepresentation(bitmapImageRepresentation)
+        
+        return image
     }
 }

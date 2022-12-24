@@ -56,7 +56,9 @@ class AXHoverButton: NSButton {
     }
     
     override func mouseEntered(with event: NSEvent) {
-        self.layer?.backgroundColor = self.isMouseDown ? selectedColor.cgColor : hoverColor.cgColor
+        if isEnabled {
+            self.layer?.backgroundColor = self.isMouseDown ? selectedColor.cgColor : hoverColor.cgColor
+        }
     }
     
     override func mouseExited(with event: NSEvent) {
