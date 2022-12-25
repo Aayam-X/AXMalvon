@@ -15,6 +15,15 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     fileprivate var hasDrawn = false
     var newTabMode: Bool = true
     
+    let suggestionWindow = AXAboutView.createSuggestionsWindow()
+    
+    private var highlightedSuggestion = 0 {
+        willSet(newValue) {
+            suggestions[highlightedSuggestion].isSelected = false
+            suggestions[newValue].isSelected = true
+        }
+    }
+    
     lazy var searchField: NSTextField = {
         let searchField = NSTextField()
         searchField.translatesAutoresizingMaskIntoConstraints = false
@@ -38,14 +47,11 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         return s
     }()
     
-    let suggestions = [AXHoverButton(), AXHoverButton(), AXHoverButton(), AXHoverButton(), AXHoverButton()]
+    let suggestions = [AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem()]
     
     override func viewWillDraw() {
         if !hasDrawn {
             layer?.backgroundColor = NSColor.textBackgroundColor.withAlphaComponent(0.92).cgColor
-            layer?.cornerRadius = 50.0
-            layer?.borderColor = NSColor.systemGray.cgColor
-            layer?.borderWidth = 1.5
             hasDrawn = true
             
             searchField.delegate = self
@@ -58,18 +64,20 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             
             addSubview(suggestionsStackView)
             suggestionsStackView.heightAnchor.constraint(equalTo: heightAnchor).isActive = true
-            suggestionsStackView.topAnchor.constraint(equalTo: searchField.bottomAnchor).isActive = true
+            suggestionsStackView.topAnchor.constraint(equalTo: searchField.bottomAnchor, constant: 5).isActive = true
             suggestionsStackView.leftAnchor.constraint(equalTo: leftAnchor, constant: 25).isActive = true
             suggestionsStackView.rightAnchor.constraint(equalTo: rightAnchor, constant: -25).isActive = true
             
-            
             for suggestion in suggestions {
-                suggestion.title = ""
+                suggestion.titleValue = ""
+                suggestion.target = self
                 suggestion.action = #selector(searchSuggestionAction)
                 suggestionsStackView.addArrangedSubview(suggestion)
                 suggestion.widthAnchor.constraint(equalTo: suggestionsStackView.widthAnchor).isActive = true
                 suggestion.heightAnchor.constraint(equalToConstant: 35).isActive = true
             }
+            
+            highlightedSuggestion = 0
         }
     }
     
@@ -83,14 +91,15 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         newTabMode = true
     }
     
-    @objc func searchSuggestionAction(_ sender: AXHoverButton) {
-        if !sender.title.isEmpty {
-            searchEnter(fixURL(URL(string: "https://www.google.com/search?client=Malvon&q=\(sender.title.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!)")!))
+    @objc func searchSuggestionAction(_ sender: AXSearchFieldSuggestItem) {
+        if !sender.titleValue.isEmpty {
+            searchEnter(fixURL(URL(string: "https://www.google.com/search?client=Malvon&q=\(sender.titleValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!)")!))
             close()
         }
     }
     
     func searchFieldAction() {
+        appProperties.tabs[appProperties.currentTab].view.alphaValue = 1.0
         let value = searchField.stringValue
         
         if !searchField.stringValue.isEmpty {
@@ -113,17 +122,29 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     
     func updateSuggestions() {
         if !searchField.stringValue.isEmpty {
+            // First one will always be equal to the text
+            suggestions[0].titleValue = searchField.stringValue
+            
             SearchSuggestions.getQuerySuggestions(searchField.stringValue) { [self] results, error in
-                guard let results = results else { return }
-                
-                for (i, suggestion) in suggestions.enumerated() {
-                    if i < results.count {
-                        suggestion.title = results[i]
-                    } else {
-                        suggestion.title = ""
+                if error != nil {
+                    for index in 1..<suggestions.count {
+                        let suggestion = suggestions[index]
+                        suggestion.titleValue = ""
                     }
+                    return
                 }
                 
+                let results = results!
+                
+                for index in 1..<suggestions.count {
+                    let suggestion = suggestions[index]
+                    
+                    if index < results.count {
+                        suggestion.titleValue = results[index]
+                    } else {
+                        suggestion.titleValue = ""
+                    }
+                }
             }
         } else {
             suggestions.forEach { suggestion in
@@ -134,19 +155,46 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     }
     
     func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
+        if commandSelector == #selector(NSResponder.moveUp(_:)) {
+            highlightedSuggestion == 0 ? (highlightedSuggestion = 4) : (highlightedSuggestion -= 1)
+            searchField.stringValue = suggestions[highlightedSuggestion].titleValue
+            return true
+        }
+        if commandSelector == #selector(NSResponder.moveDown(_:)) {
+            highlightedSuggestion == 4 ? (highlightedSuggestion = 0) : (highlightedSuggestion += 1)
+            searchField.stringValue = suggestions[highlightedSuggestion].titleValue
+            return true
+        }
+        if commandSelector == #selector(NSResponder.deleteToBeginningOfLine(_:)) {
+            updateSuggestions()
+            return false
+        }
+        
         if (commandSelector == #selector(NSResponder.cancelOperation(_:))) {
             close()
             return true
-        } else if commandSelector == #selector(NSResponder.insertNewline(_:)) {
+        }
+        if commandSelector == #selector(NSResponder.insertNewline(_:)) {
             searchFieldAction()
             return true
-        } else {
-            return false
         }
+        
+        return false
     }
     
     func controlTextDidChange(_ obj: Notification) {
         updateSuggestions()
+    }
+    
+    func show() {
+        appProperties.tabs[appProperties.currentTab].view.alphaValue = 0.5
+        appProperties.window.ignoresMouseEvents = true
+        suggestionWindow.contentView = self
+        
+        print(appProperties.window.frame.midY)
+        print((appProperties.window.frame.height - self.frame.size.height) / 2)
+        suggestionWindow.setFrameOrigin(.init(x: (appProperties.window.frame.width - self.frame.width) / 2, y: (appProperties.window.frame.midY)))
+        suggestionWindow.makeKeyAndOrderFront(nil)
     }
     
     func close() {
@@ -156,6 +204,10 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         suggestions.forEach { suggestion in
             suggestion.title = ""
         }
+        
+        appProperties.tabs[appProperties.currentTab].view.alphaValue = 1.0
+        suggestionWindow.close()
+        appProperties.window.ignoresMouseEvents = false
         self.removeFromSuperview()
     }
 }

@@ -16,6 +16,8 @@ SplitView Animation: https://stackoverflow.com/questions/6315091/how-to-expand-a
 - [ ] Improve the search suggestions to use arrow keys and reduce the side of the frame
 - [ ] Do not have all the tabs loaded at the start
 ---
+- [ ] Search Field Improvement
+---
 - [x] Copy link shortcut
 - [x] Sidebar Hover Animation
 - [x] New About Malvon view

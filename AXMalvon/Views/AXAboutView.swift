@@ -154,6 +154,23 @@ class AXAboutView: NSView {
         
         return window
     }
+    
+    static func createSuggestionsWindow() -> NSWindow {
+        let window = NSWindow(
+            contentRect: .init(x: 0, y: 0, width: 530, height: 250),
+            styleMask: [.titled, .fullSizeContentView],
+            backing: .buffered,
+            defer: false
+        )
+        
+        window.level = .floating
+        window.titlebarAppearsTransparent = true
+        window.isMovableByWindowBackground = true
+        window.isReleasedWhenClosed = false
+        window.backgroundColor = .black
+        
+        return window
+    }
 }
 
 

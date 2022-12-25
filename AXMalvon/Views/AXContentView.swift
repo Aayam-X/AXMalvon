@@ -102,26 +102,30 @@ class AXContentView: NSView {
     
     // Show a searchbar popover
     func displaySearchBarPopover() {
-        appProperties.popOver.frame = bounds.insetBy(dx: 250, dy: 250)
-        addSubview(appProperties.popOver)
+        //        appProperties.popOver.frame = bounds.insetBy(dx: 250, dy: 250)
+        //        addSubview(appProperties.popOver)
         appProperties.searchFieldShown = true
-        appProperties.popOver.searchField.becomeFirstResponder()
+        appProperties.popOver.show()
     }
     
     func showSearchBar() {
         if !appProperties.searchFieldShown {
-            appProperties.popOver.frame = bounds.insetBy(dx: 250, dy: 250)
-            addSubview(appProperties.popOver)
-            appProperties.popOver.searchField.stringValue = appProperties.tabs[appProperties.currentTab].view.url?.absoluteString ?? ""
             appProperties.searchFieldShown = true
-            appProperties.popOver.searchField.becomeFirstResponder()
+            appProperties.popOver.show()
+            appProperties.popOver.searchField.stringValue = appProperties.tabs[appProperties.currentTab].view.url?.absoluteString ?? ""
         } else {
             appProperties.popOver.close()
         }
     }
     
     override func keyDown(with event: NSEvent) {
-        if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command {
+        if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == [.command, .shift] {
+            if event.characters == "c" {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(appProperties.tabs[appProperties.currentTab].view.url?.absoluteString ?? "Malvon: Unable to copy link", forType: .URL)
+                return
+            }
+        } else if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command {
             switch event.characters {
             case "1": // There is always going to be one tab, so no checking
                 appProperties.tabManager.switch(to: 0)
@@ -146,11 +150,9 @@ class AXContentView: NSView {
             default:
                 super.keyDown(with: event)
             }
-        } else if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == [.command, .shift] {
-            if event.characters == "c" {
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(appProperties.tabs[appProperties.currentTab].view.url?.absoluteString ?? "Malvon: Unable to copy link", forType: .URL)
-            }
+            return
         }
+        
+        super.keyDown(with: event)
     }
 }
