@@ -181,14 +181,7 @@ class AXSideBarView: NSView {
     }
     
     @objc func tabClick(_ sender: NSButton) {
-        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = false
-        
-        appProperties.currentTab = sender.tag
-        
-        appProperties.webContainerView.update()
-        (sender as! AXSidebarTabButton).isSelected = true
-        
-        appProperties.window.title = appProperties.tabs[sender.tag].title ?? "Untitled"
+        appProperties.tabManager.switch(to: sender.tag)
     }
     
     @objc func backButtonAction() {
@@ -218,6 +211,7 @@ class AXSideBarView: NSView {
         removeTrackingArea(trackingArea)
         trackingArea = NSTrackingArea(rect: .init(x: bounds.origin.x - 100, y: bounds.origin.y, width: bounds.size.width + 100, height: bounds.size.height), options: [.activeAlways, .mouseEnteredAndExited], owner: self)
         addTrackingArea(trackingArea)
+        layer?.backgroundColor = .clear
     }
     
     override func resizeSubviews(withOldSize oldSize: NSSize) {
@@ -384,6 +378,9 @@ class AXSideBarView: NSView {
                     }
                     
                     (otherAppProperty.sidebarView.stackView.arrangedSubviews[otherAppProperty.currentTab] as! AXSidebarTabButton).isSelected = true
+                    
+                    // TODO: Add "hasLoaded" logic here
+                    // EDIT: The entire thing
                     otherAppProperty.webContainerView.update()
                 }
                 

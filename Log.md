@@ -15,6 +15,14 @@ Animating NSWindow:
 - [ ] Do not have all the tabs loaded at the start
 - [ ] Create tab after current tab rather the at the end
 ---
+- [ ] Problems with moveTabToNewWindow
+- [x] Increased size of search field window
+- [x] Mini-Alerts show when you do a certain action (Copy URL)
+- [x] Window color will be black if the user is on private mode
+- [x] Created seperator in Search Field View
+- [x] Prevent loading of all the tabs
+- [x] Sidebar will stay red instead of returning back to clear
+---
 - [x] Favicons
 ---
 - [x] Drag and drop to create new window

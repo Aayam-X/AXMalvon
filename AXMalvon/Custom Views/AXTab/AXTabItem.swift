@@ -23,12 +23,15 @@ struct AXTabItem: Codable {
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         
-        title = try values.decode(String.self, forKey: .title)
-        url = try values.decode(URL.self, forKey: .url)
+        self.title = try values.decode(String.self, forKey: .title)
+        self.url = try values.decode(URL.self, forKey: .url)
         
         view = AXWebView()
         view.addConfigurations()
         view.layer?.cornerRadius = 5.0
+    }
+    
+    func load() {
         view.load(URLRequest(url: url!))
     }
     

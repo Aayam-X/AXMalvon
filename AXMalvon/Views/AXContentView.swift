@@ -24,7 +24,7 @@ class AXContentView: NSView {
             addTrackingArea(sidebarTrackingArea)
             
             if appProperties.isPrivate {
-                self.layer?.backgroundColor = NSColor.systemGray.cgColor
+                self.layer?.backgroundColor = .black
             } else {
 #if DEBUG
                 self.layer?.backgroundColor = NSColor.brown.cgColor
@@ -120,11 +120,27 @@ class AXContentView: NSView {
         }
     }
     
+    func displayMessage(message: String) {
+        let alert = AXInformationAlertView(frame: .zero)
+        alert.message = message
+        
+        alert.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(alert)
+        
+        alert.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        alert.rightAnchor.constraint(equalTo: rightAnchor, constant: -5).isActive = true
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            alert.removeFromSuperview()
+        }
+    }
+    
     override func keyDown(with event: NSEvent) {
         if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == [.command, .shift] {
             if event.characters == "c" {
                 NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(appProperties.tabs[appProperties.currentTab].view.url?.absoluteString ?? "Malvon: Unable to copy link", forType: .URL)
+                NSPasteboard.general.setString(appProperties.tabs[appProperties.currentTab].view.url?.absoluteString ?? "Malvon: Unable to copy link", forType: .string)
+                displayMessage(message: "Copied Link!")
                 return
             }
         } else if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command {

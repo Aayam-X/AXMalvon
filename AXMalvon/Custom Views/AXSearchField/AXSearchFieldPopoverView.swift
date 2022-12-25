@@ -55,6 +55,10 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         suggestionWindow.contentView = self
     }
     
+    deinit {
+        localMouseDownEventMonitor = nil
+    }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -67,10 +71,18 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             searchField.rightAnchor.constraint(equalTo: rightAnchor, constant: -25).isActive = true
             searchField.topAnchor.constraint(equalTo: topAnchor, constant: 25).isActive = true
             
+            let seperator = NSBox()
+            seperator.boxType = .separator
+            seperator.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(seperator)
+            seperator.topAnchor.constraint(equalTo: searchField.bottomAnchor, constant: 20).isActive = true
+            seperator.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
+            seperator.rightAnchor.constraint(equalTo: rightAnchor, constant: 5).isActive = true
+            
             addSubview(suggestionsStackView)
-            suggestionsStackView.topAnchor.constraint(equalTo: searchField.bottomAnchor, constant: 5).isActive = true
-            suggestionsStackView.leftAnchor.constraint(equalTo: leftAnchor, constant: 25).isActive = true
-            suggestionsStackView.rightAnchor.constraint(equalTo: rightAnchor, constant: -25).isActive = true
+            suggestionsStackView.topAnchor.constraint(equalTo: searchField.bottomAnchor, constant: 30).isActive = true
+            suggestionsStackView.leftAnchor.constraint(equalTo: leftAnchor, constant: 15).isActive = true
+            suggestionsStackView.rightAnchor.constraint(equalTo: rightAnchor, constant: -15).isActive = true
             
             for suggestion in suggestions {
                 suggestion.isHidden = true
@@ -82,6 +94,10 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             }
             
             highlightedSuggestion = 0
+            
+            if appProperties.isPrivate {
+                suggestionWindow.appearance = .init(named: .darkAqua)
+            }
             
             hasDrawn = true
         }
@@ -199,9 +215,9 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     func show() {
         appProperties.tabs[appProperties.currentTab].view.alphaValue = 0.5
         
-        // 265: Half the Width
-        // 125: Half the Height
-        suggestionWindow.setFrameOrigin(.init(x: appProperties.window.frame.midX - 265, y: appProperties.window.frame.midY - 125))
+        // 300: Half the Width
+        // 137: Half the Height
+        suggestionWindow.setFrameOrigin(.init(x: appProperties.window.frame.midX - 300, y: appProperties.window.frame.midY - 137))
         
         appProperties.window.addChildWindow(suggestionWindow, ordered: .above)
         suggestionWindow.makeKey()
@@ -235,6 +251,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             }
             return event
         })
+        
     }
 }
 

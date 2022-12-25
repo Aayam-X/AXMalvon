@@ -70,7 +70,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             
             // Setup imageView
             favIconImageView.translatesAutoresizingMaskIntoConstraints = false
-            favIconImageView.image = NSImage(systemSymbolName: "square", accessibilityDescription: nil)
+            favIconImageView.image = NSImage(systemSymbolName: "square.fill", accessibilityDescription: nil)
             favIconImageView.contentTintColor = .textBackgroundColor.withAlphaComponent(0.2)
             addSubview(favIconImageView)
             favIconImageView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
@@ -109,6 +109,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     }
     
     @objc func closeTab() {
+        stopObserving()
         appProperties.tabManager.removeTab(self.tag)
     }
     
@@ -239,6 +240,8 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             DispatchQueue.main.async {
                 window.appProperties.tabManager.updateAll()
             }
+            
+            self.appProperties = window.appProperties
         }
         
         isDragging = false

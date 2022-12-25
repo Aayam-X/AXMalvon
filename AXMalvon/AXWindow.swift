@@ -50,6 +50,10 @@ class AXWindow: NSWindow, NSWindowDelegate {
             hideTrafficLights(true)
         }
         
+        if appProperties.isPrivate {
+            self.appearance = .init(named: .darkAqua)
+        }
+        
         self.contentView = appProperties.contentView
         appProperties.window = self
         

@@ -15,6 +15,11 @@ class AXTabManager {
     // Updates every single view
     func updateAll() {
         appProperties.currentTab = 0
+        let tab = appProperties.tabs[0]
+        if tab.view.url == nil {
+            tab.load()
+        }
+        
         appProperties.sidebarView.updateAll()
         appProperties.webContainerView.update()
     }
@@ -45,6 +50,10 @@ class AXTabManager {
     // MARK: - Creating Tabs
     func `switch`(to: Int) {
         // let oldTab = appProperties.currentTab
+        let tab = appProperties.tabs[to]
+        if tab.view.url == nil {
+            tab.load()
+        }
         appProperties.sidebarView.moveSelectionTo(to: to)
         appProperties.webContainerView.update()
     }
@@ -53,6 +62,11 @@ class AXTabManager {
     func didCreateNewTab(_ at: Int) {
         let oldTab = appProperties.currentTab
         appProperties.currentTab = at
+        
+        let tab = appProperties.tabs[at]
+        if tab.view.url == nil {
+            tab.load()
+        }
         
         appProperties.webContainerView.update()
         appProperties.sidebarView.didCreateTab(oldTab)
@@ -74,6 +88,10 @@ class AXTabManager {
             
             appProperties.tabs.remove(at: at)
             appProperties.sidebarView.removedTab(at)
+            
+            if tab.view.url == nil {
+                tab.load()
+            }
             
             appProperties.webContainerView.update()
         } else {

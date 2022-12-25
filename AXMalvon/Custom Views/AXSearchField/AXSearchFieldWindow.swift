@@ -11,7 +11,7 @@ import AppKit
 class AXSearchFieldWindow: NSPanel {
     init() {
         super.init(
-            contentRect: .init(x: 0, y: 0, width: 530, height: 250),
+            contentRect: .init(x: 0, y: 0, width: 600, height: 274),
             styleMask: [.titled, .fullSizeContentView],
             backing: .buffered,
             defer: false
@@ -28,4 +28,8 @@ class AXSearchFieldWindow: NSPanel {
         // Which is why we must set the background color
         backgroundColor = .textBackgroundColor
     }
+    
+    // override func close() {
+    //  super.close()
+    // }
 }

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		ED01B05A2957E3C700CB657E /* AXSearchFieldSuggestItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED01B0592957E3C700CB657E /* AXSearchFieldSuggestItem.swift */; };
+		ED02037A2958E5760054A6BB /* AXInformationAlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0203792958E5760054A6BB /* AXInformationAlertView.swift */; };
 		ED0ACB0A294FFB9900BFBFC9 /* MXSearchSuggestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0ACB09294FFB9900BFBFC9 /* MXSearchSuggestion.swift */; };
 		ED0B1AC92947910800524F08 /* AXSearchFieldPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0B1AC82947910800524F08 /* AXSearchFieldPopoverView.swift */; };
 		ED19C806294F904400E0924D /* WKWebViewSearch.js in Resources */ = {isa = PBXBuildFile; fileRef = ED19C805294F904400E0924D /* WKWebViewSearch.js */; };
@@ -38,6 +39,7 @@
 
 /* Begin PBXFileReference section */
 		ED01B0592957E3C700CB657E /* AXSearchFieldSuggestItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSearchFieldSuggestItem.swift; sourceTree = "<group>"; };
+		ED0203792958E5760054A6BB /* AXInformationAlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXInformationAlertView.swift; sourceTree = "<group>"; };
 		ED0ACB09294FFB9900BFBFC9 /* MXSearchSuggestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MXSearchSuggestion.swift; sourceTree = "<group>"; };
 		ED0B1AC82947910800524F08 /* AXSearchFieldPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSearchFieldPopoverView.swift; sourceTree = "<group>"; };
 		ED19C805294F904400E0924D /* WKWebViewSearch.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = WKWebViewSearch.js; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.javascript; };
@@ -139,6 +141,7 @@
 				ED0B1AC7294790EB00524F08 /* AXSearchField */,
 				ED95609B294033C600AC1C15 /* AXTab */,
 				ED212332294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift */,
+				ED0203792958E5760054A6BB /* AXInformationAlertView.swift */,
 			);
 			path = "Custom Views";
 			sourceTree = "<group>";
@@ -291,6 +294,7 @@
 				EDD7C02C2957C2C10067E559 /* AXAboutView.swift in Sources */,
 				ED3204FE293E61240055CD73 /* AXSplitView.swift in Sources */,
 				EDD71EDB293BF0F900256EA9 /* AXContentView.swift in Sources */,
+				ED02037A2958E5760054A6BB /* AXInformationAlertView.swift in Sources */,
 				ED95609D294033D400AC1C15 /* AXTabItem.swift in Sources */,
 				EDC611C1294E213A00524E88 /* AXWebViewFindView.swift in Sources */,
 				ED95609A2940339800AC1C15 /* AXTabContainerView.swift in Sources */,

@@ -108,9 +108,6 @@ class AXWebContainerView: NSView {
         })
         
         self.windowTitleLabel.stringValue = webView.title ?? "Untitled"
-        if appProperties.isPrivate {
-            windowTitleLabel.stringValue += " - Private"
-        }
     }
     
     func stopObserving() {
@@ -148,7 +145,7 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
             if let favIcon = faviconURL {
                 selectedTab.favIconImageView.download(from: favIcon)
             } else {
-                selectedTab.favIconImageView.image = NSImage(systemSymbolName: "square", accessibilityDescription: nil)
+                selectedTab.favIconImageView.image = NSImage(systemSymbolName: "square.fill", accessibilityDescription: nil)
             }
         }
     }
@@ -157,9 +154,6 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
         appProperties.window.title = appProperties.tabs[appProperties.currentTab].title ?? "Untitled"
         appProperties.sidebarView.checkNavigationButtons()
         self.windowTitleLabel.stringValue = webView.title ?? "Untitled"
-        if appProperties.isPrivate {
-            windowTitleLabel.stringValue += " - Private"
-        }
     }
     
     func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
