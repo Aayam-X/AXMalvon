@@ -81,3 +81,14 @@ extension NSView {
         return image
     }
 }
+
+extension NSImageView {
+    func download(from url: URL) {
+        URLSession.shared.dataTask(with: url) { data, _, error in
+            guard error == nil, let data = data, let image = NSImage(data: data) else { return }
+            DispatchQueue.main.async() { [weak self] in
+                self?.image = image
+            }
+        }.resume()
+    }
+}

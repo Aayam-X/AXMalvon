@@ -141,6 +141,18 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
         return appProperties.tabManager.createNewTab(config: configuration)
     }
     
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        let axWebView = appProperties.tabs[appProperties.currentTab].view
+        let selectedTab = appProperties.sidebarView.stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton
+        axWebView.getFavicon { faviconURL in
+            if let favIcon = faviconURL {
+                selectedTab.favIconImageView.download(from: favIcon)
+            } else {
+                selectedTab.favIconImageView.image = NSImage(systemSymbolName: "square", accessibilityDescription: nil)
+            }
+        }
+    }
+    
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         appProperties.window.title = appProperties.tabs[appProperties.currentTab].title ?? "Untitled"
         appProperties.sidebarView.checkNavigationButtons()

@@ -9,6 +9,8 @@
 import AppKit
 import WebKit
 
+fileprivate let favIconScript = "document.querySelector('link[rel=\"icon\"], link[rel=\"shortcut icon\"]').getAttribute('href');"
+
 class AXWebView: WKWebView {
     func addConfigurations() {
         self.configuration.preferences.setValue(true, forKey: "offlineApplicationCacheIsEnabled")
@@ -31,6 +33,25 @@ class AXWebView: WKWebView {
         self.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.2 Safari/605.1.15"
         
         self.allowsMagnification = true
+    }
+    
+    public func getFavicon(completion: @escaping(URL?) -> ()) {
+        evaluateJavaScript(favIconScript) { result, error in
+            if let favIconURL = result as? String {
+                completion(URL(string: favIconURL))
+                return
+            }
+            
+            // If cannot find icon
+            if let url = self.url {
+                completion(URL(string: "https://www.google.com/s2/favicons?sz=16&domain_url=" + url.absoluteString))
+                return
+            }
+            
+            // Everything failed
+            completion(nil)
+            return
+        }
     }
     
     // Code Borrowed From: https://github.com/sstahurski/SearchWKWebView

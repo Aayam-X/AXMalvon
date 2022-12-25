@@ -41,7 +41,11 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         }
     }
     
+    var favIconImageView = NSImageView()
+    
     var isMouseDown = false
+    
+    var hasDrawn = false
     
     var trackingArea: NSTrackingArea!
     
@@ -54,37 +58,54 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         self.bezelStyle = .shadowlessSquare
         self.layer?.borderColor = .white
         title = ""
-        
-        self.setTrackingArea()
-        
-        // Setup closeButton
-        closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.target = self
-        closeButton.action = #selector(closeTab)
-        addSubview(closeButton)
-        closeButton.image = NSImage(systemSymbolName: "xmark", accessibilityDescription: nil)
-        closeButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
-        closeButton.heightAnchor.constraint(equalToConstant: 16).isActive = true
-        closeButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -5).isActive = true
-        closeButton.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
-        closeButton.isHidden = true
-        
-        // Setup titleView
-        titleView.translatesAutoresizingMaskIntoConstraints = false
-        titleView.isEditable = false // This should be set to true in a while :)
-        titleView.alignment = .left
-        titleView.isBordered = false
-        titleView.usesSingleLineMode = true
-        titleView.drawsBackground = false
-        addSubview(titleView)
-        titleView.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
-        titleView.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
-        titleViewRightAnchor = titleView.rightAnchor.constraint(equalTo: closeButton.leftAnchor, constant: 20)
-        titleViewRightAnchor?.isActive = true
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewWillDraw() {
+        if !hasDrawn {
+            self.setTrackingArea()
+            
+            // Setup imageView
+            favIconImageView.translatesAutoresizingMaskIntoConstraints = false
+            favIconImageView.image = NSImage(systemSymbolName: "square", accessibilityDescription: nil)
+            favIconImageView.contentTintColor = .textBackgroundColor.withAlphaComponent(0.2)
+            addSubview(favIconImageView)
+            favIconImageView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+            favIconImageView.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
+            favIconImageView.widthAnchor.constraint(equalToConstant: 16).isActive = true
+            favIconImageView.heightAnchor.constraint(equalToConstant: 16).isActive = true
+            
+            // Setup closeButton
+            closeButton.translatesAutoresizingMaskIntoConstraints = false
+            closeButton.target = self
+            closeButton.action = #selector(closeTab)
+            addSubview(closeButton)
+            closeButton.image = NSImage(systemSymbolName: "xmark", accessibilityDescription: nil)
+            closeButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
+            closeButton.heightAnchor.constraint(equalToConstant: 16).isActive = true
+            closeButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -5).isActive = true
+            closeButton.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+            closeButton.isHidden = true
+            
+            // Setup titleView
+            titleView.translatesAutoresizingMaskIntoConstraints = false
+            titleView.isEditable = false // This should be set to true in a while :)
+            titleView.alignment = .left
+            titleView.isBordered = false
+            titleView.usesSingleLineMode = true
+            titleView.drawsBackground = false
+            titleView.lineBreakMode = .byTruncatingTail
+            addSubview(titleView)
+            titleView.leftAnchor.constraint(equalTo: favIconImageView.rightAnchor, constant: 5).isActive = true
+            titleView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+            titleViewRightAnchor = titleView.rightAnchor.constraint(equalTo: closeButton.leftAnchor, constant: 5)
+            titleViewRightAnchor?.isActive = true
+            
+            hasDrawn = true
+        }
     }
     
     @objc func closeTab() {
@@ -97,13 +118,15 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     }
     
     public func startObserving() {
-        titleObserver = self.appProperties.tabs[tag].view.observe(\.title, changeHandler: { [self] _, _ in
-            appProperties.tabs[tag].title = appProperties.tabs[tag].view.title ?? "Untitled"
+        let webView = appProperties.tabs[tag].view
+        
+        titleObserver = webView.observe(\.title, changeHandler: { [self] _, _ in
+            appProperties.tabs[tag].title = webView.title ?? "Untitled"
             tabTitle = appProperties.tabs[tag].title ?? "Untitled"
         })
         
-        urlObserver = self.appProperties.tabs[tag].view.observe(\.url, changeHandler: { [self] _, _ in
-            appProperties.tabs[tag].url = appProperties.tabs[tag].view.url
+        urlObserver = webView.observe(\.url, changeHandler: { [self] _, _ in
+            appProperties.tabs[tag].url = webView.url
         })
     }
     
@@ -171,7 +194,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     }
     
     func draggingSession(_ session: NSDraggingSession, willBeginAt screenPoint: NSPoint) {
-        closeButton.isHidden = true
+        closeButton.isHidden = false
         isDragging = true
         
         self.isHidden = true

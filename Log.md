@@ -15,6 +15,8 @@ Animating NSWindow:
 - [ ] Do not have all the tabs loaded at the start
 - [ ] Create tab after current tab rather the at the end
 ---
+- [x] Favicons
+---
 - [x] Drag and drop to create new window
 - [x] Improve the search suggestions to use arrow keys
 - [x] Search field improvements
