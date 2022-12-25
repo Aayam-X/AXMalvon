@@ -181,6 +181,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             let draggingSession = self.beginDraggingSession(with: [dragItem], event: event, source: self)
             draggingSession.animatesToStartingPositionsOnCancelOrFail = true
             isHidden = true
+            NSCursor.arrow.push()
         }
     }
     
@@ -188,6 +189,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         isDragging = false
         isHidden = false
         closeButton.isHidden = false
+        NSCursor.arrow.pop()
     }
     
     override func mouseExited(with event: NSEvent) {

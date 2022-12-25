@@ -29,6 +29,7 @@
 		EDD71ECD293BD96700256EA9 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = EDD71ECB293BD96700256EA9 /* MainMenu.xib */; };
 		EDD71ED9293BECE700256EA9 /* AXWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD71ED8293BECE700256EA9 /* AXWindow.swift */; };
 		EDD71EDB293BF0F900256EA9 /* AXContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD71EDA293BF0F900256EA9 /* AXContentView.swift */; };
+		EDD7C02C2957C2C10067E559 /* AXAboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD7C02B2957C2C10067E559 /* AXAboutView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +59,7 @@
 		EDD71ECE293BD96700256EA9 /* AXMalvon.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AXMalvon.entitlements; sourceTree = "<group>"; };
 		EDD71ED8293BECE700256EA9 /* AXWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWindow.swift; sourceTree = "<group>"; };
 		EDD71EDA293BF0F900256EA9 /* AXContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXContentView.swift; sourceTree = "<group>"; };
+		EDD7C02B2957C2C10067E559 /* AXAboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXAboutView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +107,7 @@
 				EDD71EDA293BF0F900256EA9 /* AXContentView.swift */,
 				ED989DA5293D25E90081ABCF /* AXSideBarView.swift */,
 				ED95609629400AC700AC1C15 /* AXWebView.swift */,
+				EDD7C02B2957C2C10067E559 /* AXAboutView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -261,6 +264,7 @@
 				ED956093293FFFB900AC1C15 /* AXHoverButton.swift in Sources */,
 				ED9FE65E29464E1C00323453 /* AXSidebarTabButton.swift in Sources */,
 				ED95609729400AC700AC1C15 /* AXWebView.swift in Sources */,
+				EDD7C02C2957C2C10067E559 /* AXAboutView.swift in Sources */,
 				ED3204FE293E61240055CD73 /* AXSplitView.swift in Sources */,
 				EDD71EDB293BF0F900256EA9 /* AXContentView.swift in Sources */,
 				ED95609D294033D400AC1C15 /* AXTabItem.swift in Sources */,

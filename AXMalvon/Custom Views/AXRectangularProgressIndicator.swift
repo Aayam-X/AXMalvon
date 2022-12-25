@@ -46,7 +46,7 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
         
         // Bottom Point
         bottomPointPath.move(to: .init(x: bounds.width, y: 0))
-        bottomPointPath.line(to: .init(x: (bounds.width - (bounds.width * newValue)), y: 2))
+        bottomPointPath.line(to: .init(x: (bounds.width - (bounds.width * newValue)), y: 0))
         
         // Left Point
         leftPointPath.move(to: .zero)

@@ -70,13 +70,27 @@ class AXContentView: NSView {
         }
     }
     
+    var isAnimating: Bool = false
+    
     override func mouseMoved(with event: NSEvent) {
         if !appProperties.sidebarToggled && appProperties.sidebarView.superview == nil {
             appProperties.sidebarView.setFrameSize(.init(width: appProperties.sidebarWidth, height: bounds.height))
+            appProperties.sidebarView.setFrameOrigin(.init(x: -appProperties.sidebarWidth, y: 0))
             addSubview(appProperties.sidebarView)
             appProperties.sidebarView.autoresizingMask = [.height]
             appProperties.sidebarView.layer?.backgroundColor = NSColor.systemGray.cgColor
-            appProperties.window.hideTrafficLights(false)
+            
+            if !isAnimating {
+                NSAnimationContext.runAnimationGroup({ context in
+                    context.duration = 0.1
+                    appProperties.sidebarView.animator().frame.origin.x = 0
+                    isAnimating = true
+                }, completionHandler: {
+                    self.isAnimating = false
+                })
+            }
+            
+            self.appProperties.window.hideTrafficLights(false)
         }
     }
     
@@ -131,6 +145,11 @@ class AXContentView: NSView {
                 appProperties.sidebarView.reloadButtonAction()
             default:
                 super.keyDown(with: event)
+            }
+        } else if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == [.command, .shift] {
+            if event.characters == "c" {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(appProperties.tabs[appProperties.currentTab].view.url?.absoluteString ?? "Malvon: Unable to copy link", forType: .URL)
             }
         }
     }

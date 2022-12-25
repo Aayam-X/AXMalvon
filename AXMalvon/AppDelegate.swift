@@ -12,6 +12,12 @@ import AppKit
 class AppDelegate: NSObject, NSApplicationDelegate {
     let window = AXWindow()
     
+    var aboutView: AXAboutView? = nil
+    
+    lazy var aboutViewWindow: NSWindow = {
+        AXAboutView.createAboutViewWindow()
+    }()
+    
     // MARK: - Delegates
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -113,6 +119,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
         appProperties?.popOver.newTabMode = false
         appProperties?.tabManager.showSearchField()
+    }
+    
+    @IBAction func customAboutView(_ sender: Any) {
+        if aboutView == nil {
+            aboutView = AXAboutView()
+            aboutViewWindow.contentView = aboutView
+        }
+        
+        aboutViewWindow.setFrameOriginToPositionWindowInCenterOfScreen()
+        aboutViewWindow.makeKeyAndOrderFront(self)
     }
     
     @IBAction func setAsDefaultBrowser(_ sender: Any) {

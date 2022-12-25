@@ -85,9 +85,14 @@ class AXSideBarView: NSView {
     
     override func mouseExited(with event: NSEvent) {
         if !appProperties.sidebarToggled {
-            self.removeFromSuperview()
+            NSAnimationContext.runAnimationGroup({ context in
+                context.duration = 0.1
+                appProperties.sidebarView.animator().frame.origin.x = -bounds.width
+            }, completionHandler: {
+                self.layer?.backgroundColor = .none
+                self.removeFromSuperview()
+            })
             appProperties.window.hideTrafficLights(true)
-            layer?.backgroundColor = .none
         }
     }
     
@@ -419,7 +424,6 @@ class AXSideBarView: NSView {
         
         pasteboardObjects.forEach { object in
             if let url = object as? NSURL {
-                NSCursor.dragLink.set()
                 appProperties.tabManager.createNewTab(url: url as URL)
             }
             
