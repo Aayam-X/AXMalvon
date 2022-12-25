@@ -14,9 +14,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     var aboutView: AXAboutView? = nil
     
-    lazy var aboutViewWindow: NSWindow = {
-        AXAboutView.createAboutViewWindow()
-    }()
+    lazy var aboutViewWindow: NSWindow = AXAboutView.createAboutViewWindow()
     
     // MARK: - Delegates
     
@@ -50,9 +48,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return true
         }
         
-        //        if sender.windows.count == 1 {
-        //            if sender.windows[0].isMiniaturized
-        //        }
         return false
     }
     
@@ -74,7 +69,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    // MARK: - Actions
+    // MARK: - Menu Bar Actions
     
     @IBAction func findInWebpage(_ sender: Any) {
         let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
@@ -91,11 +86,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @IBAction func removeCurrentTab(_ sender: Any) {
-        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
-        if appProperties!.searchFieldShown {
-            appProperties?.popOver.close()
+        guard let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties else { return }
+        if appProperties.searchFieldShown {
+            appProperties.popOver.close()
         } else {
-            appProperties?.tabManager.removeTab(appProperties!.currentTab)
+            appProperties.tabManager.removeTab(appProperties.currentTab)
         }
     }
     

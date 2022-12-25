@@ -146,38 +146,11 @@ class AXAboutView: NSView {
             defer: false
         )
         
-        window.level = .floating
         window.titlebarAppearsTransparent = true
         window.isMovableByWindowBackground = true
         window.isReleasedWhenClosed = false
         window.backgroundColor = .black
         
         return window
-    }
-    
-    static func createSuggestionsWindow() -> NSWindow {
-        let window = NSWindow(
-            contentRect: .init(x: 0, y: 0, width: 530, height: 250),
-            styleMask: [.titled, .fullSizeContentView],
-            backing: .buffered,
-            defer: false
-        )
-        
-        window.level = .floating
-        window.titlebarAppearsTransparent = true
-        window.isMovableByWindowBackground = true
-        window.isReleasedWhenClosed = false
-        window.backgroundColor = .black
-        
-        return window
-    }
-}
-
-
-extension NSWindow {
-    public func setFrameOriginToPositionWindowInCenterOfScreen() {
-        if let screenSize = screen?.frame.size {
-            self.setFrameOrigin(NSPoint(x: (screenSize.width - frame.size.width) / 2, y: (screenSize.height - frame.size.height) / 2))
-        }
     }
 }

@@ -5,18 +5,23 @@
 ## Links:
 Custom NSTextField: https://stackoverflow.com/a/11833209
 SplitView Animation: https://stackoverflow.com/questions/6315091/how-to-expand-and-collapse-nssplitview-subviews-with-animation
+Animating NSWindow: 
 
 ## 0.0.2
 - [ ] Fix drag and drop between windows problem
-- [ ] Add Create new window to drag and drop
-- [ ] Create tab after current tab rather the at the end
 - [ ] Downloading Tabs cause entire tab view to crash
 - [ ] Improve splitview functionality
 - [ ] Improve command-f finding text functionality to use less power
-- [ ] Improve the search suggestions to use arrow keys and reduce the side of the frame
 - [ ] Do not have all the tabs loaded at the start
+- [ ] Create tab after current tab rather the at the end
 ---
-- [ ] Search Field Improvement
+- [x] Drag and drop to create new window
+- [x] Improve the search suggestions to use arrow keys
+- [x] Search field improvements
+- [x] Reduced energy usage when searching
+- [x] Code cleanup 🚛
+---
+- [x] Search Field Improvement
 ---
 - [x] Copy link shortcut
 - [x] Sidebar Hover Animation

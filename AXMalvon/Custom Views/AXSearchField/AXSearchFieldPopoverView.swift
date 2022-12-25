@@ -15,7 +15,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     fileprivate var hasDrawn = false
     var newTabMode: Bool = true
     
-    let suggestionWindow = AXAboutView.createSuggestionsWindow()
+    var suggestionWindow: NSPanel
     
     private var highlightedSuggestion = 0 {
         willSet(newValue) {
@@ -24,8 +24,8 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         }
     }
     
-    lazy var searchField: NSTextField = {
-        let searchField = NSTextField()
+    lazy var searchField: AXTextField = {
+        let searchField = AXTextField()
         searchField.translatesAutoresizingMaskIntoConstraints = false
         searchField.alignment = .left
         searchField.isBordered = false
@@ -49,27 +49,31 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     
     let suggestions = [AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem()]
     
+    init() {
+        suggestionWindow = AXSearchFieldWindow()
+        super.init(frame: .zero)
+        suggestionWindow.contentView = self
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewWillDraw() {
         if !hasDrawn {
-            layer?.backgroundColor = NSColor.textBackgroundColor.withAlphaComponent(0.92).cgColor
-            hasDrawn = true
-            
             searchField.delegate = self
             addSubview(searchField)
             searchField.leftAnchor.constraint(equalTo: leftAnchor, constant: 25).isActive = true
             searchField.rightAnchor.constraint(equalTo: rightAnchor, constant: -25).isActive = true
             searchField.topAnchor.constraint(equalTo: topAnchor, constant: 25).isActive = true
             
-            searchField.becomeFirstResponder()
-            
             addSubview(suggestionsStackView)
-            suggestionsStackView.heightAnchor.constraint(equalTo: heightAnchor).isActive = true
             suggestionsStackView.topAnchor.constraint(equalTo: searchField.bottomAnchor, constant: 5).isActive = true
             suggestionsStackView.leftAnchor.constraint(equalTo: leftAnchor, constant: 25).isActive = true
             suggestionsStackView.rightAnchor.constraint(equalTo: rightAnchor, constant: -25).isActive = true
             
             for suggestion in suggestions {
-                suggestion.titleValue = ""
+                suggestion.isHidden = true
                 suggestion.target = self
                 suggestion.action = #selector(searchSuggestionAction)
                 suggestionsStackView.addArrangedSubview(suggestion)
@@ -78,6 +82,8 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             }
             
             highlightedSuggestion = 0
+            
+            hasDrawn = true
         }
     }
     
@@ -123,13 +129,16 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     func updateSuggestions() {
         if !searchField.stringValue.isEmpty {
             // First one will always be equal to the text
+            suggestions[0].isHidden = false
             suggestions[0].titleValue = searchField.stringValue
             
             SearchSuggestions.getQuerySuggestions(searchField.stringValue) { [self] results, error in
                 if error != nil {
                     for index in 1..<suggestions.count {
                         let suggestion = suggestions[index]
-                        suggestion.titleValue = ""
+                        DispatchQueue.main.async {
+                            suggestion.isHidden = true
+                        }
                     }
                     return
                 }
@@ -140,15 +149,16 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
                     let suggestion = suggestions[index]
                     
                     if index < results.count {
+                        suggestion.isHidden = false
                         suggestion.titleValue = results[index]
                     } else {
-                        suggestion.titleValue = ""
+                        suggestion.isHidden = true
                     }
                 }
             }
         } else {
             suggestions.forEach { suggestion in
-                suggestion.title = ""
+                suggestion.isHidden = true
             }
         }
         
@@ -188,13 +198,15 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     
     func show() {
         appProperties.tabs[appProperties.currentTab].view.alphaValue = 0.5
-        appProperties.window.ignoresMouseEvents = true
-        suggestionWindow.contentView = self
         
-        print(appProperties.window.frame.midY)
-        print((appProperties.window.frame.height - self.frame.size.height) / 2)
-        suggestionWindow.setFrameOrigin(.init(x: (appProperties.window.frame.width - self.frame.width) / 2, y: (appProperties.window.frame.midY)))
-        suggestionWindow.makeKeyAndOrderFront(nil)
+        // 265: Half the Width
+        // 125: Half the Height
+        suggestionWindow.setFrameOrigin(.init(x: appProperties.window.frame.midX - 265, y: appProperties.window.frame.midY - 125))
+        
+        appProperties.window.addChildWindow(suggestionWindow, ordered: .above)
+        suggestionWindow.makeKey()
+        self.suggestionWindow.makeFirstResponder(self.searchField)
+        observer()
     }
     
     func close() {
@@ -202,13 +214,27 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         appProperties.searchFieldShown = false
         self.newTabMode = true
         suggestions.forEach { suggestion in
-            suggestion.title = ""
+            suggestion.isHidden = true
         }
         
         appProperties.tabs[appProperties.currentTab].view.alphaValue = 1.0
+        appProperties.window.removeChildWindow(suggestionWindow)
         suggestionWindow.close()
-        appProperties.window.ignoresMouseEvents = false
-        self.removeFromSuperview()
+        localMouseDownEventMonitor = nil
+    }
+    
+    private var localMouseDownEventMonitor: Any?
+    
+    func observer() {
+        // When the user clicks outside of the window, we will exit
+        localMouseDownEventMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown], handler: { event -> NSEvent? in
+            if event.window != self.suggestionWindow {
+                if event.window == self.appProperties.window {
+                    self.close()
+                }
+            }
+            return event
+        })
     }
 }
 
@@ -230,25 +256,4 @@ fileprivate func fixURL(_ url: URL) -> URL {
     newURL += url.path
     newURL += url.query ?? ""
     return URL(string: newURL)!
-}
-
-fileprivate extension String {
-    var isValidURL: Bool {
-        let detector = try! NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
-        if let match = detector.firstMatch(in: self, options: [], range: NSRange(location: 0, length: self.utf16.count)) {
-            // it is a link, if the match covers the whole string
-            return match.range.length == self.utf16.count
-        } else {
-            return false
-        }
-    }
-    
-    var hasWhitespace: Bool {
-        return rangeOfCharacter(from: .whitespacesAndNewlines) != nil
-    }
-    
-    func string(after: Int) -> String {
-        let index = self.index(startIndex, offsetBy: after)
-        return String(self[index...])
-    }
 }

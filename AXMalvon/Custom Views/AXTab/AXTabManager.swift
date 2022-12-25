@@ -44,11 +44,51 @@ class AXTabManager {
     
     // MARK: - Creating Tabs
     func `switch`(to: Int) {
-        let oldTab = appProperties.currentTab
+        // let oldTab = appProperties.currentTab
         appProperties.sidebarView.moveSelectionTo(to: to)
         appProperties.webContainerView.update()
     }
     
+    /// After creating a new tab, you will update the sidebar and the web container view
+    func didCreateNewTab(_ at: Int) {
+        let oldTab = appProperties.currentTab
+        appProperties.currentTab = at
+        
+        appProperties.webContainerView.update()
+        appProperties.sidebarView.didCreateTab(oldTab)
+    }
+    
+    func removeTab(_ at: Int) {
+        let tab = appProperties.tabs[at]
+        tab.view.removeFromSuperview()
+        
+        if appProperties.tabs.count != 1 {
+            // Close tab algorithm
+            if appProperties.currentTab == at {
+                if at == appProperties.tabs.count - 1 {
+                    appProperties.currentTab -= 1
+                }
+            } else if appProperties.currentTab > at {
+                appProperties.currentTab -= 1
+            }
+            
+            appProperties.tabs.remove(at: at)
+            appProperties.sidebarView.removedTab(at)
+            
+            appProperties.webContainerView.update()
+        } else {
+            // Close window
+            appProperties.window.close()
+        }
+    }
+    
+    func swapAt(_ first: Int, _ second: Int) {
+        appProperties.tabs.swapAt(first, second)
+        appProperties.currentTab = second
+        appProperties.sidebarView.swapAt(first, second)
+    }
+    
+    // MARK: - Create New Tab
     func createNewTab(fileURL: URL) {
         // Check if private
         if appProperties.isPrivate {
@@ -167,42 +207,4 @@ class AXTabManager {
         return tabItem.view
     }
     
-    /// After creating a new tab, you will update the sidebar and the web container view
-    func didCreateNewTab(_ at: Int) {
-        let oldTab = appProperties.currentTab
-        appProperties.currentTab = at
-        
-        appProperties.webContainerView.update()
-        appProperties.sidebarView.didCreateTab(oldTab)
-    }
-    
-    func removeTab(_ at: Int) {
-        let tab = appProperties.tabs[at]
-        tab.view.removeFromSuperview()
-        
-        if appProperties.tabs.count != 1 {
-            // Close tab algorithm
-            if appProperties.currentTab == at {
-                if at == appProperties.tabs.count - 1 {
-                    appProperties.currentTab -= 1
-                }
-            } else if appProperties.currentTab > at {
-                appProperties.currentTab -= 1
-            }
-            
-            appProperties.tabs.remove(at: at)
-            appProperties.sidebarView.removedTab(at)
-            
-            appProperties.webContainerView.update()
-        } else {
-            // Close window
-            appProperties.window.close()
-        }
-    }
-    
-    func swapAt(_ first: Int, _ second: Int) {
-        appProperties.tabs.swapAt(first, second)
-        appProperties.currentTab = second
-        appProperties.sidebarView.swapAt(first, second)
-    }
 }

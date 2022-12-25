@@ -43,6 +43,7 @@ class AXAppProperties {
     var isPrivate: Bool
     
     init(isPrivate: Bool = false, restoresTab: Bool = true) {
+        // Get UserDefaults
         sidebarToggled = UserDefaults.standard.bool(forKey: "sidebarToggled")
         sidebarWidth = (UserDefaults.standard.object(forKey: "sidebarWidth") as? CGFloat) ?? 225.0
         
@@ -52,6 +53,7 @@ class AXAppProperties {
             windowFrame = NSMakeRect(100, 100, NSScreen.main!.frame.width/2, NSScreen.main!.frame.height/2)
         }
         
+        // Initialize Views
         sidebarView = AXSideBarView()
         splitView = AXSplitView()
         contentView = AXContentView()

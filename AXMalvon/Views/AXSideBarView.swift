@@ -83,103 +83,10 @@ class AXSideBarView: NSView {
         return button
     }()
     
-    override func mouseExited(with event: NSEvent) {
-        if !appProperties.sidebarToggled {
-            NSAnimationContext.runAnimationGroup({ context in
-                context.duration = 0.1
-                appProperties.sidebarView.animator().frame.origin.x = -bounds.width
-            }, completionHandler: {
-                self.layer?.backgroundColor = .none
-                self.removeFromSuperview()
-            })
-            appProperties.window.hideTrafficLights(true)
-        }
-    }
-    
     fileprivate var hasDrawn = false
-    
-    // MARK: - Actions
-    
-    @objc func toggleSidebar() {
-        appProperties.sidebarToggled.toggle()
-        layer?.backgroundColor = .none
-        
-        if appProperties.sidebarToggled {
-            appProperties.window.hideTrafficLights(false)
-            appProperties.splitView.insertArrangedSubview(self, at: 0)
-            if !appProperties.isFullScreen {
-                appProperties.webContainerView.insetFrameSidebarOff()
-            }
-        } else {
-            appProperties.window.hideTrafficLights(true)
-            if !appProperties.isFullScreen {
-                appProperties.webContainerView.insetFrame()
-            }
-            self.removeFromSuperview()
-        }
-    }
-    
-    func moveSelectionTo(to: Int) {
-        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = false
-        
-        appProperties.currentTab = to
-        
-        appProperties.webContainerView.update()
-        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
-        
-        appProperties.window.title = appProperties.tabs[to].title ?? "Untitled"
-    }
-    
-    @objc func tabClick(_ sender: NSButton) {
-        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = false
-        
-        appProperties.currentTab = sender.tag
-        
-        appProperties.webContainerView.update()
-        (sender as! AXSidebarTabButton).isSelected = true
-        
-        appProperties.window.title = appProperties.tabs[sender.tag].title ?? "Untitled"
-    }
-    
-    @objc func backButtonAction() {
-        let webView = appProperties.tabs[appProperties.currentTab].view
-        webView.goBack()
-    }
-    
-    @objc func forwardButtonAction() {
-        let webView = appProperties.tabs[appProperties.currentTab].view
-        webView.goForward()
-    }
-    
-    @objc func reloadButtonAction() {
-        appProperties.tabs[appProperties.currentTab].view.reload()
-    }
-    
-    override func viewDidEndLiveResize() {
-        appProperties.sidebarWidth = self.frame.size.width
-        removeTrackingArea(trackingArea)
-        trackingArea = NSTrackingArea(rect: .init(x: bounds.origin.x - 100, y: bounds.origin.y, width: bounds.size.width + 100, height: bounds.size.height), options: [.activeAlways, .mouseEnteredAndExited], owner: self)
-        addTrackingArea(trackingArea)
-    }
-    
-    override func resizeSubviews(withOldSize oldSize: NSSize) {
-        if oldSize.height == frame.height {
-            if !appProperties.isFullScreen {
-                if frame.width >= 210 {
-                    self.layer?.backgroundColor = .clear
-                } else {
-                    self.layer?.backgroundColor = NSColor.red.cgColor
-                }
-            }
-        }
-    }
     
     override var tag: Int {
         return 0x01
-    }
-    
-    override public func mouseDown(with event: NSEvent) {
-        window?.performDrag(with: event)
     }
     
     // MARK: Functions
@@ -252,14 +159,94 @@ class AXSideBarView: NSView {
         }
     }
     
-    func updateAll() {
-        stackView.subviews.removeAll()
+    // MARK: - Actions
+    
+    @objc func toggleSidebar() {
+        appProperties.sidebarToggled.toggle()
+        layer?.backgroundColor = .none
         
-        for (index, tab) in appProperties.tabs.enumerated() {
-            _update_didCreateTab(tab, index)
+        if appProperties.sidebarToggled {
+            appProperties.window.hideTrafficLights(false)
+            appProperties.splitView.insertArrangedSubview(self, at: 0)
+            if !appProperties.isFullScreen {
+                appProperties.webContainerView.insetFrameSidebarOff()
+            }
+        } else {
+            appProperties.window.hideTrafficLights(true)
+            if !appProperties.isFullScreen {
+                appProperties.webContainerView.insetFrame()
+            }
+            self.removeFromSuperview()
         }
+    }
+    
+    @objc func tabClick(_ sender: NSButton) {
+        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = false
         
-        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
+        appProperties.currentTab = sender.tag
+        
+        appProperties.webContainerView.update()
+        (sender as! AXSidebarTabButton).isSelected = true
+        
+        appProperties.window.title = appProperties.tabs[sender.tag].title ?? "Untitled"
+    }
+    
+    @objc func backButtonAction() {
+        let webView = appProperties.tabs[appProperties.currentTab].view
+        webView.goBack()
+    }
+    
+    @objc func forwardButtonAction() {
+        let webView = appProperties.tabs[appProperties.currentTab].view
+        webView.goForward()
+    }
+    
+    @objc func reloadButtonAction() {
+        appProperties.tabs[appProperties.currentTab].view.reload()
+    }
+    
+    func checkNavigationButtons() {
+        let webView = appProperties.tabs[appProperties.currentTab].view
+        
+        backButton.isEnabled = webView.canGoBack
+        forwardButton.isEnabled = webView.canGoForward
+    }
+    
+    // MARK: - Functions
+    override func viewDidEndLiveResize() {
+        appProperties.sidebarWidth = self.frame.size.width
+        removeTrackingArea(trackingArea)
+        trackingArea = NSTrackingArea(rect: .init(x: bounds.origin.x - 100, y: bounds.origin.y, width: bounds.size.width + 100, height: bounds.size.height), options: [.activeAlways, .mouseEnteredAndExited], owner: self)
+        addTrackingArea(trackingArea)
+    }
+    
+    override func resizeSubviews(withOldSize oldSize: NSSize) {
+        if oldSize.height == frame.height {
+            if !appProperties.isFullScreen {
+                if frame.width >= 210 {
+                    self.layer?.backgroundColor = .clear
+                } else {
+                    self.layer?.backgroundColor = NSColor.red.cgColor
+                }
+            }
+        }
+    }
+    
+    override func mouseExited(with event: NSEvent) {
+        if !appProperties.sidebarToggled {
+            NSAnimationContext.runAnimationGroup({ context in
+                context.duration = 0.1
+                appProperties.sidebarView.animator().frame.origin.x = -bounds.width
+            }, completionHandler: {
+                self.layer?.backgroundColor = .none
+                self.removeFromSuperview()
+            })
+            appProperties.window.hideTrafficLights(true)
+        }
+    }
+    
+    override public func mouseDown(with event: NSEvent) {
+        window?.performDrag(with: event)
     }
     
     func enteredFullScreen() {
@@ -270,26 +257,14 @@ class AXSideBarView: NSView {
         toggleSidebarButtonLeftConstaint?.constant = 76
     }
     
-    func _update_didCreateTab(_ t: AXTabItem, _ i: Int) {
-        let button = AXSidebarTabButton(appProperties)
-        button.tag = i
-        button.startObserving()
+    func updateAll() {
+        stackView.subviews.removeAll()
         
-        button.alignment = .natural
-        button.target = self
-        button.action = #selector(tabClick)
-        button.tabTitle = t.title ?? "Untitled"
-        stackView.addArrangedSubview(button)
+        for (index, tab) in appProperties.tabs.enumerated() {
+            _update_didCreateTab(tab, index)
+        }
         
-        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
-    }
-    
-    func checkNavigationButtons() {
-        let webView = appProperties.tabs[appProperties.currentTab].view
-        
-        backButton.isEnabled = webView.canGoBack
-        forwardButton.isEnabled = webView.canGoForward
+        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
     }
     
     // Add a new item into the stackview
@@ -307,17 +282,6 @@ class AXSideBarView: NSView {
         button.tabTitle = t.title ?? "Untitled"
         stackView.addArrangedSubview(button)
         button.isSelected = true
-        
-        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
-    }
-    
-    func didDownload(_ d: AXDownloadItem) {
-        let button = AXSidebarDownloadButton(appProperties)
-        button.downloadItem = d
-        button.startObserving()
-        
-        stackView.addArrangedSubview(button)
         
         button.heightAnchor.constraint(equalToConstant: 30).isActive = true
         button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
@@ -347,6 +311,44 @@ class AXSideBarView: NSView {
         }
         
         (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
+    }
+    
+    func didDownload(_ d: AXDownloadItem) {
+        let button = AXSidebarDownloadButton(appProperties)
+        button.downloadItem = d
+        button.startObserving()
+        
+        stackView.addArrangedSubview(button)
+        
+        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+    }
+    
+    
+    func moveSelectionTo(to: Int) {
+        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = false
+        
+        appProperties.currentTab = to
+        
+        appProperties.webContainerView.update()
+        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
+        
+        appProperties.window.title = appProperties.tabs[to].title ?? "Untitled"
+    }
+    
+    func _update_didCreateTab(_ t: AXTabItem, _ i: Int) {
+        let button = AXSidebarTabButton(appProperties)
+        button.tag = i
+        button.startObserving()
+        
+        button.alignment = .natural
+        button.target = self
+        button.action = #selector(tabClick)
+        button.tabTitle = t.title ?? "Untitled"
+        stackView.addArrangedSubview(button)
+        
+        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
     }
     
     // MARK: - Drag and Drop
@@ -433,19 +435,5 @@ class AXSideBarView: NSView {
         }
         
         return true
-    }
-    
-    override func draggingEnded(_ sender: NSDraggingInfo) {
-        NSCursor.arrow.set()
-    }
-    
-    override func draggingExited(_ sender: NSDraggingInfo?) {
-        NSCursor.arrow.set()
-    }
-}
-
-extension Array {
-    subscript (safe index: Index) -> Element? {
-        0 <= index && index < count ? self[index] : nil
     }
 }

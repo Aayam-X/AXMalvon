@@ -27,6 +27,18 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
     let leftPointPath = NSBezierPath()
     let leftAnimation = CABasicAnimation(keyPath: "strokeEnd")
     
+    init() {
+        super.init(frame: .zero)
+        topBorderLayer.lineWidth = 5
+        rightBorderLayer.lineWidth = 5
+        bottomBorderLayer.lineWidth = 5
+        leftBorderLayer.lineWidth = 5
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     func smoothProgress(_ newValue: CGFloat, increment by: CGFloat = 0.3) {
         if newValue - progress >= by {
             updateProgress(newValue, 0.3)
@@ -121,46 +133,5 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
         rightBorderLayer.removeFromSuperlayer()
         bottomBorderLayer.removeFromSuperlayer()
         leftBorderLayer.removeFromSuperlayer()
-    }
-    
-    init() {
-        super.init(frame: .zero)
-        topBorderLayer.lineWidth = 5
-        rightBorderLayer.lineWidth = 5
-        bottomBorderLayer.lineWidth = 5
-        leftBorderLayer.lineWidth = 5
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-
-extension NSBezierPath {
-    
-    var cgPath: CGPath {
-        let path = CGMutablePath()
-        var points = [CGPoint](repeating: .zero, count: 3)
-        for i in 0 ..< self.elementCount {
-            let type = self.element(at: i, associatedPoints: &points)
-            
-            switch type {
-            case .moveTo:
-                path.move(to: points[0])
-                
-            case .lineTo:
-                path.addLine(to: points[0])
-                
-            case .curveTo:
-                path.addCurve(to: points[2], control1: points[0], control2: points[1])
-                
-            case .closePath:
-                path.closeSubpath()
-                
-            @unknown default:
-                break
-            }
-        }
-        return path
     }
 }

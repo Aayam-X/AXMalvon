@@ -22,6 +22,9 @@
 		ED95609A2940339800AC1C15 /* AXTabContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9560992940339800AC1C15 /* AXTabContainerView.swift */; };
 		ED95609D294033D400AC1C15 /* AXTabItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED95609C294033D400AC1C15 /* AXTabItem.swift */; };
 		ED989DA6293D25E90081ABCF /* AXSideBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED989DA5293D25E90081ABCF /* AXSideBarView.swift */; };
+		ED9B4CE629587E6500961792 /* AXSearchFieldWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9B4CE529587E6500961792 /* AXSearchFieldWindow.swift */; };
+		ED9B4CE82958835100961792 /* AXTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9B4CE72958835100961792 /* AXTextField.swift */; };
+		ED9B4CEB2958A1EE00961792 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9B4CEA2958A1EE00961792 /* Extensions.swift */; };
 		ED9FE65E29464E1C00323453 /* AXSidebarTabButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9FE65D29464E1C00323453 /* AXSidebarTabButton.swift */; };
 		EDB514A42945219800EB0E8F /* AXTabManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB514A32945219800EB0E8F /* AXTabManager.swift */; };
 		EDC611C1294E213A00524E88 /* AXWebViewFindView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDC611C0294E213A00524E88 /* AXWebViewFindView.swift */; };
@@ -51,6 +54,9 @@
 		ED9560992940339800AC1C15 /* AXTabContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTabContainerView.swift; sourceTree = "<group>"; };
 		ED95609C294033D400AC1C15 /* AXTabItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTabItem.swift; sourceTree = "<group>"; };
 		ED989DA5293D25E90081ABCF /* AXSideBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSideBarView.swift; sourceTree = "<group>"; };
+		ED9B4CE529587E6500961792 /* AXSearchFieldWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSearchFieldWindow.swift; sourceTree = "<group>"; };
+		ED9B4CE72958835100961792 /* AXTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTextField.swift; sourceTree = "<group>"; };
+		ED9B4CEA2958A1EE00961792 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		ED9FE65D29464E1C00323453 /* AXSidebarTabButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSidebarTabButton.swift; sourceTree = "<group>"; };
 		EDB514A32945219800EB0E8F /* AXTabManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTabManager.swift; sourceTree = "<group>"; };
 		EDC611C0294E213A00524E88 /* AXWebViewFindView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWebViewFindView.swift; sourceTree = "<group>"; };
@@ -81,6 +87,8 @@
 				ED0B1AC82947910800524F08 /* AXSearchFieldPopoverView.swift */,
 				EDC611C0294E213A00524E88 /* AXWebViewFindView.swift */,
 				ED0ACB09294FFB9900BFBFC9 /* MXSearchSuggestion.swift */,
+				ED9B4CE529587E6500961792 /* AXSearchFieldWindow.swift */,
+				ED9B4CE72958835100961792 /* AXTextField.swift */,
 			);
 			path = AXSearchField;
 			sourceTree = "<group>";
@@ -145,6 +153,14 @@
 			path = AXTab;
 			sourceTree = "<group>";
 		};
+		ED9B4CE92958A1E300961792 /* Other */ = {
+			isa = PBXGroup;
+			children = (
+				ED9B4CEA2958A1EE00961792 /* Extensions.swift */,
+			);
+			path = Other;
+			sourceTree = "<group>";
+		};
 		EDD71EBB293BD96600256EA9 = {
 			isa = PBXGroup;
 			children = (
@@ -171,6 +187,7 @@
 				ED9560942940065600AC1C15 /* Views */,
 				ED9560982940334B00AC1C15 /* Custom Views */,
 				ED9560952940066300AC1C15 /* Subclass Views */,
+				ED9B4CE92958A1E300961792 /* Other */,
 				ED474EF829496EE400268FBD /* Resources */,
 				EDD71EC9293BD96700256EA9 /* Assets.xcassets */,
 				ED4262622948A64B00D2478E /* Info.plist */,
@@ -259,10 +276,13 @@
 				ED0ACB0A294FFB9900BFBFC9 /* MXSearchSuggestion.swift in Sources */,
 				EDB514A42945219800EB0E8F /* AXTabManager.swift in Sources */,
 				ED907B33294DF4B30057A591 /* AXSidebarDownloadButton.swift in Sources */,
+				ED9B4CE629587E6500961792 /* AXSearchFieldWindow.swift in Sources */,
 				ED212333294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift in Sources */,
 				ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */,
 				ED0B1AC92947910800524F08 /* AXSearchFieldPopoverView.swift in Sources */,
 				ED01B05A2957E3C700CB657E /* AXSearchFieldSuggestItem.swift in Sources */,
+				ED9B4CE82958835100961792 /* AXTextField.swift in Sources */,
+				ED9B4CEB2958A1EE00961792 /* Extensions.swift in Sources */,
 				ED989DA6293D25E90081ABCF /* AXSideBarView.swift in Sources */,
 				EDD71ED9293BECE700256EA9 /* AXWindow.swift in Sources */,
 				ED956093293FFFB900AC1C15 /* AXHoverButton.swift in Sources */,

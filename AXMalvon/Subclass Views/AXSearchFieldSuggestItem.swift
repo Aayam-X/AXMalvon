@@ -42,7 +42,7 @@ class AXSearchFieldSuggestItem: NSButton {
         
         // Setup titleView
         titleView.translatesAutoresizingMaskIntoConstraints = false
-        titleView.isEditable = false // This should be set to true in a while :)
+        titleView.isEditable = false
         titleView.alignment = .left
         titleView.isBordered = false
         titleView.usesSingleLineMode = true

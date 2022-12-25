@@ -9,36 +9,11 @@
 import AppKit
 
 class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPasteboardReading {
-    func writableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard.PasteboardType] {
-        return [NSPasteboard.PasteboardType("com.aayamx.malvon.tabButton")]
-    }
-    
-    func pasteboardPropertyList(forType type: NSPasteboard.PasteboardType) -> Any? {
-        // return "\(appProperties.window.windowNumber),\(self.tag)"
-        return ""
-    }
-    
-    static func readableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard.PasteboardType] {
-        return [NSPasteboard.PasteboardType("com.aayamx.malvon.tabButton")]
-    }
-    
-    required init?(pasteboardPropertyList propertyList: Any, ofType type: NSPasteboard.PasteboardType) {
-        super.init(frame: .zero)
-        // if type == .init("com.aayamx.malvon.tabButton") {
-        //  let value = propertyList as! String
-        // }
-    }
-    
-    static func readingOptions(forType type: NSPasteboard.PasteboardType, pasteboard: NSPasteboard) -> NSPasteboard.ReadingOptions {
-        return .asString
-    }
-    
     let titleView = NSTextField(frame: .zero)
     
     // Drag and drop
     fileprivate var isDragging = false
-    var dragOffset: CGFloat?
-    var draggingView: NSImageView?
+    var dragItem: NSDraggingItem!
     
     var closeButton = AXHoverButton()
     
@@ -108,6 +83,14 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         titleViewRightAnchor?.isActive = true
     }
     
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    @objc func closeTab() {
+        appProperties.tabManager.removeTab(self.tag)
+    }
+    
     public func stopObserving() {
         titleObserver?.invalidate()
         urlObserver?.invalidate()
@@ -124,13 +107,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         })
     }
     
-    @objc func closeTab() {
-        appProperties.tabManager.removeTab(self.tag)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    // MARK: - Mouse Functions
     
     func setTrackingArea() {
         let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited, .enabledDuringMouseDrag]
@@ -141,17 +118,6 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     override func mouseUp(with event: NSEvent) {
         self.isMouseDown = false
         layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
-        
-        if tryingToCreateNewWindow {
-            let window = AXWindow(restoresTab: false)
-            window.setFrameOrigin(.init(x: NSEvent.mouseLocation.x, y: NSEvent.mouseLocation.y))
-            window.makeKeyAndOrderFront(nil)
-            window.appProperties.tabs.append(appProperties.tabs[tag])
-            appProperties.tabManager.tabMovedToNewWindow(tag)
-            DispatchQueue.main.async {
-                window.appProperties.tabManager.updateAll()
-            }
-        }
         
         isDragging = false
     }
@@ -173,12 +139,14 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         self.layer?.backgroundColor = selectedColor.cgColor
     }
     
+    
+    // MARK: - Drag and Drop
     override func mouseDragged(with event: NSEvent) {
         if !isDragging {
-            let dragItem = NSDraggingItem(pasteboardWriter: self)
+            dragItem = NSDraggingItem(pasteboardWriter: self)
             dragItem.setDraggingFrame(self.bounds, contents: self.toImage())
             let draggingSession = self.beginDraggingSession(with: [dragItem], event: event, source: self)
-            draggingSession.animatesToStartingPositionsOnCancelOrFail = true
+            draggingSession.animatesToStartingPositionsOnCancelOrFail = false
             isHidden = true
         }
     }
@@ -196,19 +164,14 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     }
     
     func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
+        if context == .outsideApplication {
+            return .private
+        }
         return .move
     }
     
     func draggingSession(_ session: NSDraggingSession, willBeginAt screenPoint: NSPoint) {
-        dragOffset = self.frame.origin.x - screenPoint.x
         closeButton.isHidden = true
-        let dragRect = self.bounds
-        let image = NSImage(data: self.dataWithPDF(inside: dragRect))
-        self.draggingView = NSImageView(frame: dragRect)
-        if let draggingView = self.draggingView {
-            draggingView.image = image
-            draggingView.translatesAutoresizingMaskIntoConstraints = false
-        }
         isDragging = true
         
         self.isHidden = true
@@ -218,15 +181,17 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         let offsetX = screenPoint.x - appProperties.window.frame.origin.x
         let offsetY = screenPoint.y - appProperties.window.frame.origin.y
         
-        if offsetX <= appProperties.sidebarWidth && offsetX >= 0.0 && offsetY <= appProperties.sidebarView.scrollView.frame.height && offsetY >= 0.0 {
+        
+        if appProperties.sidebarView.frame.contains(.init(x: offsetX, y: offsetY)) {
+            tryingToCreateNewWindow = false
             let index = Int((offsetY - appProperties.sidebarView.scrollView.frame.size.height) / -31)
             if index <= appProperties.sidebarView.stackView.arrangedSubviews.count - 1 && index >= 0 {
                 appProperties.tabManager.swapAt(self.tag, index)
             }
         } else {
             // TODO: Implement this
-            // Also for splitview, maybe..
-            //            print("View entered Outside, should create new window")
+            // Support for splitview as well :(
+            tryingToCreateNewWindow = true
         }
     }
     
@@ -235,28 +200,49 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         let offsetX = screenPoint.x - appProperties.window.frame.origin.x
         let offsetY = screenPoint.y - appProperties.window.frame.origin.y
         
-        if offsetX <= appProperties.sidebarWidth && offsetX >= 0.0 && offsetY <= appProperties.sidebarView.scrollView.frame.height && offsetY >= 0.0 {
+        if appProperties.sidebarView.frame.contains(.init(x: offsetX, y: offsetY)) {
             let index = Int((offsetY - appProperties.sidebarView.scrollView.frame.size.height) / -31)
             if index <= appProperties.sidebarView.stackView.arrangedSubviews.count - 1 && index >= 0 {
                 appProperties.tabManager.swapAt(self.tag, index)
             }
         }
         
+        if tryingToCreateNewWindow {
+            let window = AXWindow(restoresTab: false)
+            window.setFrameOrigin(.init(x: NSEvent.mouseLocation.x, y: NSEvent.mouseLocation.y))
+            window.makeKeyAndOrderFront(nil)
+            window.appProperties.tabs.append(appProperties.tabs[tag])
+            appProperties.tabManager.tabMovedToNewWindow(tag)
+            DispatchQueue.main.async {
+                window.appProperties.tabManager.updateAll()
+            }
+        }
+        
         isDragging = false
     }
-}
-
-extension NSView {
-    func toImage() -> NSImage? {
-        guard let bitmapImageRepresentation = self.bitmapImageRepForCachingDisplay(in: bounds) else {
-            return nil
-        }
-        bitmapImageRepresentation.size = bounds.size
-        self.cacheDisplay(in: bounds, to: bitmapImageRepresentation)
-        
-        let image = NSImage(size: bounds.size)
-        image.addRepresentation(bitmapImageRepresentation)
-        
-        return image
+    
+    // MARK: - Pasteboard
+    func writableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard.PasteboardType] {
+        return [NSPasteboard.PasteboardType("com.aayamx.malvon.tabButton")]
+    }
+    
+    func pasteboardPropertyList(forType type: NSPasteboard.PasteboardType) -> Any? {
+        // return "\(appProperties.window.windowNumber),\(self.tag)"
+        return ""
+    }
+    
+    static func readableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard.PasteboardType] {
+        return [NSPasteboard.PasteboardType("com.aayamx.malvon.tabButton")]
+    }
+    
+    required init?(pasteboardPropertyList propertyList: Any, ofType type: NSPasteboard.PasteboardType) {
+        super.init(frame: .zero)
+        // if type == .init("com.aayamx.malvon.tabButton") {
+        //  let value = propertyList as! String
+        // }
+    }
+    
+    static func readingOptions(forType type: NSPasteboard.PasteboardType, pasteboard: NSPasteboard) -> NSPasteboard.ReadingOptions {
+        return .asString
     }
 }

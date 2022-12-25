@@ -14,6 +14,8 @@ class AXContentView: NSView {
     
     fileprivate var hasDrawn = false
     
+    var isAnimating: Bool = false
+    
     var sidebarTrackingArea: NSTrackingArea!
     
     override func viewWillDraw() {
@@ -24,6 +26,9 @@ class AXContentView: NSView {
             if appProperties.isPrivate {
                 self.layer?.backgroundColor = NSColor.systemGray.cgColor
             } else {
+#if DEBUG
+                self.layer?.backgroundColor = NSColor.brown.cgColor
+#else
                 // Create NSVisualEffectView
                 let visualEffectView = NSVisualEffectView()
                 visualEffectView.material = .popover
@@ -33,6 +38,7 @@ class AXContentView: NSView {
                 visualEffectView.frame = bounds
                 addSubview(visualEffectView)
                 visualEffectView.autoresizingMask = [.height, .width]
+#endif
             }
             
             // Setup progress bar
@@ -57,8 +63,8 @@ class AXContentView: NSView {
             addSubview(appProperties.splitView)
             appProperties.splitView.autoresizingMask = [.height, .width]
             
+            // Create a tab if there are no tabs
             if appProperties.tabs.isEmpty {
-                // Create a tab
                 appProperties.tabManager.createNewTab()
             } else {
                 appProperties.tabManager.updateAll()
@@ -69,8 +75,6 @@ class AXContentView: NSView {
             hasDrawn = true
         }
     }
-    
-    var isAnimating: Bool = false
     
     override func mouseMoved(with event: NSEvent) {
         if !appProperties.sidebarToggled && appProperties.sidebarView.superview == nil {
@@ -102,8 +106,6 @@ class AXContentView: NSView {
     
     // Show a searchbar popover
     func displaySearchBarPopover() {
-        //        appProperties.popOver.frame = bounds.insetBy(dx: 250, dy: 250)
-        //        addSubview(appProperties.popOver)
         appProperties.searchFieldShown = true
         appProperties.popOver.show()
     }

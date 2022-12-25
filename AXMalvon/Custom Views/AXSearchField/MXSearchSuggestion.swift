@@ -18,6 +18,8 @@ public enum SearchSuggestionsError: Error {
     case serializationError(String)
 }
 
+// TODO: Code cleanup
+
 public enum SearchSuggestions {
     static let baseURL = "https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&alt=json&q="
     
@@ -61,8 +63,7 @@ public enum SearchSuggestions {
             do {
                 let array = try JSONSerialization.jsonObject(with: JSON!.data(using: String.Encoding.utf8.rawValue) ?? Data(), options: .allowFragments)
                 var result = [String]()
-                // swiftlint:disable identifier_name
-                for i in 0 ..< (array as AnyObject).count {
+                for i in 0 ..< (array as AnyObject).count where i <= 4 {
                     for j in 0 ..< 1 {
                         let suggestion = ((array as AnyObject).object(at: i) as AnyObject).object(at: j)
                         if let str = suggestion as? String {

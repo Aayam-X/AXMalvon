@@ -49,8 +49,6 @@ class AXWebContainerView: NSView {
         }
     }
     
-    
-    
     func enteredFullScreen() {
         splitView.frame = bounds
         splitView.arrangedSubviews.forEach { view in

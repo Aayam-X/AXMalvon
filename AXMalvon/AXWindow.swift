@@ -9,6 +9,7 @@
 import AppKit
 
 class AXWindow: NSWindow, NSWindowDelegate {
+    // Track the buttons
     var trackingTag: NSView.TrackingRectTag?
     
     var appProperties: AXAppProperties
@@ -81,6 +82,16 @@ class AXWindow: NSWindow, NSWindowDelegate {
     }
     
     // MARK: - Window Functions
+    override func makeKey() {
+        if appProperties.searchFieldShown {
+            let window1 = childWindows![0]
+            window1.makeKey()
+            window1.makeFirstResponder(appProperties.popOver.searchField)
+            return
+        }
+        
+        super.makeKey()
+    }
     
     func windowDidResize(_ notification: Notification) {
         updateTrafficLights()
