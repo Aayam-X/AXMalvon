@@ -16,6 +16,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     lazy var aboutViewWindow: NSWindow = AXAboutView.createAboutViewWindow()
     
+    lazy var preferenceWindow = AXPreferenceWindow()
+    
     // MARK: - Delegates
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -142,6 +144,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         setAsDefaultBrowser()
     }
     
+    
+    @IBAction func showPreferences(_ sender: Any) {
+        preferenceWindow.makeKeyAndOrderFront(nil)
+    }
     
     // MARK: - Functions
     

@@ -33,6 +33,13 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
         rightBorderLayer.lineWidth = 5
         bottomBorderLayer.lineWidth = 5
         leftBorderLayer.lineWidth = 5
+        
+        
+        leftAnimation.delegate = self
+        leftAnimation.isRemovedOnCompletion = true
+        rightAnimation.isRemovedOnCompletion = true
+        bottomAnimation.isRemovedOnCompletion = true
+        topAnimation.isRemovedOnCompletion = true
     }
     
     required init?(coder: NSCoder) {
@@ -101,22 +108,12 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
         leftAnimation.duration = duration
         leftBorderLayer.add(leftAnimation, forKey: "ANIMATION:Progress:left")
         
-        leftAnimation.delegate = self
-        leftAnimation.isRemovedOnCompletion = true
-        rightAnimation.isRemovedOnCompletion = true
-        bottomAnimation.isRemovedOnCompletion = true
-        topAnimation.isRemovedOnCompletion = true
-        
         progress = newValue
     }
     
     func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
         if progress >= 0.93 {
-            progress = 0.0
-            topBorderLayer.removeFromSuperlayer()
-            rightBorderLayer.removeFromSuperlayer()
-            bottomBorderLayer.removeFromSuperlayer()
-            leftBorderLayer.removeFromSuperlayer()
+            close()
         }
     }
     

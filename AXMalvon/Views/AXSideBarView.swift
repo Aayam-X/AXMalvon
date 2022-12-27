@@ -8,7 +8,7 @@
 
 import AppKit
 
-fileprivate final class FlippedClipView: NSClipView {
+final class AXFlippedClipView: NSClipView {
     override var isFlipped: Bool {
         return true
     }
@@ -20,7 +20,7 @@ class AXSideBarView: NSView {
     
     let scrollView = NSScrollView()
     
-    fileprivate let clipView = FlippedClipView()
+    fileprivate let clipView = AXFlippedClipView()
     
     var stackView = NSStackView()
     

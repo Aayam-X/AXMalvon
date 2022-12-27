@@ -3,9 +3,10 @@
 # BEFORE RELEASING, MAKE SURE TO UPDATE XCODE PROJECT NUMBER
 
 ## Links:
-Custom NSTextField: https://stackoverflow.com/a/11833209
-SplitView Animation: https://stackoverflow.com/a/48608153
-Animating NSWindow: 
+- Custom NSTextField: https://stackoverflow.com/a/11833209
+- SplitView Animation: https://stackoverflow.com/a/48608153
+- Animating NSWindow: 
+- Textkit 2: https://developer.apple.com/videos/play/wwdc2021/10061/
 
 ## 0.0.2
 - [ ] Fix drag and drop between windows problem & Problems with moveTabToNewWindow
@@ -13,6 +14,8 @@ Animating NSWindow:
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Create tab after current tab rather the at the end
 - [ ] Window Buttons not working (minimize, full screen etc..)
+---
+- [x] System Setting Implementation..
 ---
 - [x] Other stuff I forgot to mention..
 - [x] Split View Functionality
