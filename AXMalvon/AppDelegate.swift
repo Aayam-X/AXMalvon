@@ -110,6 +110,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    // TODO: MINIMIZE BUTTON FUNCTIONALITY
+    // https://stackoverflow.com/questions/33045075/minimize-miniaturize-cocoa-nswindow-without-titlebar
+    @IBAction func minimizeWindow(_ sender: Any) {
+        guard let window = NSApplication.shared.keyWindow as? AXWindow else { return }
+        window.styleMask = window.styleMask.union(.miniaturizable)
+        
+        
+        window.miniaturize(self)
+        //        window.setIsMiniaturized(true)
+        //        window.performMiniaturize(nil)
+    }
+    
     @IBAction func showSearchField(_ sender: Any) {
         let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
         appProperties?.popOver.newTabMode = false

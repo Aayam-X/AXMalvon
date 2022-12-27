@@ -262,8 +262,8 @@ class AXSideBarView: NSView {
     }
     
     // Add a new item into the stackview
-    func didCreateTab(_ oldPos: Int) {
-        (stackView.arrangedSubviews[safe: oldPos] as? AXSidebarTabButton)?.isSelected = false
+    func didCreateTab() {
+        (stackView.arrangedSubviews[safe: appProperties.previousTab] as? AXSidebarTabButton)?.isSelected = false
         let t = appProperties.tabs[appProperties.currentTab]
         
         let button = AXSidebarTabButton(appProperties)
@@ -319,15 +319,16 @@ class AXSideBarView: NSView {
     }
     
     
-    func moveSelectionTo(to: Int) {
-        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = false
-        
-        appProperties.currentTab = to
-        
-        appProperties.webContainerView.update()
+    func updateSelection() {
+        (stackView.arrangedSubviews[safe: appProperties.previousTab] as? AXSidebarTabButton)?.isSelected = false
         (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
-        
-        appProperties.window.title = appProperties.tabs[to].title ?? "Untitled"
+        appProperties.window.title = appProperties.tabs[appProperties.currentTab].title ?? "Untitled"
+    }
+    
+    func webView_updateSelection() {
+        appProperties.currentTab = appProperties.previousTab
+        updateSelection()
+        appProperties.webContainerView.updateDelegates()
     }
     
     func _update_didCreateTab(_ t: AXTabItem, _ i: Int) {

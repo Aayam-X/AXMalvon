@@ -4,18 +4,20 @@
 
 ## Links:
 Custom NSTextField: https://stackoverflow.com/a/11833209
-SplitView Animation: https://stackoverflow.com/questions/6315091/how-to-expand-and-collapse-nssplitview-subviews-with-animation
+SplitView Animation: https://stackoverflow.com/a/48608153
 Animating NSWindow: 
 
 ## 0.0.2
-- [ ] Fix drag and drop between windows problem
+- [ ] Fix drag and drop between windows problem & Problems with moveTabToNewWindow
 - [ ] Downloading Tabs cause entire tab view to crash
-- [ ] Improve splitview functionality
 - [ ] Improve command-f finding text functionality to use less power
-- [ ] Do not have all the tabs loaded at the start
 - [ ] Create tab after current tab rather the at the end
+- [ ] Window Buttons not working (minimize, full screen etc..)
 ---
-- [ ] Problems with moveTabToNewWindow
+- [x] Other stuff I forgot to mention..
+- [x] Split View Functionality
+- [x] Tab Closing Problems Fixed
+---
 - [x] Increased size of search field window
 - [x] Mini-Alerts show when you do a certain action (Copy URL)
 - [x] Window color will be black if the user is on private mode

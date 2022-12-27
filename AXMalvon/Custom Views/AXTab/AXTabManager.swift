@@ -15,10 +15,6 @@ class AXTabManager {
     // Updates every single view
     func updateAll() {
         appProperties.currentTab = 0
-        let tab = appProperties.tabs[0]
-        if tab.view.url == nil {
-            tab.load()
-        }
         
         appProperties.sidebarView.updateAll()
         appProperties.webContainerView.update()
@@ -29,10 +25,10 @@ class AXTabManager {
         tab.view.removeFromSuperview()
         
         if appProperties.tabs.count != 1 {
-            appProperties.currentTab = i - 1
+            self.switch(to: i - 1)
+            
             appProperties.tabs.remove(at: i)
             appProperties.sidebarView.removedTab(i)
-            appProperties.webContainerView.update()
         } else {
             // Close window
             appProperties.window.close()
@@ -49,27 +45,12 @@ class AXTabManager {
     
     // MARK: - Creating Tabs
     func `switch`(to: Int) {
-        // let oldTab = appProperties.currentTab
-        let tab = appProperties.tabs[to]
-        if tab.view.url == nil {
-            tab.load()
-        }
-        appProperties.sidebarView.moveSelectionTo(to: to)
-        appProperties.webContainerView.update()
-    }
-    
-    /// After creating a new tab, you will update the sidebar and the web container view
-    func didCreateNewTab(_ at: Int) {
-        let oldTab = appProperties.currentTab
-        appProperties.currentTab = at
-        
-        let tab = appProperties.tabs[at]
-        if tab.view.url == nil {
-            tab.load()
+        if appProperties.currentTab != to {
+            appProperties.currentTab = to
+            appProperties.sidebarView.updateSelection()
         }
         
         appProperties.webContainerView.update()
-        appProperties.sidebarView.didCreateTab(oldTab)
     }
     
     func removeTab(_ at: Int) {
@@ -89,10 +70,6 @@ class AXTabManager {
             appProperties.tabs.remove(at: at)
             appProperties.sidebarView.removedTab(at)
             
-            if tab.view.url == nil {
-                tab.load()
-            }
-            
             appProperties.webContainerView.update()
         } else {
             // Close window
@@ -101,9 +78,24 @@ class AXTabManager {
     }
     
     func swapAt(_ first: Int, _ second: Int) {
-        appProperties.tabs.swapAt(first, second)
-        appProperties.currentTab = second
-        appProperties.sidebarView.swapAt(first, second)
+        if first != second {
+            appProperties.tabs.swapAt(first, second)
+            appProperties.currentTab = second
+            appProperties.sidebarView.swapAt(first, second)
+        }
+    }
+    
+    @discardableResult
+    private func addTabAndUpdate(webView: AXWebView) -> AXTabItem {
+        let tabItem = AXTabItem(view: webView)
+        appProperties.tabs.append(tabItem)
+        
+        // This is the only exception
+        appProperties.currentTab = appProperties.tabs.count - 1
+        appProperties.sidebarView.didCreateTab()
+        appProperties.webContainerView.update()
+        
+        return tabItem
     }
     
     // MARK: - Create New Tab
@@ -120,9 +112,7 @@ class AXTabManager {
         webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL)
         
         // Create tab
-        let tabItem = AXTabItem(view: webView)
-        appProperties.tabs.append(tabItem)
-        self.didCreateNewTab(appProperties.tabs.count - 1)
+        addTabAndUpdate(webView: webView)
     }
     
     func createNewTab(url: URL) {
@@ -137,10 +127,7 @@ class AXTabManager {
         webView.addConfigurations()
         webView.load(URLRequest(url: url))
         
-        // Create tab
-        let tabItem = AXTabItem(view: webView)
-        appProperties.tabs.append(tabItem)
-        self.didCreateNewTab(appProperties.tabs.count - 1)
+        addTabAndUpdate(webView: webView)
     }
     
     func createNewTab() {
@@ -156,9 +143,7 @@ class AXTabManager {
         webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
         
         // Create tab
-        let tabItem = AXTabItem(view: webView)
-        appProperties.tabs.append(tabItem)
-        self.didCreateNewTab(appProperties.tabs.count - 1)
+        addTabAndUpdate(webView: webView)
     }
     
     func createNewTab(config: WKWebViewConfiguration) -> AXWebView {
@@ -172,11 +157,7 @@ class AXTabManager {
         webView.addConfigurations()
         
         // Create tab
-        let tabItem = AXTabItem(view: webView)
-        appProperties.tabs.append(tabItem)
-        self.didCreateNewTab(appProperties.tabs.count - 1)
-        
-        return tabItem.view
+        return addTabAndUpdate(webView: webView).view
     }
     
     func createNewPrivateTab() {
@@ -186,9 +167,7 @@ class AXTabManager {
         webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
         
         // Create tab
-        let tabItem = AXTabItem(view: webView)
-        appProperties.tabs.append(tabItem)
-        self.didCreateNewTab(appProperties.tabs.count - 1)
+        addTabAndUpdate(webView: webView)
     }
     
     func createNewPrivateTab(fileURL: URL) {
@@ -197,9 +176,7 @@ class AXTabManager {
         webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL)
         
         // Create tab
-        let tabItem = AXTabItem(view: webView)
-        appProperties.tabs.append(tabItem)
-        self.didCreateNewTab(appProperties.tabs.count - 1)
+        addTabAndUpdate(webView: webView)
     }
     
     func createNewPrivateTab(url: URL) {
@@ -208,21 +185,16 @@ class AXTabManager {
         webView.load(URLRequest(url: url))
         
         // Create tab
-        let tabItem = AXTabItem(view: webView)
-        appProperties.tabs.append(tabItem)
-        self.didCreateNewTab(appProperties.tabs.count - 1)
+        addTabAndUpdate(webView: webView)
     }
     
     func createNewPrivateTab(configuration: WKWebViewConfiguration) -> AXWebView {
+        // TODO: How do I do this???
         let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
         webView.addConfigurations()
         
         // Create tab
-        let tabItem = AXTabItem(view: webView)
-        appProperties.tabs.append(tabItem)
-        self.didCreateNewTab(appProperties.tabs.count - 1)
-        
-        return tabItem.view
+        return addTabAndUpdate(webView: webView).view
     }
     
 }

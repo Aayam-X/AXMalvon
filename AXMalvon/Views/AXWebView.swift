@@ -12,6 +12,8 @@ import WebKit
 fileprivate let favIconScript = "document.querySelector('link[rel=\"icon\"], link[rel=\"shortcut icon\"]').getAttribute('href');"
 
 class AXWebView: WKWebView {
+    var isSplitView: Bool = false
+    
     func addConfigurations() {
         self.configuration.preferences.setValue(true, forKey: "offlineApplicationCacheIsEnabled")
         self.configuration.preferences.setValue(true, forKey: "fullScreenEnabled")
@@ -33,6 +35,34 @@ class AXWebView: WKWebView {
         self.customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.2 Safari/605.1.15"
         
         self.allowsMagnification = true
+        
+        self.layer?.borderColor = NSColor.controlAccentColor.cgColor
+    }
+    
+    override func becomeFirstResponder() -> Bool {
+        if isSplitView {
+            self.layer?.borderWidth = 1.0
+            let appProperties = (window as! AXWindow).appProperties
+            appProperties.sidebarView.webView_updateSelection()
+        }
+        
+        return super.becomeFirstResponder()
+    }
+    
+    override func removeFromSuperview() {
+        if isSplitView {
+            self.layer?.borderWidth = 0.0
+            isSplitView = false
+        }
+        super.removeFromSuperview()
+    }
+    
+    override func resignFirstResponder() -> Bool {
+        if isSplitView {
+            self.layer?.borderWidth = 0.0
+        }
+        
+        return super.resignFirstResponder()
     }
     
     public func getFavicon(completion: @escaping(URL?) -> ()) {

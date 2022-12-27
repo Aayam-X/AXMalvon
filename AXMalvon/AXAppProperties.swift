@@ -35,7 +35,14 @@ class AXAppProperties {
     
     // Variables
     var tabs: [AXTabItem] = []
-    var currentTab = -1
+    
+    var currentTab = -1 {
+        willSet {
+            previousTab = currentTab
+        }
+    }
+    
+    var previousTab = -1
     
     // Private Browsing
     var configuration: WKWebViewConfiguration?

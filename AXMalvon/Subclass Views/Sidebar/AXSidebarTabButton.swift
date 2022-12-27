@@ -8,26 +8,46 @@
 
 import AppKit
 
+fileprivate enum DraggingPositionState {
+    case newWindow
+    case newSplitView
+    case reorder
+}
+
+fileprivate enum DraggingSide {
+    case left
+    case right
+}
+
+fileprivate let tempView = AXWebSplitViewAddItemView()
+
 class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPasteboardReading {
+    unowned var appProperties: AXAppProperties!
+    
+    // Subviews
+    var favIconImageView = NSImageView()
     let titleView = NSTextField(frame: .zero)
+    var closeButton = AXHoverButton()
     
     // Drag and drop
     fileprivate var isDragging = false
     var dragItem: NSDraggingItem!
+    fileprivate var draggingState: DraggingPositionState = .reorder
+    fileprivate var draggingSide: DraggingSide = .left
     
-    var closeButton = AXHoverButton()
-    
+    // Colors
     var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
     var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
     
+    // Observers
     var titleObserver: NSKeyValueObservation?
     var urlObserver: NSKeyValueObservation?
     
+    // Other
     weak var titleViewRightAnchor: NSLayoutConstraint?
-    
-    var tryingToCreateNewWindow: Bool = false
-    
-    unowned var appProperties: AXAppProperties!
+    var trackingArea: NSTrackingArea!
+    var hasDrawn = false
+    var isMouseDown = false
     
     var isSelected: Bool = false {
         didSet {
@@ -40,14 +60,6 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             titleView.stringValue = tabTitle
         }
     }
-    
-    var favIconImageView = NSImageView()
-    
-    var isMouseDown = false
-    
-    var hasDrawn = false
-    
-    var trackingArea: NSTrackingArea!
     
     init(_ appProperties: AXAppProperties) {
         self.appProperties = appProperties
@@ -66,6 +78,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     
     override func viewWillDraw() {
         if !hasDrawn {
+            // Setup trackingArea
             self.setTrackingArea()
             
             // Setup imageView
@@ -146,6 +159,14 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         isDragging = false
     }
     
+    override func mouseDown(with event: NSEvent) {
+        if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
+            sendAction(action, to: target)
+        }
+        self.isMouseDown = true
+        self.layer?.backgroundColor = selectedColor.cgColor
+    }
+    
     override func mouseEntered(with event: NSEvent) {
         titleViewRightAnchor?.constant = 0
         closeButton.isHidden = false
@@ -155,16 +176,15 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         }
     }
     
-    override func mouseDown(with event: NSEvent) {
-        if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
-            sendAction(action, to: target)
-        }
-        self.isMouseDown = true
-        self.layer?.backgroundColor = selectedColor.cgColor
+    override func mouseExited(with event: NSEvent) {
+        titleViewRightAnchor?.constant = 20
+        closeButton.isHidden = true
+        self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
     }
     
     
     // MARK: - Drag and Drop
+    
     override func mouseDragged(with event: NSEvent) {
         if !isDragging {
             dragItem = NSDraggingItem(pasteboardWriter: self)
@@ -175,76 +195,140 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         }
     }
     
-    override func concludeDragOperation(_ sender: NSDraggingInfo?) {
-        isDragging = false
-        isHidden = false
-        closeButton.isHidden = false
-    }
-    
-    override func mouseExited(with event: NSEvent) {
-        titleViewRightAnchor?.constant = 20
-        closeButton.isHidden = true
-        self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
-    }
-    
     func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
-        if context == .outsideApplication {
-            return .private
-        }
         return .move
     }
     
     func draggingSession(_ session: NSDraggingSession, willBeginAt screenPoint: NSPoint) {
         closeButton.isHidden = false
         isDragging = true
-        
-        self.isHidden = true
     }
     
     func draggingSession(_ session: NSDraggingSession, movedTo screenPoint: NSPoint) {
-        let offsetX = screenPoint.x - appProperties.window.frame.origin.x
-        let offsetY = screenPoint.y - appProperties.window.frame.origin.y
+        let offset = screenPoint - appProperties.window.frame.origin
         
-        
-        if appProperties.sidebarView.frame.contains(.init(x: offsetX, y: offsetY)) {
-            tryingToCreateNewWindow = false
-            let index = Int((offsetY - appProperties.sidebarView.scrollView.frame.size.height) / -31)
+        // Check if the user is hovering over the sidebar
+        if appProperties.sidebarView.frame.contains(offset) {
+            userMovedCursorRemovingSplitView()
+            
+            draggingState = .reorder
+            let index = Int((offset.y - appProperties.sidebarView.scrollView.frame.size.height) / -31)
             if index <= appProperties.sidebarView.stackView.arrangedSubviews.count - 1 && index >= 0 {
                 appProperties.tabManager.swapAt(self.tag, index)
             }
         } else {
-            // TODO: Implement this
-            // Support for splitview as well :(
-            tryingToCreateNewWindow = true
+            // Check if the user is hovering over the WebView
+            if appProperties.webContainerView.frame.contains(.init(x: offset.x, y: offset.y)) {
+                draggingState = .newSplitView
+                inDragging_createSplitView(offsetX: offset.x)
+            } else {
+                // The user is hovering outside the application
+                userMovedCursorRemovingSplitView()
+                
+                draggingState = .newWindow
+            }
         }
     }
     
     func draggingSession(_ session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
         self.isHidden = false
-        let offsetX = screenPoint.x - appProperties.window.frame.origin.x
-        let offsetY = screenPoint.y - appProperties.window.frame.origin.y
         
-        if appProperties.sidebarView.frame.contains(.init(x: offsetX, y: offsetY)) {
-            let index = Int((offsetY - appProperties.sidebarView.scrollView.frame.size.height) / -31)
-            if index <= appProperties.sidebarView.stackView.arrangedSubviews.count - 1 && index >= 0 {
-                appProperties.tabManager.swapAt(self.tag, index)
-            }
-        }
-        
-        if tryingToCreateNewWindow {
-            let window = AXWindow(restoresTab: false)
-            window.setFrameOrigin(.init(x: NSEvent.mouseLocation.x, y: NSEvent.mouseLocation.y))
-            window.makeKeyAndOrderFront(nil)
-            window.appProperties.tabs.append(appProperties.tabs[tag])
-            appProperties.tabManager.tabMovedToNewWindow(tag)
-            DispatchQueue.main.async {
-                window.appProperties.tabManager.updateAll()
-            }
-            
-            self.appProperties = window.appProperties
+        switch draggingState {
+        case .newWindow:
+            moveTabToNewWindow()
+        case .newSplitView:
+            createNewSplitView()
+            break
+        case .reorder:
+            // Reorder is already done when the user is dragging the cursor
+            break
         }
         
         isDragging = false
+    }
+    
+    override func concludeDragOperation(_ sender: NSDraggingInfo?) {
+        isDragging = false
+        isHidden = false
+        closeButton.isHidden = false
+    }
+    
+    // MARK: - Functions of Drag and Drop
+    
+    // The user is still dragging the view.
+    private func inDragging_createSplitView(offsetX: CGFloat) {
+        isHidden = false
+        
+        let betterOffset = offsetX - appProperties.sidebarWidth
+        
+        if appProperties.currentTab == self.tag {
+            appProperties.currentTab = appProperties.previousTab
+            appProperties.webContainerView.update()
+        }
+        
+        tempView.frame.size.width = 200
+        
+        let position = appProperties.webContainerView.frame.size.width / 2
+        
+        // Calculate if left or right side.
+        if betterOffset > position {
+            draggingSide = .right
+            appProperties.webContainerView.splitView.addArrangedSubview(tempView)
+        } else {
+            draggingSide = .left
+            appProperties.webContainerView.splitView.insertArrangedSubview(tempView, at: 0)
+        }
+        
+        appProperties.webContainerView.layer?.backgroundColor = NSColor.systemGray.withAlphaComponent(0.2).cgColor
+    }
+    
+    private func createNewSplitView() {
+        appProperties.webContainerView.layer?.backgroundColor = .none
+        tempView.removeFromSuperview()
+        
+        // Might need a better safe check..
+        
+        if appProperties.previousTab != -1 {
+            let webView = appProperties.tabs[appProperties.previousTab].view
+            let webView1 = appProperties.tabs[appProperties.currentTab].view
+            
+            webView.isSplitView = true
+            webView1.isSplitView = true
+            if draggingSide == .left {
+                appProperties.webContainerView.splitView.insertArrangedSubview(webView, at: 0)
+            } else {
+                appProperties.webContainerView.splitView.addArrangedSubview(webView)
+            }
+            
+            if let window = webView.window as? AXWindow {
+                window.makeFirstResponder(webView)
+            }
+            webView.layer?.borderWidth = 2.0
+        }
+    }
+    
+    private func userMovedCursorRemovingSplitView() {
+        isHidden = true
+        tempView.removeFromSuperview()
+        appProperties.webContainerView.layer?.backgroundColor = .none
+        
+        if appProperties.currentTab != self.tag {
+            appProperties.currentTab = self.tag
+            appProperties.webContainerView.update()
+        }
+    }
+    
+    private func moveTabToNewWindow() {
+        let window = AXWindow(restoresTab: false)
+        window.setFrameOrigin(.init(x: NSEvent.mouseLocation.x, y: NSEvent.mouseLocation.y))
+        window.makeKeyAndOrderFront(nil)
+        window.appProperties.tabs.append(appProperties.tabs[tag])
+        appProperties.tabManager.tabMovedToNewWindow(tag)
+        DispatchQueue.main.async {
+            window.appProperties.tabManager.updateAll()
+        }
+        
+        self.appProperties = window.appProperties
     }
     
     // MARK: - Pasteboard

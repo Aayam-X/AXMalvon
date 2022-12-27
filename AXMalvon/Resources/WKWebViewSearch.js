@@ -16,7 +16,7 @@ function WKWebView_HighlightAllOccurrencesOfStringForElement(element, keyword) {
                 span.appendChild(text);
                 span.classList.add("WKWebView_Highlight");
                 span.style.backgroundColor = "";
-                span.style.border = "1px solid #dedede";
+                span.style.border = "2px solid #dedede";
                 text = document.createTextNode(element.nodeValue.substr(match.index + match[0].length));
                 element.deleteData(match.index, element.nodeValue.length - match.index);
                 var next = element.nextSibling;
@@ -70,7 +70,7 @@ function WKWebView_jump(increment) {
 
 
 // the main entry point to start the search
-function WKWebView_HighlightAllOccurencesOfString(keyword) {
+function WKWebView_HighlightAllOccurrencesOfString(keyword) {
     WKWebView_RemoveAllHighlights();
     WKWebView_HighlightAllOccurrencesOfStringForElement(document.body, keyword.toLowerCase());
 }

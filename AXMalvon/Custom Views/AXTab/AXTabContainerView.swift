@@ -12,7 +12,7 @@ import WebKit
 
 class AXWebContainerView: NSView {
     unowned var appProperties: AXAppProperties!
-    var splitView = AXWebSplitView()
+    lazy var splitView = AXWebSplitView()
     
     var progressBarObserver: NSKeyValueObservation?
     
@@ -46,6 +46,8 @@ class AXWebContainerView: NSView {
             splitView.frame = appProperties.sidebarToggled ? insetWebView(bounds) : bounds.insetBy(dx: 14, dy: 14)
             addSubview(splitView)
             splitView.autoresizingMask = [.height, .width]
+            
+            hasDrawn = true
         }
     }
     
@@ -72,10 +74,22 @@ class AXWebContainerView: NSView {
     //  splitView.autoresizingMask = .none
     // }
     
+    func updateDelegates() {
+        let webView = appProperties.tabs[appProperties.currentTab].view
+        webView.uiDelegate = self
+        webView.navigationDelegate = self
+    }
+    
+    
     func update() {
         splitView.subviews.removeAll()
         
         let webView = appProperties.tabs[appProperties.currentTab].view
+        
+        
+        if webView.url == nil {
+            appProperties.tabs[appProperties.currentTab].load()
+        }
         
         if !webView.isLoading {
             appProperties.progressBar.close()

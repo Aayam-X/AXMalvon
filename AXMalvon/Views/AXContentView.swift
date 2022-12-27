@@ -26,9 +26,6 @@ class AXContentView: NSView {
             if appProperties.isPrivate {
                 self.layer?.backgroundColor = .black
             } else {
-#if DEBUG
-                self.layer?.backgroundColor = NSColor.brown.cgColor
-#else
                 // Create NSVisualEffectView
                 let visualEffectView = NSVisualEffectView()
                 visualEffectView.material = .popover
@@ -38,7 +35,6 @@ class AXContentView: NSView {
                 visualEffectView.frame = bounds
                 addSubview(visualEffectView)
                 visualEffectView.autoresizingMask = [.height, .width]
-#endif
             }
             
             // Setup progress bar

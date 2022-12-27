@@ -11,6 +11,7 @@
 		ED02037A2958E5760054A6BB /* AXInformationAlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0203792958E5760054A6BB /* AXInformationAlertView.swift */; };
 		ED0ACB0A294FFB9900BFBFC9 /* MXSearchSuggestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0ACB09294FFB9900BFBFC9 /* MXSearchSuggestion.swift */; };
 		ED0B1AC92947910800524F08 /* AXSearchFieldPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0B1AC82947910800524F08 /* AXSearchFieldPopoverView.swift */; };
+		ED0B284C2959C6A7003D656F /* AXWebSplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0B284B2959C6A7003D656F /* AXWebSplitView.swift */; };
 		ED19C806294F904400E0924D /* WKWebViewSearch.js in Resources */ = {isa = PBXBuildFile; fileRef = ED19C805294F904400E0924D /* WKWebViewSearch.js */; };
 		ED212333294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED212332294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift */; };
 		ED3204FE293E61240055CD73 /* AXSplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FD293E61240055CD73 /* AXSplitView.swift */; };
@@ -42,6 +43,7 @@
 		ED0203792958E5760054A6BB /* AXInformationAlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXInformationAlertView.swift; sourceTree = "<group>"; };
 		ED0ACB09294FFB9900BFBFC9 /* MXSearchSuggestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MXSearchSuggestion.swift; sourceTree = "<group>"; };
 		ED0B1AC82947910800524F08 /* AXSearchFieldPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSearchFieldPopoverView.swift; sourceTree = "<group>"; };
+		ED0B284B2959C6A7003D656F /* AXWebSplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWebSplitView.swift; sourceTree = "<group>"; };
 		ED19C805294F904400E0924D /* WKWebViewSearch.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = WKWebViewSearch.js; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.javascript; };
 		ED212332294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXRectangularProgressIndicator.swift; sourceTree = "<group>"; };
 		ED27D69E2944B5F000CA1911 /* Log.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Log.md; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 			children = (
 				ED907B34294DF4B50057A591 /* Sidebar */,
 				ED3204FD293E61240055CD73 /* AXSplitView.swift */,
+				ED0B284B2959C6A7003D656F /* AXWebSplitView.swift */,
 				ED956092293FFFB900AC1C15 /* AXHoverButton.swift */,
 				ED01B0592957E3C700CB657E /* AXSearchFieldSuggestItem.swift */,
 			);
@@ -281,6 +284,7 @@
 				ED907B33294DF4B30057A591 /* AXSidebarDownloadButton.swift in Sources */,
 				ED9B4CE629587E6500961792 /* AXSearchFieldWindow.swift in Sources */,
 				ED212333294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift in Sources */,
+				ED0B284C2959C6A7003D656F /* AXWebSplitView.swift in Sources */,
 				ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */,
 				ED0B1AC92947910800524F08 /* AXSearchFieldPopoverView.swift in Sources */,
 				ED01B05A2957E3C700CB657E /* AXSearchFieldSuggestItem.swift in Sources */,

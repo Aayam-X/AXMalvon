@@ -32,7 +32,9 @@ struct AXTabItem: Codable {
     }
     
     func load() {
-        view.load(URLRequest(url: url!))
+        if let url = url {
+            view.load(URLRequest(url: url))
+        }
     }
     
     enum CodingKeys: CodingKey {

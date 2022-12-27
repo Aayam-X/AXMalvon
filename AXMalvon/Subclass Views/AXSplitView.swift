@@ -41,30 +41,3 @@ class AXSplitView: NSSplitView, NSSplitViewDelegate {
         fatalError("init(coder:) has not been implemented")
     }
 }
-
-
-class AXWebSplitView: NSSplitView, NSSplitViewDelegate {
-    init() {
-        super.init(frame: .zero)
-        
-        delegate = self
-        isVertical = true
-        dividerStyle = .thin
-    }
-    
-    func splitView(_ splitView: NSSplitView, constrainMinCoordinate proposedMinimumPosition: CGFloat, ofSubviewAt dividerIndex: Int) -> CGFloat {
-        return 50
-    }
-    
-    func splitView(_ splitView: NSSplitView, canCollapseSubview subview: NSView) -> Bool {
-        return false
-    }
-    
-    override func drawDivider(in rect: NSRect) {
-        // Writing nothing here makes the divider invisible
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
