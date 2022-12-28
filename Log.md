@@ -9,11 +9,16 @@
 - Textkit 2: https://developer.apple.com/videos/play/wwdc2021/10061/
 
 ## 0.0.2
-- [ ] Fix drag and drop between windows problem & Problems with moveTabToNewWindow
 - [ ] Downloading Tabs cause entire tab view to crash
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Create tab after current tab rather the at the end
 - [ ] Window Buttons not working (minimize, full screen etc..)
+---
+- [ ] Fix app safety
+- [ ] Fix problems with moveTabToNewWindow
+- [ ] Memory leaks found, fix them
+---
+- [x] Fix drag and drop between windows problem
 ---
 - [x] All memory leaks fixed!!
 ---

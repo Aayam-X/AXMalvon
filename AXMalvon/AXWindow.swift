@@ -129,8 +129,6 @@ class AXWindow: NSWindow, NSWindowDelegate {
         
         appProperties.tabs.removeAll()
         
-        print("WINDOLIJEOLDK,miklm,")
-        
         super.close()
     }
     

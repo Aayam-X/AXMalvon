@@ -8,9 +8,10 @@
 
 import AppKit
 
-fileprivate enum DraggingPositionState {
+enum DraggingPositionState {
     case newWindow
     case newSplitView
+    case addToSidebarView
     case reorder
 }
 
@@ -19,7 +20,7 @@ fileprivate enum DraggingSide {
     case right
 }
 
-fileprivate let tempView = AXWebSplitViewAddItemView()
+fileprivate let tempView: AXWebSplitViewAddItemView! = AXWebSplitViewAddItemView()
 
 class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPasteboardReading {
     weak var appProperties: AXAppProperties!
@@ -35,7 +36,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     // Drag and drop
     fileprivate var isDragging = false
     var dragItem: NSDraggingItem!
-    fileprivate var draggingState: DraggingPositionState = .reorder
+    var draggingState: DraggingPositionState = .reorder
     fileprivate var draggingSide: DraggingSide = .left
     
     // Colors
@@ -80,8 +81,6 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         self.bezelStyle = .shadowlessSquare
         self.layer?.borderColor = .white
         title = ""
-        
-        print("INIGT SIDEBARE BUTTOn")
     }
     
     required init?(coder: NSCoder) {
@@ -252,11 +251,15 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         switch draggingState {
         case .newWindow:
             moveTabToNewWindow()
+            break
         case .newSplitView:
             createNewSplitView()
             break
         case .reorder:
             // Reorder is already done when the user is dragging the cursor
+            break
+        case .addToSidebarView:
+            // Handled by sidebarview
             break
         }
         
@@ -336,13 +339,16 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     
     private func moveTabToNewWindow() {
         let window = AXWindow(restoresTab: false)
-        window.setFrameOrigin(.init(x: NSEvent.mouseLocation.x, y: NSEvent.mouseLocation.y))
-        window.makeKeyAndOrderFront(nil)
         window.appProperties.tabs.append(appProperties.tabs[tag])
         appProperties.tabManager.tabMovedToNewWindow(tag)
+        
         DispatchQueue.main.async {
+            // Fix this
             window.appProperties.tabManager.updateAll()
         }
+        
+        window.setFrameOrigin(.init(x: NSEvent.mouseLocation.x, y: NSEvent.mouseLocation.y))
+        window.makeKeyAndOrderFront(nil)
         
         self.appProperties = window.appProperties
     }

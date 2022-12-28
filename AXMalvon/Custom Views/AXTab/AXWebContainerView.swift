@@ -66,9 +66,9 @@ class AXWebContainerView: NSView {
     }
     
     func removeDelegates() {
-        let webView = appProperties.tabs[appProperties.currentTab].view
-        webView.uiDelegate = nil
-        webView.navigationDelegate = nil
+        let webView = appProperties.tabs[safe: appProperties.currentTab]?.view
+        webView?.uiDelegate = nil
+        webView?.navigationDelegate = nil
     }
     
     // override func viewDidEndLiveResize() {
@@ -171,7 +171,7 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
     }
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        appProperties.window.title = appProperties.tabs[appProperties.currentTab].title ?? "Untitled"
+        appProperties.window.title = appProperties.tabs[safe: appProperties.currentTab]?.title ?? "Untitled"
         appProperties.sidebarView.checkNavigationButtons()
         self.windowTitleLabel.stringValue = webView.title ?? "Untitled"
     }

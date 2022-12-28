@@ -331,7 +331,7 @@ class AXSideBarView: NSView {
     func updateSelection() {
         (stackView.arrangedSubviews[safe: appProperties.previousTab] as? AXSidebarTabButton)?.isSelected = false
         (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
-        appProperties.window.title = appProperties.tabs[appProperties.currentTab].title ?? "Untitled"
+        appProperties.window.title = appProperties.tabs[ appProperties.currentTab].title ?? "Untitled"
     }
     
     func webView_updateSelection() {
@@ -355,7 +355,47 @@ class AXSideBarView: NSView {
         button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
     }
     
+    func insertTabFromOtherWindow(view: NSView) {
+        (stackView.arrangedSubviews[safe: appProperties.currentTab] as! AXSidebarTabButton).isSelected = false
+        
+        let button = view as! AXSidebarTabButton
+        button.removeFromSuperview()
+        button.stopObserving()
+        button.startObserving()
+        
+        button.target = self
+        button.action = #selector(tabClick)
+        stackView.addArrangedSubview(button)
+        button.isSelected = true
+        
+        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+        
+        appProperties.currentTab = stackView.arrangedSubviews.count - 1
+        button.tag = appProperties.currentTab
+        appProperties.webContainerView.update()
+    }
+    
     // MARK: - Drag and Drop
+    //    override func draggingUpdated(_ sender: NSDraggingInfo) -> NSDragOperation {
+    //        if let button = sender.draggingSource as? AXSidebarTabButton {
+    //            if button.window?.windowNumber != self.window?.windowNumber {
+    //                button.draggingState = .addToSidebarView
+    //            }
+    //        }
+    //
+    //        return .copy
+    //    }
+    
+    func updatePosition(from i: Int) {
+        for index in i..<stackView.arrangedSubviews.count {
+            let tab = stackView.arrangedSubviews[index] as! AXSidebarTabButton
+            tab.tag = index
+            
+            tab.stopObserving()
+            tab.startObserving()
+        }
+    }
+    
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
         let pasteBoardItemIsValid = sender.draggingPasteboard.canReadObject(forClasses: [NSURL.self, AXSidebarTabButton.self])
         self.window?.orderFront(nil)
@@ -366,53 +406,13 @@ class AXSideBarView: NSView {
                 // Update the tabs in the `appProperties`
                 let otherAppProperty = button.appProperties!
                 
-                
-                print(button.tag, otherAppProperty.tabs.count)
+                // Other window
                 appProperties.tabs.append(otherAppProperty.tabs[button.tag])
-                otherAppProperty.tabs.remove(at: button.tag)
+                otherAppProperty.tabManager.tabDraggedToOtherWindow(button.tag)
                 
-                // Last tab
-                if otherAppProperty.tabs.isEmpty {
-                    button.window?.close()
-                } else {
-                    // Update the current tab in that window
-                    // TODO: Fix problem here
-                    if otherAppProperty.currentTab == otherAppProperty.tabs.count - 1 {
-                        otherAppProperty.currentTab -= 1
-                    }
-                    
-                    // Fix tab.position
-                    for index in button.tag..<otherAppProperty.sidebarView.stackView.arrangedSubviews.count {
-                        let tab = otherAppProperty.sidebarView.stackView.arrangedSubviews[index] as! AXSidebarTabButton
-                        tab.tag -= 1
-                    }
-                    
-                    (otherAppProperty.sidebarView.stackView.arrangedSubviews[otherAppProperty.currentTab] as! AXSidebarTabButton).isSelected = true
-                    
-                    // TODO: Add "hasLoaded" logic here
-                    // EDIT: The entire thing
-                    otherAppProperty.webContainerView.update()
-                }
-                
-                // Remove the button from the origin window
-                // And update the appProperties
-                button.removeFromSuperview()
-                button.appProperties = self.appProperties
-                button.tag = stackView.arrangedSubviews.count
-                button.startObserving()
-                
-                button.target = self
-                button.action = #selector(tabClick)
-                button.tabTitle = appProperties.tabs[button.tag].title ?? "Untitled"
-                stackView.addArrangedSubview(button)
-                
-                // Change selected button
-                (stackView.arrangedSubviews[safe: appProperties.currentTab] as? AXSidebarTabButton)?.isSelected = false
-                appProperties.currentTab = button.tag
-                button.isSelected = true
-                appProperties.webContainerView.update()
-                
-                button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+                // Our window
+                button.appProperties = appProperties
+                insertTabFromOtherWindow(view: button)
                 
                 print("Button from another window")
             }

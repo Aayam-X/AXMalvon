@@ -20,19 +20,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
-        //        let window = AXWindow()
-        //        window.makeKeyAndOrderFront(nil)
+        let window = AXWindow()
+        window.makeKeyAndOrderFront(nil)
+        
         checkForUpdates()
     }
     
     func application(_ app: NSApplication, didDecodeRestorableState coder: NSCoder) {
         if let window = app.keyWindow as? AXWindow {
-            window.appProperties.tabManager.updateAll()
-        }
-        
-        else {
-            let window = AXWindow()
-            window.makeKeyAndOrderFront(nil)
             window.appProperties.tabManager.updateAll()
         }
     }

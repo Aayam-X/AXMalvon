@@ -15,7 +15,6 @@ class AXTabManager {
     // Updates every single view
     func updateAll() {
         appProperties.currentTab = 0
-        self.createNewTab()
         
         appProperties.sidebarView.updateAll()
         appProperties.webContainerView.update()
@@ -26,10 +25,42 @@ class AXTabManager {
         tab.view.removeFromSuperview()
         
         if appProperties.tabs.count != 1 {
-            self.switch(to: i - 1)
+            // Same logic as remove tab
+            if appProperties.currentTab == i {
+                if i == appProperties.tabs.count {
+                    self.switch(to: i - 1)
+                }
+            } else if appProperties.currentTab > i {
+                self.switch(to: i - 1)
+            }
             
             appProperties.tabs.remove(at: i)
             appProperties.sidebarView.removedTab(i)
+            appProperties.webContainerView.update()
+        } else {
+            // Close window
+            appProperties.window.close()
+        }
+    }
+    
+    func tabDraggedToOtherWindow(_ i: Int) {
+        let tab = appProperties.tabs[i]
+        tab.view.removeFromSuperview()
+        
+        if appProperties.tabs.count != 1 {
+            // Same logic as remove tab
+            if appProperties.currentTab == i {
+                if i == appProperties.tabs.count - 1 {
+                    appProperties.currentTab = i - 1
+                }
+            } else if appProperties.currentTab > i {
+                appProperties.currentTab = i - 1
+            }
+            
+            appProperties.tabs.remove(at: i)
+            appProperties.sidebarView.updatePosition(from: i-1)
+            appProperties.sidebarView.updateSelection()
+            appProperties.webContainerView.update()
         } else {
             // Close window
             appProperties.window.close()
