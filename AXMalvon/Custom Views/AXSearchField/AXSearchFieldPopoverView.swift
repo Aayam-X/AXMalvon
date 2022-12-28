@@ -10,7 +10,7 @@ import AppKit
 import Carbon.HIToolbox
 
 class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
-    unowned var appProperties: AXAppProperties!
+    weak var appProperties: AXAppProperties!
     
     fileprivate var hasDrawn = false
     var newTabMode: Bool = true
@@ -67,8 +67,8 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         if !hasDrawn {
             searchField.delegate = self
             addSubview(searchField)
-            searchField.leftAnchor.constraint(equalTo: leftAnchor, constant: 25).isActive = true
-            searchField.rightAnchor.constraint(equalTo: rightAnchor, constant: -25).isActive = true
+            searchField.widthAnchor.constraint(equalTo: self.widthAnchor, constant: -50).isActive = true
+            searchField.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
             searchField.topAnchor.constraint(equalTo: topAnchor, constant: 25).isActive = true
             
             let seperator = NSBox()
@@ -103,7 +103,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         }
     }
     
-    private func searchEnter(_ url: URL) {
+    private func searchEnter(_ url: inout URL) {
         if newTabMode {
             appProperties.tabManager.createNewTab(url: url)
         } else {
@@ -115,7 +115,8 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     
     @objc func searchSuggestionAction(_ sender: AXSearchFieldSuggestItem) {
         if !sender.titleValue.isEmpty {
-            searchEnter(fixURL(URL(string: "https://www.google.com/search?client=Malvon&q=\(sender.titleValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!)")!))
+            var url = fixURL(URL(string: "https://www.google.com/search?client=Malvon&q=\(sender.titleValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!)")!)
+            searchEnter(&url)
             close()
         }
     }
@@ -124,6 +125,8 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         appProperties.tabs[appProperties.currentTab].view.alphaValue = 1.0
         let value = searchField.stringValue
         
+        var url: URL?
+        
         if !searchField.stringValue.isEmpty {
             if value.starts(with: "malvon?") {
                 print(value.string(after: 7))
@@ -131,12 +134,16 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
                     appProperties.tabManager.createNewTab(fileURL: url)
                 }
             } else if value.starts(with: "file:///") {
-                appProperties.tabManager.createNewTab(fileURL: URL(string: value)!)
+                url = URL(string: value)!
             } else if value.isValidURL && !value.hasWhitespace {
-                searchEnter(fixURL(URL(string: value)!))
+                url = fixURL(URL(string: value)!)
             } else {
-                searchEnter(fixURL(URL(string: "https://www.google.com/search?client=Malvon&q=\(searchField.stringValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!)")!))
+                url = fixURL(URL(string: "https://www.google.com/search?client=Malvon&q=\(searchField.stringValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!)")!)
             }
+        }
+        
+        if url != nil {
+            searchEnter(&url!)
         }
         
         close()
@@ -235,8 +242,8 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         
         appProperties.tabs[appProperties.currentTab].view.alphaValue = 1.0
         appProperties.window.removeChildWindow(suggestionWindow)
+        NSEvent.removeMonitor(localMouseDownEventMonitor as Any)
         suggestionWindow.close()
-        localMouseDownEventMonitor = nil
     }
     
     private var localMouseDownEventMonitor: Any?

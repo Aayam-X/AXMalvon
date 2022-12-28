@@ -15,6 +15,10 @@
 - [ ] Create tab after current tab rather the at the end
 - [ ] Window Buttons not working (minimize, full screen etc..)
 ---
+- [x] Sidebar's background color would be clear when resizing
+- [x] Search field window would change size if search field's text was long
+- [x] Memory improvements
+---
 - [x] System Setting Implementation..
 ---
 - [x] Other stuff I forgot to mention..

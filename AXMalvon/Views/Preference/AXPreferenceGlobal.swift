@@ -9,5 +9,6 @@
 import Foundation
 
 struct AXPreferenceGlobal {
+    static var tempValue: CGFloat = 1.0
     static var selectedTab = 1 // General
 }

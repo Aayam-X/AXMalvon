@@ -10,7 +10,7 @@ import AppKit
 import WebKit
 
 class AXContentView: NSView {
-    unowned var appProperties: AXAppProperties!
+    weak var appProperties: AXAppProperties!
     
     fileprivate var hasDrawn = false
     

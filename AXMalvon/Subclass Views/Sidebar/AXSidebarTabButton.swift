@@ -22,7 +22,7 @@ fileprivate enum DraggingSide {
 fileprivate let tempView = AXWebSplitViewAddItemView()
 
 class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPasteboardReading {
-    unowned var appProperties: AXAppProperties!
+    weak var appProperties: AXAppProperties!
     
     // Subviews
     var favIconImageView = NSImageView()
@@ -129,18 +129,22 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     public func stopObserving() {
         titleObserver?.invalidate()
         urlObserver?.invalidate()
+        
+        titleObserver = nil
+        urlObserver = nil
     }
     
     public func startObserving() {
         let webView = appProperties.tabs[tag].view
         
-        titleObserver = webView.observe(\.title, changeHandler: { [self] _, _ in
-            appProperties.tabs[tag].title = webView.title ?? "Untitled"
-            tabTitle = appProperties.tabs[tag].title ?? "Untitled"
+        titleObserver = webView.observe(\.title, changeHandler: { _, _ in
+            self.appProperties.tabs[self.tag].title = webView.title ?? "Untitled"
+            self.tabTitle = self.appProperties.tabs[self.tag].title ?? "Untitled"
         })
         
-        urlObserver = webView.observe(\.url, changeHandler: { [self] _, _ in
-            appProperties.tabs[tag].url = webView.url
+        urlObserver = webView.observe(\.url, changeHandler: { _, _ in
+            print("Tag isn't ", self.tag)
+            self.appProperties.tabs[self.tag].url = webView.url
         })
     }
     
@@ -205,7 +209,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     }
     
     func draggingSession(_ session: NSDraggingSession, movedTo screenPoint: NSPoint) {
-        let offset = screenPoint - appProperties.window.frame.origin
+        var offset = screenPoint - appProperties.window.frame.origin
         
         // Check if the user is hovering over the sidebar
         if appProperties.sidebarView.frame.contains(offset) {
@@ -218,9 +222,9 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             }
         } else {
             // Check if the user is hovering over the WebView
-            if appProperties.webContainerView.frame.contains(.init(x: offset.x, y: offset.y)) {
+            if appProperties.webContainerView.frame.contains(offset) {
                 draggingState = .newSplitView
-                inDragging_createSplitView(offsetX: offset.x)
+                inDragging_createSplitView(offsetX: &offset.x)
             } else {
                 // The user is hovering outside the application
                 userMovedCursorRemovingSplitView()
@@ -256,7 +260,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     // MARK: - Functions of Drag and Drop
     
     // The user is still dragging the view.
-    private func inDragging_createSplitView(offsetX: CGFloat) {
+    private func inDragging_createSplitView(offsetX: inout CGFloat) {
         isHidden = false
         
         let betterOffset = offsetX - appProperties.sidebarWidth

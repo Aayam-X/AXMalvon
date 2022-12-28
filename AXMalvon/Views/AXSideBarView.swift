@@ -16,7 +16,7 @@ final class AXFlippedClipView: NSClipView {
 
 class AXSideBarView: NSView {
     // MARK: - Variables
-    unowned var appProperties: AXAppProperties!
+    weak var appProperties: AXAppProperties!
     
     let scrollView = NSScrollView()
     
@@ -211,12 +211,15 @@ class AXSideBarView: NSView {
         removeTrackingArea(trackingArea)
         trackingArea = NSTrackingArea(rect: .init(x: bounds.origin.x - 100, y: bounds.origin.y, width: bounds.size.width + 100, height: bounds.size.height), options: [.activeAlways, .mouseEnteredAndExited], owner: self)
         addTrackingArea(trackingArea)
-        layer?.backgroundColor = .clear
+        
+        if appProperties.sidebarToggled {
+            layer?.backgroundColor = .clear
+        }
     }
     
     override func resizeSubviews(withOldSize oldSize: NSSize) {
         if oldSize.height == frame.height {
-            if !appProperties.isFullScreen {
+            if !appProperties.isFullScreen && appProperties.sidebarToggled {
                 if frame.width >= 210 {
                     self.layer?.backgroundColor = .clear
                 } else {
@@ -235,11 +238,12 @@ class AXSideBarView: NSView {
                 self.layer?.backgroundColor = .none
                 self.removeFromSuperview()
             })
+            
             appProperties.window.hideTrafficLights(true)
         }
     }
     
-    override public func mouseDown(with event: NSEvent) {
+    override func mouseDown(with event: NSEvent) {
         window?.performDrag(with: event)
     }
     
@@ -254,8 +258,8 @@ class AXSideBarView: NSView {
     func updateAll() {
         stackView.subviews.removeAll()
         
-        for (index, tab) in appProperties.tabs.enumerated() {
-            _update_didCreateTab(tab, index)
+        for (index, var tab) in appProperties.tabs.enumerated() {
+            _update_didCreateTab(&tab, index)
         }
         
         (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
@@ -301,13 +305,16 @@ class AXSideBarView: NSView {
         // Fix tab.position
         for index in at..<stackView.arrangedSubviews.count {
             let tab = stackView.arrangedSubviews[index] as! AXSidebarTabButton
-            tab.tag -= 1
+            tab.tag = index
+            
+            tab.stopObserving()
+            tab.startObserving()
         }
         
         (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
     }
     
-    func didDownload(_ d: AXDownloadItem) {
+    func didDownload(_ d: inout AXDownloadItem) {
         let button = AXSidebarDownloadButton(appProperties)
         button.downloadItem = d
         button.startObserving()
@@ -331,7 +338,7 @@ class AXSideBarView: NSView {
         appProperties.webContainerView.updateDelegates()
     }
     
-    func _update_didCreateTab(_ t: AXTabItem, _ i: Int) {
+    func _update_didCreateTab(_ t: inout AXTabItem, _ i: Int) {
         let button = AXSidebarTabButton(appProperties)
         button.tag = i
         button.startObserving()
@@ -423,7 +430,7 @@ class AXSideBarView: NSView {
         guard let pasteboardObjects = sender.draggingPasteboard.readObjects(forClasses: [NSURL.self, AXSidebarTabButton.self]), !pasteboardObjects.isEmpty else { return false }
         
         pasteboardObjects.forEach { object in
-            if let url = object as? NSURL {
+            if let url = (object as? NSURL) {
                 appProperties.tabManager.createNewTab(url: url as URL)
             }
             

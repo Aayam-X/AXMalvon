@@ -23,7 +23,7 @@ class AXSidebarDownloadButton: NSButton {
     
     weak var titleViewWidthAnchor: NSLayoutConstraint?
     
-    unowned var appProperties: AXAppProperties
+    weak var appProperties: AXAppProperties!
     
     var isSelected: Bool = false {
         didSet {
@@ -53,7 +53,7 @@ class AXSidebarDownloadButton: NSButton {
         self.action = #selector(openInFinder)
         title = ""
         
-        self.setTrackingArea(WithDrag: false)
+        self.setTrackingArea()
         
         // Setup circular progress bar
         progressBar.style = .spinning
@@ -133,11 +133,8 @@ class AXSidebarDownloadButton: NSButton {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setTrackingArea(WithDrag drag: Bool = false) {
-        var options : NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
-        if drag {
-            options.insert(.enabledDuringMouseDrag)
-        }
+    func setTrackingArea() {
+        let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
         trackingArea = NSTrackingArea.init(rect: self.bounds, options: options, owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
     }
@@ -146,7 +143,6 @@ class AXSidebarDownloadButton: NSButton {
         self.isMouseDown = false
         closeButton.isHidden = true
         self.removeTrackingArea(self.trackingArea)
-        self.setTrackingArea(WithDrag: false)
         layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
         
         if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
@@ -156,7 +152,6 @@ class AXSidebarDownloadButton: NSButton {
     
     override func mouseDown(with event: NSEvent) {
         self.removeTrackingArea(self.trackingArea)
-        self.setTrackingArea(WithDrag: true)
         self.isMouseDown = true
         self.layer?.backgroundColor = selectedColor.cgColor
     }

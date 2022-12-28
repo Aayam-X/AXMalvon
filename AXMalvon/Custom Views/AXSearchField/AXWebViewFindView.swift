@@ -10,7 +10,7 @@ import AppKit
 import Carbon.HIToolbox
 
 class AXWebViewFindView: NSView {
-    unowned var appProperties: AXAppProperties!
+    weak var appProperties: AXAppProperties!
     
     fileprivate var hasDrawn = false
     
@@ -106,10 +106,8 @@ class AXWebViewFindView: NSView {
         let webView = appProperties.tabs[appProperties.currentTab].view
         webView.removeAllHighlights()
         
-        let searchText = searchField.stringValue
-        
-        if !searchText.isEmpty {
-            webView.highlightAllOccurencesOfString(string: searchText)
+        if !searchField.stringValue.isEmpty {
+            webView.highlightAllOccurencesOfString(string: &searchField.stringValue)
             
             // Number of words found
             let countCompletionHandler: (Int) -> Void = {

@@ -85,7 +85,7 @@ class AXWebView: WKWebView {
     }
     
     // Code Borrowed From: https://github.com/sstahurski/SearchWKWebView
-    func highlightAllOccurencesOfString(string: String) {
+    func highlightAllOccurencesOfString(string: inout String) {
         if let path = Bundle.main.url(forResource: "WKWebViewSearch", withExtension: "js") {
             do {
                 let data: Data = try Data(contentsOf: path)

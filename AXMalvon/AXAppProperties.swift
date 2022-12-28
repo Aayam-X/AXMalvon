@@ -16,7 +16,7 @@ class AXAppProperties {
     let splitView: AXSplitView
     let contentView: AXContentView
     let webContainerView: AXWebContainerView
-    var window: AXWindow! = nil
+    weak var window: AXWindow! = nil
     
     // Other Views
     let popOver: AXSearchFieldPopoverView
@@ -75,8 +75,7 @@ class AXAppProperties {
                 if let data = UserDefaults.standard.data(forKey: "tabs") {
                     do {
                         let decoder = JSONDecoder()
-                        let tabs = try decoder.decode([AXTabItem].self, from: data)
-                        self.tabs = tabs
+                        self.tabs = try decoder.decode([AXTabItem].self, from: data)
                     } catch {
                         print("Unable to Decode Tabs (\(error.localizedDescription))")
                     }

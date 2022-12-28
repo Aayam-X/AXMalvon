@@ -178,7 +178,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 #endif
     }
     
-    func showAlert(title: String, description: String) {
+    func showAlert(title: inout String, description: inout String) {
         let alert = NSAlert()
         alert.messageText = title
         alert.informativeText = description

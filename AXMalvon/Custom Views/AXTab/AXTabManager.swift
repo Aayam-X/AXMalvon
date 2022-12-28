@@ -10,7 +10,7 @@ import AppKit
 import WebKit
 
 class AXTabManager {
-    unowned var appProperties: AXAppProperties!
+    weak var appProperties: AXAppProperties!
     
     // Updates every single view
     func updateAll() {
@@ -86,7 +86,7 @@ class AXTabManager {
     }
     
     @discardableResult
-    private func addTabAndUpdate(webView: AXWebView) -> AXTabItem {
+    private func addTabAndUpdate(webView: AXWebView) -> AXWebView {
         let tabItem = AXTabItem(view: webView)
         appProperties.tabs.append(tabItem)
         
@@ -95,7 +95,7 @@ class AXTabManager {
         appProperties.sidebarView.didCreateTab()
         appProperties.webContainerView.update()
         
-        return tabItem
+        return tabItem.view
     }
     
     // MARK: - Create New Tab
@@ -157,7 +157,7 @@ class AXTabManager {
         webView.addConfigurations()
         
         // Create tab
-        return addTabAndUpdate(webView: webView).view
+        return addTabAndUpdate(webView: webView)
     }
     
     func createNewPrivateTab() {
@@ -194,7 +194,7 @@ class AXTabManager {
         webView.addConfigurations()
         
         // Create tab
-        return addTabAndUpdate(webView: webView).view
+        return addTabAndUpdate(webView: webView)
     }
     
 }

@@ -74,7 +74,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
         }
     }
     
-    func updateTrackingAreas(_ establish : Bool) {
+    func updateTrackingAreas(_ establish: Bool) {
         if let tag = trackingTag {
             standardWindowButton(.closeButton)!.removeTrackingRect(tag)
         }
