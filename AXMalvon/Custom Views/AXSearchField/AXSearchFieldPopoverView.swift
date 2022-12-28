@@ -15,16 +15,18 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     fileprivate var hasDrawn = false
     var newTabMode: Bool = true
     
-    var suggestionWindow: NSPanel
+    private var localMouseDownEventMonitor: Any?
+    
+    var suggestionWindow: NSPanel!
     
     private var highlightedSuggestion = 0 {
         willSet(newValue) {
-            suggestions[highlightedSuggestion].isSelected = false
-            suggestions[newValue].isSelected = true
+            suggestions[highlightedSuggestion]!.isSelected = false
+            suggestions[newValue]!.isSelected = true
         }
     }
     
-    lazy var searchField: AXTextField = {
+    lazy var searchField: AXTextField! = {
         let searchField = AXTextField()
         searchField.translatesAutoresizingMaskIntoConstraints = false
         searchField.alignment = .left
@@ -39,7 +41,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         return searchField
     }()
     
-    lazy var suggestionsStackView: NSStackView = {
+    lazy var suggestionsStackView: NSStackView! = {
         let s = NSStackView()
         s.orientation = .vertical
         s.spacing = 1.08
@@ -47,7 +49,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         return s
     }()
     
-    let suggestions = [AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem()]
+    var suggestions: [AXSearchFieldSuggestItem?]! = [AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem()]
     
     init() {
         suggestionWindow = AXSearchFieldWindow()
@@ -56,7 +58,9 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     }
     
     deinit {
-        localMouseDownEventMonitor = nil
+        suggestionsStackView = nil
+        suggestions = nil
+        searchField = nil
     }
     
     required init?(coder: NSCoder) {
@@ -85,12 +89,12 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             suggestionsStackView.rightAnchor.constraint(equalTo: rightAnchor, constant: -15).isActive = true
             
             for suggestion in suggestions {
-                suggestion.isHidden = true
-                suggestion.target = self
-                suggestion.action = #selector(searchSuggestionAction)
-                suggestionsStackView.addArrangedSubview(suggestion)
-                suggestion.widthAnchor.constraint(equalTo: suggestionsStackView.widthAnchor).isActive = true
-                suggestion.heightAnchor.constraint(equalToConstant: 35).isActive = true
+                suggestion!.isHidden = true
+                suggestion!.target = self
+                suggestion!.action = #selector(searchSuggestionAction)
+                suggestionsStackView.addArrangedSubview(suggestion!)
+                suggestion!.widthAnchor.constraint(equalTo: suggestionsStackView.widthAnchor).isActive = true
+                suggestion!.heightAnchor.constraint(equalToConstant: 35).isActive = true
             }
             
             highlightedSuggestion = 0
@@ -152,15 +156,15 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     func updateSuggestions() {
         if !searchField.stringValue.isEmpty {
             // First one will always be equal to the text
-            suggestions[0].isHidden = false
-            suggestions[0].titleValue = searchField.stringValue
+            suggestions[0]!.isHidden = false
+            suggestions[0]!.titleValue = searchField.stringValue
             
             SearchSuggestions.getQuerySuggestions(searchField.stringValue) { [self] results, error in
                 if error != nil {
                     for index in 1..<suggestions.count {
                         let suggestion = suggestions[index]
                         DispatchQueue.main.async {
-                            suggestion.isHidden = true
+                            suggestion!.isHidden = true
                         }
                     }
                     return
@@ -172,16 +176,16 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
                     let suggestion = suggestions[index]
                     
                     if index < results.count {
-                        suggestion.isHidden = false
-                        suggestion.titleValue = results[index]
+                        suggestion!.isHidden = false
+                        suggestion!.titleValue = results[index]
                     } else {
-                        suggestion.isHidden = true
+                        suggestion!.isHidden = true
                     }
                 }
             }
         } else {
             suggestions.forEach { suggestion in
-                suggestion.isHidden = true
+                suggestion!.isHidden = true
             }
         }
         
@@ -190,12 +194,12 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
         if commandSelector == #selector(NSResponder.moveUp(_:)) {
             highlightedSuggestion == 0 ? (highlightedSuggestion = 4) : (highlightedSuggestion -= 1)
-            searchField.stringValue = suggestions[highlightedSuggestion].titleValue
+            searchField.stringValue = suggestions[highlightedSuggestion]!.titleValue
             return true
         }
         if commandSelector == #selector(NSResponder.moveDown(_:)) {
             highlightedSuggestion == 4 ? (highlightedSuggestion = 0) : (highlightedSuggestion += 1)
-            searchField.stringValue = suggestions[highlightedSuggestion].titleValue
+            searchField.stringValue = suggestions[highlightedSuggestion]!.titleValue
             return true
         }
         if commandSelector == #selector(NSResponder.deleteToBeginningOfLine(_:)) {
@@ -237,16 +241,19 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         appProperties.searchFieldShown = false
         self.newTabMode = true
         suggestions.forEach { suggestion in
-            suggestion.isHidden = true
+            suggestion!.isHidden = true
         }
         
         appProperties.tabs[appProperties.currentTab].view.alphaValue = 1.0
         appProperties.window.removeChildWindow(suggestionWindow)
-        NSEvent.removeMonitor(localMouseDownEventMonitor as Any)
+        
+        if let localMouseDownEventMonitor = localMouseDownEventMonitor {
+            NSEvent.removeMonitor(localMouseDownEventMonitor)
+            self.localMouseDownEventMonitor = nil
+        }
+        
         suggestionWindow.close()
     }
-    
-    private var localMouseDownEventMonitor: Any?
     
     func observer() {
         // When the user clicks outside of the window, we will exit
@@ -254,8 +261,10 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             if event.window != self.suggestionWindow {
                 if event.window == self.appProperties.window {
                     self.close()
+                    return nil
                 }
             }
+            
             return event
         })
         

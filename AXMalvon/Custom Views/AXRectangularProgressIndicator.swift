@@ -11,21 +11,21 @@ import AppKit
 class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
     private var progress: CGFloat = 0.0
     
-    let topBorderLayer = CAShapeLayer()
-    let topPointPath = NSBezierPath()
-    let topAnimation = CABasicAnimation(keyPath: "strokeEnd")
+    var topBorderLayer: CAShapeLayer! = CAShapeLayer()
+    var topPointPath: NSBezierPath! = NSBezierPath()
+    var topAnimation: CABasicAnimation! = CABasicAnimation(keyPath: "strokeEnd")
     
-    let rightBorderLayer = CAShapeLayer()
-    let rightPointPath = NSBezierPath()
-    let rightAnimation = CABasicAnimation(keyPath: "strokeEnd")
+    var rightBorderLayer: CAShapeLayer! = CAShapeLayer()
+    var rightPointPath: NSBezierPath! = NSBezierPath()
+    var rightAnimation: CABasicAnimation! = CABasicAnimation(keyPath: "strokeEnd")
     
-    let bottomBorderLayer = CAShapeLayer()
-    let bottomPointPath = NSBezierPath()
-    let bottomAnimation = CABasicAnimation(keyPath: "strokeEnd")
+    var bottomBorderLayer: CAShapeLayer! = CAShapeLayer()
+    var bottomPointPath: NSBezierPath! = NSBezierPath()
+    var bottomAnimation: CABasicAnimation! = CABasicAnimation(keyPath: "strokeEnd")
     
-    let leftBorderLayer = CAShapeLayer()
-    let leftPointPath = NSBezierPath()
-    let leftAnimation = CABasicAnimation(keyPath: "strokeEnd")
+    var leftBorderLayer: CAShapeLayer! = CAShapeLayer()
+    var leftPointPath: NSBezierPath! = NSBezierPath()
+    var leftAnimation: CABasicAnimation! = CABasicAnimation(keyPath: "strokeEnd")
     
     init() {
         super.init(frame: .zero)
@@ -33,7 +33,6 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
         rightBorderLayer.lineWidth = 5
         bottomBorderLayer.lineWidth = 5
         leftBorderLayer.lineWidth = 5
-        
         
         leftAnimation.delegate = self
         leftAnimation.isRemovedOnCompletion = true
@@ -44,6 +43,27 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    deinit {
+        print("")
+    }
+    
+    override func removeFromSuperview() {
+        topBorderLayer = nil
+        topPointPath = nil
+        topAnimation = nil
+        rightBorderLayer = nil
+        rightPointPath = nil
+        rightAnimation = nil
+        bottomBorderLayer = nil
+        bottomPointPath = nil
+        bottomAnimation = nil
+        leftBorderLayer = nil
+        leftPointPath = nil
+        leftAnimation = nil
+        
+        super.removeFromSuperview()
     }
     
     func smoothProgress(_ newValue: CGFloat, increment by: CGFloat = 0.3) {
@@ -126,9 +146,9 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
     
     func close() {
         progress = 0.0
-        topBorderLayer.removeFromSuperlayer()
-        rightBorderLayer.removeFromSuperlayer()
-        bottomBorderLayer.removeFromSuperlayer()
-        leftBorderLayer.removeFromSuperlayer()
+        topBorderLayer?.removeFromSuperlayer()
+        rightBorderLayer?.removeFromSuperlayer()
+        bottomBorderLayer?.removeFromSuperlayer()
+        leftBorderLayer?.removeFromSuperlayer()
     }
 }

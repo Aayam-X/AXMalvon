@@ -15,6 +15,8 @@
 - [ ] Create tab after current tab rather the at the end
 - [ ] Window Buttons not working (minimize, full screen etc..)
 ---
+- [x] All memory leaks fixed!!
+---
 - [x] Closing tab problem resolved!!!!!!
 - [x] Remove unnecessary code
 - [x] WKWebView close on popups

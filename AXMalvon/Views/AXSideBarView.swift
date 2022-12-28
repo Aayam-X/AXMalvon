@@ -22,7 +22,7 @@ class AXSideBarView: NSView {
     
     fileprivate let clipView = AXFlippedClipView()
     
-    var stackView = NSStackView()
+    var stackView: NSStackView! = NSStackView() // Should I make this reference option??
     
     weak var toggleSidebarButtonLeftConstaint: NSLayoutConstraint?
     
@@ -262,7 +262,9 @@ class AXSideBarView: NSView {
             _update_didCreateTab(tab, index)
         }
         
-        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
+        let currentTab = (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton)
+        currentTab.isSelected = true
+        currentTab.startObserving()
     }
     
     // Add a new item into the stackview

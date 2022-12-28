@@ -30,12 +30,13 @@ class AXWindow: NSWindow, NSWindowDelegate {
             defer: false
         )
         
-        delegate = self
+        self.delegate = self
         
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
         isMovableByWindowBackground = true
         self.minSize = .init(width: 300, height: 300)
+        self.isReleasedWhenClosed = false
         
         // NSWindow has a hidden NSVisualEffectView that changes the window's tint based on the wallpaper and position
         // We do not want to have two NSVisualEffectViews as it effects the performance
@@ -118,13 +119,17 @@ class AXWindow: NSWindow, NSWindowDelegate {
     }
     
     override func close() {
-        appProperties.webContainerView.stopObserving()
-        
         appProperties.sidebarView.stackView.arrangedSubviews.forEach { view in
             (view as! AXSidebarTabButton).stopObserving()
+            view.removeFromSuperview()
         }
         
+        appProperties.webContainerView.stopObserving()
+        appProperties.webContainerView.removeDelegates()
+        
         appProperties.tabs.removeAll()
+        
+        print("WINDOLIJEOLDK,miklm,")
         
         super.close()
     }

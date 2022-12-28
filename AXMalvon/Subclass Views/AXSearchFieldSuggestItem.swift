@@ -9,7 +9,7 @@
 import AppKit
 
 class AXSearchFieldSuggestItem: NSButton {
-    let titleView = NSTextField(frame: .zero)
+    let titleView: NSTextField! = NSTextField(frame: .zero)
     
     var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
     var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)

@@ -14,7 +14,7 @@ class AXWebContainerView: NSView {
     weak var appProperties: AXAppProperties!
     lazy var splitView = AXWebSplitView()
     
-    weak var progressBarObserver: NSKeyValueObservation?
+    var progressBarObserver: NSKeyValueObservation?
     
     fileprivate var hasDrawn = false
     
@@ -63,6 +63,12 @@ class AXWebContainerView: NSView {
         splitView.arrangedSubviews.forEach { view in
             view.layer?.cornerRadius = 5.0
         }
+    }
+    
+    func removeDelegates() {
+        let webView = appProperties.tabs[appProperties.currentTab].view
+        webView.uiDelegate = nil
+        webView.navigationDelegate = nil
     }
     
     // override func viewDidEndLiveResize() {
@@ -115,7 +121,6 @@ class AXWebContainerView: NSView {
             let progress: CGFloat = webView.estimatedProgress
             if progress >= 0.93 {
                 // Go very fast to 100!
-                
                 appProperties.progressBar.updateProgress(1.0)
             } else {
                 appProperties.progressBar.smoothProgress(progress)

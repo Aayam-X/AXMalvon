@@ -25,9 +25,12 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     weak var appProperties: AXAppProperties!
     
     // Subviews
-    var favIconImageView = NSImageView()
-    let titleView = NSTextField(frame: .zero)
-    var closeButton = AXHoverButton()
+    lazy var favIconImageView: NSImageView! = NSImageView()
+    
+    // This variable will stay in memory
+    let titleView: NSTextField! = NSTextField()
+    
+    lazy var closeButton: AXHoverButton! = AXHoverButton()
     
     // Drag and drop
     fileprivate var isDragging = false
@@ -40,8 +43,8 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
     
     // Observers
-    weak var titleObserver: NSKeyValueObservation?
-    weak var urlObserver: NSKeyValueObservation?
+    var titleObserver: NSKeyValueObservation?
+    var urlObserver: NSKeyValueObservation?
     
     // Other
     weak var titleViewRightAnchor: NSLayoutConstraint?
@@ -61,6 +64,13 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         }
     }
     
+    deinit {
+        titleObserver?.invalidate()
+        urlObserver?.invalidate()
+        titleObserver = nil
+        urlObserver = nil
+    }
+    
     init(_ appProperties: AXAppProperties) {
         self.appProperties = appProperties
         super.init(frame: .zero)
@@ -70,6 +80,8 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         self.bezelStyle = .shadowlessSquare
         self.layer?.borderColor = .white
         title = ""
+        
+        print("INIGT SIDEBARE BUTTOn")
     }
     
     required init?(coder: NSCoder) {
@@ -137,17 +149,14 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     public func startObserving() {
         let webView = appProperties.tabs[tag].view
         
-        self.titleObserver = webView.observe(\.title, changeHandler: { _, _ in
-            if let appProperties = self.appProperties {
-                appProperties.tabs[self.tag].title = webView.title ?? "Untitled"
-                self.tabTitle = appProperties.tabs[self.tag].title ?? "Untitled"
-            }
+        self.titleObserver = webView.observe(\.title, options: .new, changeHandler: { [weak self] _, _ in
+            let title = webView.title ?? "Untitled"
+            self?.appProperties.tabs[self!.tag].title = title
+            self?.tabTitle = title
         })
         
-        self.urlObserver = webView.observe(\.url, changeHandler: { _, _ in
-            if let appProperties = self.appProperties {
-                appProperties.tabs[self.tag].url = webView.url
-            }
+        self.urlObserver = webView.observe(\.url, options: .new, changeHandler: { [weak self] _, _ in
+            self?.appProperties.tabs[self!.tag].url = webView.url
         })
     }
     

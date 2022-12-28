@@ -14,7 +14,7 @@ class AXHoverButton: NSButton {
     
     var isMouseDown = false
     
-    var trackingArea : NSTrackingArea!
+    var trackingArea: NSTrackingArea!
     
     init(isSelected: Bool = false) {
         super.init(frame: .zero)
@@ -22,18 +22,15 @@ class AXHoverButton: NSButton {
         self.layer?.cornerRadius = 5
         self.isBordered = false
         self.bezelStyle = .shadowlessSquare
-        self.setTrackingArea(WithDrag: false)
+        self.setTrackingArea()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func setTrackingArea(WithDrag drag: Bool = false) {
-        var options : NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
-        if drag {
-            options.insert(.enabledDuringMouseDrag)
-        }
+    func setTrackingArea() {
+        let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
         trackingArea = NSTrackingArea.init(rect: self.bounds, options: options, owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
     }
@@ -43,14 +40,10 @@ class AXHoverButton: NSButton {
             sendAction(action, to: target)
         }
         self.isMouseDown = false
-        self.removeTrackingArea(self.trackingArea)
-        self.setTrackingArea(WithDrag: false)
         layer?.backgroundColor = .none
     }
     
     override func mouseDown(with event: NSEvent) {
-        self.removeTrackingArea(self.trackingArea)
-        self.setTrackingArea(WithDrag: true)
         self.isMouseDown = true
         self.layer?.backgroundColor = hoverColor.cgColor
     }

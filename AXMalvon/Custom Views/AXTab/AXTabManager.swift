@@ -15,6 +15,7 @@ class AXTabManager {
     // Updates every single view
     func updateAll() {
         appProperties.currentTab = 0
+        self.createNewTab()
         
         appProperties.sidebarView.updateAll()
         appProperties.webContainerView.update()

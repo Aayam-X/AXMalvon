@@ -49,6 +49,11 @@ class AXAppProperties {
     
     var isPrivate: Bool
     
+    deinit {
+        progressBar.removeFromSuperview()
+        popOver.removeFromSuperview()
+    }
+    
     init(isPrivate: Bool = false, restoresTab: Bool = true) {
         // Get UserDefaults
         sidebarToggled = UserDefaults.standard.bool(forKey: "sidebarToggled")

@@ -10,8 +10,6 @@ import AppKit
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
-    let window = AXWindow()
-    
     var aboutView: AXAboutView? = nil
     
     lazy var aboutViewWindow: NSWindow = AXAboutView.createAboutViewWindow()
@@ -22,12 +20,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Insert code here to initialize your application
-        window.makeKeyAndOrderFront(nil)
+        //        let window = AXWindow()
+        //        window.makeKeyAndOrderFront(nil)
         checkForUpdates()
     }
     
     func application(_ app: NSApplication, didDecodeRestorableState coder: NSCoder) {
-        window.appProperties.tabManager.updateAll()
+        if let window = app.keyWindow as? AXWindow {
+            window.appProperties.tabManager.updateAll()
+        }
+        
+        else {
+            let window = AXWindow()
+            window.makeKeyAndOrderFront(nil)
+            window.appProperties.tabManager.updateAll()
+        }
     }
     
     func application(_ app: NSApplication, willEncodeRestorableState coder: NSCoder) {
@@ -58,13 +65,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func application(_ application: NSApplication, open urls: [URL]) {
-        if application.windows.count > 1 {
+        if application.windows.count != 0 {
             if let window = application.keyWindow as? AXWindow {
                 for url in urls {
                     window.appProperties.tabManager.createNewTab(url: url)
                 }
             }
         } else {
+            let window = AXWindow()
+            window.makeKeyAndOrderFront(nil)
             for url in urls {
                 window.appProperties.tabManager.createNewTab(url: url)
             }
