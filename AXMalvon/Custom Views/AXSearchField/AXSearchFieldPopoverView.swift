@@ -103,7 +103,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         }
     }
     
-    private func searchEnter(_ url: inout URL) {
+    private func searchEnter(_ url: URL) {
         if newTabMode {
             appProperties.tabManager.createNewTab(url: url)
         } else {
@@ -115,8 +115,8 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     
     @objc func searchSuggestionAction(_ sender: AXSearchFieldSuggestItem) {
         if !sender.titleValue.isEmpty {
-            var url = fixURL(URL(string: "https://www.google.com/search?client=Malvon&q=\(sender.titleValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!)")!)
-            searchEnter(&url)
+            let url = fixURL(URL(string: "https://www.google.com/search?client=Malvon&q=\(sender.titleValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!)")!)
+            searchEnter(url)
             close()
         }
     }
@@ -143,7 +143,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         }
         
         if url != nil {
-            searchEnter(&url!)
+            searchEnter(url!)
         }
         
         close()

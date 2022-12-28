@@ -117,18 +117,16 @@ class AXWindow: NSWindow, NSWindowDelegate {
         appProperties.webContainerView.exitedFullScreen()
     }
     
-    func windowWillClose(_ notification: Notification) {
-        appProperties.tabs.forEach { tab in
-            tab.view.removeFromSuperview()
-        }
-        
-        appProperties.sidebarView.stackView.arrangedSubviews.forEach { view in
-            (view as? AXSidebarTabButton)?.stopObserving()
-        }
-        
+    override func close() {
         appProperties.webContainerView.stopObserving()
         
+        appProperties.sidebarView.stackView.arrangedSubviews.forEach { view in
+            (view as! AXSidebarTabButton).stopObserving()
+        }
+        
         appProperties.tabs.removeAll()
+        
+        super.close()
     }
     
     // MARK: - Public

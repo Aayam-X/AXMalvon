@@ -107,7 +107,7 @@ class AXWebViewFindView: NSView {
         webView.removeAllHighlights()
         
         if !searchField.stringValue.isEmpty {
-            webView.highlightAllOccurencesOfString(string: &searchField.stringValue)
+            webView.highlightAllOccurencesOfString(string: searchField.stringValue)
             
             // Number of words found
             let countCompletionHandler: (Int) -> Void = {

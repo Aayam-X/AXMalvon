@@ -14,7 +14,7 @@ class AXWebContainerView: NSView {
     weak var appProperties: AXAppProperties!
     lazy var splitView = AXWebSplitView()
     
-    var progressBarObserver: NSKeyValueObservation?
+    weak var progressBarObserver: NSKeyValueObservation?
     
     fileprivate var hasDrawn = false
     
@@ -112,13 +112,13 @@ class AXWebContainerView: NSView {
         }
         
         progressBarObserver = webView.observe(\.estimatedProgress, changeHandler: { [self] _, _ in
-            var progress: CGFloat = webView.estimatedProgress
+            let progress: CGFloat = webView.estimatedProgress
             if progress >= 0.93 {
                 // Go very fast to 100!
                 
-                appProperties.progressBar.updateProgress(&AXPreferenceGlobal.tempValue)
+                appProperties.progressBar.updateProgress(1.0)
             } else {
-                appProperties.progressBar.smoothProgress(&progress)
+                appProperties.progressBar.smoothProgress(progress)
             }
         })
         
@@ -207,10 +207,14 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
             index += 1
         }
         
-        var downloadItem = AXDownloadItem(fileName: suggestedFilename, location: fileUrl, download: download)
-        appProperties.sidebarView.didDownload(&downloadItem)
+        let downloadItem = AXDownloadItem(fileName: suggestedFilename, location: fileUrl, download: download)
+        appProperties.sidebarView.didDownload(downloadItem)
         
         completionHandler(fileUrl)
+    }
+    
+    func webViewDidClose(_ webView: WKWebView) {
+        self.appProperties.tabManager.removeTab(appProperties.currentTab)
     }
     
     // func downloadDidFinish(_ download: WKDownload) { }

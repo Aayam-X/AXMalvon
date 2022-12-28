@@ -54,6 +54,7 @@ class AXWebView: WKWebView {
             self.layer?.borderWidth = 0.0
             isSplitView = false
         }
+        
         super.removeFromSuperview()
     }
     
@@ -85,7 +86,7 @@ class AXWebView: WKWebView {
     }
     
     // Code Borrowed From: https://github.com/sstahurski/SearchWKWebView
-    func highlightAllOccurencesOfString(string: inout String) {
+    func highlightAllOccurencesOfString(string: String) {
         if let path = Bundle.main.url(forResource: "WKWebViewSearch", withExtension: "js") {
             do {
                 let data: Data = try Data(contentsOf: path)

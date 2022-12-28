@@ -258,8 +258,8 @@ class AXSideBarView: NSView {
     func updateAll() {
         stackView.subviews.removeAll()
         
-        for (index, var tab) in appProperties.tabs.enumerated() {
-            _update_didCreateTab(&tab, index)
+        for (index, tab) in appProperties.tabs.enumerated() {
+            _update_didCreateTab(tab, index)
         }
         
         (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
@@ -314,7 +314,7 @@ class AXSideBarView: NSView {
         (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
     }
     
-    func didDownload(_ d: inout AXDownloadItem) {
+    func didDownload(_ d: AXDownloadItem) {
         let button = AXSidebarDownloadButton(appProperties)
         button.downloadItem = d
         button.startObserving()
@@ -338,7 +338,7 @@ class AXSideBarView: NSView {
         appProperties.webContainerView.updateDelegates()
     }
     
-    func _update_didCreateTab(_ t: inout AXTabItem, _ i: Int) {
+    func _update_didCreateTab(_ t: AXTabItem, _ i: Int) {
         let button = AXSidebarTabButton(appProperties)
         button.tag = i
         button.startObserving()

@@ -15,6 +15,10 @@
 - [ ] Create tab after current tab rather the at the end
 - [ ] Window Buttons not working (minimize, full screen etc..)
 ---
+- [x] Closing tab problem resolved!!!!!!
+- [x] Remove unnecessary code
+- [x] WKWebView close on popups
+---
 - [x] Sidebar's background color would be clear when resizing
 - [x] Search field window would change size if search field's text was long
 - [x] Memory improvements

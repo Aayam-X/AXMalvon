@@ -46,13 +46,13 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func smoothProgress(_ newValue: inout CGFloat, increment by: CGFloat = 0.3) {
+    func smoothProgress(_ newValue: CGFloat, increment by: CGFloat = 0.3) {
         if newValue - progress >= by {
-            updateProgress(&newValue, 0.3)
+            updateProgress(newValue, 0.3)
         }
     }
     
-    func updateProgress(_ newValue: inout CGFloat, _ duration: CGFloat = 0.2) {
+    func updateProgress(_ newValue: CGFloat, _ duration: CGFloat = 0.2) {
         let color = NSColor.textColor.withAlphaComponent(CGFloat.random(in: 0.5..<1.0)).cgColor
         
         // Top Point
