@@ -16,7 +16,10 @@
 ---
 - [ ] Fix app safety
 - [ ] Fix problems with moveTabToNewWindow
-- [ ] Memory leaks found, fix them
+---
+- [x] Memory leaks found, fix them
+- [x] Command-Shift-T || Restore closed tab. 
+- [x] Button would have selectedState when hovered.
 ---
 - [x] Fix drag and drop between windows problem
 ---

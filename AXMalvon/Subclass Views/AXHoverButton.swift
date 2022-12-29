@@ -12,7 +12,7 @@ class AXHoverButton: NSButton {
     var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
     var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
     
-    var isMouseDown = false
+    var defaultColor: CGColor? = .none
     
     var trackingArea: NSTrackingArea!
     
@@ -39,22 +39,20 @@ class AXHoverButton: NSButton {
         if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
             sendAction(action, to: target)
         }
-        self.isMouseDown = false
-        layer?.backgroundColor = .none
+        layer?.backgroundColor = defaultColor
     }
     
     override func mouseDown(with event: NSEvent) {
-        self.isMouseDown = true
         self.layer?.backgroundColor = hoverColor.cgColor
     }
     
     override func mouseEntered(with event: NSEvent) {
         if isEnabled {
-            self.layer?.backgroundColor = self.isMouseDown ? selectedColor.cgColor : hoverColor.cgColor
+            self.layer?.backgroundColor = hoverColor.cgColor
         }
     }
     
     override func mouseExited(with event: NSEvent) {
-        self.layer?.backgroundColor = .none
+        self.layer?.backgroundColor = defaultColor
     }
 }

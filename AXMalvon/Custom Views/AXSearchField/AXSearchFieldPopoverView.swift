@@ -257,10 +257,10 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     
     func observer() {
         // When the user clicks outside of the window, we will exit
-        localMouseDownEventMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown], handler: { event -> NSEvent? in
-            if event.window != self.suggestionWindow {
-                if event.window == self.appProperties.window {
-                    self.close()
+        localMouseDownEventMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown], handler: { [weak self] event -> NSEvent? in
+            if event.window != self?.suggestionWindow {
+                if event.window == self?.appProperties.window {
+                    self!.close()
                     return nil
                 }
             }

@@ -7,7 +7,6 @@
 //
 
 import Cocoa
-import SwiftUI
 
 class AXPreferenceAccountView: NSView {
     lazy var nameLabel: NSTextField = {

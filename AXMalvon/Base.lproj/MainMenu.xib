@@ -79,6 +79,12 @@
                                     <action selector="createNewTab:" target="-1" id="xkI-RV-SM9"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Restore Tab" keyEquivalent="T" id="Zj1-FC-KrR">
+                                <connections>
+                                    <action selector="restoreTab:" target="Voe-Tx-rLC" id="Zk0-XZ-ZFg"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="OTG-dY-lzK"/>
                             <menuItem title="New Window" keyEquivalent="n" id="I9m-SQ-mmO">
                                 <connections>
                                     <action selector="createNewWindow:" target="-1" id="7Go-51-RPc"/>

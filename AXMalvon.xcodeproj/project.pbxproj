@@ -22,6 +22,8 @@
 		ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FF293E632A0055CD73 /* AXAppProperties.swift */; };
 		ED4262612948A63900D2478E /* Appicon.icns in Resources */ = {isa = PBXBuildFile; fileRef = ED4262602948A63900D2478E /* Appicon.icns */; };
 		ED474EFA29496EEF00268FBD /* newtab.html in Resources */ = {isa = PBXBuildFile; fileRef = ED474EF929496EEF00268FBD /* newtab.html */; };
+		ED5DF664295CF8F700433D45 /* AXWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED5DF663295CF8F700433D45 /* AXWelcomeView.swift */; };
+		ED5DF668295DC68000433D45 /* AXPurchaseBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED5DF667295DC68000433D45 /* AXPurchaseBrowserView.swift */; };
 		ED7B549F295B6E6F008A944F /* AXPreferenceGeneralView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED7B549E295B6E6F008A944F /* AXPreferenceGeneralView.swift */; };
 		ED7B54A1295B798C008A944F /* AXPreferenceAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED7B54A0295B798C008A944F /* AXPreferenceAccountView.swift */; };
 		ED907B33294DF4B30057A591 /* AXSidebarDownloadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED907B32294DF4B30057A591 /* AXSidebarDownloadButton.swift */; };
@@ -44,6 +46,19 @@
 		EDD7C02C2957C2C10067E559 /* AXAboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD7C02B2957C2C10067E559 /* AXAboutView.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		ED26A92B295DDCBC001915CF /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		ED01B0592957E3C700CB657E /* AXSearchFieldSuggestItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSearchFieldSuggestItem.swift; sourceTree = "<group>"; };
 		ED0203792958E5760054A6BB /* AXInformationAlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXInformationAlertView.swift; sourceTree = "<group>"; };
@@ -62,6 +77,8 @@
 		ED4262602948A63900D2478E /* Appicon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Appicon.icns; sourceTree = "<group>"; };
 		ED4262622948A64B00D2478E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		ED474EF929496EEF00268FBD /* newtab.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = newtab.html; sourceTree = "<group>"; };
+		ED5DF663295CF8F700433D45 /* AXWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWelcomeView.swift; sourceTree = "<group>"; };
+		ED5DF667295DC68000433D45 /* AXPurchaseBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPurchaseBrowserView.swift; sourceTree = "<group>"; };
 		ED7B549E295B6E6F008A944F /* AXPreferenceGeneralView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPreferenceGeneralView.swift; sourceTree = "<group>"; };
 		ED7B54A0295B798C008A944F /* AXPreferenceAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPreferenceAccountView.swift; sourceTree = "<group>"; };
 		ED907B32294DF4B30057A591 /* AXSidebarDownloadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSidebarDownloadButton.swift; sourceTree = "<group>"; };
@@ -130,6 +147,15 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		ED5DF662295CF8E000433D45 /* Welcome */ = {
+			isa = PBXGroup;
+			children = (
+				ED5DF663295CF8F700433D45 /* AXWelcomeView.swift */,
+				ED5DF667295DC68000433D45 /* AXPurchaseBrowserView.swift */,
+			);
+			path = Welcome;
+			sourceTree = "<group>";
+		};
 		ED7B549D295B6E61008A944F /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -151,6 +177,7 @@
 		ED9560942940065600AC1C15 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				ED5DF662295CF8E000433D45 /* Welcome */,
 				ED0B285C295B2F84003D656F /* Preference */,
 				EDD71EDA293BF0F900256EA9 /* AXContentView.swift */,
 				ED989DA5293D25E90081ABCF /* AXSideBarView.swift */,
@@ -248,6 +275,7 @@
 				EDD71EC0293BD96600256EA9 /* Sources */,
 				EDD71EC1293BD96600256EA9 /* Frameworks */,
 				EDD71EC2293BD96600256EA9 /* Resources */,
+				ED26A92B295DDCBC001915CF /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -322,8 +350,10 @@
 				ED7B54A1295B798C008A944F /* AXPreferenceAccountView.swift in Sources */,
 				ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */,
 				ED0B1AC92947910800524F08 /* AXSearchFieldPopoverView.swift in Sources */,
+				ED5DF668295DC68000433D45 /* AXPurchaseBrowserView.swift in Sources */,
 				ED0B2866295B619F003D656F /* AXPreferenceGlobal.swift in Sources */,
 				ED0B2864295B5EC1003D656F /* AXPreferenceButton.swift in Sources */,
+				ED5DF664295CF8F700433D45 /* AXWelcomeView.swift in Sources */,
 				ED01B05A2957E3C700CB657E /* AXSearchFieldSuggestItem.swift in Sources */,
 				ED9B4CE82958835100961792 /* AXTextField.swift in Sources */,
 				ED0B2860295B3910003D656F /* AXPreferenceView.swift in Sources */,
@@ -488,6 +518,10 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = B29PGN9AG4;
 				ENABLE_HARDENED_RUNTIME = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/AXMalvon",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AXMalvon/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
@@ -521,6 +555,10 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = B29PGN9AG4;
 				ENABLE_HARDENED_RUNTIME = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/AXMalvon",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AXMalvon/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Malvon;

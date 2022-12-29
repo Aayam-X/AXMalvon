@@ -35,6 +35,7 @@ class AXAppProperties {
     
     // Variables
     var tabs: [AXTabItem] = []
+    var previouslyClosedTabs: [URL] = []
     
     var currentTab = -1 {
         willSet {

@@ -50,8 +50,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     // Other
     weak var titleViewRightAnchor: NSLayoutConstraint?
     var trackingArea: NSTrackingArea!
-    var hasDrawn = false
-    var isMouseDown = false
+    private var hasDrawn = false
     
     var isSelected: Bool = false {
         didSet {
@@ -134,7 +133,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     
     @objc func closeTab() {
         stopObserving()
-        appProperties.tabManager.removeTab(self.tag)
+        appProperties.tabManager.closeTab(self.tag)
     }
     
     public func stopObserving() {
@@ -168,7 +167,6 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     }
     
     override func mouseUp(with event: NSEvent) {
-        self.isMouseDown = false
         layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
         
         isDragging = false
@@ -178,7 +176,6 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
             sendAction(action, to: target)
         }
-        self.isMouseDown = true
         self.layer?.backgroundColor = selectedColor.cgColor
     }
     
@@ -187,7 +184,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         closeButton.isHidden = false
         
         if !isSelected {
-            self.layer?.backgroundColor = self.isMouseDown ? selectedColor.cgColor : hoverColor.cgColor
+            self.layer?.backgroundColor = hoverColor.cgColor
         }
     }
     
@@ -343,7 +340,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         appProperties.tabManager.tabMovedToNewWindow(tag)
         
         DispatchQueue.main.async {
-            // Fix this
+            // Fix this | add self to stackview to prevent redrawing.
             window.appProperties.tabManager.updateAll()
         }
         

@@ -23,6 +23,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let window = AXWindow()
         window.makeKeyAndOrderFront(nil)
         
+        let window0 = NSWindow.create(styleMask: [.closable, .miniaturizable], size: .init(width: 500, height: 500))
+        window0.contentView = AXWelcomeView()
+        window0.makeKeyAndOrderFront(nil)
+        
+        // Always show this dialogue
+        let window1 = NSWindow.create(styleMask: [.closable, .miniaturizable], size: .init(width: 500, height: 500))
+        window1.contentView = AXPurchaseBrowserView()
+        window1.makeKeyAndOrderFront(nil)
+        
         checkForUpdates()
     }
     
@@ -96,7 +105,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if appProperties.searchFieldShown {
             appProperties.popOver.close()
         } else {
-            appProperties.tabManager.removeTab(appProperties.currentTab)
+            appProperties.tabManager.closeTab(appProperties.currentTab)
         }
     }
     
@@ -108,6 +117,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBAction func createNewPrivateWindow(_ sender: Any) {
         let window = AXWindow(isPrivate: true)
         window.makeKeyAndOrderFront(nil)
+    }
+    
+    @IBAction func restoreTab(_ sender: Any) {
+        guard let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties else { return }
+        appProperties.tabManager.restoreTab()
     }
     
     @IBAction func closeWindow(_ sender: Any) {

@@ -85,9 +85,13 @@ class AXTabManager {
         appProperties.webContainerView.update()
     }
     
-    func removeTab(_ at: Int) {
+    func closeTab(_ at: Int) {
         let tab = appProperties.tabs[at]
         tab.view.removeFromSuperview()
+        
+        if let url = tab.view.url {
+            appProperties.previouslyClosedTabs.append(url)
+        }
         
         if appProperties.tabs.count != 1 {
             // Close tab algorithm
@@ -106,6 +110,12 @@ class AXTabManager {
         } else {
             // Close window
             appProperties.window.close()
+        }
+    }
+    
+    func restoreTab() {
+        if !appProperties.previouslyClosedTabs.isEmpty {
+            createNewTab(url: appProperties.previouslyClosedTabs.removeLast())
         }
     }
     

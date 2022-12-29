@@ -219,7 +219,7 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
     }
     
     func webViewDidClose(_ webView: WKWebView) {
-        self.appProperties.tabManager.removeTab(appProperties.currentTab)
+        self.appProperties.tabManager.closeTab(appProperties.currentTab)
     }
     
     // func downloadDidFinish(_ download: WKDownload) { }

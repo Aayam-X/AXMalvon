@@ -44,6 +44,9 @@ class AXWebView: WKWebView {
             self.layer?.borderWidth = 1.0
             let appProperties = (window as! AXWindow).appProperties
             appProperties.sidebarView.webView_updateSelection()
+            
+            self.window?.title = self.title ?? "Untitled Tab"
+            appProperties.webContainerView.windowTitleLabel.stringValue = self.title ?? "Untitled Tab"
         }
         
         return super.becomeFirstResponder()

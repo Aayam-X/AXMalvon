@@ -8,6 +8,24 @@
 
 import AppKit
 
+extension NSWindow {
+    static func create(styleMask: NSWindow.StyleMask, size: NSSize) -> NSWindow {
+        let window = NSWindow(
+            contentRect: .init(origin: .zero, size: size),
+            styleMask: [.titled, .fullSizeContentView, styleMask],
+            backing: .buffered,
+            defer: false
+        )
+        
+        window.titlebarAppearsTransparent = true
+        window.isMovableByWindowBackground = true
+        window.center()
+        window.isReleasedWhenClosed = false
+        
+        return window
+    }
+}
+
 extension Array {
     subscript (safe index: Index) -> Element? {
         0 <= index && index < count ? self[index] : nil
