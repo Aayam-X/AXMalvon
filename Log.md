@@ -14,8 +14,9 @@
 - [ ] Create tab after current tab rather the at the end
 - [ ] Window Buttons not working (minimize, full screen etc..)
 ---
-- [ ] Fix app safety
-- [ ] Fix problems with moveTabToNewWindow
+- [x] Fix app safety
+- [x] Fix problems with moveTabToNewWindow
+- [x] Sidebar view will popup when user is dragging a tab if their sidebar view is hidden.
 ---
 - [x] Memory leaks found, fix them
 - [x] Command-Shift-T || Restore closed tab. 

@@ -58,7 +58,12 @@ class AXTabManager {
             }
             
             appProperties.tabs.remove(at: i)
-            appProperties.sidebarView.updatePosition(from: i-1)
+            
+            // remove button from stackView
+            let button = appProperties.sidebarView.stackView.arrangedSubviews[i]
+            button.removeFromSuperview()
+            
+            appProperties.sidebarView.updatePosition(from: i)
             appProperties.sidebarView.updateSelection()
             appProperties.webContainerView.update()
         } else {

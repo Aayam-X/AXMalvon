@@ -230,7 +230,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             }
         } else {
             // Check if the user is hovering over the WebView
-            if appProperties.webContainerView.frame.contains(offset) {
+            if appProperties.webContainerView.frame.contains(offset) && appProperties.tabs.count != 1 {
                 draggingState = .newSplitView
                 inDragging_createSplitView(offsetX: offset.x)
             } else {

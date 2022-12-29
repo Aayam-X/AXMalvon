@@ -18,10 +18,13 @@ class AXContentView: NSView {
     
     var sidebarTrackingArea: NSTrackingArea!
     
+    let supportedDraggingTypes: [NSPasteboard.PasteboardType] = [.URL, .init("com.aayamx.malvon.tabButton")]
+    
     override func viewWillDraw() {
         if !hasDrawn {
             sidebarTrackingArea = NSTrackingArea(rect: .init(x: bounds.origin.x - 100, y: bounds.origin.y, width: 101, height: bounds.size.height), options: [.activeAlways, .mouseMoved], owner: self)
             addTrackingArea(sidebarTrackingArea)
+            self.registerForDraggedTypes(supportedDraggingTypes)
             
             if appProperties.isPrivate {
                 self.layer?.backgroundColor = .black
@@ -74,24 +77,36 @@ class AXContentView: NSView {
     
     override func mouseMoved(with event: NSEvent) {
         if !appProperties.sidebarToggled && appProperties.sidebarView.superview == nil {
-            appProperties.sidebarView.setFrameSize(.init(width: appProperties.sidebarWidth, height: bounds.height))
-            appProperties.sidebarView.setFrameOrigin(.init(x: -appProperties.sidebarWidth, y: 0))
-            addSubview(appProperties.sidebarView)
-            appProperties.sidebarView.autoresizingMask = [.height]
-            appProperties.sidebarView.layer?.backgroundColor = NSColor.systemGray.cgColor
-            
-            if !isAnimating {
-                NSAnimationContext.runAnimationGroup({ context in
-                    context.duration = 0.1
-                    appProperties.sidebarView.animator().frame.origin.x = 0
-                    isAnimating = true
-                }, completionHandler: {
-                    self.isAnimating = false
-                })
-            }
-            
-            self.appProperties.window.hideTrafficLights(false)
+            sidebarHover()
         }
+    }
+    
+    override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
+        if !appProperties.sidebarToggled && appProperties.sidebarView.superview == nil {
+            sidebarHover()
+        }
+        
+        return .generic
+    }
+    
+    func sidebarHover() {
+        appProperties.sidebarView.setFrameSize(.init(width: appProperties.sidebarWidth, height: bounds.height))
+        appProperties.sidebarView.setFrameOrigin(.init(x: -appProperties.sidebarWidth, y: 0))
+        addSubview(appProperties.sidebarView)
+        appProperties.sidebarView.autoresizingMask = [.height]
+        appProperties.sidebarView.layer?.backgroundColor = NSColor.systemGray.cgColor
+        
+        if !isAnimating {
+            NSAnimationContext.runAnimationGroup({ context in
+                context.duration = 0.1
+                appProperties.sidebarView.animator().frame.origin.x = 0
+                isAnimating = true
+            }, completionHandler: {
+                self.isAnimating = false
+            })
+        }
+        
+        self.appProperties.window.hideTrafficLights(false)
     }
     
     override func viewDidEndLiveResize() {

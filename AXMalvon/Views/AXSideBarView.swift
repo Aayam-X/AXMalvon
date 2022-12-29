@@ -359,9 +359,7 @@ class AXSideBarView: NSView {
         (stackView.arrangedSubviews[safe: appProperties.currentTab] as! AXSidebarTabButton).isSelected = false
         
         let button = view as! AXSidebarTabButton
-        button.removeFromSuperview()
         button.stopObserving()
-        button.startObserving()
         
         button.target = self
         button.action = #selector(tabClick)
@@ -372,6 +370,7 @@ class AXSideBarView: NSView {
         
         appProperties.currentTab = stackView.arrangedSubviews.count - 1
         button.tag = appProperties.currentTab
+        button.startObserving()
         appProperties.webContainerView.update()
     }
     

@@ -23,14 +23,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let window = AXWindow()
         window.makeKeyAndOrderFront(nil)
         
-        let window0 = NSWindow.create(styleMask: [.closable, .miniaturizable], size: .init(width: 500, height: 500))
-        window0.contentView = AXWelcomeView()
-        window0.makeKeyAndOrderFront(nil)
-        
-        // Always show this dialogue
-        let window1 = NSWindow.create(styleMask: [.closable, .miniaturizable], size: .init(width: 500, height: 500))
-        window1.contentView = AXPurchaseBrowserView()
-        window1.makeKeyAndOrderFront(nil)
+        // let window0 = NSWindow.create(styleMask: [.closable, .miniaturizable], size: .init(width: 500, height: 500))
+        // window0.contentView = AXWelcomeView()
+        // window0.makeKeyAndOrderFront(nil)
+        //
+        // Always show this dialogue at start, if they haven't purchased it of course!
+        // let window1 = NSWindow.create(styleMask: [.closable, .miniaturizable], size: .init(width: 500, height: 500))
+        // window1.contentView = AXPurchaseBrowserView()
+        // window1.makeKeyAndOrderFront(nil)
         
         checkForUpdates()
     }
