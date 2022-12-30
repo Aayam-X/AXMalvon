@@ -12,7 +12,9 @@
 - [ ] Downloading Tabs cause entire tab view to crash
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Create tab after current tab rather the at the end
-- [ ] Window Buttons not working (minimize, full screen etc..)
+- [ ] Optional: Create transparent window buttons. 
+---
+- [x] Window Buttons not working (minimize, full screen etc..)
 ---
 - [x] Fix app safety
 - [x] Fix problems with moveTabToNewWindow

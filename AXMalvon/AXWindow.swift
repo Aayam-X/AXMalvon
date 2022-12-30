@@ -43,10 +43,6 @@ class AXWindow: NSWindow, NSWindowDelegate {
         // Which is why we must set the background color
         backgroundColor = .textColor
         
-        updateTrackingAreas(true)
-        
-        shouldEnableButtons(false)
-        
         if !appProperties.sidebarToggled {
             hideTrafficLights(true)
         }
@@ -59,31 +55,6 @@ class AXWindow: NSWindow, NSWindowDelegate {
         appProperties.window = self
         
         updateTrafficLights()
-    }
-    
-    
-    // MARK: - Mouse Tracking Functions
-    override func mouseEntered(with theEvent: NSEvent) {
-        if trackingTag == theEvent.trackingNumber {
-            shouldEnableButtons(true)
-        }
-    }
-    
-    override func mouseExited(with theEvent: NSEvent) {
-        if trackingTag == theEvent.trackingNumber {
-            shouldEnableButtons(false)
-        }
-    }
-    
-    func updateTrackingAreas(_ establish: Bool) {
-        if let tag = trackingTag {
-            standardWindowButton(.closeButton)!.removeTrackingRect(tag)
-        }
-        
-        if establish, let closeButton = standardWindowButton(.closeButton) {
-            let newBounds = NSRect(x: 0, y: 0, width: 55, height: 14.5)
-            trackingTag = closeButton.addTrackingRect(newBounds, owner: self, userData: nil, assumeInside: false)
-        }
     }
     
     // MARK: - Window Functions
@@ -107,12 +78,10 @@ class AXWindow: NSWindow, NSWindowDelegate {
         appProperties.sidebarView.enteredFullScreen()
         appProperties.webContainerView.enteredFullScreen()
         _hideTrafficLights(false)
-        shouldEnableButtons(true)
     }
     
     func windowDidExitFullScreen(_ notification: Notification) {
         appProperties.isFullScreen = false
-        shouldEnableButtons(false)
         hideTrafficLights(!appProperties.sidebarToggled)
         appProperties.sidebarView.exitedFullScreen()
         appProperties.webContainerView.exitedFullScreen()
@@ -170,11 +139,5 @@ class AXWindow: NSWindow, NSWindowDelegate {
         let zoomButton = standardWindowButton(.zoomButton)!
         zoomButton.frame.origin.x = 53.0
         zoomButton.frame.origin.y = 0
-    }
-    
-    fileprivate func shouldEnableButtons(_ b: Bool) {
-        standardWindowButton(.closeButton)!.isEnabled = b
-        standardWindowButton(.miniaturizeButton)!.isEnabled = b
-        standardWindowButton(.zoomButton)!.isEnabled = b
     }
 }
