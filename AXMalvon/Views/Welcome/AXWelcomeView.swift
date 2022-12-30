@@ -212,28 +212,3 @@ class AXWelcomeView: NSView {
         
     }
 }
-
-
-import SwiftUI
-
-struct AppKitPreview: NSViewRepresentable {
-    let viewBuilder: () -> NSView
-    
-    init(_ viewBuilder: @escaping () -> NSView) {
-        self.viewBuilder = viewBuilder
-    }
-    
-    func updateNSView(_ nsView: NSViewType, context: Context) {}
-    
-    func makeNSView(context: Context) -> some NSView {
-        return viewBuilder()
-    }
-}
-
-struct AppKitPreview_Previews: PreviewProvider {
-    static var previews: some View {
-        AppKitPreview {
-            AXWelcomeView()
-        }
-    }
-}

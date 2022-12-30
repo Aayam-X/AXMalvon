@@ -12,7 +12,7 @@ extension NSWindow {
     static func create(styleMask: NSWindow.StyleMask, size: NSSize) -> NSWindow {
         let window = NSWindow(
             contentRect: .init(origin: .zero, size: size),
-            styleMask: [.titled, .fullSizeContentView, styleMask],
+            styleMask: [.titled, styleMask],
             backing: .buffered,
             defer: false
         )
@@ -114,5 +114,21 @@ extension NSImageView {
 extension CGPoint {
     static func -(left: CGPoint, right: CGPoint) -> CGPoint {
         return CGPoint(x: left.x - right.x, y: left.y - right.y)
+    }
+}
+
+extension NSURL {
+    static func appDataURL() -> URL {
+        do {
+            let applicationSupportFolderURL = try FileManager.default.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            let appName = "Malvon"
+            let folder = applicationSupportFolderURL.appendingPathComponent("\(appName)/data", isDirectory: true)
+            if !FileManager.default.fileExists(atPath: folder.path) {
+                try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true, attributes: nil)
+            }
+            return folder
+        } catch {
+            fatalError("Application Support Directory Not Found")
+        }
     }
 }

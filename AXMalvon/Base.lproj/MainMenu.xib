@@ -389,12 +389,18 @@
                                     <action selector="showSearchField:" target="Voe-Tx-rLC" id="hcd-pH-jJW"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Show History" keyEquivalent="y" id="bRG-ab-Re5">
+                                <connections>
+                                    <action selector="showHistory:" target="Voe-Tx-rLC" id="xRD-as-d1E"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Toggle Sidebar" keyEquivalent="s" id="SOD-Ll-RHQ">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                 <connections>
                                     <action selector="toggleSidebar:" target="Voe-Tx-rLC" id="Oy2-1j-Fvv"/>
                                 </connections>
                             </menuItem>
+                            <menuItem isSeparatorItem="YES" id="14R-O7-7G6"/>
                             <menuItem title="Enter Full Screen" keyEquivalent="f" id="4J7-dP-txa">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                 <connections>
@@ -404,26 +410,26 @@
                         </items>
                     </menu>
                 </menuItem>
-                <menuItem title="Window" id="aUF-d1-5bR">
+                <menuItem title="Window" id="P9n-ND-L12">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <menu key="submenu" title="Window" systemMenu="window" id="Td7-aD-5lo">
+                    <menu key="submenu" title="Window" systemMenu="window" id="y7J-MS-HBB">
                         <items>
-                            <menuItem title="Minimize" keyEquivalent="m" id="OY7-WF-poV">
+                            <menuItem title="Minimize" keyEquivalent="m" id="L4h-nk-OCh">
                                 <connections>
-                                    <action selector="minimizeWindow:" target="Voe-Tx-rLC" id="VWI-eT-Yof"/>
+                                    <action selector="performMiniaturize:" target="-1" id="Dl6-7M-Bfy"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Zoom" id="R4o-n2-Eq4">
+                            <menuItem title="Zoom" id="gcz-Hp-xpH">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="performZoom:" target="-1" id="DIl-cC-cCs"/>
+                                    <action selector="performZoom:" target="-1" id="bJk-O2-FiR"/>
                                 </connections>
                             </menuItem>
-                            <menuItem isSeparatorItem="YES" id="GJ7-nK-xbC"/>
-                            <menuItem title="Bring All to Front" id="LE2-aR-0XJ">
+                            <menuItem isSeparatorItem="YES" id="zrw-qm-Z3i"/>
+                            <menuItem title="Bring All to Front" id="zPH-hJ-jsK">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="arrangeInFront:" target="-1" id="DRN-fu-gQh"/>
+                                    <action selector="arrangeInFront:" target="-1" id="SRb-IM-ptV"/>
                                 </connections>
                             </menuItem>
                         </items>

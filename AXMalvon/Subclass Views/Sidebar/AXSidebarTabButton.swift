@@ -36,8 +36,8 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     // Drag and drop
     fileprivate var isDragging = false
     var dragItem: NSDraggingItem!
-    var draggingState: DraggingPositionState = .reorder
-    fileprivate var draggingSide: DraggingSide = .left
+    var draggingState: DraggingPositionState! = .reorder
+    fileprivate var draggingSide: DraggingSide! = .left
     
     // Colors
     var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
@@ -258,6 +258,8 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         case .addToSidebarView:
             // Handled by sidebarview
             break
+        case .none:
+            break
         }
         
         isDragging = false
@@ -267,6 +269,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         isDragging = false
         isHidden = false
         closeButton.isHidden = false
+        dragItem = nil
     }
     
     // MARK: - Functions of Drag and Drop

@@ -63,12 +63,16 @@ public enum SearchSuggestions {
             do {
                 let array = try JSONSerialization.jsonObject(with: JSON!.data(using: String.Encoding.utf8.rawValue) ?? Data(), options: .allowFragments)
                 var result = [String]()
-                for i in 0 ..< (array as AnyObject).count where i <= 4 {
-                    for j in 0 ..< 1 {
-                        let suggestion = ((array as AnyObject).object(at: i) as AnyObject).object(at: j)
-                        if let str = suggestion as? String {
-                            result.append(str)
+                for i in 0 ..< (array as AnyObject).count {
+                    if i <= 4 {
+                        for j in 0 ..< 1 {
+                            let suggestion = ((array as AnyObject).object(at: i) as AnyObject).object(at: j)
+                            if let str = suggestion as? String {
+                                result.append(str)
+                            }
                         }
+                    } else {
+                        break
                     }
                 }
                 

@@ -22,7 +22,7 @@ class AXSideBarView: NSView {
     
     fileprivate let clipView = AXFlippedClipView()
     
-    var stackView: NSStackView! = NSStackView() // Should I make this reference option??
+    var stackView: NSStackView! = NSStackView()
     
     weak var toggleSidebarButtonLeftConstaint: NSLayoutConstraint?
     

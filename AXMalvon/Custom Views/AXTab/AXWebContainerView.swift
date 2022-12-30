@@ -174,6 +174,10 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
         appProperties.window.title = appProperties.tabs[safe: appProperties.currentTab]?.title ?? "Untitled"
         appProperties.sidebarView.checkNavigationButtons()
         self.windowTitleLabel.stringValue = webView.title ?? "Untitled"
+        
+        if webView.url != nil && !appProperties.isPrivate {
+            AXHistory.appendItem(title: webView.title ?? "Untitled", url: webView.url!.absoluteString)
+        }
     }
     
     func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {

@@ -28,7 +28,7 @@ class AXPurchaseBrowserView: NSView {
         label.isSelectable = true
         label.alignment = .center
         label.stringValue = """
-        At just $1.99, you will be given these astonishing and life changing features:
+        At just $2.88, you will be given these astonishing and life changing features:
             - Something
             - Something
             - Something
@@ -114,7 +114,7 @@ class AXPurchaseBrowserView: NSView {
         let webView = AXWebView()
         
         // Display a popover
-        let window = NSWindow.create(styleMask: [.closable, .miniaturizable, .resizable], size: .init(width: 650, height: 500))
+        let window = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable, .resizable], size: .init(width: 650, height: 500))
         window.contentView = webView
         self.window?.setContentSize(.init(width: 800, height: 600))
         self.window?.center()

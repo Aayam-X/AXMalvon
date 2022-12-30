@@ -9,10 +9,14 @@
 - Textkit 2: https://developer.apple.com/videos/play/wwdc2021/10061/
 
 ## 0.0.2
-- [ ] Downloading Tabs cause entire tab view to crash
+- [ ] Downloading Tabs cause entire tab view to crash || Subclass it
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Create tab after current tab rather the at the end
-- [ ] Optional: Create transparent window buttons. 
+- [ ] Optional: Create transparent window buttons.
+- [ ] Updater Application || xattr -cr Malvon.app || after zip 
+- [ ] Finish history problem with multiple selection
+---
+- [x] History!!
 ---
 - [x] Window Buttons not working (minimize, full screen etc..)
 ---

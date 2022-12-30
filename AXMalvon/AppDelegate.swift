@@ -23,12 +23,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let window = AXWindow()
         window.makeKeyAndOrderFront(nil)
         
-        // let window0 = NSWindow.create(styleMask: [.closable, .miniaturizable], size: .init(width: 500, height: 500))
+        AXHistory.checkIfFileExists()
+        
+        // let window0 = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))
         // window0.contentView = AXWelcomeView()
         // window0.makeKeyAndOrderFront(nil)
         //
         // Always show this dialogue at start, if they haven't purchased it of course!
-        // let window1 = NSWindow.create(styleMask: [.closable, .miniaturizable], size: .init(width: 500, height: 500))
+        // let window1 = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))
         // window1.contentView = AXPurchaseBrowserView()
         // window1.makeKeyAndOrderFront(nil)
         
@@ -130,17 +132,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    // TODO: MINIMIZE BUTTON FUNCTIONALITY
-    // https://stackoverflow.com/questions/33045075/minimize-miniaturize-cocoa-nswindow-without-titlebar
-    @IBAction func minimizeWindow(_ sender: Any) {
-        guard let window = NSApplication.shared.keyWindow as? AXWindow else { return }
-        window.styleMask = window.styleMask.union(.miniaturizable)
-        
-        
-        window.miniaturize(self)
-        //        window.setIsMiniaturized(true)
-        //        window.performMiniaturize(nil)
+    @IBAction func showHistory(_ sender: Any) {
+        if let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties {
+            let window = NSWindow.create(styleMask: [.closable, .miniaturizable, .resizable], size: .init(width: 500, height: 500))
+            window.title = "History"
+            window.contentView = AXHistoryView(appProperties: appProperties)
+            window.makeKeyAndOrderFront(nil)
+        }
     }
+    
     
     @IBAction func showSearchField(_ sender: Any) {
         let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
