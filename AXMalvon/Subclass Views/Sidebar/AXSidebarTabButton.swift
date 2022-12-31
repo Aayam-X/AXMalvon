@@ -343,14 +343,12 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         appProperties.tabManager.tabMovedToNewWindow(tag)
         
         DispatchQueue.main.async {
-            // Fix this | add self to stackview to prevent redrawing.
+            // TODO: add self to stackview to prevent redrawing.
             window.appProperties.tabManager.updateAll()
         }
         
-        window.setFrameOrigin(.init(x: NSEvent.mouseLocation.x, y: NSEvent.mouseLocation.y))
+        window.setFrameTopLeftPoint(.init(x: NSEvent.mouseLocation.x, y: NSEvent.mouseLocation.y))
         window.makeKeyAndOrderFront(nil)
-        
-        self.appProperties = window.appProperties
     }
     
     // MARK: - Pasteboard

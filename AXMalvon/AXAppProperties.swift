@@ -45,9 +45,6 @@ class AXAppProperties {
     
     var previousTab = -1
     
-    // Private Browsing
-    var configuration: WKWebViewConfiguration?
-    
     var isPrivate: Bool
     
     deinit {
@@ -76,7 +73,27 @@ class AXAppProperties {
         progressBar = AXRectangularProgressIndicator()
         findBar = AXWebViewFindView()
         
-        if !isPrivate {
+        self.isPrivate = isPrivate
+        
+        if isPrivate {
+            AXMalvon_WebViewConfiguration.processPool = .init()
+        } else {
+            // Retrive the pool
+            if let pool = self.getDataPool(key: "pool") {
+                AXMalvon_WebViewConfiguration.processPool = pool
+            } else {
+                AXMalvon_WebViewConfiguration.processPool = WKProcessPool()
+                self.setData(AXMalvon_WebViewConfiguration.processPool, key: "pool")
+            }
+            
+            // Retrive the cookies
+            if let cookies: [HTTPCookie] = self.getData(key: "AXMalvon-Cookies") {
+                for cookie in cookies {
+                    AXMalvon_WebViewConfiguration.websiteDataStore.httpCookieStore.setCookie(cookie)
+                }
+            }
+            
+            // Restore the tabs
             if restoresTab {
                 if let data = UserDefaults.standard.data(forKey: "tabs") {
                     do {
@@ -89,20 +106,12 @@ class AXAppProperties {
             }
         }
         
-        self.isPrivate = isPrivate
-        
         sidebarView.appProperties = self
         contentView.appProperties = self
         webContainerView.appProperties = self
         tabManager.appProperties = self
         popOver.appProperties = self
         findBar.appProperties = self
-        
-        if isPrivate {
-            configuration = WKWebViewConfiguration()
-            configuration?.processPool = WKProcessPool()
-            configuration?.websiteDataStore = .nonPersistent()
-        }
     }
     
     func saveProperties() {
@@ -111,6 +120,7 @@ class AXAppProperties {
         UserDefaults.standard.set(sidebarWidth, forKey: "sidebarWidth")
         
         if !isPrivate {
+            saveCookies()
             do {
                 let encoder = JSONEncoder()
                 let data = try encoder.encode(tabs)
@@ -119,5 +129,41 @@ class AXAppProperties {
                 print("Unable to Encode Tabs (\(error.localizedDescription))")
             }
         }
+    }
+    
+    
+    // Save webView cookies
+    private func saveCookies() {
+        if !isPrivate {
+            AXMalvon_WebViewConfiguration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
+                self.setData(cookies, key: "AXMalvon-Cookies")
+            }
+        }
+    }
+    
+    func setData(_ value: Any, key: String) {
+        let ud = UserDefaults.standard
+        let archivedPool = NSKeyedArchiver.archivedData(withRootObject: value)
+        ud.set(archivedPool, forKey: key)
+    }
+    
+    func getDataPool(key: String) -> WKProcessPool? {
+        let ud = UserDefaults.standard
+        if let val = ud.value(forKey: key) as? Data,
+           let obj = try! NSKeyedUnarchiver.unarchivedObject(ofClass: WKProcessPool.self, from: val) {
+            return obj
+        }
+        
+        return nil
+    }
+    
+    func getData(key: String) -> [HTTPCookie]? {
+        let ud = UserDefaults.standard
+        if let val = ud.value(forKey: key) as? Data,
+           let obj = NSKeyedUnarchiver.unarchiveObject(with: val) as? [HTTPCookie] {
+            return obj
+        }
+        
+        return nil
     }
 }

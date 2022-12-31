@@ -7,6 +7,9 @@
 //
 
 import AppKit
+import WebKit
+
+var AXMalvon_WebViewConfiguration: WKWebViewConfiguration = WKWebViewConfiguration()
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -19,12 +22,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Delegates
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        AXMalvon_WebViewConfiguration.websiteDataStore = .nonPersistent()
+        
         // Insert code here to initialize your application
         let window = AXWindow()
         window.makeKeyAndOrderFront(nil)
         
         AXHistory.checkIfFileExists()
-        
         // let window0 = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))
         // window0.contentView = AXWelcomeView()
         // window0.makeKeyAndOrderFront(nil)
@@ -100,6 +104,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @IBAction func removeCurrentTab(_ sender: Any) {
         guard let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties else { return }
+        
         if appProperties.searchFieldShown {
             appProperties.popOver.close()
         } else {

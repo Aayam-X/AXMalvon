@@ -264,7 +264,6 @@ class AXSideBarView: NSView {
         
         let currentTab = (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton)
         currentTab.isSelected = true
-        currentTab.startObserving()
     }
     
     // Add a new item into the stackview

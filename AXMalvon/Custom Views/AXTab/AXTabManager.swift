@@ -161,7 +161,7 @@ class AXTabManager {
         }
         
         // Create webView
-        let webView = AXWebView()
+        let webView = AXWebView(frame: .zero, configuration: AXMalvon_WebViewConfiguration)
         webView.addConfigurations()
         webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL)
         
@@ -177,7 +177,7 @@ class AXTabManager {
         }
         
         // Create webView
-        let webView = AXWebView()
+        let webView = AXWebView(frame: .zero, configuration: AXMalvon_WebViewConfiguration)
         webView.addConfigurations()
         webView.load(URLRequest(url: url))
         
@@ -192,7 +192,7 @@ class AXTabManager {
         }
         
         // Create webView
-        let webView = AXWebView()
+        let webView = AXWebView(frame: .zero, configuration: AXMalvon_WebViewConfiguration)
         webView.addConfigurations()
         webView.load(request)
         
@@ -221,7 +221,7 @@ class AXTabManager {
         }
         
         // Create webView
-        let webView = AXWebView()
+        let webView = AXWebView(frame: .zero, configuration: AXMalvon_WebViewConfiguration)
         webView.addConfigurations()
         webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
         
@@ -245,7 +245,7 @@ class AXTabManager {
     
     func createNewPrivateTab() {
         // Create webView
-        let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
+        let webView = AXWebView(frame: .zero, configuration: AXMalvon_WebViewConfiguration)
         webView.addConfigurations()
         webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
         
@@ -254,7 +254,7 @@ class AXTabManager {
     }
     
     func createNewPrivateTab(fileURL: URL) {
-        let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
+        let webView = AXWebView(frame: .zero, configuration: AXMalvon_WebViewConfiguration)
         webView.addConfigurations()
         webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL)
         
@@ -263,7 +263,7 @@ class AXTabManager {
     }
     
     func createNewPrivateTab(url: URL) {
-        let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
+        let webView = AXWebView(frame: .zero, configuration: AXMalvon_WebViewConfiguration)
         webView.addConfigurations()
         webView.load(URLRequest(url: url))
         
@@ -272,7 +272,7 @@ class AXTabManager {
     }
     
     func createNewPrivateTab(request: URLRequest) {
-        let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
+        let webView = AXWebView(frame: .zero, configuration: AXMalvon_WebViewConfiguration)
         webView.addConfigurations()
         webView.load(request)
         
@@ -281,8 +281,10 @@ class AXTabManager {
     }
     
     func createNewPrivateTab(request: URLRequest, config: WKWebViewConfiguration) -> AXWebView {
-        // TODO: How do I do this???
-        let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
+        config.websiteDataStore = AXMalvon_WebViewConfiguration.websiteDataStore
+        config.processPool = AXMalvon_WebViewConfiguration.processPool
+        
+        let webView = AXWebView(frame: .zero, configuration: AXMalvon_WebViewConfiguration)
         webView.addConfigurations()
         webView.load(request)
         
@@ -291,8 +293,10 @@ class AXTabManager {
     }
     
     func createNewPrivateTab(configuration: WKWebViewConfiguration) -> AXWebView {
-        // TODO: How do I do this???
-        let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
+        configuration.websiteDataStore = AXMalvon_WebViewConfiguration.websiteDataStore
+        configuration.processPool = AXMalvon_WebViewConfiguration.processPool
+        
+        let webView = AXWebView(frame: .zero, configuration: configuration)
         webView.addConfigurations()
         
         // Create tab

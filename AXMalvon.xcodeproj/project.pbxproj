@@ -26,6 +26,7 @@
 		ED5DF668295DC68000433D45 /* AXPurchaseBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED5DF667295DC68000433D45 /* AXPurchaseBrowserView.swift */; };
 		ED7B549F295B6E6F008A944F /* AXPreferenceGeneralView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED7B549E295B6E6F008A944F /* AXPreferenceGeneralView.swift */; };
 		ED7B54A1295B798C008A944F /* AXPreferenceAccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED7B54A0295B798C008A944F /* AXPreferenceAccountView.swift */; };
+		ED7E39682960CFA100745CE0 /* AXAlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED7E39672960CFA100745CE0 /* AXAlertView.swift */; };
 		ED907B33294DF4B30057A591 /* AXSidebarDownloadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED907B32294DF4B30057A591 /* AXSidebarDownloadButton.swift */; };
 		ED956093293FFFB900AC1C15 /* AXHoverButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED956092293FFFB900AC1C15 /* AXHoverButton.swift */; };
 		ED95609729400AC700AC1C15 /* AXWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED95609629400AC700AC1C15 /* AXWebView.swift */; };
@@ -83,6 +84,7 @@
 		ED5DF667295DC68000433D45 /* AXPurchaseBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPurchaseBrowserView.swift; sourceTree = "<group>"; };
 		ED7B549E295B6E6F008A944F /* AXPreferenceGeneralView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPreferenceGeneralView.swift; sourceTree = "<group>"; };
 		ED7B54A0295B798C008A944F /* AXPreferenceAccountView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPreferenceAccountView.swift; sourceTree = "<group>"; };
+		ED7E39672960CFA100745CE0 /* AXAlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXAlertView.swift; sourceTree = "<group>"; };
 		ED907B32294DF4B30057A591 /* AXSidebarDownloadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSidebarDownloadButton.swift; sourceTree = "<group>"; };
 		ED956092293FFFB900AC1C15 /* AXHoverButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXHoverButton.swift; sourceTree = "<group>"; };
 		ED95609629400AC700AC1C15 /* AXWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWebView.swift; sourceTree = "<group>"; };
@@ -195,6 +197,7 @@
 				EDD71EDA293BF0F900256EA9 /* AXContentView.swift */,
 				ED989DA5293D25E90081ABCF /* AXSideBarView.swift */,
 				EDD7C02B2957C2C10067E559 /* AXAboutView.swift */,
+				ED7E39672960CFA100745CE0 /* AXAlertView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -382,6 +385,7 @@
 				ED9B4CE82958835100961792 /* AXTextField.swift in Sources */,
 				ED0B2860295B3910003D656F /* AXPreferenceView.swift in Sources */,
 				ED9B4CEB2958A1EE00961792 /* Extensions.swift in Sources */,
+				ED7E39682960CFA100745CE0 /* AXAlertView.swift in Sources */,
 				ED989DA6293D25E90081ABCF /* AXSideBarView.swift in Sources */,
 				EDD71ED9293BECE700256EA9 /* AXWindow.swift in Sources */,
 				EDF03DEF295F701B00E62B9C /* AXHistoryView.swift in Sources */,

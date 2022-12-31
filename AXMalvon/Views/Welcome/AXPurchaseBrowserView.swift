@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import WebKit
 
 class AXPurchaseBrowserView: NSView {
     lazy var welcomeToMalvonLabel: NSTextField = {
@@ -111,7 +112,8 @@ class AXPurchaseBrowserView: NSView {
     
     @objc func purchaseAction(_ sender: AXHoverButton) {
         // Display a webview
-        let webView = AXWebView()
+        // TODO: Check if using AXWebView would be safe or not
+        let webView = WKWebView()
         
         // Display a popover
         let window = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable, .resizable], size: .init(width: 650, height: 500))

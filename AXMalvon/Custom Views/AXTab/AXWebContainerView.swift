@@ -196,12 +196,47 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
         download.delegate = self
     }
     
+    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        guard let url = webView.url, let scheme = url.scheme else { return }
+        
+        if scheme != "https" && scheme != "about" && scheme != "file" && scheme != "http" {
+            guard let appPath = NSWorkspace.shared.urlForApplication(toOpen: url) else { return }
+            
+            AXAlertView.presentAlert(window: appProperties.window) { response in
+                if response == true {
+                    let config = NSWorkspace.OpenConfiguration()
+                    config.activates = true
+                    
+                    NSWorkspace.shared.open([url], withApplicationAt: appPath, configuration: config)
+                }
+            }
+        }
+    }
+    
+    func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
+        let dialog = NSOpenPanel()
+        
+        dialog.allowsMultipleSelection = parameters.allowsMultipleSelection
+        dialog.canChooseDirectories = parameters.allowsDirectories
+        
+        // Show panel
+        dialog.beginSheetModal(for: appProperties.window) { result in
+            if result == .OK, let url = dialog.url {
+                completionHandler([url])
+            } else {
+                completionHandler(nil)
+            }
+        }
+    }
+    
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+        // Download
         if navigationAction.shouldPerformDownload {
             decisionHandler(.download, preferences)
             return
         }
         
+        // Modifier Flags
         switch navigationAction.modifierFlags {
         case .command: // New tab
             appProperties.tabManager.goesToNewTab = false
@@ -224,6 +259,7 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
             break
         }
         
+        // Default
         decisionHandler(.allow, preferences)
     }
     

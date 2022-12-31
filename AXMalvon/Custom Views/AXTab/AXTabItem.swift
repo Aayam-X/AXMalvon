@@ -26,7 +26,7 @@ struct AXTabItem: Codable {
         self.title = try values.decode(String.self, forKey: .title)
         self.url = try values.decode(URL.self, forKey: .url)
         
-        view = AXWebView()
+        view = AXWebView(frame: .zero, configuration: AXMalvon_WebViewConfiguration)
         view.addConfigurations()
         view.layer?.cornerRadius = 5.0
     }

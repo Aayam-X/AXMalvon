@@ -10,7 +10,6 @@
 
 ## Other
 - [ ] Create transparent window buttons.
-- [ ] What to do in private tabs with popups??
 
 ## 0.0.2
 - [ ] Downloading Tabs cause entire tab view to crash || Subclass it
@@ -19,6 +18,12 @@
 - [ ] Updater Application || xattr -cr Malvon.app || after zip 
 - [ ] History: Indexing + Most visited site || Clicking on tab opens || No duplicates?
 - [ ] Some sort of memory leak when dragging tabs
+---
+- [x] File uploading in the webView
+- [x] New alert view, AXAlertView
+- [x] Universal Link Support
+- [x] What to do in private tabs with popups??
+- [x] Halfway done browser profiles
 ---
 - [x] WebView Menu override
 - [x] WebView Command-Click new tab + Other types of clicks
