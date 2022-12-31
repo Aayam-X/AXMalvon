@@ -287,6 +287,24 @@ class AXSideBarView: NSView {
         button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
     }
     
+    // Add a new item into the stackview
+    func didCreateTabInBackground(index: Int) {
+        let t = appProperties.tabs[index]
+        
+        let button = AXSidebarTabButton(appProperties)
+        button.tag = index
+        button.startObserving()
+        
+        button.alignment = .natural
+        button.target = self
+        button.action = #selector(tabClick)
+        button.tabTitle = t.title ?? "Untitled"
+        stackView.addArrangedSubview(button)
+        
+        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+    }
+    
     func swapAt(_ first: Int, _ second: Int) {
         let firstSubview = stackView.arrangedSubviews[first] as! AXSidebarTabButton
         let secondSubview = stackView.arrangedSubviews[second] as! AXSidebarTabButton

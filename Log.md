@@ -5,18 +5,23 @@
 ## Links:
 - Custom NSTextField: https://stackoverflow.com/a/11833209
 - SplitView Animation: https://stackoverflow.com/a/48608153
-- Animating NSWindow: 
+- Animating NSWindow: https://github.com/jwilling/JNWAnimatableWindow
 - Textkit 2: https://developer.apple.com/videos/play/wwdc2021/10061/
+
+## Other
+- [ ] Create transparent window buttons.
+- [ ] What to do in private tabs with popups??
 
 ## 0.0.2
 - [ ] Downloading Tabs cause entire tab view to crash || Subclass it
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Create tab after current tab rather the at the end
-- [ ] Optional: Create transparent window buttons.
 - [ ] Updater Application || xattr -cr Malvon.app || after zip 
-- [ ] History: Indexing + Most visited site || Clicking on tab opens 
-- [ ] WebView Menu override
-- [ ] WebView Command-Click new tab
+- [ ] History: Indexing + Most visited site || Clicking on tab opens || No duplicates?
+- [ ] Some sort of memory leak when dragging tabs
+---
+- [x] WebView Menu override
+- [x] WebView Command-Click new tab + Other types of clicks
 ---
 - [x] Finish history problem with multiple selection + History action
 - [x] Moved the app will terminate logic to nswindow

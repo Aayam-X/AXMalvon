@@ -12,6 +12,8 @@ import WebKit
 class AXTabManager {
     weak var appProperties: AXAppProperties!
     
+    var goesToNewTab = true
+    
     // Updates every single view
     func updateAll() {
         appProperties.currentTab = 0
@@ -138,9 +140,14 @@ class AXTabManager {
         appProperties.tabs.append(tabItem)
         
         // This is the only exception
-        appProperties.currentTab = appProperties.tabs.count - 1
-        appProperties.sidebarView.didCreateTab()
-        appProperties.webContainerView.update()
+        if goesToNewTab {
+            appProperties.currentTab = appProperties.tabs.count - 1
+            appProperties.sidebarView.didCreateTab()
+            appProperties.webContainerView.update()
+        } else {
+            appProperties.sidebarView.didCreateTabInBackground(index: appProperties.tabs.count - 1)
+            goesToNewTab = true
+        }
         
         return tabItem.view
     }
@@ -175,6 +182,35 @@ class AXTabManager {
         webView.load(URLRequest(url: url))
         
         addTabAndUpdate(webView: webView)
+    }
+    
+    func createNewTab(request: URLRequest) {
+        // Check if private
+        if appProperties.isPrivate {
+            createNewPrivateTab(request: request)
+            return
+        }
+        
+        // Create webView
+        let webView = AXWebView()
+        webView.addConfigurations()
+        webView.load(request)
+        
+        addTabAndUpdate(webView: webView)
+    }
+    
+    func createNewTab(request: URLRequest, config: WKWebViewConfiguration) -> AXWebView {
+        // Check if private
+        if appProperties.isPrivate {
+            return createNewPrivateTab(request: request, config: config)
+        }
+        
+        // Create webView
+        let webView = AXWebView(frame: .zero, configuration: config)
+        webView.addConfigurations()
+        webView.load(request)
+        
+        return addTabAndUpdate(webView: webView)
     }
     
     func createNewTab() {
@@ -233,6 +269,25 @@ class AXTabManager {
         
         // Create tab
         addTabAndUpdate(webView: webView)
+    }
+    
+    func createNewPrivateTab(request: URLRequest) {
+        let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
+        webView.addConfigurations()
+        webView.load(request)
+        
+        // Create tab
+        addTabAndUpdate(webView: webView)
+    }
+    
+    func createNewPrivateTab(request: URLRequest, config: WKWebViewConfiguration) -> AXWebView {
+        // TODO: How do I do this???
+        let webView = AXWebView(frame: .zero, configuration: appProperties.configuration!)
+        webView.addConfigurations()
+        webView.load(request)
+        
+        // Create tab
+        return addTabAndUpdate(webView: webView)
     }
     
     func createNewPrivateTab(configuration: WKWebViewConfiguration) -> AXWebView {

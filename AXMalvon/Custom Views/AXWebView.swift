@@ -9,10 +9,16 @@
 import AppKit
 import WebKit
 
+enum ContextualMenuAction {
+    case openInNewTab
+    // Add other stuff
+}
+
 fileprivate let favIconScript = "document.querySelector('link[rel=\"icon\"], link[rel=\"shortcut icon\"]').getAttribute('href');"
 
 class AXWebView: WKWebView {
     var isSplitView: Bool = false
+    var contextualMenuAction: ContextualMenuAction?
     
     func addConfigurations() {
         self.configuration.preferences.setValue(true, forKey: "offlineApplicationCacheIsEnabled")
@@ -69,6 +75,8 @@ class AXWebView: WKWebView {
         return super.resignFirstResponder()
     }
     
+    // MARK: - Favicon
+    
     public func getFavicon(completion: @escaping(URL?) -> ()) {
         evaluateJavaScript(favIconScript) { result, error in
             if let favIconURL = result as? String {
@@ -87,6 +95,53 @@ class AXWebView: WKWebView {
             return
         }
     }
+    
+    // MARK: - Right click menu
+    override func willOpenMenu(_ menu: NSMenu, with event: NSEvent) {
+        super.willOpenMenu(menu, with: event)
+        
+        var objectType: String? = nil
+        
+        for item in menu.items {
+            switch item.identifier?.rawValue {
+            case "WKMenuItemIdentifierOpenLinkInNewWindow":
+                objectType = "Link"
+            case "WKMenuItemIdentifierOpenImageInNewWindow":
+                objectType = "Image"
+            case "WKMenuItemIdentifierOpenMediaInNewWindow":
+                objectType = "Media"
+            case "WKMenuItemIdentifierOpenFrameInNewWindow":
+                objectType = "Frame"
+            default:
+                break
+            }
+        }
+        
+        if let objectType = objectType {
+            let newMenuItem = NSMenuItem(title: "Open \(objectType) in New Tab", action: #selector(openLinkInNewTab(_:)), keyEquivalent: "")
+            newMenuItem.representedObject = menu.items[1] // Open in new window
+            menu.items.insert(newMenuItem, at: 1)
+            menu.items.insert(.separator(), at: 3)
+        }
+    }
+    
+    override func didCloseMenu(_ menu: NSMenu, with event: NSEvent?) {
+        super.didCloseMenu(menu, with: event)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            self.contextualMenuAction = nil
+        }
+    }
+    
+    @objc func openLinkInNewTab(_ sender: NSMenuItem) {
+        contextualMenuAction = .openInNewTab
+        
+        if let originalItem = sender.representedObject as? NSMenuItem {
+            _ = originalItem.target?.perform(originalItem.action, with: originalItem)
+        }
+    }
+    
+    // MARK: - Web Searching
     
     // Code Borrowed From: https://github.com/sstahurski/SearchWKWebView
     func highlightAllOccurencesOfString(string: String) {

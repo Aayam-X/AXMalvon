@@ -155,6 +155,14 @@ class AXWebContainerView: NSView {
 
 extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDelegate {
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+        
+        if let contextualMenuAction = (webView as? AXWebView)?.contextualMenuAction {
+            switch contextualMenuAction {
+            case .openInNewTab:
+                return appProperties.tabManager.createNewTab(request: navigationAction.request, config: configuration)
+            }
+        }
+        
         return appProperties.tabManager.createNewTab(config: configuration)
     }
     
@@ -191,9 +199,32 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
         if navigationAction.shouldPerformDownload {
             decisionHandler(.download, preferences)
-        } else {
-            decisionHandler(.allow, preferences)
+            return
         }
+        
+        switch navigationAction.modifierFlags {
+        case .command: // New tab
+            appProperties.tabManager.goesToNewTab = false
+            fallthrough
+        case [.shift, .command]: // New tab + Go to tab
+            appProperties.tabManager.createNewTab(request: navigationAction.request)
+            decisionHandler(.cancel, preferences)
+            return
+            
+            
+        case [.option, .command]: // New window
+            fallthrough
+        case [.shift, .option, .command]: // New window + show window
+            let window = AXWindow(isPrivate: appProperties.isPrivate, restoresTab: false)
+            window.appProperties.tabManager.createNewTab(request: navigationAction.request)
+            window.makeKeyAndOrderFront(nil)
+            decisionHandler(.cancel, preferences)
+            return
+        default:
+            break
+        }
+        
+        decisionHandler(.allow, preferences)
     }
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
