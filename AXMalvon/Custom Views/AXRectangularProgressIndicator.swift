@@ -45,10 +45,6 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
         fatalError("init(coder:) has not been implemented")
     }
     
-    deinit {
-        print("")
-    }
-    
     override func removeFromSuperview() {
         topBorderLayer = nil
         topPointPath = nil

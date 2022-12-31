@@ -51,10 +51,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
-        if let window = NSApplication.shared.keyWindow as? AXWindow {
-            window.appProperties.windowFrame = window.frame
-            window.appProperties.saveProperties()
-        }
     }
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

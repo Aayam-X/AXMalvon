@@ -14,7 +14,12 @@
 - [ ] Create tab after current tab rather the at the end
 - [ ] Optional: Create transparent window buttons.
 - [ ] Updater Application || xattr -cr Malvon.app || after zip 
-- [ ] Finish history problem with multiple selection
+- [ ] History: Indexing + Most visited site || Clicking on tab opens 
+- [ ] WebView Menu override
+- [ ] WebView Command-Click new tab
+---
+- [x] Finish history problem with multiple selection + History action
+- [x] Moved the app will terminate logic to nswindow
 ---
 - [x] History!!
 ---

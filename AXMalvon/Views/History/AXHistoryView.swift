@@ -107,6 +107,7 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
             tableView.delegate = self
             tableView.dataSource = self
             tableView.backgroundColor = .clear
+            tableView.doubleAction = #selector(tableViewAction)
             addSubview(tableView)
             tableView.autoresizingMask = [.height, .width]
             
@@ -182,6 +183,20 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
     }
     
     // MARK: - Actions
+    @objc func tableViewAction() {
+        let selectedRows = tableView.selectedRowIndexes
+        
+        for window in NSApplication.shared.windows {
+            if let window = window as? AXWindow {
+                for rowIndex in selectedRows {
+                    let url = filteredItems[rowIndex].url
+                    window.appProperties.tabManager.createNewTab(url: URL(string: url)!)
+                }
+                self.window?.close()
+                break
+            }
+        }
+    }
     
     @objc func searchAction() {
         let query = searchField.stringValue
@@ -215,8 +230,7 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
     }
     
     func deleteAtHighlightedRows() {
-        // TODO: FIX THIS
-        for index in tableView.selectedRowIndexes {
+        for index in tableView.selectedRowIndexes.reversed() {
             items.remove(at: index)
             filteredItems = items
         }

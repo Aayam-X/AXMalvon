@@ -88,6 +88,10 @@ class AXWindow: NSWindow, NSWindowDelegate {
     }
     
     override func close() {
+        // Save the window
+        appProperties.windowFrame = self.frame
+        appProperties.saveProperties()
+        
         appProperties.sidebarView.stackView.arrangedSubviews.forEach { view in
             (view as! AXSidebarTabButton).stopObserving()
             view.removeFromSuperview()
