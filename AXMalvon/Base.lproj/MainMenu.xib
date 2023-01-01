@@ -426,6 +426,13 @@
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="zrw-qm-Z3i"/>
+                            <menuItem title="Keep Window on Top" id="D8b-Lm-Tal">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="keepWindowOnTop:" target="Voe-Tx-rLC" id="Qf0-Yx-lqu"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="KDF-lK-R7G"/>
                             <menuItem title="Bring All to Front" id="zPH-hJ-jsK">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>

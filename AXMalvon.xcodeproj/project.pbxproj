@@ -18,6 +18,8 @@
 		ED0B2866295B619F003D656F /* AXPreferenceGlobal.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0B2865295B619F003D656F /* AXPreferenceGlobal.swift */; };
 		ED19C806294F904400E0924D /* WKWebViewSearch.js in Resources */ = {isa = PBXBuildFile; fileRef = ED19C805294F904400E0924D /* WKWebViewSearch.js */; };
 		ED212333294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED212332294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift */; };
+		ED2735E52961FAAB00DE8126 /* AXProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2735E42961FAAB00DE8126 /* AXProfile.swift */; };
+		ED2735E72962136E00DE8126 /* AXProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2735E62962136E00DE8126 /* AXProfileManager.swift */; };
 		ED3204FE293E61240055CD73 /* AXSplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FD293E61240055CD73 /* AXSplitView.swift */; };
 		ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FF293E632A0055CD73 /* AXAppProperties.swift */; };
 		ED4262612948A63900D2478E /* Appicon.icns in Resources */ = {isa = PBXBuildFile; fileRef = ED4262602948A63900D2478E /* Appicon.icns */; };
@@ -74,6 +76,8 @@
 		ED0B2865295B619F003D656F /* AXPreferenceGlobal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPreferenceGlobal.swift; sourceTree = "<group>"; };
 		ED19C805294F904400E0924D /* WKWebViewSearch.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = WKWebViewSearch.js; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.javascript; };
 		ED212332294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXRectangularProgressIndicator.swift; sourceTree = "<group>"; };
+		ED2735E42961FAAB00DE8126 /* AXProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXProfile.swift; sourceTree = "<group>"; };
+		ED2735E62962136E00DE8126 /* AXProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXProfileManager.swift; sourceTree = "<group>"; };
 		ED27D69E2944B5F000CA1911 /* Log.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Log.md; sourceTree = "<group>"; };
 		ED3204FD293E61240055CD73 /* AXSplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSplitView.swift; sourceTree = "<group>"; };
 		ED3204FF293E632A0055CD73 /* AXAppProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXAppProperties.swift; sourceTree = "<group>"; };
@@ -241,6 +245,8 @@
 			children = (
 				ED6ED710295F372F00B08B30 /* History */,
 				ED9B4CEA2958A1EE00961792 /* Extensions.swift */,
+				ED2735E42961FAAB00DE8126 /* AXProfile.swift */,
+				ED2735E62962136E00DE8126 /* AXProfileManager.swift */,
 			);
 			path = Other;
 			sourceTree = "<group>";
@@ -391,7 +397,9 @@
 				EDF03DEF295F701B00E62B9C /* AXHistoryView.swift in Sources */,
 				ED7B549F295B6E6F008A944F /* AXPreferenceGeneralView.swift in Sources */,
 				ED956093293FFFB900AC1C15 /* AXHoverButton.swift in Sources */,
+				ED2735E52961FAAB00DE8126 /* AXProfile.swift in Sources */,
 				ED9FE65E29464E1C00323453 /* AXSidebarTabButton.swift in Sources */,
+				ED2735E72962136E00DE8126 /* AXProfileManager.swift in Sources */,
 				ED95609729400AC700AC1C15 /* AXWebView.swift in Sources */,
 				EDD7C02C2957C2C10067E559 /* AXAboutView.swift in Sources */,
 				ED0B285E295B2F8C003D656F /* AXPreferenceWindow.swift in Sources */,
@@ -559,7 +567,7 @@
 				INFOPLIST_FILE = AXMalvon/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 Aayam(X) Inc. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2023 Aayam(X) Inc. All rights reserved.";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -601,7 +609,7 @@
 				INFOPLIST_FILE = AXMalvon/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 Aayam(X) Inc. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2023 Aayam(X) Inc. All rights reserved.";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (

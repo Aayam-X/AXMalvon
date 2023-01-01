@@ -3,10 +3,18 @@
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2022-12-04.
-//  Copyright © 2022 Aayam(X). All rights reserved.
+//  Copyright © 2022-2023 Aayam(X). All rights reserved.
 //
 
 import AppKit
+
+
+enum AXScrollViewScrollDirection {
+    case left
+    case right
+}
+
+fileprivate var scrollDirection: AXScrollViewScrollDirection! = .left
 
 final class AXFlippedClipView: NSClipView {
     override var isFlipped: Bool {
@@ -14,11 +22,46 @@ final class AXFlippedClipView: NSClipView {
     }
 }
 
+final class AXScrollView: NSScrollView {
+    var horizontalScrollHandler: (() -> Void)
+    
+    init(horizontalScrollHandler: @escaping () -> Void) {
+        self.horizontalScrollHandler = horizontalScrollHandler
+        super.init(frame: .zero)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func scrollWheel(with event: NSEvent) {
+        super.scrollWheel(with: event)
+        let x = event.scrollingDeltaX
+        let y = event.scrollingDeltaY
+        
+        if x == 0 && y == 0 {
+            horizontalScrollHandler()
+            return
+        }
+        
+        if y == 0 {
+            if x > 0 {
+                scrollDirection = .left
+            }
+            if x < 0 {
+                scrollDirection = .right
+            }
+        } else {
+            scrollDirection = nil
+        }
+    }
+}
+
 class AXSideBarView: NSView {
     // MARK: - Variables
     weak var appProperties: AXAppProperties!
     
-    let scrollView = NSScrollView()
+    var scrollView: AXScrollView!
     
     fileprivate let clipView = AXFlippedClipView()
     
@@ -91,6 +134,28 @@ class AXSideBarView: NSView {
     
     // MARK: Functions
     
+    override func scrollWheel(with event: NSEvent) {
+        super.scrollWheel(with: event)
+        let x = event.scrollingDeltaX
+        let y = event.scrollingDeltaY
+        
+        if x == 0 && y == 0 {
+            updateProfile()
+            return
+        }
+        
+        if y == 0 {
+            if x > 0 {
+                scrollDirection = .left
+            }
+            if x < 0 {
+                scrollDirection = .right
+            }
+        } else {
+            scrollDirection = nil
+        }
+    }
+    
     override func viewWillDraw() {
         if !hasDrawn {
             // Configure Self
@@ -128,6 +193,9 @@ class AXSideBarView: NSView {
             backButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
             
             // Setup the scrollview
+            scrollView = AXScrollView(horizontalScrollHandler: { [weak self] in
+                self?.updateProfile()
+            })
             scrollView.translatesAutoresizingMaskIntoConstraints = false
             scrollView.automaticallyAdjustsContentInsets = false
             scrollView.contentInsets = .init(top: 0, left: 9, bottom: 0, right: 0)
@@ -156,6 +224,13 @@ class AXSideBarView: NSView {
             stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
             
             hasDrawn = true
+        }
+    }
+    
+    func updateProfile() {
+        if let direction = scrollDirection {
+            // Update the profile
+            
         }
     }
     

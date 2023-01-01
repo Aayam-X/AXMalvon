@@ -3,7 +3,7 @@
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2022-12-06.
-//  Copyright © 2022 Aayam(X). All rights reserved.
+//  Copyright © 2022-2023 Aayam(X). All rights reserved.
 //
 
 import AppKit
@@ -180,7 +180,6 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         appProperties.window.title = appProperties.tabs[safe: appProperties.currentTab]?.title ?? "Untitled"
-        appProperties.sidebarView.checkNavigationButtons()
         self.windowTitleLabel.stringValue = webView.title ?? "Untitled"
         
         if webView.url != nil && !appProperties.isPrivate {

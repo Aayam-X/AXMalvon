@@ -3,7 +3,7 @@
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2022-12-27.
-//  Copyright © 2022 Aayam(X). All rights reserved.
+//  Copyright © 2022-2023 Aayam(X). All rights reserved.
 //
 
 import Foundation

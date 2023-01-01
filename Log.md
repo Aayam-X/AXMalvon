@@ -19,6 +19,11 @@
 - [ ] History: Indexing + Most visited site || Clicking on tab opens || No duplicates?
 - [ ] Some sort of memory leak when dragging tabs
 ---
+- [x] Keep Window on Top option
+- [x] Profiles code finished
+- [x] Bit of UI for profiles, still have to make a bit more stuff
+- [x] 2023 Copyright update
+---
 - [x] File uploading in the webView
 - [x] New alert view, AXAlertView
 - [x] Universal Link Support

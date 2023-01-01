@@ -3,7 +3,7 @@
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2022-12-03.
-//  Copyright © 2022 Aayam(X). All rights reserved.
+//  Copyright © 2022-2023 Aayam(X). All rights reserved.
 //
 
 import AppKit
@@ -24,8 +24,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         AXMalvon_WebViewConfiguration.websiteDataStore = .nonPersistent()
         
+        // Retrive profiles from UserDefaults
+        AX_profiles = [
+            // TODO:
+            .init(name: "Personal"),
+            .init(name: "School")
+        ]
+        
         // Insert code here to initialize your application
         let window = AXWindow()
+        window.appProperties.profileManager.switchProfiles(to: 0)
         window.makeKeyAndOrderFront(nil)
         
         AXHistory.checkIfFileExists()
@@ -157,6 +165,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         aboutViewWindow.setFrameOriginToPositionWindowInCenterOfScreen()
         aboutViewWindow.makeKeyAndOrderFront(self)
+    }
+    
+    @IBAction func keepWindowOnTop(_ sender: Any) {
+        if let window = (NSApplication.shared.keyWindow as? AXWindow) {
+            if window.level == .floating {
+                window.level = .normal
+            } else {
+                window.level = .floating
+            }
+        }
     }
     
     @IBAction func setAsDefaultBrowser(_ sender: Any) {
