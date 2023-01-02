@@ -16,6 +16,11 @@ struct AXTabItem: Codable {
     var url: URL?
     var view: AXWebView
     
+    enum CodingKeys: CodingKey {
+        case title
+        case url
+    }
+    
     init(view: AXWebView) {
         self.view = view
     }
@@ -35,11 +40,6 @@ struct AXTabItem: Codable {
         if let url = url {
             view.load(URLRequest(url: url))
         }
-    }
-    
-    enum CodingKeys: CodingKey {
-        case title
-        case url
     }
 }
 

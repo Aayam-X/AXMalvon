@@ -48,6 +48,7 @@
 		EDD71ED9293BECE700256EA9 /* AXWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD71ED8293BECE700256EA9 /* AXWindow.swift */; };
 		EDD71EDB293BF0F900256EA9 /* AXContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD71EDA293BF0F900256EA9 /* AXContentView.swift */; };
 		EDD7C02C2957C2C10067E559 /* AXAboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD7C02B2957C2C10067E559 /* AXAboutView.swift */; };
+		EDE6969A29638F230041B72D /* Subclasses.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE6969929638F230041B72D /* Subclasses.swift */; };
 		EDF03DEB295F654600E62B9C /* AXHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF03DEA295F654600E62B9C /* AXHistory.swift */; };
 		EDF03DEF295F701B00E62B9C /* AXHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF03DEE295F701B00E62B9C /* AXHistoryView.swift */; };
 /* End PBXBuildFile section */
@@ -111,6 +112,7 @@
 		EDD71ED8293BECE700256EA9 /* AXWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWindow.swift; sourceTree = "<group>"; };
 		EDD71EDA293BF0F900256EA9 /* AXContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXContentView.swift; sourceTree = "<group>"; };
 		EDD7C02B2957C2C10067E559 /* AXAboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXAboutView.swift; sourceTree = "<group>"; };
+		EDE6969929638F230041B72D /* Subclasses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Subclasses.swift; sourceTree = "<group>"; };
 		EDF03DEA295F654600E62B9C /* AXHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXHistory.swift; sourceTree = "<group>"; };
 		EDF03DEE295F701B00E62B9C /* AXHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXHistoryView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -247,6 +249,7 @@
 			children = (
 				ED6ED710295F372F00B08B30 /* History */,
 				ED9B4CEA2958A1EE00961792 /* Extensions.swift */,
+				EDE6969929638F230041B72D /* Subclasses.swift */,
 				ED2735E42961FAAB00DE8126 /* AXProfile.swift */,
 				ED2735E62962136E00DE8126 /* AXProfileManager.swift */,
 				ED2735E82962586400DE8126 /* AXProfileListView.swift */,
@@ -389,6 +392,7 @@
 				ED0B2866295B619F003D656F /* AXPreferenceGlobal.swift in Sources */,
 				EDF03DEB295F654600E62B9C /* AXHistory.swift in Sources */,
 				ED0B2864295B5EC1003D656F /* AXPreferenceButton.swift in Sources */,
+				EDE6969A29638F230041B72D /* Subclasses.swift in Sources */,
 				ED5DF664295CF8F700433D45 /* AXWelcomeView.swift in Sources */,
 				ED01B05A2957E3C700CB657E /* AXSearchFieldSuggestItem.swift in Sources */,
 				ED9B4CE82958835100961792 /* AXTextField.swift in Sources */,

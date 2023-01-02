@@ -15,6 +15,16 @@ struct AXBrowserProfile: Codable {
     var tabs: [AXTabItem] = []
     var previouslyClosedTabs: [URL] = []
     
+    lazy var tabStackView: NSStackView = {
+        let stackView = NSStackView()
+        stackView.orientation = .vertical
+        stackView.spacing = 1.08
+        stackView.detachesHiddenViews = false
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        return stackView
+    }()
+    
     var currentTab = -1 {
         willSet {
             previousTab = currentTab
@@ -99,6 +109,12 @@ struct AXBrowserProfile: Codable {
         webViewConfiguration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
             setData(cookies, key: "\(name)-HTTPCookie")
         }
+    }
+    
+    static func retriveProfiles() {
+        let profileNames = UserDefaults.standard.stringArray(forKey: "Profiles") ?? [.init("Default"), .init("Secondary")]
+        let profiles = profileNames.map { AXBrowserProfile(name: $0) }
+        AX_profiles.append(contentsOf: profiles)
     }
 }
 

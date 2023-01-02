@@ -17,6 +17,10 @@ class AXSplitView: NSSplitView, NSSplitViewDelegate {
         dividerStyle = .thin
     }
     
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     func splitView(_ splitView: NSSplitView, constrainMinCoordinate proposedMinimumPosition: CGFloat, ofSubviewAt dividerIndex: Int) -> CGFloat {
         return 160
     }
@@ -35,9 +39,5 @@ class AXSplitView: NSSplitView, NSSplitViewDelegate {
     
     override func drawDivider(in rect: NSRect) {
         // Writing nothing here makes the divider invisible
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
     }
 }

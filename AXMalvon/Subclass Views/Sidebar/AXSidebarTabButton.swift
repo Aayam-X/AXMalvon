@@ -26,11 +26,8 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     weak var appProperties: AXAppProperties!
     
     // Subviews
+    lazy var titleView: NSTextField! = NSTextField()
     lazy var favIconImageView: NSImageView! = NSImageView()
-    
-    // This variable will stay in memory
-    let titleView: NSTextField! = NSTextField()
-    
     lazy var closeButton: AXHoverButton! = AXHoverButton()
     
     // Drag and drop
@@ -50,7 +47,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     // Other
     weak var titleViewRightAnchor: NSLayoutConstraint?
     var trackingArea: NSTrackingArea!
-    private var hasDrawn = false
+    private var hasDrawn: Bool = false
     
     var isSelected: Bool = false {
         didSet {

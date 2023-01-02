@@ -10,6 +10,8 @@ import Cocoa
 import WebKit
 
 class AXPurchaseBrowserView: NSView {
+    private var hasDrawn: Bool = false
+    
     lazy var welcomeToMalvonLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -63,8 +65,6 @@ class AXPurchaseBrowserView: NSView {
         // button.action = #selector(enterAction)
         return button
     }()
-    
-    private var hasDrawn: Bool = false
     
     override func viewWillDraw() {
         if !hasDrawn {

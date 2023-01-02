@@ -31,7 +31,7 @@ class AXTabManager {
             appProperties.currentTab = 0
         }
         
-        appProperties.sidebarView.updateAll()
+        appProperties.sidebarView.switchedProfile()
         appProperties.webContainerView.update()
     }
     
@@ -95,7 +95,7 @@ class AXTabManager {
         appProperties.contentView.displaySearchBarPopover()
     }
     
-    // MARK: - Creating Tabs
+    // MARK: - Tab functions
     func `switch`(to: Int) {
         if appProperties.currentTab != to {
             appProperties.currentTab = to
@@ -147,6 +147,7 @@ class AXTabManager {
         }
     }
     
+    // MARK: - Create New Tab
     @discardableResult
     private func addTabAndUpdate(webView: AXWebView) -> AXWebView {
         var tabItem = AXTabItem(view: webView)
@@ -166,7 +167,6 @@ class AXTabManager {
         return tabItem.view
     }
     
-    // MARK: - Create New Tab
     func createNewTab(fileURL: URL) {
         // Check if private
         if appProperties.isPrivate {

@@ -9,6 +9,8 @@
 import Cocoa
 
 class AXWelcomeView: NSView {
+    private var hasDrawn: Bool = false
+    
     lazy var welcomeToMalvonLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -93,7 +95,7 @@ class AXWelcomeView: NSView {
         button.layer?.borderWidth = 1.0
         button.title = "Sign Up"
         button.target = self
-        button.action = #selector(showConfirmPassword)
+        button.action = #selector(displaySecondTextField)
         return button
     }()
     
@@ -109,8 +111,6 @@ class AXWelcomeView: NSView {
         label.textColor = .systemRed
         return label
     }()
-    
-    private var hasDrawn: Bool = false
     
     override func viewWillDraw() {
         if !hasDrawn {
@@ -180,7 +180,9 @@ class AXWelcomeView: NSView {
         }
     }
     
-    @objc func showConfirmPassword(_ sender: AXHoverButton) {
+    // Prevent reverse engineering
+    // This is signUpButtonAction
+    @objc func displaySecondTextField(_ sender: AXHoverButton) {
         enterNameTextField.nextKeyView = retypeSecurePasswordTextField
         addSubview(enterNameTextField)
         enterNameTextField.topAnchor.constraint(equalTo: signUpButton.bottomAnchor, constant: 10).isActive = true

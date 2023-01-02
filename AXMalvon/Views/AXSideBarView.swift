@@ -14,64 +14,21 @@ enum AXScrollViewScrollDirection {
     case right
 }
 
-fileprivate var scrollDirection: AXScrollViewScrollDirection! = .left
-
-final class AXFlippedClipView: NSClipView {
-    override var isFlipped: Bool {
-        return true
-    }
-}
-
-final class AXScrollView: NSScrollView {
-    var horizontalScrollHandler: (() -> Void)
-    
-    init(horizontalScrollHandler: @escaping () -> Void) {
-        self.horizontalScrollHandler = horizontalScrollHandler
-        super.init(frame: .zero)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    override func scrollWheel(with event: NSEvent) {
-        super.scrollWheel(with: event)
-        let x = event.scrollingDeltaX
-        let y = event.scrollingDeltaY
-        
-        if x == 0 && y == 0 {
-            horizontalScrollHandler()
-            return
-        }
-        
-        if y == 0 {
-            if x > 0 {
-                scrollDirection = .left
-            }
-            if x < 0 {
-                scrollDirection = .right
-            }
-        } else {
-            scrollDirection = nil
-        }
-    }
-}
+var AXMalvon_SidebarView_scrollDirection: AXScrollViewScrollDirection! = .left
 
 class AXSideBarView: NSView {
     // MARK: - Variables
     weak var appProperties: AXAppProperties!
-    
-    var scrollView: AXScrollView!
-    
-    fileprivate let clipView = AXFlippedClipView()
-    
-    var stackView: NSStackView! = NSStackView()
-    
-    weak var toggleSidebarButtonLeftConstaint: NSLayoutConstraint?
+    private var hasDrawn: Bool = false
     
     var trackingArea: NSTrackingArea!
-    
+    weak var toggleSidebarButtonLeftConstaint: NSLayoutConstraint?
     let supportedDraggingTypes: [NSPasteboard.PasteboardType] = [.URL, .init("com.aayamx.malvon.tabButton")]
+    override var tag: Int { 0x01 }
+    
+    var scrollView: AXScrollView!
+    fileprivate let clipView = AXFlippedClipView()
+    var stackView: NSStackView { get { return AX_profiles[appProperties.currentTab].tabStackView } }
     
     lazy var toggleSidebarButton: AXHoverButton = {
         let button = AXHoverButton()
@@ -126,36 +83,7 @@ class AXSideBarView: NSView {
         return button
     }()
     
-    fileprivate var hasDrawn = false
-    
-    override var tag: Int {
-        return 0x01
-    }
-    
-    // MARK: Functions
-    
-    override func scrollWheel(with event: NSEvent) {
-        super.scrollWheel(with: event)
-        let x = event.scrollingDeltaX
-        let y = event.scrollingDeltaY
-        
-        if x == 0 && y == 0 {
-            updateProfile()
-            return
-        }
-        
-        if y == 0 {
-            if x > 0 {
-                scrollDirection = .left
-            }
-            if x < 0 {
-                scrollDirection = .right
-            }
-        } else {
-            scrollDirection = nil
-        }
-    }
-    
+    // MARK: - Functions
     override func viewWillDraw() {
         if !hasDrawn {
             // Configure Self
@@ -216,10 +144,6 @@ class AXSideBarView: NSView {
             clipView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor).isActive = true
             
             // Setup stackview
-            stackView.orientation = .vertical
-            stackView.spacing = 1.08
-            stackView.detachesHiddenViews = false
-            stackView.translatesAutoresizingMaskIntoConstraints = false
             scrollView.documentView = stackView
             stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
             
@@ -232,13 +156,6 @@ class AXSideBarView: NSView {
             appProperties.profileList.heightAnchor.constraint(equalToConstant: 30).isActive = true
             
             hasDrawn = true
-        }
-    }
-    
-    func updateProfile() {
-        if let direction = scrollDirection {
-            // Update the profile
-            
         }
     }
     
@@ -288,7 +205,57 @@ class AXSideBarView: NSView {
         forwardButton.isEnabled = webView.canGoForward
     }
     
-    // MARK: - Functions
+    // MARK: - Mouse Functions
+    
+    func updateProfile() {
+        if let direction = AXMalvon_SidebarView_scrollDirection {
+            // Update the profile
+            print("DIRRR:", direction)
+        }
+    }
+    
+    override func mouseExited(with event: NSEvent) {
+        if !appProperties.sidebarToggled {
+            NSAnimationContext.runAnimationGroup({ context in
+                context.duration = 0.1
+                appProperties.sidebarView.animator().frame.origin.x = -bounds.width
+            }, completionHandler: {
+                self.layer?.backgroundColor = .none
+                self.removeFromSuperview()
+            })
+            
+            appProperties.window.hideTrafficLights(true)
+        }
+    }
+    
+    override func scrollWheel(with event: NSEvent) {
+        super.scrollWheel(with: event)
+        let x = event.scrollingDeltaX
+        let y = event.scrollingDeltaY
+        
+        if x == 0 && y == 0 {
+            updateProfile()
+            return
+        }
+        
+        if y == 0 {
+            if x > 0 {
+                AXMalvon_SidebarView_scrollDirection = .left
+            }
+            if x < 0 {
+                AXMalvon_SidebarView_scrollDirection = .right
+            }
+        } else {
+            AXMalvon_SidebarView_scrollDirection = nil
+        }
+    }
+    
+    override func mouseDown(with event: NSEvent) {
+        window?.performDrag(with: event)
+    }
+    
+    // MARK: - View Functions
+    
     override func viewDidEndLiveResize() {
         appProperties.sidebarWidth = self.frame.size.width
         removeTrackingArea(trackingArea)
@@ -312,24 +279,6 @@ class AXSideBarView: NSView {
         }
     }
     
-    override func mouseExited(with event: NSEvent) {
-        if !appProperties.sidebarToggled {
-            NSAnimationContext.runAnimationGroup({ context in
-                context.duration = 0.1
-                appProperties.sidebarView.animator().frame.origin.x = -bounds.width
-            }, completionHandler: {
-                self.layer?.backgroundColor = .none
-                self.removeFromSuperview()
-            })
-            
-            appProperties.window.hideTrafficLights(true)
-        }
-    }
-    
-    override func mouseDown(with event: NSEvent) {
-        window?.performDrag(with: event)
-    }
-    
     func enteredFullScreen() {
         toggleSidebarButtonLeftConstaint?.constant = 5
     }
@@ -337,6 +286,8 @@ class AXSideBarView: NSView {
     func exitedFullScreen() {
         toggleSidebarButtonLeftConstaint?.constant = 76
     }
+    
+    // MARK: - Tab Functions
     
     func updateAll() {
         stackView.subviews.removeAll()
@@ -426,7 +377,6 @@ class AXSideBarView: NSView {
         button.heightAnchor.constraint(equalToConstant: 30).isActive = true
         button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
     }
-    
     
     func updateSelection() {
         (stackView.arrangedSubviews[safe: appProperties.previousTab] as? AXSidebarTabButton)?.isSelected = false
@@ -525,8 +475,6 @@ class AXSideBarView: NSView {
         return NSDragOperation()
     }
     
-    
-    
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         guard let pasteboardObjects = sender.draggingPasteboard.readObjects(forClasses: [NSURL.self, AXSidebarTabButton.self]), !pasteboardObjects.isEmpty else { return false }
         
@@ -541,5 +489,15 @@ class AXSideBarView: NSView {
         }
         
         return true
+    }
+    
+    // MARK: - Other Functions
+    func switchedProfile() {
+        if stackView.subviews.isEmpty {
+            updateAll()
+        }
+        
+        scrollView.documentView = stackView
+        stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
     }
 }

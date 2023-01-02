@@ -10,9 +10,8 @@ import AppKit
 import Carbon.HIToolbox
 
 class AXAlertView: NSView {
-    var hasDrawn: Bool = false
-    
     var completionHandler: ((Bool) -> Void)?
+    private var hasDrawn: Bool = false
     
     lazy var alertTitle: NSTextField = {
         let label = NSTextField()

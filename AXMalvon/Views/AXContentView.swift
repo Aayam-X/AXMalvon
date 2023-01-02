@@ -12,12 +12,10 @@ import WebKit
 class AXContentView: NSView {
     weak var appProperties: AXAppProperties!
     
-    fileprivate var hasDrawn = false
-    
+    private var hasDrawn: Bool = false
     var isAnimating: Bool = false
     
     var sidebarTrackingArea: NSTrackingArea!
-    
     let supportedDraggingTypes: [NSPasteboard.PasteboardType] = [.URL, .init("com.aayamx.malvon.tabButton")]
     
     override func viewWillDraw() {
@@ -26,6 +24,7 @@ class AXContentView: NSView {
             addTrackingArea(sidebarTrackingArea)
             self.registerForDraggedTypes(supportedDraggingTypes)
             
+            // Background Color
             if appProperties.isPrivate {
                 self.layer?.backgroundColor = .black
             } else {

@@ -9,7 +9,7 @@
 import AppKit
 
 class AXInformationAlertView: NSView {
-    fileprivate var hasDrawn: Bool = false
+    private var hasDrawn: Bool = false
     
     let titleView = NSTextField(frame: .zero)
     

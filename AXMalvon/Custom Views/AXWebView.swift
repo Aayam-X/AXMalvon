@@ -20,6 +20,8 @@ class AXWebView: WKWebView {
     var isSplitView: Bool = false
     var contextualMenuAction: ContextualMenuAction?
     
+    // MARK: - Functions
+    
     func addConfigurations() {
         self.configuration.preferences.setValue(true, forKey: "offlineApplicationCacheIsEnabled")
         self.configuration.preferences.setValue(true, forKey: "fullScreenEnabled")

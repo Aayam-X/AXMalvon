@@ -12,11 +12,11 @@ import WebKit
 
 class AXWebContainerView: NSView {
     weak var appProperties: AXAppProperties!
-    lazy var splitView = AXWebSplitView()
     
     var progressBarObserver: NSKeyValueObservation?
+    private var hasDrawn: Bool = false
     
-    fileprivate var hasDrawn = false
+    lazy var splitView = AXWebSplitView()
     
     lazy var windowTitleLabel: NSTextField = {
         let title = NSTextField()
@@ -30,7 +30,6 @@ class AXWebContainerView: NSView {
     }()
     
     override func viewWillDraw() {
-        // self.layer?.backgroundColor = NSColor.systemGray.withAlphaComponent(0.2).cgColor
         if !hasDrawn {
             // Setup title label
             windowTitleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -71,21 +70,11 @@ class AXWebContainerView: NSView {
         webView?.navigationDelegate = nil
     }
     
-    // override func viewDidEndLiveResize() {
-    //  splitView.frame = appProperties.sidebarToggled ? insetWebView(bounds) : bounds.insetBy(dx: 14, dy: 14)
-    //  splitView.autoresizingMask = [.height, .width]
-    // }
-    //
-    // override func viewWillStartLiveResize() {
-    //  splitView.autoresizingMask = .none
-    // }
-    
     func updateDelegates() {
         let webView = appProperties.tabs[appProperties.currentTab].view
         webView.uiDelegate = self
         webView.navigationDelegate = self
     }
-    
     
     func update() {
         splitView.subviews.removeAll()
@@ -153,9 +142,9 @@ class AXWebContainerView: NSView {
     }
 }
 
+// WebView delegates
 extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDelegate {
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-        
         if let contextualMenuAction = (webView as? AXWebView)?.contextualMenuAction {
             switch contextualMenuAction {
             case .openInNewTab:
@@ -197,8 +186,7 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
     
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         guard let url = webView.url, let scheme = url.scheme else { return }
-        
-        if scheme != "https" && scheme != "about" && scheme != "file" && scheme != "http" {
+        if !["https", "about", "http", "file"].contains(scheme) {
             guard let appPath = NSWorkspace.shared.urlForApplication(toOpen: url) else { return }
             
             AXAlertView.presentAlert(window: appProperties.window) { response in

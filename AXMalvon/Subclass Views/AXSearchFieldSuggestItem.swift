@@ -9,13 +9,14 @@
 import AppKit
 
 class AXSearchFieldSuggestItem: NSButton {
+    // Subview
     let titleView: NSTextField! = NSTextField(frame: .zero)
     
+    // Colors
     var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
     var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
     
-    var isMouseDown = false
-    
+    // Other
     var trackingArea: NSTrackingArea!
     
     var isSelected: Bool = false {
@@ -65,7 +66,7 @@ class AXSearchFieldSuggestItem: NSButton {
     
     override func mouseEntered(with event: NSEvent) {
         if !isSelected && !titleView.stringValue.isEmpty {
-            self.layer?.backgroundColor = self.isMouseDown ? selectedColor.cgColor : hoverColor.cgColor
+            self.layer?.backgroundColor = hoverColor.cgColor
         }
     }
     
@@ -73,15 +74,11 @@ class AXSearchFieldSuggestItem: NSButton {
         if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
             sendAction(action, to: target)
         }
-        self.isMouseDown = true
         
-        if !titleView.stringValue.isEmpty {
-            self.layer?.backgroundColor = selectedColor.cgColor
-        }
+        self.layer?.backgroundColor = titleView.stringValue.isEmpty ? .none : selectedColor.cgColor
     }
     
     override func mouseUp(with event: NSEvent) {
-        isMouseDown = false
         layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
     }
     

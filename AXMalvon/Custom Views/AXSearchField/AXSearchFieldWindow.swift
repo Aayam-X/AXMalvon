@@ -23,10 +23,7 @@ class AXSearchFieldWindow: NSPanel {
         titlebarAppearsTransparent = true
         isMovable = false
         
-        // NSWindow has a hidden NSVisualEffectView that changes the window's tint based on the wallpaper and position
-        // We do not want to have two NSVisualEffectViews as it effects the performance
-        // Which is why we must set the background color
-        backgroundColor = .textBackgroundColor
+        backgroundColor = .textBackgroundColor // NSWindow stuff
     }
     
     // override func close() {

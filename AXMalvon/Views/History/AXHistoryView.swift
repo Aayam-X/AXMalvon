@@ -11,13 +11,16 @@ import AppKit
 class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindowDelegate {
     weak var appProperties: AXAppProperties!
     
-    let scrollView = NSScrollView()
-    
-    let tableView = NSTableView()
-    
-    let searchField = NSSearchField()
-    
+    // Items
+    var items: [AXHistoryItem] = []
+    var filteredItems: [AXHistoryItem] = []
+    private var hasDrawn: Bool = false
     var changesMade: Bool = false
+    
+    // Views
+    let searchField = NSSearchField()
+    let tableView = NSTableView()
+    let scrollView = NSScrollView()
     
     lazy var reloadButton: AXHoverButton = {
         let button = AXHoverButton()
@@ -48,13 +51,7 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
         return button
     }()
     
-    private var hasDrawn = false
-    
-    var items: [AXHistoryItem] = []
-    
-    var filteredItems: [AXHistoryItem] = []
-    
-    init(appProperties: AXAppProperties!) {
+    init(appProperties: AXAppProperties) {
         self.appProperties = appProperties
         super.init(frame: .zero)
     }
@@ -65,54 +62,52 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
     
     override func viewWillDraw() {
         if !hasDrawn {
+            // Setup searchField
+            searchField.translatesAutoresizingMaskIntoConstraints = false
+            searchField.bezelStyle = .roundedBezel
+            searchField.controlSize = .large
+            searchField.action = #selector(searchAction)
+            addSubview(searchField)
+            searchField.topAnchor.constraint(equalTo: topAnchor).isActive = true
+            searchField.rightAnchor.constraint(equalTo: rightAnchor, constant: 30).isActive = true
+            
             // Setup removeAllButton
             addSubview(removeAllButton)
             removeAllButton.topAnchor.constraint(equalTo: topAnchor).isActive = true
-            removeAllButton.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
-            
-            // Setup searchField
-            searchField.action = #selector(searchAction)
-            searchField.translatesAutoresizingMaskIntoConstraints = false
-            addSubview(searchField)
-            searchField.bezelStyle = .roundedBezel
-            searchField.controlSize = .large
-            searchField.topAnchor.constraint(equalTo: topAnchor).isActive = true
-            
-            searchField.rightAnchor.constraint(equalTo: rightAnchor, constant: 30).isActive = true
-            
-            // ... Remove All
             removeAllButton.centerYAnchor.constraint(equalTo: searchField.centerYAnchor).isActive = true
+            removeAllButton.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
             removeAllButton.rightAnchor.constraint(equalTo: searchField.leftAnchor).isActive = true
             
             // Setup reloadButton
             addSubview(reloadButton)
             reloadButton.topAnchor.constraint(equalTo: topAnchor).isActive = true
-            reloadButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -5).isActive = true
             reloadButton.centerYAnchor.constraint(equalTo: searchField.centerYAnchor).isActive = true
+            reloadButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -5).isActive = true
             
             // Setup scrollview
             scrollView.translatesAutoresizingMaskIntoConstraints = false
-            addSubview(scrollView)
             scrollView.hasVerticalScroller = true
             scrollView.drawsBackground = false
+            addSubview(scrollView)
+            scrollView.topAnchor.constraint(equalTo: searchField.bottomAnchor).isActive = true
             scrollView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
             scrollView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
             scrollView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-            scrollView.topAnchor.constraint(equalTo: searchField.bottomAnchor).isActive = true
             
             // Setup tableView
-            tableView.allowsMultipleSelection = true
-            tableView.frame = scrollView.bounds
             tableView.translatesAutoresizingMaskIntoConstraints = false
             tableView.delegate = self
             tableView.dataSource = self
             tableView.backgroundColor = .clear
-            tableView.doubleAction = #selector(tableViewAction)
+            tableView.allowsMultipleSelection = true
+            tableView.doubleAction = #selector(tableViewClickAction)
+            tableView.frame = scrollView.bounds
             addSubview(tableView)
             tableView.autoresizingMask = [.height, .width]
             
             scrollView.documentView = tableView
             
+            // Setup tableView columns
             let websiteDateCol = NSTableColumn(identifier: NSUserInterfaceItemIdentifier(rawValue: "websiteDateCol"))
             websiteDateCol.headerCell.title = "Date"
             websiteDateCol.width = 65
@@ -141,12 +136,17 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
     }
     
     func tableView(_ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int) -> NSView? {
+        // Create textLabel
         let text = NSTextField()
         text.alignment = .left
         text.lineBreakMode = .byTruncatingTail
         text.isSelectable = true
         text.isEditable = false
+        text.drawsBackground = false
+        text.isBordered = false
+        text.translatesAutoresizingMaskIntoConstraints = false
         
+        // Assign value to label
         if tableColumn?.identifier.rawValue == "websiteTitleCol" {
             text.stringValue = filteredItems[row].title
         } else if tableColumn?.identifier.rawValue == "websiteURLCol" {
@@ -155,22 +155,21 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
             text.stringValue = filteredItems[row].date
         }
         
+        // Display the label
         let cell = NSTableCellView()
         cell.translatesAutoresizingMaskIntoConstraints = false
         cell.addSubview(text)
-        text.drawsBackground = false
-        text.isBordered = false
-        text.translatesAutoresizingMaskIntoConstraints = false
         text.centerYAnchor.constraint(equalTo: cell.centerYAnchor).isActive = true
         text.leftAnchor.constraint(equalTo: cell.leftAnchor).isActive = true
         text.rightAnchor.constraint(equalTo: cell.rightAnchor, constant: 5).isActive = true
+        
         return cell
     }
     
     func tableView(_ tableView: NSTableView, rowActionsForRow row: Int, edge: NSTableView.RowActionEdge) -> [NSTableViewRowAction] {
         if edge == .trailing {
             let deleteAction = NSTableViewRowAction(style: .destructive, title: "Delete", handler: { (rowAction, row) in
-                // action code
+                // Delete Action
                 self.items.remove(at: row)
                 self.changesMade = true
                 tableView.removeRows(at: IndexSet(integer: row), withAnimation: .slideLeft)
@@ -183,9 +182,11 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
     }
     
     // MARK: - Actions
-    @objc func tableViewAction() {
+    
+    @objc func tableViewClickAction() {
         let selectedRows = tableView.selectedRowIndexes
         
+        // Loop through all the windows to find a proper one
         for window in NSApplication.shared.windows {
             if let window = window as? AXWindow {
                 for rowIndex in selectedRows {
@@ -221,6 +222,8 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
         AXHistory.removeAll()
         reloadButtonAction()
     }
+    
+    // MARK: - Functions
     
     func updateChanges() {
         if changesMade {

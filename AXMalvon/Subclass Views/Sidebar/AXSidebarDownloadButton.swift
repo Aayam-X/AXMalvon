@@ -9,21 +9,23 @@
 import AppKit
 
 class AXSidebarDownloadButton: NSButton {
-    let titleView = NSTextField(frame: .zero)
+    weak var appProperties: AXAppProperties!
+    var downloadItem: AXDownloadItem!
     
+    // Subviews
+    let titleView = NSTextField(frame: .zero)
     var closeButton = AXHoverButton()
     var progressBar = NSProgressIndicator()
     
+    // Colors
     var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
     var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
     
-    var downloadItem: AXDownloadItem!
+    // Other
     var estimatedTimeRemainingObserver: NSKeyValueObservation?
     var isFinishedObserver: NSKeyValueObservation?
-    
     weak var titleViewWidthAnchor: NSLayoutConstraint?
-    
-    weak var appProperties: AXAppProperties!
+    var trackingArea: NSTrackingArea!
     
     var isSelected: Bool = false {
         didSet {
@@ -36,10 +38,6 @@ class AXSidebarDownloadButton: NSButton {
             titleView.stringValue = tabTitle
         }
     }
-    
-    var isMouseDown = false
-    
-    var trackingArea : NSTrackingArea!
     
     init(_ appProperties: AXAppProperties) {
         self.appProperties = appProperties
@@ -108,6 +106,7 @@ class AXSidebarDownloadButton: NSButton {
         isFinishedObserver?.invalidate()
         progressBar.removeFromSuperview()
         
+        // Image of file
         let imageView = NSImageView()
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.image = NSWorkspace.shared.icon(forFile: downloadItem.location.relativePath)
@@ -125,7 +124,7 @@ class AXSidebarDownloadButton: NSButton {
     }
     
     @objc func closeTab() {
-        // TODO:::::
+        // TODO: - Create
         //        appProperties.tabManager.removeTab(self.tag)
     }
     
@@ -140,7 +139,6 @@ class AXSidebarDownloadButton: NSButton {
     }
     
     override func mouseUp(with event: NSEvent) {
-        self.isMouseDown = false
         closeButton.isHidden = true
         self.removeTrackingArea(self.trackingArea)
         layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
@@ -152,7 +150,6 @@ class AXSidebarDownloadButton: NSButton {
     
     override func mouseDown(with event: NSEvent) {
         self.removeTrackingArea(self.trackingArea)
-        self.isMouseDown = true
         self.layer?.backgroundColor = selectedColor.cgColor
     }
     
@@ -162,7 +159,7 @@ class AXSidebarDownloadButton: NSButton {
         closeButton.isHidden = false
         
         if !isSelected {
-            self.layer?.backgroundColor = self.isMouseDown ? selectedColor.cgColor : hoverColor.cgColor
+            self.layer?.backgroundColor = hoverColor.cgColor
         }
     }
     

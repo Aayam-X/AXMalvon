@@ -12,10 +12,9 @@ import Carbon.HIToolbox
 class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     weak var appProperties: AXAppProperties!
     
-    fileprivate var hasDrawn = false
     var newTabMode: Bool = true
-    
     private var localMouseDownEventMonitor: Any?
+    private var hasDrawn: Bool = false
     
     var suggestionWindow: NSPanel!
     
@@ -49,18 +48,18 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         return s
     }()
     
-    var suggestions: [AXSearchFieldSuggestItem?]! = [AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem(), AXSearchFieldSuggestItem()]
+    var suggestions: [AXSearchFieldSuggestItem?]! = [
+        AXSearchFieldSuggestItem(),
+        AXSearchFieldSuggestItem(),
+        AXSearchFieldSuggestItem(),
+        AXSearchFieldSuggestItem(),
+        AXSearchFieldSuggestItem()
+    ]
     
     init() {
         suggestionWindow = AXSearchFieldWindow()
         super.init(frame: .zero)
         suggestionWindow.contentView = self
-    }
-    
-    deinit {
-        suggestionsStackView = nil
-        suggestions = nil
-        searchField = nil
     }
     
     required init?(coder: NSCoder) {
@@ -69,12 +68,14 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     
     override func viewWillDraw() {
         if !hasDrawn {
+            // Setup searchField
             searchField.delegate = self
             addSubview(searchField)
             searchField.widthAnchor.constraint(equalTo: self.widthAnchor, constant: -50).isActive = true
             searchField.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
             searchField.topAnchor.constraint(equalTo: topAnchor, constant: 25).isActive = true
             
+            // Setup seperator
             let seperator = NSBox()
             seperator.boxType = .separator
             seperator.translatesAutoresizingMaskIntoConstraints = false
@@ -83,11 +84,13 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             seperator.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
             seperator.rightAnchor.constraint(equalTo: rightAnchor, constant: 5).isActive = true
             
+            // Setup suggestionsStackView
             addSubview(suggestionsStackView)
             suggestionsStackView.topAnchor.constraint(equalTo: searchField.bottomAnchor, constant: 30).isActive = true
             suggestionsStackView.leftAnchor.constraint(equalTo: leftAnchor, constant: 15).isActive = true
             suggestionsStackView.rightAnchor.constraint(equalTo: rightAnchor, constant: -15).isActive = true
             
+            // Setup suggestionItems
             for suggestion in suggestions {
                 suggestion!.isHidden = true
                 suggestion!.target = self

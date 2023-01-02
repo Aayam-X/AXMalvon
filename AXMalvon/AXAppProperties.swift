@@ -12,17 +12,17 @@ import WebKit
 // Every AXWindow will have one instance of this
 class AXAppProperties {
     // Views
-    let sidebarView: AXSideBarView
-    let splitView: AXSplitView
     let contentView: AXContentView
+    let sidebarView: AXSideBarView
     let webContainerView: AXWebContainerView
     weak var window: AXWindow! = nil
+    let splitView: AXSplitView
     
     // Other Views
     let popOver: AXSearchFieldPopoverView
+    let profileList: AXProfileListView
     let progressBar: AXRectangularProgressIndicator
     let findBar: AXWebViewFindView
-    let profileList: AXProfileListView
     
     // Other
     let tabManager: AXTabManager
@@ -37,23 +37,12 @@ class AXAppProperties {
     
     // Variables
     var AX_currentProfile = 0
-    var tabs: [AXTabItem] = []
-    var previouslyClosedTabs: [URL] = []
-    
-    var currentTab = -1 {
-        willSet {
-            previousTab = currentTab
-        }
-    }
-    
-    var previousTab = -1
-    
     var isPrivate: Bool
     
-    deinit {
-        progressBar.removeFromSuperview()
-        popOver.removeFromSuperview()
-    }
+    var currentTab = -1 { willSet { previousTab = currentTab } }
+    var previousTab = -1
+    var tabs: [AXTabItem] = []
+    var previouslyClosedTabs: [URL] = []
     
     init(isPrivate: Bool = false, restoresTab: Bool = true) {
         // Get UserDefaults

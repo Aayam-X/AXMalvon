@@ -26,8 +26,8 @@ class AXPreferenceButton: NSButton {
         // Setup self
         imageView.image = NSImage(systemSymbolName: icon, accessibilityDescription: nil)
         titleView.stringValue = title
-        self.tag = tag
         
+        self.tag = tag
         self.widthAnchor.constraint(equalToConstant: 190).isActive = true
         self.heightAnchor.constraint(equalToConstant: 30).isActive = true
     }
@@ -72,6 +72,7 @@ class AXPreferenceButton: NSButton {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // By default, the mouseUp function would be called for action
     override func mouseDown(with event: NSEvent) {
         if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
             sendAction(action, to: target)

@@ -45,23 +45,6 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func removeFromSuperview() {
-        topBorderLayer = nil
-        topPointPath = nil
-        topAnimation = nil
-        rightBorderLayer = nil
-        rightPointPath = nil
-        rightAnimation = nil
-        bottomBorderLayer = nil
-        bottomPointPath = nil
-        bottomAnimation = nil
-        leftBorderLayer = nil
-        leftPointPath = nil
-        leftAnimation = nil
-        
-        super.removeFromSuperview()
-    }
-    
     func smoothProgress(_ newValue: CGFloat, increment by: CGFloat = 0.3) {
         if newValue - progress >= by {
             updateProgress(newValue, 0.3)

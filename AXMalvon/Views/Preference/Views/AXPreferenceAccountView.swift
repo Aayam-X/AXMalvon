@@ -9,6 +9,8 @@
 import Cocoa
 
 class AXPreferenceAccountView: NSView {
+    private var hasDrawn: Bool = false
+    
     lazy var nameLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -65,8 +67,6 @@ class AXPreferenceAccountView: NSView {
         button.imageView.contentTintColor = .systemRed
         return button
     }()
-    
-    fileprivate var hasDrawn: Bool = false
     
     override func viewWillDraw() {
         if !hasDrawn {

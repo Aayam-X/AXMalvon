@@ -9,6 +9,11 @@
 import AppKit
 
 class AXAboutView: NSView {
+    lazy var bundleInfoDic = Bundle.main.infoDictionary
+    private var hasDrawn: Bool = false
+    
+    lazy var donateButton = NSButton()
+    lazy var feedbackButton = NSButton()
     lazy var appIconImageView = NSImageView(frame: .init(x: 0, y: 0, width: 225, height: 225))
     
     lazy var appNameLabel: NSTextField = {
@@ -58,13 +63,6 @@ class AXAboutView: NSView {
         label.textColor = .systemGray
         return label
     }()
-    
-    lazy var donateButton = NSButton()
-    lazy var feedbackButton = NSButton()
-    
-    fileprivate var hasDrawn: Bool = false
-    
-    lazy var bundleInfoDic = Bundle.main.infoDictionary
     
     override func viewWillDraw() {
         if !hasDrawn {

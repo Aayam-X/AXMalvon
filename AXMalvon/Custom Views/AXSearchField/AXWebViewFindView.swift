@@ -12,7 +12,7 @@ import Carbon.HIToolbox
 class AXWebViewFindView: NSView {
     weak var appProperties: AXAppProperties!
     
-    fileprivate var hasDrawn = false
+    private var hasDrawn: Bool = false
     
     lazy var searchField: NSSearchField = {
         let searchField = NSSearchField()
@@ -65,7 +65,6 @@ class AXWebViewFindView: NSView {
             layer?.cornerRadius = 5.0
             layer?.borderColor = NSColor.systemGray.cgColor
             layer?.borderWidth = 0.9
-            hasDrawn = true
             
             addSubview(occurancesCountLabel)
             occurancesCountLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -5).isActive = true
@@ -99,6 +98,8 @@ class AXWebViewFindView: NSView {
                     return $0
                 }
             }
+            
+            hasDrawn = true
         }
     }
     

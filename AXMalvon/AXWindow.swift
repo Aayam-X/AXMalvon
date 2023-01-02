@@ -9,9 +9,6 @@
 import AppKit
 
 class AXWindow: NSWindow, NSWindowDelegate {
-    // Track the buttons
-    var trackingTag: NSView.TrackingRectTag?
-    
     var appProperties: AXAppProperties
     
     override var title: String {
@@ -30,18 +27,17 @@ class AXWindow: NSWindow, NSWindowDelegate {
             defer: false
         )
         
+        // Window initializers
         self.delegate = self
-        
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
         isMovableByWindowBackground = true
         self.minSize = .init(width: 300, height: 300)
         self.isReleasedWhenClosed = false
-        
-        // NSWindow has a hidden NSVisualEffectView that changes the window's tint based on the wallpaper and position
-        // We do not want to have two NSVisualEffectViews as it effects the performance
-        // Which is why we must set the background color
-        backgroundColor = .textColor
+        appProperties.window = self
+        backgroundColor = .textBackgroundColor // NSWindow has hidden NSVisualEffectView, to remove we must use this code
+        self.contentView = appProperties.contentView
+        updateTrafficLights()
         
         if !appProperties.sidebarToggled {
             hideTrafficLights(true)
@@ -50,15 +46,11 @@ class AXWindow: NSWindow, NSWindowDelegate {
         if appProperties.isPrivate {
             self.appearance = .init(named: .darkAqua)
         }
-        
-        self.contentView = appProperties.contentView
-        appProperties.window = self
-        
-        updateTrafficLights()
     }
     
     // MARK: - Window Functions
     override func makeKey() {
+        // Make searchField first responder
         if appProperties.searchFieldShown {
             let window1 = childWindows![0]
             window1.makeKey()

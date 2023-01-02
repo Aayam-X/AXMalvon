@@ -19,21 +19,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     lazy var preferenceWindow = AXPreferenceWindow()
     
-    // MARK: - Delegates
+    // MARK: - App Delegates
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        // Initializers
         AXMalvon_WebViewConfiguration.websiteDataStore = .nonPersistent()
+        AXBrowserProfile.retriveProfiles()
+        AXHistory.checkIfFileExists()
+        checkForUpdates()
         
-        let profileNames = UserDefaults.standard.stringArray(forKey: "Profiles") ?? [.init("Default"), .init("Secondary")]
-        let profiles = profileNames.map { AXBrowserProfile(name: $0) }
-        AX_profiles.append(contentsOf: profiles)
-        
-        // Insert code here to initialize your application
+        // Create a window
         let window = AXWindow()
         window.appProperties.profileManager.switchProfiles(to: 0)
         window.makeKeyAndOrderFront(nil)
-        
-        AXHistory.checkIfFileExists()
         // let window0 = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))
         // window0.contentView = AXWelcomeView()
         // window0.makeKeyAndOrderFront(nil)
@@ -42,8 +40,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // let window1 = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))
         // window1.contentView = AXPurchaseBrowserView()
         // window1.makeKeyAndOrderFront(nil)
-        
-        checkForUpdates()
     }
     
     func application(_ app: NSApplication, didDecodeRestorableState coder: NSCoder) {
@@ -93,35 +89,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    // MARK: - Menu Bar Actions
-    
-    @IBAction func findInWebpage(_ sender: Any) {
-        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
-        appProperties?.webContainerView.showFindView()
-    }
-    
-    @IBAction func toggleSidebar(_ sender: Any) {
-        (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.sidebarView.toggleSidebar()
-    }
-    
-    @IBAction func createNewTab(_ sender: Any) {
-        let tabManager = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.tabManager
-        tabManager?.openSearchBar()
-    }
-    
-    @IBAction func removeCurrentTab(_ sender: Any) {
-        guard let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties else { return }
-        
-        if appProperties.searchFieldShown {
-            appProperties.popOver.close()
-        } else {
-            appProperties.tabManager.closeTab(appProperties.currentTab)
+    // MARK: - Menu Bar Item Actions
+    @IBAction func closeWindow(_ sender: Any) {
+        if let window = NSApplication.shared.keyWindow {
+            window.close()
         }
-    }
-    
-    @IBAction func createNewWindow(_ sender: Any) {
-        let window = AXWindow()
-        window.makeKeyAndOrderFront(nil)
     }
     
     @IBAction func createNewPrivateWindow(_ sender: Any) {
@@ -129,31 +101,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
     }
     
-    @IBAction func restoreTab(_ sender: Any) {
-        guard let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties else { return }
-        appProperties.tabManager.restoreTab()
+    @IBAction func createNewTab(_ sender: Any) {
+        let tabManager = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.tabManager
+        tabManager?.openSearchBar()
     }
     
-    @IBAction func closeWindow(_ sender: Any) {
-        if let window = NSApplication.shared.keyWindow {
-            window.close()
-        }
-    }
-    
-    @IBAction func showHistory(_ sender: Any) {
-        if let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties {
-            let window = NSWindow.create(styleMask: [.closable, .miniaturizable, .resizable], size: .init(width: 500, height: 500))
-            window.title = "History"
-            window.contentView = AXHistoryView(appProperties: appProperties)
-            window.makeKeyAndOrderFront(nil)
-        }
-    }
-    
-    
-    @IBAction func showSearchField(_ sender: Any) {
-        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
-        appProperties?.popOver.newTabMode = false
-        appProperties?.tabManager.showSearchField()
+    @IBAction func createNewWindow(_ sender: Any) {
+        let window = AXWindow()
+        window.makeKeyAndOrderFront(nil)
     }
     
     @IBAction func customAboutView(_ sender: Any) {
@@ -161,9 +116,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             aboutView = AXAboutView()
             aboutViewWindow.contentView = aboutView
         }
-        
-        aboutViewWindow.setFrameOriginToPositionWindowInCenterOfScreen()
+        aboutViewWindow.center()
         aboutViewWindow.makeKeyAndOrderFront(self)
+    }
+    
+    @IBAction func findInWebpage(_ sender: Any) {
+        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
+        appProperties?.webContainerView.showFindView()
     }
     
     @IBAction func keepWindowOnTop(_ sender: Any) {
@@ -176,13 +135,46 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    @IBAction func removeCurrentTab(_ sender: Any) {
+        guard let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties else { return }
+        
+        if appProperties.searchFieldShown {
+            appProperties.popOver.close()
+        } else {
+            appProperties.tabManager.closeTab(appProperties.currentTab)
+        }
+    }
+    
+    @IBAction func restoreTab(_ sender: Any) {
+        guard let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties else { return }
+        appProperties.tabManager.restoreTab()
+    }
+    
     @IBAction func setAsDefaultBrowser(_ sender: Any) {
         setAsDefaultBrowser()
     }
     
+    @IBAction func showHistory(_ sender: Any) {
+        if let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties {
+            let window = NSWindow.create(styleMask: [.closable, .miniaturizable, .resizable], size: .init(width: 500, height: 500))
+            window.title = "History"
+            window.contentView = AXHistoryView(appProperties: appProperties)
+            window.makeKeyAndOrderFront(nil)
+        }
+    }
     
     @IBAction func showPreferences(_ sender: Any) {
         preferenceWindow.makeKeyAndOrderFront(nil)
+    }
+    
+    @IBAction func showSearchField(_ sender: Any) {
+        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
+        appProperties?.popOver.newTabMode = false
+        appProperties?.tabManager.showSearchField()
+    }
+    
+    @IBAction func toggleSidebar(_ sender: Any) {
+        (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.sidebarView.toggleSidebar()
     }
     
     // MARK: - Functions

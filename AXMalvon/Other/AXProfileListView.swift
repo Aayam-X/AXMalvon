@@ -8,31 +8,14 @@
 
 import Cocoa
 
-final class AXFlippedClipViewCentered: NSClipView {
-    override var isFlipped: Bool {
-        return true
-    }
-    
-    override func constrainBoundsRect(_ proposedBounds: NSRect) -> NSRect {
-        var rect = super.constrainBoundsRect(proposedBounds)
-        
-        if let containerView = self.documentView {
-            rect.origin.x = (containerView.frame.width - rect.width) / 2
-            rect.origin.y = (containerView.frame.height - rect.height) / 2
-        }
-        
-        return rect
-    }
-}
-
 class AXProfileListView: NSView {
     weak var appProperties: AXAppProperties!
+    
+    private var hasDrawn: Bool = false
     
     let scrollView = NSScrollView()
     let clipView = AXFlippedClipViewCentered()
     let stackView = NSStackView()
-    
-    private var hasDrawn: Bool = false
     
     override func viewWillDraw() {
         if !hasDrawn {

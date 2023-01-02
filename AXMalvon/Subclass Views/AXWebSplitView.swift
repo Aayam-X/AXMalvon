@@ -36,7 +36,7 @@ class AXWebSplitView: NSSplitView, NSSplitViewDelegate {
 }
 
 class AXWebSplitViewAddItemView: NSView {
-    fileprivate var hasDrawn = false
+    private var hasDrawn: Bool = false
     
     lazy var addSplitViewLabel: NSTextField = {
         let label = NSTextField()

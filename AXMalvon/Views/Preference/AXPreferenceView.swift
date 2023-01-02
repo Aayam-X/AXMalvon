@@ -8,29 +8,20 @@
 
 import AppKit
 
-final class AXFlippedClipViewCenteredX: NSClipView {
-    override var isFlipped: Bool {
-        return true
-    }
-    
-    // Center the views
-    override func constrainBoundsRect(_ proposedBounds: NSRect) -> NSRect {
-        var rect = super.constrainBoundsRect(proposedBounds)
-        if let containerView = self.documentView {
-            rect.origin.x = (containerView.frame.width - rect.width) / 2
-        }
-        
-        return rect
-    }
-}
-
 class AXPreferenceView: NSView {
+    private var hasDrawn: Bool = false
+    
     // Views
     lazy var settingPanes = [
         ("Account", "person.crop.circle", 0),
         ("General", "gearshape", 1),
         ("Search", "magnifyingglass", 2)
     ]
+    
+    let seperator = NSBox()
+    let seperator2 = NSBox()
+    let scrollView = NSScrollView()
+    fileprivate let clipView = AXFlippedClipViewCenteredX()
     
     lazy var windowTitleLabel: NSTextField = {
         let label = NSTextField()
@@ -43,10 +34,6 @@ class AXPreferenceView: NSView {
         return label
     }()
     
-    let scrollView = NSScrollView()
-    
-    fileprivate let clipView = AXFlippedClipViewCenteredX()
-    
     lazy var sidebarStackView: NSStackView = {
         let stackView = NSStackView()
         
@@ -58,17 +45,8 @@ class AXPreferenceView: NSView {
         return stackView
     }()
     
-    let seperator = NSBox()
-    
-    let seperator2 = NSBox()
-    
-    // Other
-    private var hasDrawn: Bool = false
-    
     override func viewWillDraw() {
         if !hasDrawn {
-            //            self.translatesAutoresizingMaskIntoConstraints = false
-            
             // Add stackView
             addSubview(sidebarStackView)
             sidebarStackView.leftAnchor.constraint(equalTo: leftAnchor, constant: 15).isActive = true
