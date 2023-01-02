@@ -22,6 +22,19 @@ class AXTabManager {
         appProperties.webContainerView.update()
     }
     
+    // Updates every single view
+    func switchedProfile() {
+        appProperties.webContainerView.splitView.subviews.removeAll()
+        
+        if appProperties.tabs.isEmpty {
+            appProperties.tabManager.createNewTab()
+            appProperties.currentTab = 0
+        }
+        
+        appProperties.sidebarView.updateAll()
+        appProperties.webContainerView.update()
+    }
+    
     func tabMovedToNewWindow(_ i: Int) {
         let tab = appProperties.tabs[i]
         tab.view.removeFromSuperview()
@@ -136,7 +149,8 @@ class AXTabManager {
     
     @discardableResult
     private func addTabAndUpdate(webView: AXWebView) -> AXWebView {
-        let tabItem = AXTabItem(view: webView)
+        var tabItem = AXTabItem(view: webView)
+        tabItem.url = webView.url
         appProperties.tabs.append(tabItem)
         
         // This is the only exception

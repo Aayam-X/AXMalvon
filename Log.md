@@ -19,6 +19,11 @@
 - [ ] History: Indexing + Most visited site || Clicking on tab opens || No duplicates?
 - [ ] Some sort of memory leak when dragging tabs
 ---
+- [ ] Swipe gesture for profile
+- [ ] Stop re-loading of the tabs when switching between profiles (Have a shared tabStackView)
+---
+- [x] Finish up the UI for profiles
+---
 - [x] Keep Window on Top option
 - [x] Profiles code finished
 - [x] Bit of UI for profiles, still have to make a bit more stuff

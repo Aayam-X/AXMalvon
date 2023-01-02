@@ -37,6 +37,7 @@ struct AXBrowserProfile: Codable {
         webViewConfiguration.websiteDataStore = .nonPersistent()
         
         retriveProperties()
+        retriveTabs()
     }
     
     init(name: String) {
@@ -65,18 +66,26 @@ struct AXBrowserProfile: Codable {
             }
         }
         
+        // Retrive the currentTab
+        currentTab = UserDefaults.standard.integer(forKey: "\(name)-CurrentTab")
+    }
+    
+    mutating func retriveTabs() {
         // Retrive the tabs
         if let data = UserDefaults.standard.data(forKey: "\(name)-AXTabItem") {
             do {
                 let decoder = JSONDecoder()
                 self.tabs = try decoder.decode([AXTabItem].self, from: data)
             } catch {
-                print("Unable to Decode Tabs (\(error.localizedDescription))")
+                print("Unable to Decode Tabs (\(error))")
             }
         }
     }
     
     func saveProperties() {
+        // Save current tab
+        UserDefaults.standard.set(currentTab, forKey: "\(name)-CurrentTab")
+        
         // Save tabs
         do {
             let encoder = JSONEncoder()

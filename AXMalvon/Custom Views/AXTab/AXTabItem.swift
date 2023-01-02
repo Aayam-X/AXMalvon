@@ -24,7 +24,7 @@ struct AXTabItem: Codable {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         
         self.title = try values.decode(String.self, forKey: .title)
-        self.url = try values.decode(URL.self, forKey: .url)
+        self.url = try? values.decode(URL.self, forKey: .url)
         
         view = AXWebView(frame: .zero, configuration: AXMalvon_WebViewConfiguration)
         view.addConfigurations()

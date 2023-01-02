@@ -9,7 +9,6 @@
 import Foundation
 
 var AX_profiles: [AXBrowserProfile] = []
-var AX_currentProfile = 0
 
 class AXProfileManager {
     weak var appProperties: AXAppProperties!
@@ -18,21 +17,26 @@ class AXProfileManager {
         updateValuesForCurrentProfile()
         
         let profile = AX_profiles[safe: to]
-        guard let profile = profile else { return }
+        guard var profile = profile else { return }
+        profile.retriveProperties()
+        AXMalvon_WebViewConfiguration = profile.webViewConfiguration
+        profile.retriveTabs()
         
-        AX_currentProfile = to
+        appProperties.AX_currentProfile = to
         appProperties.currentTab = profile.currentTab
         appProperties.tabs = profile.tabs
         appProperties.previousTab = profile.previousTab
-        AXMalvon_WebViewConfiguration = profile.webViewConfiguration
     }
     
     func updateValuesForCurrentProfile() {
-        let profile = AX_profiles[safe: AX_currentProfile]
+        let profile = AX_profiles[safe: appProperties.AX_currentProfile]
         guard var profile = profile else { return }
         
         profile.currentTab = appProperties.currentTab
         profile.previousTab = appProperties.previousTab
         profile.tabs = appProperties.tabs
+        profile.webViewConfiguration = AXMalvon_WebViewConfiguration
+        
+        profile.saveProperties()
     }
 }

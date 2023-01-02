@@ -203,7 +203,7 @@ class AXSideBarView: NSView {
             scrollView.drawsBackground = false
             scrollView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
             scrollView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true // Put -44 because profile list view + 14x spacing
             scrollView.topAnchor.constraint(equalTo: topAnchor, constant: 35).isActive = true
             
             // Setup clipview
@@ -222,6 +222,14 @@ class AXSideBarView: NSView {
             stackView.translatesAutoresizingMaskIntoConstraints = false
             scrollView.documentView = stackView
             stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
+            
+            // Setup profileListView
+            appProperties.profileList.translatesAutoresizingMaskIntoConstraints = false
+            addSubview(appProperties.profileList)
+            appProperties.profileList.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -14).isActive = true
+            appProperties.profileList.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+            appProperties.profileList.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+            appProperties.profileList.heightAnchor.constraint(equalToConstant: 30).isActive = true
             
             hasDrawn = true
         }

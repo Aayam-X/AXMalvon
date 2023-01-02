@@ -8,7 +8,7 @@
 
 import AppKit
 
-final class AXFlippedClipViewCentered: NSClipView {
+final class AXFlippedClipViewCenteredX: NSClipView {
     override var isFlipped: Bool {
         return true
     }
@@ -45,7 +45,7 @@ class AXPreferenceView: NSView {
     
     let scrollView = NSScrollView()
     
-    fileprivate let clipView = AXFlippedClipViewCentered()
+    fileprivate let clipView = AXFlippedClipViewCenteredX()
     
     lazy var sidebarStackView: NSStackView = {
         let stackView = NSStackView()

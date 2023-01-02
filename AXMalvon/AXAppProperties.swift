@@ -22,6 +22,7 @@ class AXAppProperties {
     let popOver: AXSearchFieldPopoverView
     let progressBar: AXRectangularProgressIndicator
     let findBar: AXWebViewFindView
+    let profileList: AXProfileListView
     
     // Other
     let tabManager: AXTabManager
@@ -35,6 +36,7 @@ class AXAppProperties {
     var sidebarWidth: CGFloat
     
     // Variables
+    var AX_currentProfile = 0
     var tabs: [AXTabItem] = []
     var previouslyClosedTabs: [URL] = []
     
@@ -74,6 +76,7 @@ class AXAppProperties {
         popOver = AXSearchFieldPopoverView()
         progressBar = AXRectangularProgressIndicator()
         findBar = AXWebViewFindView()
+        profileList = AXProfileListView()
         
         self.isPrivate = isPrivate
         
@@ -84,6 +87,7 @@ class AXAppProperties {
         profileManager.appProperties = self
         popOver.appProperties = self
         findBar.appProperties = self
+        profileList.appProperties = self
     }
     
     func saveProperties() {

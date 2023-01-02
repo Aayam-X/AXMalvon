@@ -24,12 +24,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         AXMalvon_WebViewConfiguration.websiteDataStore = .nonPersistent()
         
-        // Retrive profiles from UserDefaults
-        AX_profiles = [
-            // TODO:
-            .init(name: "Personal"),
-            .init(name: "School")
-        ]
+        let profileNames = UserDefaults.standard.stringArray(forKey: "Profiles") ?? [.init("Default"), .init("Secondary")]
+        let profiles = profileNames.map { AXBrowserProfile(name: $0) }
+        AX_profiles.append(contentsOf: profiles)
         
         // Insert code here to initialize your application
         let window = AXWindow()
@@ -63,6 +60,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
+        let names = AX_profiles.map { $0.saveProperties(); return $0.name }
+        UserDefaults.standard.set(names, forKey: "Profiles")
     }
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

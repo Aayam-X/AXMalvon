@@ -111,7 +111,9 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         if newTabMode {
             appProperties.tabManager.createNewTab(url: url)
         } else {
-            appProperties.tabs[appProperties.currentTab].view.load(URLRequest(url: url))
+            var currentTab: AXTabItem = appProperties.tabs[appProperties.currentTab]
+            currentTab.view.load(URLRequest(url: url))
+            currentTab.url = url
         }
         
         newTabMode = true
