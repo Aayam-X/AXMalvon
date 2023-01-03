@@ -319,7 +319,8 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             if let window = webView.window as? AXWindow {
                 window.makeFirstResponder(webView)
             }
-            webView.layer?.borderWidth = 2.0
+            
+            webView.layer?.borderWidth = 1.0
         }
     }
     

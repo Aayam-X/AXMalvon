@@ -13,13 +13,30 @@ var AX_profiles: [AXBrowserProfile] = []
 class AXProfileManager {
     weak var appProperties: AXAppProperties!
     
+    init(_ appProperties: AXAppProperties!) {
+        self.appProperties = appProperties
+    }
+    
+    func initializeProfile() {
+        let profile = AX_profiles[safe: appProperties.AX_currentProfile]
+        guard var profile = profile else { return }
+        profile.retriveProperties()
+        appProperties.webViewConfiguration = profile.webViewConfiguration
+        profile.retriveTabs()
+        
+        appProperties.AX_currentProfile = appProperties.AX_currentProfile
+        appProperties.currentTab = profile.currentTab
+        appProperties.tabs = profile.tabs
+        appProperties.previousTab = profile.previousTab
+    }
+    
     func switchProfiles(to: Int) {
         updateValuesForCurrentProfile()
         
         let profile = AX_profiles[safe: to]
         guard var profile = profile else { return }
         profile.retriveProperties()
-        AXMalvon_WebViewConfiguration = profile.webViewConfiguration
+        appProperties.webViewConfiguration = profile.webViewConfiguration
         profile.retriveTabs()
         
         appProperties.AX_currentProfile = to
@@ -35,7 +52,7 @@ class AXProfileManager {
         profile.currentTab = appProperties.currentTab
         profile.previousTab = appProperties.previousTab
         profile.tabs = appProperties.tabs
-        profile.webViewConfiguration = AXMalvon_WebViewConfiguration
+        profile.webViewConfiguration = appProperties.webViewConfiguration
         
         profile.saveProperties()
     }

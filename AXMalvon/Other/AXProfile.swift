@@ -85,6 +85,7 @@ struct AXBrowserProfile: Codable {
         if let data = UserDefaults.standard.data(forKey: "\(name)-AXTabItem") {
             do {
                 let decoder = JSONDecoder()
+                decoder.userInfo[AXTabItem.webViewConfigurationUserInfoKey] = webViewConfiguration
                 self.tabs = try decoder.decode([AXTabItem].self, from: data)
             } catch {
                 print("Unable to Decode Tabs (\(error))")
@@ -114,7 +115,7 @@ struct AXBrowserProfile: Codable {
     static func retriveProfiles() {
         let profileNames = UserDefaults.standard.stringArray(forKey: "Profiles") ?? [.init("Default"), .init("Secondary")]
         let profiles = profileNames.map { AXBrowserProfile(name: $0) }
-        AX_profiles.append(contentsOf: profiles)
+        AX_profiles = profiles
     }
 }
 

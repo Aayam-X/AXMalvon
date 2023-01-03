@@ -11,15 +11,15 @@ import Cocoa
 class AXProfileListView: NSView {
     weak var appProperties: AXAppProperties!
     
-    private var hasDrawn: Bool = false
-    
     let scrollView = NSScrollView()
     let clipView = AXFlippedClipViewCentered()
     let stackView = NSStackView()
     
-    override func viewWillDraw() {
-        if !hasDrawn {
-            
+    init(_ appProperties: AXAppProperties!) {
+        self.appProperties = appProperties
+        super.init(frame: .zero)
+        
+        if !appProperties.isPrivate {
             // Add scrollView
             scrollView.translatesAutoresizingMaskIntoConstraints = false
             scrollView.drawsBackground = false
@@ -42,9 +42,11 @@ class AXProfileListView: NSView {
             scrollView.documentView = stackView
             stackView.translatesAutoresizingMaskIntoConstraints = false
             addProfileButtons()
-            
-            hasDrawn = true
         }
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     func addProfileButtons() {
@@ -63,7 +65,8 @@ class AXProfileListView: NSView {
     }
     
     @objc func buttonClickAction(_ sender: AXHoverButton) {
-        appProperties.profileManager.switchProfiles(to: sender.tag)
+        // Forced because view wouldn't be shown on private windows
+        appProperties.profileManager!.switchProfiles(to: sender.tag)
         appProperties.tabManager.switchedProfile()
     }
 }

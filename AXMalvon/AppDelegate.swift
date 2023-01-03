@@ -9,8 +9,6 @@
 import AppKit
 import WebKit
 
-var AXMalvon_WebViewConfiguration: WKWebViewConfiguration = WKWebViewConfiguration()
-
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
     var aboutView: AXAboutView? = nil
@@ -23,14 +21,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Initializers
-        AXMalvon_WebViewConfiguration.websiteDataStore = .nonPersistent()
         AXBrowserProfile.retriveProfiles()
         AXHistory.checkIfFileExists()
         checkForUpdates()
         
         // Create a window
         let window = AXWindow()
-        window.appProperties.profileManager.switchProfiles(to: 0)
         window.makeKeyAndOrderFront(nil)
         // let window0 = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))
         // window0.contentView = AXWelcomeView()
@@ -223,5 +219,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             LSSetDefaultHandlerForURLScheme("HTML document" as CFString, bundleID)
             LSSetDefaultHandlerForURLScheme("XHTML document" as CFString, bundleID)
         }
+    }
+}
+
+extension AppDelegate: NSMenuItemValidation {
+    func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+        if menuItem.action == #selector(setAsDefaultBrowser(_:)) {
+            let url = NSWorkspace.shared.urlForApplication(toOpen: URL(string: "https://www.google.com")!)
+            return url?.lastPathComponent != "Malvon.app"
+        }
+        
+        return true
     }
 }

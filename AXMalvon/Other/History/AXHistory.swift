@@ -18,7 +18,7 @@ class AXHistory {
     static var filePath: URL = NSURL.appDataURL().appendingPathComponent("browser.history")
     
     static func checkIfFileExists() {
-        let file = NSURL.appDataURL().appendingPathComponent("browser.history")
+        let file = AXHistory.filePath
         if !FileManager.default.fileExists(atPath: file.path) {
             try! String("").write(to: file, atomically: true, encoding: .utf8)
         }
@@ -49,12 +49,11 @@ class AXHistory {
             items.append(item)
         }
         
-        print(items)
         return items
     }
     
     static func removeAll() {
-        let file = NSURL.appDataURL().appendingPathComponent("browser.history")
+        let file = AXHistory.filePath
         try! String("").write(to: file, atomically: true, encoding: .utf8)
     }
     

@@ -20,13 +20,19 @@ class AXAppProperties {
     
     // Other Views
     let popOver: AXSearchFieldPopoverView
-    let profileList: AXProfileListView
+    var profileList: AXProfileListView?
     let progressBar: AXRectangularProgressIndicator
     let findBar: AXWebViewFindView
     
     // Other
     let tabManager: AXTabManager
-    let profileManager: AXProfileManager
+    var profileManager: AXProfileManager?
+    var webViewConfiguration: WKWebViewConfiguration = {
+        let config = WKWebViewConfiguration()
+        config.websiteDataStore = .nonPersistent()
+        
+        return config
+    }()
     
     // State Variables
     var isFullScreen: Bool = false
@@ -61,22 +67,25 @@ class AXAppProperties {
         contentView = AXContentView()
         webContainerView = AXWebContainerView()
         tabManager = AXTabManager()
-        profileManager = AXProfileManager()
         popOver = AXSearchFieldPopoverView()
         progressBar = AXRectangularProgressIndicator()
         findBar = AXWebViewFindView()
-        profileList = AXProfileListView()
-        
         self.isPrivate = isPrivate
+        
+        if !isPrivate {
+            profileManager = AXProfileManager(self)
+            profileList = AXProfileListView(self)
+            profileManager!.initializeProfile()
+        } else {
+            webViewConfiguration.processPool = .init()
+        }
         
         sidebarView.appProperties = self
         contentView.appProperties = self
         webContainerView.appProperties = self
         tabManager.appProperties = self
-        profileManager.appProperties = self
         popOver.appProperties = self
         findBar.appProperties = self
-        profileList.appProperties = self
     }
     
     func saveProperties() {

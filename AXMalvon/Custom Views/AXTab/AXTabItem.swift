@@ -21,6 +21,10 @@ struct AXTabItem: Codable {
         case url
     }
     
+    static var webViewConfigurationUserInfoKey: CodingUserInfoKey {
+        return CodingUserInfoKey(rawValue: "config")!
+    }
+    
     init(view: AXWebView) {
         self.view = view
     }
@@ -31,7 +35,7 @@ struct AXTabItem: Codable {
         self.title = try values.decode(String.self, forKey: .title)
         self.url = try? values.decode(URL.self, forKey: .url)
         
-        view = AXWebView(frame: .zero, configuration: AXMalvon_WebViewConfiguration)
+        view = AXWebView(frame: .zero, configuration: decoder.userInfo[AXTabItem.webViewConfigurationUserInfoKey] as! WKWebViewConfiguration)
         view.addConfigurations()
         view.layer?.cornerRadius = 5.0
     }

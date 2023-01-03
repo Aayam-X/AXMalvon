@@ -28,7 +28,16 @@ class AXSideBarView: NSView {
     
     var scrollView: AXScrollView!
     fileprivate let clipView = AXFlippedClipView()
-    var stackView: NSStackView { get { return AX_profiles[appProperties.currentTab].tabStackView } }
+    //var stackView: NSStackView { get { return AX_profiles[appProperties.AX_currentProfile].tabStackView } }
+    lazy var stackView: NSStackView = {
+        let stackView = NSStackView()
+        stackView.orientation = .vertical
+        stackView.spacing = 1.08
+        stackView.detachesHiddenViews = false
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        return stackView
+    }()
     
     lazy var toggleSidebarButton: AXHoverButton = {
         let button = AXHoverButton()
@@ -148,12 +157,14 @@ class AXSideBarView: NSView {
             stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
             
             // Setup profileListView
-            appProperties.profileList.translatesAutoresizingMaskIntoConstraints = false
-            addSubview(appProperties.profileList)
-            appProperties.profileList.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -14).isActive = true
-            appProperties.profileList.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
-            appProperties.profileList.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-            appProperties.profileList.heightAnchor.constraint(equalToConstant: 30).isActive = true
+            if let profileList = appProperties.profileList {
+                profileList.translatesAutoresizingMaskIntoConstraints = false
+                addSubview(profileList)
+                profileList.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -14).isActive = true
+                profileList.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+                profileList.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+                profileList.heightAnchor.constraint(equalToConstant: 30).isActive = true
+            }
             
             hasDrawn = true
         }
@@ -493,9 +504,7 @@ class AXSideBarView: NSView {
     
     // MARK: - Other Functions
     func switchedProfile() {
-        if stackView.subviews.isEmpty {
-            updateAll()
-        }
+        updateAll()
         
         scrollView.documentView = stackView
         stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
