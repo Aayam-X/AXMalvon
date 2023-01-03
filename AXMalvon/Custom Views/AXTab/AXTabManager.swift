@@ -12,46 +12,45 @@ import WebKit
 class AXTabManager {
     weak var appProperties: AXAppProperties!
     
-    var goesToNewTab = true
+    // When a new tab is created, we will go to that tab
+    var navigatesToNewTabOnCreate = true
     
     // Updates every single view
     func updateAll() {
-        appProperties.currentTab = 0
-        
         appProperties.sidebarView.updateAll()
-        appProperties.webContainerView.update()
+        appProperties.webContainerView.update(view: appProperties.currentProfile.tabs[appProperties.currentProfile.currentTab].view)
     }
     
     // Updates every single view
     func switchedProfile() {
-        appProperties.webContainerView.splitView.subviews.removeAll()
-        
-        if appProperties.tabs.isEmpty {
-            appProperties.tabManager.createNewTab()
-            appProperties.currentTab = 0
-        }
-        
-        appProperties.sidebarView.switchedProfile()
-        appProperties.webContainerView.update()
+//        appProperties.webContainerView.splitView.subviews.removeAll()
+//
+//        if appProperties.tabs.isEmpty {
+//            appProperties.tabManager.createNewTab()
+//            appProperties.currentTab = 0
+//        }
+//
+//        appProperties.sidebarView.switchedProfile()
+//        appProperties.webContainerView.update()
     }
     
     func tabMovedToNewWindow(_ i: Int) {
-        let tab = appProperties.tabs[i]
+        let tab = appProperties.currentProfile.tabs[i]
         tab.view.removeFromSuperview()
-        
-        if appProperties.tabs.count != 1 {
+
+        if appProperties.currentProfile.tabs.count != 1 {
             // Same logic as remove tab
-            if appProperties.currentTab == i {
-                if i == appProperties.tabs.count {
+            if appProperties.currentProfile.currentTab == i {
+                if i == appProperties.currentProfile.tabs.count {
                     self.switch(to: i - 1)
                 }
-            } else if appProperties.currentTab > i {
+            } else if appProperties.currentProfile.currentTab > i {
                 self.switch(to: i - 1)
             }
-            
-            appProperties.tabs.remove(at: i)
+
+            appProperties.currentProfile.tabs.remove(at: i)
             appProperties.sidebarView.removedTab(i)
-            appProperties.webContainerView.update()
+            appProperties.webContainerView.update(view: appProperties.currentProfile.tabs[appProperties.currentProfile.currentTab].view)
         } else {
             // Close window
             appProperties.window.close()
@@ -59,28 +58,28 @@ class AXTabManager {
     }
     
     func tabDraggedToOtherWindow(_ i: Int) {
-        let tab = appProperties.tabs[i]
+        let tab = appProperties.currentProfile.tabs[i]
         tab.view.removeFromSuperview()
-        
-        if appProperties.tabs.count != 1 {
+
+        if appProperties.currentProfile.tabs.count != 1 {
             // Same logic as remove tab
-            if appProperties.currentTab == i {
-                if i == appProperties.tabs.count - 1 {
-                    appProperties.currentTab = i - 1
+            if appProperties.currentProfile.currentTab == i {
+                if i == appProperties.currentProfile.tabs.count - 1 {
+                    appProperties.currentProfile.currentTab = i - 1
                 }
-            } else if appProperties.currentTab > i {
-                appProperties.currentTab = i - 1
+            } else if appProperties.currentProfile.currentTab > i {
+                appProperties.currentProfile.currentTab = i - 1
             }
-            
-            appProperties.tabs.remove(at: i)
-            
-            // remove button from stackView
-            let button = appProperties.sidebarView.stackView.arrangedSubviews[i]
+
+            appProperties.currentProfile.tabs.remove(at: i)
+
+            // Remove button from stackView
+            let button = appProperties.sidebarView.tabView.tabStackView.arrangedSubviews[i]
             button.removeFromSuperview()
-            
+
             appProperties.sidebarView.updatePosition(from: i)
             appProperties.sidebarView.updateSelection()
-            appProperties.webContainerView.update()
+            appProperties.webContainerView.update(view: appProperties.currentProfile.tabs[appProperties.currentProfile.currentTab].view)
         } else {
             // Close window
             appProperties.window.close()
@@ -97,36 +96,37 @@ class AXTabManager {
     
     // MARK: - Tab functions
     func `switch`(to: Int) {
-        if appProperties.currentTab != to {
-            appProperties.currentTab = to
+        if appProperties.currentProfile.currentTab != to {
+            appProperties.currentProfile.currentTab = to
             appProperties.sidebarView.updateSelection()
         }
         
-        appProperties.webContainerView.update()
+        appProperties.webContainerView.update(view: appProperties.currentProfile.tabs[to].view)
     }
     
     func closeTab(_ at: Int) {
-        let tab = appProperties.tabs[at]
+        print(appProperties.currentProfile.tabs.count)
+        let tab = appProperties.currentProfile.tabs[at]
         tab.view.removeFromSuperview()
-        
+
         if let url = tab.view.url {
-            appProperties.previouslyClosedTabs.append(url)
+            appProperties.currentProfile.previouslyClosedTabs.append(url)
         }
-        
-        if appProperties.tabs.count != 1 {
+
+        if appProperties.currentProfile.tabs.count != 1 {
             // Close tab algorithm
-            if appProperties.currentTab == at {
-                if at == appProperties.tabs.count - 1 {
-                    appProperties.currentTab -= 1
+            if appProperties.currentProfile.currentTab == at {
+                if at == appProperties.currentProfile.tabs.count - 1 {
+                    appProperties.currentProfile.currentTab -= 1
                 }
-            } else if appProperties.currentTab > at {
-                appProperties.currentTab -= 1
+            } else if appProperties.currentProfile.currentTab > at {
+                appProperties.currentProfile.currentTab -= 1
             }
-            
-            appProperties.tabs.remove(at: at)
+
+            appProperties.currentProfile.tabs.remove(at: at)
             appProperties.sidebarView.removedTab(at)
-            
-            appProperties.webContainerView.update()
+
+            appProperties.webContainerView.update(view: appProperties.currentTab.view)
         } else {
             // Close window
             appProperties.window.close()
@@ -134,15 +134,13 @@ class AXTabManager {
     }
     
     func restoreTab() {
-        if !appProperties.previouslyClosedTabs.isEmpty {
-            createNewTab(url: appProperties.previouslyClosedTabs.removeLast())
+        if !appProperties.currentProfile.previouslyClosedTabs.isEmpty {
+            createNewTab(url: appProperties.currentProfile.previouslyClosedTabs.removeLast())
         }
     }
     
     func swapAt(_ first: Int, _ second: Int) {
         if first != second {
-            appProperties.tabs.swapAt(first, second)
-            appProperties.currentTab = second
             appProperties.sidebarView.swapAt(first, second)
         }
     }
@@ -152,16 +150,12 @@ class AXTabManager {
     private func addTabAndUpdate(webView: AXWebView) -> AXWebView {
         var tabItem = AXTabItem(view: webView)
         tabItem.url = webView.url
-        appProperties.tabs.append(tabItem)
         
-        // This is the only exception
-        if goesToNewTab {
-            appProperties.currentTab = appProperties.tabs.count - 1
-            appProperties.sidebarView.didCreateTab()
-            appProperties.webContainerView.update()
+        if navigatesToNewTabOnCreate {
+            appProperties.sidebarView.createTab(tabItem)
         } else {
-            appProperties.sidebarView.didCreateTabInBackground(index: appProperties.tabs.count - 1)
-            goesToNewTab = true
+            appProperties.sidebarView.didCreateTabInBackground(index: appProperties.currentProfile.tabs.count - 1)
+            navigatesToNewTabOnCreate = true
         }
         
         return tabItem.view

@@ -9,7 +9,7 @@
 import AppKit
 import WebKit
 
-struct AXBrowserProfile: Codable {
+class AXBrowserProfile: Codable {
     var name: String // User default string
     var webViewConfiguration: WKWebViewConfiguration
     var tabs: [AXTabItem] = []
@@ -25,7 +25,7 @@ struct AXBrowserProfile: Codable {
         return stackView
     }()
     
-    var currentTab = -1 {
+    var currentTab = 0 {
         willSet {
             previousTab = currentTab
         }
@@ -37,7 +37,7 @@ struct AXBrowserProfile: Codable {
         case name
     }
     
-    init(from decoder: Decoder) throws {
+    required init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         
         self.name = try values.decode(String.self, forKey: .name)
@@ -60,7 +60,7 @@ struct AXBrowserProfile: Codable {
         retriveProperties()
     }
     
-    mutating func retriveProperties() {
+    func retriveProperties() {
         // Retrive the pool
         if let pool = getDataPool(key: "\(name)-WKProcessPool") {
             webViewConfiguration.processPool = pool
@@ -75,18 +75,18 @@ struct AXBrowserProfile: Codable {
                 self.webViewConfiguration.websiteDataStore.httpCookieStore.setCookie(cookie)
             }
         }
-        
-        // Retrive the currentTab
-        currentTab = UserDefaults.standard.integer(forKey: "\(name)-CurrentTab")
     }
     
-    mutating func retriveTabs() {
+    func retriveTabs() {
         // Retrive the tabs
         if let data = UserDefaults.standard.data(forKey: "\(name)-AXTabItem") {
             do {
                 let decoder = JSONDecoder()
                 decoder.userInfo[AXTabItem.webViewConfigurationUserInfoKey] = webViewConfiguration
                 self.tabs = try decoder.decode([AXTabItem].self, from: data)
+                
+                // Retrive the currentTab
+                currentTab = UserDefaults.standard.integer(forKey: "\(name)-CurrentTab")
             } catch {
                 print("Unable to Decode Tabs (\(error))")
             }
@@ -108,7 +108,7 @@ struct AXBrowserProfile: Codable {
         
         // Save cookies
         webViewConfiguration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
-            setData(cookies, key: "\(name)-HTTPCookie")
+            setData(cookies, key: "\(self.name)-HTTPCookie")
         }
     }
     

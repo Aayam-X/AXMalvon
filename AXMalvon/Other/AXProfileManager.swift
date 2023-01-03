@@ -18,42 +18,37 @@ class AXProfileManager {
     }
     
     func initializeProfile() {
-        let profile = AX_profiles[safe: appProperties.AX_currentProfile]
-        guard var profile = profile else { return }
-        profile.retriveProperties()
-        appProperties.webViewConfiguration = profile.webViewConfiguration
-        profile.retriveTabs()
-        
-        appProperties.AX_currentProfile = appProperties.AX_currentProfile
-        appProperties.currentTab = profile.currentTab
-        appProperties.tabs = profile.tabs
-        appProperties.previousTab = profile.previousTab
+//        appProperties.currentProfile = AX_profiles[0]
+//
+//        appProperties.currentProfile.retriveProperties()
+//        appProperties.webViewConfiguration = appProperties.currentProfile.webViewConfiguration
+//        appProperties.currentProfile.retriveTabs()
     }
     
     func switchProfiles(to: Int) {
-        updateValuesForCurrentProfile()
-        
-        let profile = AX_profiles[safe: to]
-        guard var profile = profile else { return }
-        profile.retriveProperties()
-        appProperties.webViewConfiguration = profile.webViewConfiguration
-        profile.retriveTabs()
-        
-        appProperties.AX_currentProfile = to
-        appProperties.currentTab = profile.currentTab
-        appProperties.tabs = profile.tabs
-        appProperties.previousTab = profile.previousTab
+//        updateValuesForCurrentProfile()
+//
+//        let profile = AX_profiles[safe: to]
+//        guard var profile = profile else { return }
+//        profile.retriveProperties()
+//        appProperties.webViewConfiguration = profile.webViewConfiguration
+//        profile.retriveTabs()
+//
+//        appProperties.AX_currentProfile = to
+//        appProperties.currentTab = profile.currentTab
+//        appProperties.tabs = profile.tabs
+//        appProperties.previousTab = profile.previousTab
     }
     
     func updateValuesForCurrentProfile() {
-        let profile = AX_profiles[safe: appProperties.AX_currentProfile]
-        guard var profile = profile else { return }
-        
-        profile.currentTab = appProperties.currentTab
-        profile.previousTab = appProperties.previousTab
-        profile.tabs = appProperties.tabs
-        profile.webViewConfiguration = appProperties.webViewConfiguration
-        
-        profile.saveProperties()
+//        let profile = AX_profiles[safe: appProperties.AX_currentProfile]
+//        guard var profile = profile else { return }
+//
+//        profile.currentTab = appProperties.currentTab
+//        profile.previousTab = appProperties.previousTab
+//        profile.tabs = appProperties.tabs
+//        profile.webViewConfiguration = appProperties.webViewConfiguration
+//
+//        profile.saveProperties()
     }
 }

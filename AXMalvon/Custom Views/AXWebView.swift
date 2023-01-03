@@ -51,7 +51,7 @@ class AXWebView: WKWebView {
         if isSplitView {
             self.layer?.borderWidth = 1.0
             let appProperties = (window as! AXWindow).appProperties
-            appProperties.sidebarView.webView_updateSelection()
+            appProperties.sidebarView.webView_updateSelection(webView: self)
             
             self.window?.title = self.title ?? "Untitled Tab"
             appProperties.webContainerView.windowTitleLabel.stringValue = self.title ?? "Untitled Tab"

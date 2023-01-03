@@ -42,13 +42,11 @@ class AXAppProperties {
     var sidebarWidth: CGFloat
     
     // Variables
-    var AX_currentProfile = 0
     var isPrivate: Bool
     
-    var currentTab = -1 { willSet { previousTab = currentTab } }
-    var previousTab = -1
-    var tabs: [AXTabItem] = []
-    var previouslyClosedTabs: [URL] = []
+    var currentProfile: AXBrowserProfile!
+    var currentTab: AXTabItem!
+    var currentTabButton: AXSidebarTabButton!
     
     init(isPrivate: Bool = false, restoresTab: Bool = true) {
         // Get UserDefaults
@@ -86,6 +84,8 @@ class AXAppProperties {
         tabManager.appProperties = self
         popOver.appProperties = self
         findBar.appProperties = self
+        
+        currentProfile = AX_profiles[0]
     }
     
     func saveProperties() {

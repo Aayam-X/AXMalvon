@@ -114,9 +114,8 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         if newTabMode {
             appProperties.tabManager.createNewTab(url: url)
         } else {
-            var currentTab: AXTabItem = appProperties.tabs[appProperties.currentTab]
-            currentTab.view.load(URLRequest(url: url))
-            currentTab.url = url
+            appProperties.currentTab.view.load(URLRequest(url: url))
+            appProperties.currentTab.url = url
         }
         
         newTabMode = true
@@ -131,7 +130,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     }
     
     func searchFieldAction() {
-        appProperties.tabs[appProperties.currentTab].view.alphaValue = 1.0
+        appProperties.currentTab.view.alphaValue = 1.0
         let value = searchField.stringValue
         
         var url: URL?
@@ -229,7 +228,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     }
     
     func show() {
-        appProperties.tabs[appProperties.currentTab].view.alphaValue = 0.5
+        appProperties.currentTab.view.alphaValue = 0.5
         
         // 300: Half the Width
         // 137: Half the Height
@@ -249,7 +248,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             suggestion!.isHidden = true
         }
         
-        appProperties.tabs[appProperties.currentTab].view.alphaValue = 1.0
+        appProperties.currentTab.view.alphaValue = 1.0
         appProperties.window.removeChildWindow(suggestionWindow)
         
         if let localMouseDownEventMonitor = localMouseDownEventMonitor {

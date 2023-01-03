@@ -18,6 +18,8 @@ class AXWebContainerView: NSView {
     
     lazy var splitView = AXWebSplitView()
     
+    var currentWebView: AXWebView!
+    
     lazy var windowTitleLabel: NSTextField = {
         let title = NSTextField()
         title.isEditable = false
@@ -65,49 +67,47 @@ class AXWebContainerView: NSView {
     }
     
     func removeDelegates() {
-        let webView = appProperties.tabs[safe: appProperties.currentTab]?.view
-        webView?.uiDelegate = nil
-        webView?.navigationDelegate = nil
+        let webView = appProperties.currentTab.view
+        webView.uiDelegate = nil
+        webView.navigationDelegate = nil
     }
     
     func updateDelegates() {
-        let webView = appProperties.tabs[appProperties.currentTab].view
+        let webView = appProperties.currentTab.view
         webView.uiDelegate = self
         webView.navigationDelegate = self
     }
     
-    func update() {
+    func update(view: AXWebView) {
+        currentWebView = view
         splitView.subviews.removeAll()
         
-        let webView = appProperties.tabs[appProperties.currentTab].view
-        
-        
-        if webView.url == nil {
-            appProperties.tabs[appProperties.currentTab].load()
+        if view.url == nil {
+            appProperties.currentTab.load()
         }
         
-        if !webView.isLoading {
+        if !view.isLoading {
             appProperties.progressBar.close()
         }
         
         if appProperties.isFullScreen {
-            webView.frame = bounds
-            webView.layer?.cornerRadius = 0.0
+            view.frame = bounds
+            view.layer?.cornerRadius = 0.0
         } else {
-            webView.frame = appProperties.sidebarToggled ? insetWebView(bounds) : bounds.insetBy(dx: 14, dy: 14)
-            webView.layer?.cornerRadius = 5.0
+            view.frame = appProperties.sidebarToggled ? insetWebView(bounds) : bounds.insetBy(dx: 14, dy: 14)
+            view.layer?.cornerRadius = 5.0
         }
         
-        webView.navigationDelegate = self
-        webView.uiDelegate = self
-        splitView.addArrangedSubview(webView)
-        webView.autoresizingMask = [.height, .width]
-        if let window = webView.window as? AXWindow {
-            window.makeFirstResponder(webView)
+        view.navigationDelegate = self
+        view.uiDelegate = self
+        splitView.addArrangedSubview(view)
+        view.autoresizingMask = [.height, .width]
+        if let window = view.window as? AXWindow {
+            window.makeFirstResponder(view)
         }
         
-        progressBarObserver = webView.observe(\.estimatedProgress, changeHandler: { [self] _, _ in
-            let progress: CGFloat = webView.estimatedProgress
+        progressBarObserver = view.observe(\.estimatedProgress, changeHandler: { [self] _, _ in
+            let progress: CGFloat = view.estimatedProgress
             if progress >= 0.93 {
                 // Go very fast to 100!
                 appProperties.progressBar.updateProgress(1.0)
@@ -116,7 +116,7 @@ class AXWebContainerView: NSView {
             }
         })
         
-        self.windowTitleLabel.stringValue = webView.title ?? "Untitled"
+        self.windowTitleLabel.stringValue = view.title ?? "Untitled"
     }
     
     func stopObserving() {
@@ -156,19 +156,18 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
     }
     
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        let axWebView = appProperties.tabs[appProperties.currentTab].view
-        let selectedTab = appProperties.sidebarView.stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton
-        axWebView.getFavicon { faviconURL in
+        let selectedTab = appProperties.currentTabButton
+        currentWebView.getFavicon { faviconURL in
             if let favIcon = faviconURL {
-                selectedTab.favIconImageView.download(from: favIcon)
+                selectedTab?.favIconImageView.download(from: favIcon)
             } else {
-                selectedTab.favIconImageView.image = NSImage(systemSymbolName: "square.fill", accessibilityDescription: nil)
+                selectedTab?.favIconImageView.image = NSImage(systemSymbolName: "square.fill", accessibilityDescription: nil)
             }
         }
     }
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        appProperties.window.title = appProperties.tabs[safe: appProperties.currentTab]?.title ?? "Untitled"
+        appProperties.window.title = appProperties.currentTab.view.title ?? "Untitled"
         self.windowTitleLabel.stringValue = webView.title ?? "Untitled"
         
         if webView.url != nil && !appProperties.isPrivate {
@@ -226,7 +225,7 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
         // Modifier Flags
         switch navigationAction.modifierFlags {
         case .command: // New tab
-            appProperties.tabManager.goesToNewTab = false
+            appProperties.tabManager.navigatesToNewTabOnCreate = false
             fallthrough
         case [.shift, .command]: // New tab + Go to tab
             appProperties.tabManager.createNewTab(request: navigationAction.request)
@@ -270,14 +269,14 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
             index += 1
         }
         
-        let downloadItem = AXDownloadItem(fileName: suggestedFilename, location: fileUrl, download: download)
-        appProperties.sidebarView.didDownload(downloadItem)
+        //let downloadItem = AXDownloadItem(fileName: suggestedFilename, location: fileUrl, download: download)
+        //appProperties.sidebarView.didDownload(downloadItem)
         
         completionHandler(fileUrl)
     }
     
     func webViewDidClose(_ webView: WKWebView) {
-        self.appProperties.tabManager.closeTab(appProperties.currentTab)
+        //self.appProperties.tabManager.closeTab(appProperties.currentTab)
     }
     
     // func downloadDidFinish(_ download: WKDownload) { }

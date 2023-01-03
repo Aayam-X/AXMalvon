@@ -16,6 +16,7 @@ enum AXScrollViewScrollDirection {
 
 var AXMalvon_SidebarView_scrollDirection: AXScrollViewScrollDirection! = .left
 
+
 class AXSideBarView: NSView {
     // MARK: - Variables
     weak var appProperties: AXAppProperties!
@@ -28,16 +29,8 @@ class AXSideBarView: NSView {
     
     var scrollView: AXScrollView!
     fileprivate let clipView = AXFlippedClipView()
-    //var stackView: NSStackView { get { return AX_profiles[appProperties.AX_currentProfile].tabStackView } }
-    lazy var stackView: NSStackView = {
-        let stackView = NSStackView()
-        stackView.orientation = .vertical
-        stackView.spacing = 1.08
-        stackView.detachesHiddenViews = false
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        return stackView
-    }()
+    
+    let tabView = AXTabView(profile: AX_profiles[0])
     
     lazy var toggleSidebarButton: AXHoverButton = {
         let button = AXHoverButton()
@@ -152,9 +145,15 @@ class AXSideBarView: NSView {
             clipView.topAnchor.constraint(equalTo: scrollView.topAnchor).isActive = true
             clipView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor).isActive = true
             
-            // Setup stackview
-            scrollView.documentView = stackView
-            stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
+            // Setup tabView
+            tabView.appProperties = appProperties
+            tabView.translatesAutoresizingMaskIntoConstraints = false
+            scrollView.documentView = tabView
+            tabView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
+            
+            tabView.createTab()
+            tabView.createTab()
+            tabView.createTab()
             
             // Setup profileListView
             if let profileList = appProperties.profileList {
@@ -192,25 +191,25 @@ class AXSideBarView: NSView {
     }
     
     @objc func tabClick(_ sender: NSButton) {
-        appProperties.tabManager.switch(to: sender.tag)
+       // appProperties.tabManager.switch(to: sender.tag)
     }
     
     @objc func backButtonAction() {
-        let webView = appProperties.tabs[appProperties.currentTab].view
+        let webView = appProperties.currentTab.view
         webView.goBack()
     }
     
     @objc func forwardButtonAction() {
-        let webView = appProperties.tabs[appProperties.currentTab].view
+        let webView = appProperties.currentTab.view
         webView.goForward()
     }
     
     @objc func reloadButtonAction() {
-        appProperties.tabs[appProperties.currentTab].view.reload()
+        appProperties.currentTab.view.reload()
     }
     
     func checkNavigationButtons() {
-        let webView = appProperties.tabs[appProperties.currentTab].view
+        let webView = appProperties.currentTab.view
         
         backButton.isEnabled = webView.canGoBack
         forwardButton.isEnabled = webView.canGoForward
@@ -301,138 +300,52 @@ class AXSideBarView: NSView {
     // MARK: - Tab Functions
     
     func updateAll() {
-        stackView.subviews.removeAll()
-        
-        for (index, tab) in appProperties.tabs.enumerated() {
-            _update_didCreateTab(tab, index)
-        }
-        
-        let currentTab = (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton)
-        currentTab.isSelected = true
+        tabView.update()
     }
     
     // Add a new item into the stackview
     func didCreateTab() {
-        (stackView.arrangedSubviews[safe: appProperties.previousTab] as? AXSidebarTabButton)?.isSelected = false
-        let t = appProperties.tabs[appProperties.currentTab]
-        
-        let button = AXSidebarTabButton(appProperties)
-        button.tag = appProperties.currentTab
-        button.startObserving()
-        
-        button.alignment = .natural
-        button.target = self
-        button.action = #selector(tabClick)
-        button.tabTitle = t.title ?? "Untitled"
-        stackView.addArrangedSubview(button)
-        button.isSelected = true
-        
-        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+       tabView.addTabToStackView()
+    }
+    
+    func createTab(_ tab: AXTabItem) {
+        tabView.createTab(tab)
     }
     
     // Add a new item into the stackview
     func didCreateTabInBackground(index: Int) {
-        let t = appProperties.tabs[index]
-        
-        let button = AXSidebarTabButton(appProperties)
-        button.tag = index
-        button.startObserving()
-        
-        button.alignment = .natural
-        button.target = self
-        button.action = #selector(tabClick)
-        button.tabTitle = t.title ?? "Untitled"
-        stackView.addArrangedSubview(button)
-        
-        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+        //tabView.addTabToStackViewInBackground(index: index)
     }
     
     func swapAt(_ first: Int, _ second: Int) {
-        let firstSubview = stackView.arrangedSubviews[first] as! AXSidebarTabButton
-        let secondSubview = stackView.arrangedSubviews[second] as! AXSidebarTabButton
-        
-        firstSubview.tag = second
-        secondSubview.tag = first
-        
-        stackView.removeArrangedSubview(firstSubview)
-        stackView.insertArrangedSubview(firstSubview, at: second)
-        stackView.insertArrangedSubview(secondSubview, at: first)
+        tabView.swapAt(first, second)
     }
     
     func removedTab(_ at: Int) {
-        let tab = stackView.arrangedSubviews[at] as! AXSidebarTabButton
-        tab.stopObserving()
-        tab.removeFromSuperview()
-        
-        // Fix tab.position
-        for index in at..<stackView.arrangedSubviews.count {
-            let tab = stackView.arrangedSubviews[index] as! AXSidebarTabButton
-            tab.tag = index
-            
-            tab.stopObserving()
-            tab.startObserving()
-        }
-        
-        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
+        tabView.removedTab(at)
     }
     
-    func didDownload(_ d: AXDownloadItem) {
-        let button = AXSidebarDownloadButton(appProperties)
-        button.downloadItem = d
-        button.startObserving()
-        
-        stackView.addArrangedSubview(button)
-        
-        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
-    }
+//    func didDownload(_ d: AXDownloadItem) {
+//        let button = AXSidebarDownloadButton(appProperties)
+//        button.downloadItem = d
+//        button.startObserving()
+//
+//        stackView.addArrangedSubview(button)
+//
+//        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
+//        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+//    }
     
     func updateSelection() {
-        (stackView.arrangedSubviews[safe: appProperties.previousTab] as? AXSidebarTabButton)?.isSelected = false
-        (stackView.arrangedSubviews[appProperties.currentTab] as! AXSidebarTabButton).isSelected = true
-        appProperties.window.title = appProperties.tabs[ appProperties.currentTab].title ?? "Untitled"
+      tabView.updateSelection()
     }
     
-    func webView_updateSelection() {
-        appProperties.currentTab = appProperties.previousTab
-        updateSelection()
-        appProperties.webContainerView.updateDelegates()
-    }
-    
-    func _update_didCreateTab(_ t: AXTabItem, _ i: Int) {
-        let button = AXSidebarTabButton(appProperties)
-        button.tag = i
-        button.startObserving()
-        
-        button.alignment = .natural
-        button.target = self
-        button.action = #selector(tabClick)
-        button.tabTitle = t.title ?? "Untitled"
-        stackView.addArrangedSubview(button)
-        
-        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
-        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+    func webView_updateSelection(webView: AXWebView) {
+      tabView.webView_updateSelection(webView: webView)
     }
     
     func insertTabFromOtherWindow(view: NSView) {
-        (stackView.arrangedSubviews[safe: appProperties.currentTab] as! AXSidebarTabButton).isSelected = false
-        
-        let button = view as! AXSidebarTabButton
-        button.stopObserving()
-        
-        button.target = self
-        button.action = #selector(tabClick)
-        stackView.addArrangedSubview(button)
-        button.isSelected = true
-        
-        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
-        
-        appProperties.currentTab = stackView.arrangedSubviews.count - 1
-        button.tag = appProperties.currentTab
-        button.startObserving()
-        appProperties.webContainerView.update()
+      //  tabView.insertTabFromAnotherWindow(view: view)
     }
     
     // MARK: - Drag and Drop
@@ -447,13 +360,7 @@ class AXSideBarView: NSView {
     //    }
     
     func updatePosition(from i: Int) {
-        for index in i..<stackView.arrangedSubviews.count {
-            let tab = stackView.arrangedSubviews[index] as! AXSidebarTabButton
-            tab.tag = index
-            
-            tab.stopObserving()
-            tab.startObserving()
-        }
+      tabView.updateTabTags(from: i)
     }
     
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
@@ -467,8 +374,8 @@ class AXSideBarView: NSView {
                 let otherAppProperty = button.appProperties!
                 
                 // Other window
-                appProperties.tabs.append(otherAppProperty.tabs[button.tag])
-                otherAppProperty.tabManager.tabDraggedToOtherWindow(button.tag)
+//                appProperties.tabs.append(otherAppProperty.tabs[button.tag])
+//                otherAppProperty.tabManager.tabDraggedToOtherWindow(button.tag)
                 
                 // Our window
                 button.appProperties = appProperties
@@ -504,9 +411,9 @@ class AXSideBarView: NSView {
     
     // MARK: - Other Functions
     func switchedProfile() {
-        updateAll()
+        //updateAll()
         
-        scrollView.documentView = stackView
-        stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
+        //scrollView.documentView = stackView
+        //stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
     }
 }

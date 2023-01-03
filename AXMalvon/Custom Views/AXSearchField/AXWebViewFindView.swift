@@ -104,7 +104,7 @@ class AXWebViewFindView: NSView {
     }
     
     func searchForText() {
-        let webView = appProperties.tabs[appProperties.currentTab].view
+        let webView = appProperties.currentTab.view
         webView.removeAllHighlights()
         
         if !searchField.stringValue.isEmpty {
@@ -121,12 +121,12 @@ class AXWebViewFindView: NSView {
     }
     
     @objc func nextButtonAction() {
-        let webView = appProperties.tabs[appProperties.currentTab].view
+        let webView = appProperties.currentTab.view
         webView.searchNext()
     }
     
     @objc func previousButtonAction() {
-        let webView = appProperties.tabs[appProperties.currentTab].view
+        let webView = appProperties.currentTab.view
         webView.searchPrevious()
     }
     

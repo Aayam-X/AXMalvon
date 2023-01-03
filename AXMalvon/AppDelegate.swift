@@ -137,7 +137,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if appProperties.searchFieldShown {
             appProperties.popOver.close()
         } else {
-            appProperties.tabManager.closeTab(appProperties.currentTab)
+            appProperties.tabManager.closeTab(appProperties.currentProfile.currentTab)
         }
     }
     

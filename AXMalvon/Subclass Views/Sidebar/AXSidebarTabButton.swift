@@ -24,6 +24,7 @@ fileprivate let tempView: AXWebSplitViewAddItemView! = AXWebSplitViewAddItemView
 
 class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPasteboardReading {
     weak var appProperties: AXAppProperties!
+    var profile: AXBrowserProfile!
     
     // Subviews
     lazy var titleView: NSTextField! = NSTextField()
@@ -68,7 +69,8 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         urlObserver = nil
     }
     
-    init(_ appProperties: AXAppProperties) {
+    init(_ appProperties: AXAppProperties, _ profile: AXBrowserProfile?) {
+        self.profile = profile
         self.appProperties = appProperties
         super.init(frame: .zero)
         self.wantsLayer = true
@@ -77,6 +79,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         self.bezelStyle = .shadowlessSquare
         self.layer?.borderColor = .white
         title = ""
+        heightAnchor.constraint(equalToConstant: 30).isActive = true
     }
     
     required init?(coder: NSCoder) {
@@ -142,16 +145,16 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     }
     
     public func startObserving() {
-        let webView = appProperties.tabs[tag].view
+        let webView = profile.tabs[tag].view
         
         self.titleObserver = webView.observe(\.title, options: .new, changeHandler: { [weak self] _, _ in
             let title = webView.title ?? "Untitled"
-            self?.appProperties.tabs[self!.tag].title = title
+            self?.profile.tabs[self!.tag].title = title
             self?.tabTitle = title
         })
-        
+
         self.urlObserver = webView.observe(\.url, options: .new, changeHandler: { [weak self] _, _ in
-            self?.appProperties.tabs[self!.tag].url = webView.url
+            self?.profile.tabs[self!.tag].url = webView.url
         })
     }
     
@@ -222,12 +225,12 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             
             draggingState = .reorder
             let index = Int((offset.y - appProperties.sidebarView.scrollView.frame.size.height) / -31)
-            if index <= appProperties.sidebarView.stackView.arrangedSubviews.count - 1 && index >= 0 {
+            if index <= appProperties.sidebarView.tabView.tabStackView.arrangedSubviews.count - 1 && index >= 0 {
                 appProperties.tabManager.swapAt(self.tag, index)
             }
         } else {
             // Check if the user is hovering over the WebView
-            if appProperties.webContainerView.frame.contains(offset) && appProperties.tabs.count != 1 {
+            if appProperties.webContainerView.frame.contains(offset) && profile.tabs.count != 1 {
                 draggingState = .newSplitView
                 inDragging_createSplitView(offsetX: offset.x)
             } else {
@@ -277,9 +280,9 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         
         let betterOffset = offsetX - appProperties.sidebarWidth
         
-        if appProperties.currentTab == self.tag {
-            appProperties.currentTab = appProperties.previousTab
-            appProperties.webContainerView.update()
+        if profile.currentTab == self.tag {
+            profile.currentTab = profile.previousTab
+            appProperties.webContainerView.update(view: appProperties.currentProfile.tabs[appProperties.currentProfile.currentTab].view)
         }
         
         tempView.frame.size.width = 200
@@ -303,10 +306,9 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         tempView.removeFromSuperview()
         
         // Might need a better safe check..
-        
-        if appProperties.previousTab != -1 {
-            let webView = appProperties.tabs[appProperties.previousTab].view
-            let webView1 = appProperties.tabs[appProperties.currentTab].view
+        if profile.previousTab != -1 {
+            let webView = profile.tabs[profile.previousTab].view
+            let webView1 = appProperties.currentTab.view
             
             webView.isSplitView = true
             webView1.isSplitView = true
@@ -329,15 +331,15 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         tempView.removeFromSuperview()
         appProperties.webContainerView.layer?.backgroundColor = .none
         
-        if appProperties.currentTab != self.tag {
-            appProperties.currentTab = self.tag
-            appProperties.webContainerView.update()
+        if profile.currentTab != self.tag {
+            profile.currentTab = self.tag
+            appProperties.webContainerView.update(view: appProperties.currentProfile.tabs[appProperties.currentProfile.currentTab].view)
         }
     }
     
     private func moveTabToNewWindow() {
         let window = AXWindow(restoresTab: false)
-        window.appProperties.tabs.append(appProperties.tabs[tag])
+        window.appProperties.currentProfile.tabs.append(appProperties.currentProfile.tabs[tag])
         appProperties.tabManager.tabMovedToNewWindow(tag)
         
         DispatchQueue.main.async {

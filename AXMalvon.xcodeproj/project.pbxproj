@@ -40,6 +40,7 @@
 		ED9B4CE82958835100961792 /* AXTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9B4CE72958835100961792 /* AXTextField.swift */; };
 		ED9B4CEB2958A1EE00961792 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9B4CEA2958A1EE00961792 /* Extensions.swift */; };
 		ED9FE65E29464E1C00323453 /* AXSidebarTabButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9FE65D29464E1C00323453 /* AXSidebarTabButton.swift */; };
+		EDB1B1C829648A7B00C8942A /* AXTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB1B1C729648A7B00C8942A /* AXTabView.swift */; };
 		EDB514A42945219800EB0E8F /* AXTabManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB514A32945219800EB0E8F /* AXTabManager.swift */; };
 		EDC611C1294E213A00524E88 /* AXWebViewFindView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDC611C0294E213A00524E88 /* AXWebViewFindView.swift */; };
 		EDD71EC8293BD96600256EA9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD71EC7293BD96600256EA9 /* AppDelegate.swift */; };
@@ -102,6 +103,7 @@
 		ED9B4CE72958835100961792 /* AXTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTextField.swift; sourceTree = "<group>"; };
 		ED9B4CEA2958A1EE00961792 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		ED9FE65D29464E1C00323453 /* AXSidebarTabButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSidebarTabButton.swift; sourceTree = "<group>"; };
+		EDB1B1C729648A7B00C8942A /* AXTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTabView.swift; sourceTree = "<group>"; };
 		EDB514A32945219800EB0E8F /* AXTabManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTabManager.swift; sourceTree = "<group>"; };
 		EDC611C0294E213A00524E88 /* AXWebViewFindView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWebViewFindView.swift; sourceTree = "<group>"; };
 		EDD71EC4293BD96600256EA9 /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -240,6 +242,7 @@
 				ED9560992940339800AC1C15 /* AXWebContainerView.swift */,
 				ED95609C294033D400AC1C15 /* AXTabItem.swift */,
 				EDB514A32945219800EB0E8F /* AXTabManager.swift */,
+				EDB1B1C729648A7B00C8942A /* AXTabView.swift */,
 			);
 			path = AXTab;
 			sourceTree = "<group>";
@@ -408,6 +411,7 @@
 				ED2735E92962586400DE8126 /* AXProfileListView.swift in Sources */,
 				ED9FE65E29464E1C00323453 /* AXSidebarTabButton.swift in Sources */,
 				ED2735E72962136E00DE8126 /* AXProfileManager.swift in Sources */,
+				EDB1B1C829648A7B00C8942A /* AXTabView.swift in Sources */,
 				ED95609729400AC700AC1C15 /* AXWebView.swift in Sources */,
 				EDD7C02C2957C2C10067E559 /* AXAboutView.swift in Sources */,
 				ED0B285E295B2F8C003D656F /* AXPreferenceWindow.swift in Sources */,

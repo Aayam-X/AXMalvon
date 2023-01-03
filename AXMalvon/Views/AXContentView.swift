@@ -61,13 +61,6 @@ class AXContentView: NSView {
             addSubview(appProperties.splitView)
             appProperties.splitView.autoresizingMask = [.height, .width]
             
-            // Create a tab if there are no tabs
-            if appProperties.tabs.isEmpty {
-                appProperties.tabManager.createNewTab()
-            } else {
-                appProperties.tabManager.updateAll()
-            }
-            
             appProperties.sidebarView.wantsLayer = true
             
             hasDrawn = true
@@ -124,7 +117,7 @@ class AXContentView: NSView {
         if !appProperties.searchFieldShown {
             appProperties.searchFieldShown = true
             appProperties.popOver.show()
-            appProperties.popOver.searchField.stringValue = appProperties.tabs[appProperties.currentTab].view.url?.absoluteString ?? ""
+            appProperties.popOver.searchField.stringValue = appProperties.currentTab.view.url?.absoluteString ?? ""
         } else {
             appProperties.popOver.close()
         }
@@ -149,7 +142,7 @@ class AXContentView: NSView {
         if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == [.command, .shift] {
             if event.characters == "c" {
                 NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(appProperties.tabs[appProperties.currentTab].view.url?.absoluteString ?? "Malvon: Unable to copy link", forType: .string)
+                NSPasteboard.general.setString(appProperties.currentTab.view.url?.absoluteString ?? "Malvon: Unable to copy link", forType: .string)
                 displayMessage(message: "Copied Link!")
                 return
             }
@@ -157,22 +150,22 @@ class AXContentView: NSView {
             switch event.characters {
             case "1": // There is always going to be one tab, so no checking
                 appProperties.tabManager.switch(to: 0)
-            case "2" where 2 <= appProperties.tabs.count:
+            case "2" where 2 <= appProperties.currentProfile.tabs.count:
                 appProperties.tabManager.switch(to: 1)
-            case "3" where 3 <= appProperties.tabs.count:
+            case "3" where 3 <= appProperties.currentProfile.tabs.count:
                 appProperties.tabManager.switch(to: 2)
-            case "4" where 4 <= appProperties.tabs.count:
+            case "4" where 4 <= appProperties.currentProfile.tabs.count:
                 appProperties.tabManager.switch(to: 3)
-            case "5" where 5 <= appProperties.tabs.count:
+            case "5" where 5 <= appProperties.currentProfile.tabs.count:
                 appProperties.tabManager.switch(to: 4)
-            case "6" where 6 <= appProperties.tabs.count:
+            case "6" where 6 <= appProperties.currentProfile.tabs.count:
                 appProperties.tabManager.switch(to: 5)
-            case "7" where 7 <= appProperties.tabs.count:
+            case "7" where 7 <= appProperties.currentProfile.tabs.count:
                 appProperties.tabManager.switch(to: 6)
-            case "8" where 8 <= appProperties.tabs.count:
+            case "8" where 8 <= appProperties.currentProfile.tabs.count:
                 appProperties.tabManager.switch(to: 7)
             case "9":
-                appProperties.tabManager.switch(to: appProperties.tabs.count - 1)
+                appProperties.tabManager.switch(to: appProperties.currentProfile.tabs.count - 1)
             case "r":
                 appProperties.sidebarView.reloadButtonAction()
             default:

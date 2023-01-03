@@ -22,6 +22,8 @@
 - [ ] Swipe gesture for profile
 - [ ] Stop re-loading of the tabs when switching between profiles (Have a shared tabStackView)
 ---
+- [x] Created an entirely new AXTabView class & updated some of the code
+---
 - [x] Menu item will be disabled if application is set as default browser
 - [x] Private window not private
 - [x] Webview border being 2.0 fixed to 1.0

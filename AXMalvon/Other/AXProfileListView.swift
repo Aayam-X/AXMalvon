@@ -67,6 +67,6 @@ class AXProfileListView: NSView {
     @objc func buttonClickAction(_ sender: AXHoverButton) {
         // Forced because view wouldn't be shown on private windows
         appProperties.profileManager!.switchProfiles(to: sender.tag)
-        appProperties.tabManager.switchedProfile()
+        //appProperties.tabManager.switchedProfile()
     }
 }

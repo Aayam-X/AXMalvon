@@ -84,7 +84,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
         appProperties.windowFrame = self.frame
         appProperties.saveProperties()
         
-        appProperties.sidebarView.stackView.arrangedSubviews.forEach { view in
+        appProperties.sidebarView.tabView.tabStackView.arrangedSubviews.forEach { view in
             (view as! AXSidebarTabButton).stopObserving()
             view.removeFromSuperview()
         }
@@ -92,7 +92,9 @@ class AXWindow: NSWindow, NSWindowDelegate {
         appProperties.webContainerView.stopObserving()
         appProperties.webContainerView.removeDelegates()
         
-        appProperties.tabs.removeAll()
+        AX_profiles.forEach { profile in
+            profile.tabs.removeAll()
+        }
         
         super.close()
     }
