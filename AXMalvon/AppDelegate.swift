@@ -62,6 +62,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         alert.addButton(withTitle: "Cancel")
         
         let response = alert.runModal() == .alertFirstButtonReturn
+        
+        // Testing2
         return response ? .terminateNow : .terminateCancel
     }
     

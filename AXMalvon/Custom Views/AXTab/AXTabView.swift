@@ -80,7 +80,6 @@ class AXTabView: NSView {
         tabStackView.addArrangedSubview(button)
         
         button.widthAnchor.constraint(equalTo: tabStackView.widthAnchor).isActive = true
-        //Testing
     }
     
     // Adds a button to the stackView
