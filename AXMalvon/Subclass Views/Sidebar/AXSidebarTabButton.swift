@@ -151,6 +151,14 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             let title = webView.title ?? "Untitled"
             self?.profile.tabs[self!.tag].title = title
             self?.tabTitle = title
+            
+            webView.getFavicon { faviconURL in
+                if let favicon = faviconURL {
+                    self?.favIconImageView.download(from: favicon)
+                } else {
+                    self?.favIconImageView.image = NSImage(systemSymbolName: "square.fill", accessibilityDescription: nil)
+                }
+            }
         })
 
         self.urlObserver = webView.observe(\.url, options: .new, changeHandler: { [weak self] _, _ in

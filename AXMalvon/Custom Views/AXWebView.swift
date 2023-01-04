@@ -81,16 +81,27 @@ class AXWebView: WKWebView {
     
     public func getFavicon(completion: @escaping(URL?) -> ()) {
         evaluateJavaScript(favIconScript) { result, error in
+            var completionString: String = ""
+            
             if let favIconURL = result as? String {
-                completion(URL(string: favIconURL))
+                if favIconURL.starts(with: "//") {
+                    completionString = "https:" + favIconURL
+                } else if favIconURL.starts(with: "/") {
+                    print(self.url!.pathComponents)
+                    completionString = self.url!.scheme! + "://" + self.url!.host! + favIconURL
+                } else {
+                    completionString = favIconURL
+                }
+                
+                completion(URL(string: completionString))
                 return
             }
             
             // If cannot find icon
-            if let url = self.url {
-                completion(URL(string: "https://www.google.com/s2/favicons?sz=16&domain_url=" + url.absoluteString))
-                return
-            }
+            // if let url = self.url {
+            //  completion(URL(string: "https://www.google.com/s2/favicons?sz=16&domain_url=" + url.absoluteString))
+            //  return
+            // }
             
             // Everything failed
             completion(nil)
