@@ -45,6 +45,7 @@ class AXAppProperties {
     var isPrivate: Bool
     
     var currentProfile: AXBrowserProfile!
+    var currentProfileIndex: Int = 0
     var currentTab: AXTabItem!
     var currentTabButton: AXSidebarTabButton!
     
@@ -73,7 +74,6 @@ class AXAppProperties {
         if !isPrivate {
             profileManager = AXProfileManager(self)
             profileList = AXProfileListView(self)
-            profileManager!.initializeProfile()
         } else {
             webViewConfiguration.processPool = .init()
         }
@@ -84,8 +84,6 @@ class AXAppProperties {
         tabManager.appProperties = self
         popOver.appProperties = self
         findBar.appProperties = self
-        
-        currentProfile = AX_profiles[0]
     }
     
     func saveProperties() {

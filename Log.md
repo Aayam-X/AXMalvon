@@ -19,8 +19,11 @@
 - [ ] History: Indexing + Most visited site || Clicking on tab opens || No duplicates?
 - [ ] Some sort of memory leak when dragging tabs
 ---
-- [ ] Swipe gesture for profile
-- [ ] Stop re-loading of the tabs when switching between profiles (Have a shared tabStackView)
+- [ ] Creating new window problem
+---
+- [x] Cookies are saved when app quits
+- [x] Swipe gesture for profile
+- [x] Stop re-loading of the tabs when switching between profiles (Have a shared tabStackView)
 ---
 - [x] Created an entirely new AXTabView class & updated some of the code
 ---

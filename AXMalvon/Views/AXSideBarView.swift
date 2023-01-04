@@ -30,7 +30,7 @@ class AXSideBarView: NSView {
     var scrollView: AXScrollView!
     fileprivate let clipView = AXFlippedClipView()
     
-    let tabView = AXTabView(profile: AX_profiles[0])
+    var tabView: AXTabView!
     
     lazy var toggleSidebarButton: AXHoverButton = {
         let button = AXHoverButton()
@@ -145,16 +145,6 @@ class AXSideBarView: NSView {
             clipView.topAnchor.constraint(equalTo: scrollView.topAnchor).isActive = true
             clipView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor).isActive = true
             
-            // Setup tabView
-            tabView.appProperties = appProperties
-            tabView.translatesAutoresizingMaskIntoConstraints = false
-            scrollView.documentView = tabView
-            tabView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
-            
-            tabView.createTab()
-            tabView.createTab()
-            tabView.createTab()
-            
             // Setup profileListView
             if let profileList = appProperties.profileList {
                 profileList.translatesAutoresizingMaskIntoConstraints = false
@@ -164,6 +154,9 @@ class AXSideBarView: NSView {
                 profileList.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
                 profileList.heightAnchor.constraint(equalToConstant: 30).isActive = true
             }
+            
+            // Setup tabView
+            appProperties.profileManager?.switchProfiles(to: appProperties.currentProfileIndex)
             
             hasDrawn = true
         }
@@ -191,7 +184,7 @@ class AXSideBarView: NSView {
     }
     
     @objc func tabClick(_ sender: NSButton) {
-       // appProperties.tabManager.switch(to: sender.tag)
+        // appProperties.tabManager.switch(to: sender.tag)
     }
     
     @objc func backButtonAction() {
@@ -220,7 +213,14 @@ class AXSideBarView: NSView {
     func updateProfile() {
         if let direction = AXMalvon_SidebarView_scrollDirection {
             // Update the profile
-            print("DIRRR:", direction)
+            var index: Int = appProperties.currentProfileIndex
+            if direction == .left {
+                index -= 1
+            } else {
+                index += 1
+            }
+            
+            appProperties.profileManager?.switchProfiles(to: index)
         }
     }
     
@@ -305,7 +305,7 @@ class AXSideBarView: NSView {
     
     // Add a new item into the stackview
     func didCreateTab() {
-       tabView.addTabToStackView()
+        tabView.addTabToStackView()
     }
     
     func createTab(_ tab: AXTabItem) {
@@ -314,7 +314,7 @@ class AXSideBarView: NSView {
     
     // Add a new item into the stackview
     func didCreateTabInBackground(index: Int) {
-        //tabView.addTabToStackViewInBackground(index: index)
+        tabView.addTabToStackViewInBackground(index: index)
     }
     
     func swapAt(_ first: Int, _ second: Int) {
@@ -325,27 +325,27 @@ class AXSideBarView: NSView {
         tabView.removedTab(at)
     }
     
-//    func didDownload(_ d: AXDownloadItem) {
-//        let button = AXSidebarDownloadButton(appProperties)
-//        button.downloadItem = d
-//        button.startObserving()
-//
-//        stackView.addArrangedSubview(button)
-//
-//        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
-//        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
-//    }
+    //    func didDownload(_ d: AXDownloadItem) {
+    //        let button = AXSidebarDownloadButton(appProperties)
+    //        button.downloadItem = d
+    //        button.startObserving()
+    //
+    //        stackView.addArrangedSubview(button)
+    //
+    //        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
+    //        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
+    //    }
     
     func updateSelection() {
-      tabView.updateSelection()
+        tabView.updateSelection()
     }
     
     func webView_updateSelection(webView: AXWebView) {
-      tabView.webView_updateSelection(webView: webView)
+        tabView.webView_updateSelection(webView: webView)
     }
     
     func insertTabFromOtherWindow(view: NSView) {
-      //  tabView.insertTabFromAnotherWindow(view: view)
+        tabView.insertTabFromAnotherWindow(view: view)
     }
     
     // MARK: - Drag and Drop
@@ -360,7 +360,7 @@ class AXSideBarView: NSView {
     //    }
     
     func updatePosition(from i: Int) {
-      tabView.updateTabTags(from: i)
+        tabView.updateTabTags(from: i)
     }
     
     override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
@@ -374,8 +374,8 @@ class AXSideBarView: NSView {
                 let otherAppProperty = button.appProperties!
                 
                 // Other window
-//                appProperties.tabs.append(otherAppProperty.tabs[button.tag])
-//                otherAppProperty.tabManager.tabDraggedToOtherWindow(button.tag)
+                //                appProperties.tabs.append(otherAppProperty.tabs[button.tag])
+                //                otherAppProperty.tabManager.tabDraggedToOtherWindow(button.tag)
                 
                 // Our window
                 button.appProperties = appProperties
@@ -411,9 +411,17 @@ class AXSideBarView: NSView {
     
     // MARK: - Other Functions
     func switchedProfile() {
-        //updateAll()
+        self.tabView = AXTabView(profile: appProperties.currentProfile)
+        tabView.translatesAutoresizingMaskIntoConstraints = false
+        tabView.appProperties = appProperties
         
-        //scrollView.documentView = stackView
-        //stackView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
+        if tabView.profile.tabs.isEmpty {
+            tabView.createTab()
+        }
+        
+        tabView.update()
+        
+        scrollView.documentView = tabView
+        tabView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
     }
 }

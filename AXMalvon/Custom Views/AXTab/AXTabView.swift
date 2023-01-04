@@ -42,7 +42,15 @@ class AXTabView: NSView {
         }
         
         // Select the first tab
-        (tabStackView.arrangedSubviews[profile.currentTab] as? AXSidebarTabButton)?.isSelected = true
+        let currentButton = tabStackView.arrangedSubviews[profile.currentTab] as! AXSidebarTabButton
+        
+        currentButton.isSelected = true
+        appProperties.currentTabButton = currentButton
+        
+        // Go to the first tab
+        let tab = profile.tabs[profile.currentTab]
+        appProperties.currentTab = tab
+        appProperties.webContainerView.update(view: tab.view)
     }
     
     func createTab() {
@@ -91,7 +99,7 @@ class AXTabView: NSView {
         
         // De-select previous tab
         (tabStackView.arrangedSubviews[safe: profile.previousTab] as? AXSidebarTabButton)?.isSelected = false
-
+        
         // Select current tab
         button.isSelected = true
         

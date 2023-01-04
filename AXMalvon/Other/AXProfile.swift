@@ -9,7 +9,7 @@
 import AppKit
 import WebKit
 
-class AXBrowserProfile: Codable {
+class AXBrowserProfile {
     var name: String // User default string
     var webViewConfiguration: WKWebViewConfiguration
     var tabs: [AXTabItem] = []
@@ -32,23 +32,6 @@ class AXBrowserProfile: Codable {
     }
     
     var previousTab = -1
-    
-    enum CodingKeys: CodingKey {
-        case name
-    }
-    
-    required init(from decoder: Decoder) throws {
-        let values = try decoder.container(keyedBy: CodingKeys.self)
-        
-        self.name = try values.decode(String.self, forKey: .name)
-        
-        // Create the configuration
-        self.webViewConfiguration = WKWebViewConfiguration()
-        webViewConfiguration.websiteDataStore = .nonPersistent()
-        
-        retriveProperties()
-        retriveTabs()
-    }
     
     init(name: String) {
         self.name = name

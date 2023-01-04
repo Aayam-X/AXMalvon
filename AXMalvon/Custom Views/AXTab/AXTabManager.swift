@@ -23,21 +23,21 @@ class AXTabManager {
     
     // Updates every single view
     func switchedProfile() {
-//        appProperties.webContainerView.splitView.subviews.removeAll()
-//
-//        if appProperties.tabs.isEmpty {
-//            appProperties.tabManager.createNewTab()
-//            appProperties.currentTab = 0
-//        }
-//
-//        appProperties.sidebarView.switchedProfile()
-//        appProperties.webContainerView.update()
+        //        appProperties.webContainerView.splitView.subviews.removeAll()
+        //
+        //        if appProperties.tabs.isEmpty {
+        //            appProperties.tabManager.createNewTab()
+        //            appProperties.currentTab = 0
+        //        }
+        //
+        //        appProperties.sidebarView.switchedProfile()
+        //        appProperties.webContainerView.update()
     }
     
     func tabMovedToNewWindow(_ i: Int) {
         let tab = appProperties.currentProfile.tabs[i]
         tab.view.removeFromSuperview()
-
+        
         if appProperties.currentProfile.tabs.count != 1 {
             // Same logic as remove tab
             if appProperties.currentProfile.currentTab == i {
@@ -47,7 +47,7 @@ class AXTabManager {
             } else if appProperties.currentProfile.currentTab > i {
                 self.switch(to: i - 1)
             }
-
+            
             appProperties.currentProfile.tabs.remove(at: i)
             appProperties.sidebarView.removedTab(i)
             appProperties.webContainerView.update(view: appProperties.currentProfile.tabs[appProperties.currentProfile.currentTab].view)
@@ -60,7 +60,7 @@ class AXTabManager {
     func tabDraggedToOtherWindow(_ i: Int) {
         let tab = appProperties.currentProfile.tabs[i]
         tab.view.removeFromSuperview()
-
+        
         if appProperties.currentProfile.tabs.count != 1 {
             // Same logic as remove tab
             if appProperties.currentProfile.currentTab == i {
@@ -70,13 +70,13 @@ class AXTabManager {
             } else if appProperties.currentProfile.currentTab > i {
                 appProperties.currentProfile.currentTab = i - 1
             }
-
+            
             appProperties.currentProfile.tabs.remove(at: i)
-
+            
             // Remove button from stackView
             let button = appProperties.sidebarView.tabView.tabStackView.arrangedSubviews[i]
             button.removeFromSuperview()
-
+            
             appProperties.sidebarView.updatePosition(from: i)
             appProperties.sidebarView.updateSelection()
             appProperties.webContainerView.update(view: appProperties.currentProfile.tabs[appProperties.currentProfile.currentTab].view)
@@ -96,23 +96,18 @@ class AXTabManager {
     
     // MARK: - Tab functions
     func `switch`(to: Int) {
-        if appProperties.currentProfile.currentTab != to {
-            appProperties.currentProfile.currentTab = to
-            appProperties.sidebarView.updateSelection()
-        }
-        
-        appProperties.webContainerView.update(view: appProperties.currentProfile.tabs[to].view)
+        appProperties.sidebarView.tabView.switch(to: to)
     }
     
     func closeTab(_ at: Int) {
         print(appProperties.currentProfile.tabs.count)
         let tab = appProperties.currentProfile.tabs[at]
         tab.view.removeFromSuperview()
-
+        
         if let url = tab.view.url {
             appProperties.currentProfile.previouslyClosedTabs.append(url)
         }
-
+        
         if appProperties.currentProfile.tabs.count != 1 {
             // Close tab algorithm
             if appProperties.currentProfile.currentTab == at {
@@ -122,10 +117,10 @@ class AXTabManager {
             } else if appProperties.currentProfile.currentTab > at {
                 appProperties.currentProfile.currentTab -= 1
             }
-
+            
             appProperties.currentProfile.tabs.remove(at: at)
             appProperties.sidebarView.removedTab(at)
-
+            
             appProperties.webContainerView.update(view: appProperties.currentTab.view)
         } else {
             // Close window

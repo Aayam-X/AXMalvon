@@ -17,38 +17,17 @@ class AXProfileManager {
         self.appProperties = appProperties
     }
     
-    func initializeProfile() {
-//        appProperties.currentProfile = AX_profiles[0]
-//
-//        appProperties.currentProfile.retriveProperties()
-//        appProperties.webViewConfiguration = appProperties.currentProfile.webViewConfiguration
-//        appProperties.currentProfile.retriveTabs()
-    }
-    
     func switchProfiles(to: Int) {
-//        updateValuesForCurrentProfile()
-//
-//        let profile = AX_profiles[safe: to]
-//        guard var profile = profile else { return }
-//        profile.retriveProperties()
-//        appProperties.webViewConfiguration = profile.webViewConfiguration
-//        profile.retriveTabs()
-//
-//        appProperties.AX_currentProfile = to
-//        appProperties.currentTab = profile.currentTab
-//        appProperties.tabs = profile.tabs
-//        appProperties.previousTab = profile.previousTab
-    }
-    
-    func updateValuesForCurrentProfile() {
-//        let profile = AX_profiles[safe: appProperties.AX_currentProfile]
-//        guard var profile = profile else { return }
-//
-//        profile.currentTab = appProperties.currentTab
-//        profile.previousTab = appProperties.previousTab
-//        profile.tabs = appProperties.tabs
-//        profile.webViewConfiguration = appProperties.webViewConfiguration
-//
-//        profile.saveProperties()
+        // Save the current profile
+        appProperties.currentProfile?.saveProperties()
+        
+        // Update the current profile
+        guard let newProfile = AX_profiles[safe: to] else { return }
+        appProperties.currentProfile = newProfile
+        
+        appProperties.webViewConfiguration = newProfile.webViewConfiguration
+        appProperties.sidebarView.switchedProfile()
+        
+        appProperties.currentProfileIndex = to
     }
 }

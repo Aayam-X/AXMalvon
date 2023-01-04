@@ -50,8 +50,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        let names = AX_profiles.map { $0.saveProperties(); return $0.name }
+        UserDefaults.standard.set(names, forKey: "Profiles")
+        
+        let alert = NSAlert()
+        alert.messageText = "Do you want to quit Malvon"
+        alert.informativeText = "Option to remove this alert will come in the future"
+        alert.alertStyle = .warning
+        alert.addButton(withTitle: "OK")
+        alert.addButton(withTitle: "Cancel")
+        
+        let response = alert.runModal() == .alertFirstButtonReturn
+        return response ? .terminateNow : .terminateCancel
+    }
+    
+    func applicationDidResignActive(_ notification: Notification) {
         let names = AX_profiles.map { $0.saveProperties(); return $0.name }
         UserDefaults.standard.set(names, forKey: "Profiles")
     }
