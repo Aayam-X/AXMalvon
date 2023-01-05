@@ -94,12 +94,6 @@ class AXBrowserProfile {
             setData(cookies, key: "\(self.name)-HTTPCookie")
         }
     }
-    
-    static func retriveProfiles() {
-        let profileNames = UserDefaults.standard.stringArray(forKey: "Profiles") ?? [.init("Default"), .init("Secondary")]
-        let profiles = profileNames.map { AXBrowserProfile(name: $0) }
-        AX_profiles = profiles
-    }
 }
 
 fileprivate func setData(_ value: Any, key: String) {

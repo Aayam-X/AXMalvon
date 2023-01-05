@@ -12,14 +12,19 @@
 - [ ] Create transparent window buttons.
 
 ## 0.0.2
-- [ ] Downloading Tabs cause entire tab view to crash || Subclass it
 - [ ] Improve command-f finding text functionality to use less power
-- [ ] Create tab after current tab rather the at the end
-- [ ] Updater Application || xattr -cr Malvon.app || after zip 
 - [ ] History: Indexing + Most visited site || Clicking on tab opens || No duplicates?
-- [ ] Some sort of memory leak when dragging tabs
+- [ ] Create tab after current tab rather the at the end
+- [ ] Updater Application || Use xattr -cr Malvon after unzipping
+- [ ] Downloading Tabs || Subclass it
+- [ ] Memory Leaks
 ---
-- [ ] Creating new window problem
+- [x] A few memory leaks fixed
+- [x] Drag and drop problem
+- [x] SplitView problems
+- [x] Creating new window problem
+- [x] Window close improvements
+- [x] Switches to previous tab (if exists) instead of tab above or below
 ---
 - [x] Cookies are saved when app quits
 - [x] Swipe gesture for profile

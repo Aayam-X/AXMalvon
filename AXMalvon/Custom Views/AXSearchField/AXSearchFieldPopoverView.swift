@@ -56,6 +56,12 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         AXSearchFieldSuggestItem()
     ]
     
+    deinit {
+        suggestionsStackView = nil
+        suggestions = nil
+        searchField = nil
+    }
+    
     init() {
         suggestionWindow = AXSearchFieldWindow()
         super.init(frame: .zero)

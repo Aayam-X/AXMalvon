@@ -72,7 +72,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
         _hideTrafficLights(false)
     }
     
-    func windowDidExitFullScreen(_ notification: Notification) {
+    func windowWillExitFullScreen(_ notification: Notification) {
         appProperties.isFullScreen = false
         hideTrafficLights(!appProperties.sidebarToggled)
         appProperties.sidebarView.exitedFullScreen()
@@ -92,7 +92,8 @@ class AXWindow: NSWindow, NSWindowDelegate {
         appProperties.webContainerView.stopObserving()
         appProperties.webContainerView.removeDelegates()
         
-        AX_profiles.forEach { profile in
+        appProperties.AX_profiles.forEach { profile in
+            profile.saveProperties()
             profile.tabs.removeAll()
         }
         

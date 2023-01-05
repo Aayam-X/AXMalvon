@@ -160,7 +160,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
                 }
             }
         })
-
+        
         self.urlObserver = webView.observe(\.url, options: .new, changeHandler: { [weak self] _, _ in
             self?.profile.tabs[self!.tag].url = webView.url
         })
@@ -289,8 +289,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         let betterOffset = offsetX - appProperties.sidebarWidth
         
         if profile.currentTab == self.tag {
-            profile.currentTab = profile.previousTab
-            appProperties.webContainerView.update(view: appProperties.currentProfile.tabs[appProperties.currentProfile.currentTab].view)
+            appProperties.sidebarView.tabView.updateCurrentTab(to: profile.previousTab)
         }
         
         tempView.frame.size.width = 200
@@ -320,6 +319,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             
             webView.isSplitView = true
             webView1.isSplitView = true
+            
             if draggingSide == .left {
                 appProperties.webContainerView.splitView.insertArrangedSubview(webView, at: 0)
             } else {

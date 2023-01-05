@@ -27,6 +27,7 @@ class AXAppProperties {
     // Other
     let tabManager: AXTabManager
     var profileManager: AXProfileManager?
+    var AX_profiles: [AXBrowserProfile] = []
     var webViewConfiguration: WKWebViewConfiguration = {
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .nonPersistent()
@@ -49,10 +50,20 @@ class AXAppProperties {
     var currentTab: AXTabItem!
     var currentTabButton: AXSidebarTabButton!
     
+    deinit {
+        progressBar.removeFromSuperview()
+        popOver.removeFromSuperview()
+    }
+    
     init(isPrivate: Bool = false, restoresTab: Bool = true) {
         // Get UserDefaults
         sidebarToggled = UserDefaults.standard.bool(forKey: "sidebarToggled")
         sidebarWidth = (UserDefaults.standard.object(forKey: "sidebarWidth") as? CGFloat) ?? 225.0
+        
+        // Retrive the profiles
+        let profileNames = UserDefaults.standard.stringArray(forKey: "Profiles") ?? [.init("Default"), .init("Secondary")]
+        let profiles = profileNames.map { AXBrowserProfile(name: $0) }
+        AX_profiles = profiles
         
         if let s = UserDefaults.standard.string(forKey: "windowFrame") {
             windowFrame = NSRectFromString(s)

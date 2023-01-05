@@ -8,13 +8,16 @@
 
 import Foundation
 
-var AX_profiles: [AXBrowserProfile] = []
-
 class AXProfileManager {
     weak var appProperties: AXAppProperties!
     
     init(_ appProperties: AXAppProperties!) {
         self.appProperties = appProperties
+        
+        // Update the current profile
+        guard let newProfile = appProperties.AX_profiles[safe: appProperties.currentProfileIndex] else { return }
+        appProperties.currentProfile = newProfile
+        appProperties.webViewConfiguration = newProfile.webViewConfiguration
     }
     
     func switchProfiles(to: Int) {
@@ -22,7 +25,7 @@ class AXProfileManager {
         appProperties.currentProfile?.saveProperties()
         
         // Update the current profile
-        guard let newProfile = AX_profiles[safe: to] else { return }
+        guard let newProfile = appProperties.AX_profiles[safe: to] else { return }
         appProperties.currentProfile = newProfile
         
         appProperties.webViewConfiguration = newProfile.webViewConfiguration

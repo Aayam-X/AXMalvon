@@ -50,7 +50,7 @@ class AXProfileListView: NSView {
     }
     
     func addProfileButtons() {
-        for (index, profile) in AX_profiles.enumerated() {
+        for (index, profile) in appProperties.AX_profiles.enumerated() {
             let item = AXHoverButton()
             item.translatesAutoresizingMaskIntoConstraints = false
             item.heightAnchor.constraint(equalToConstant: 30).isActive = true
@@ -67,6 +67,5 @@ class AXProfileListView: NSView {
     @objc func buttonClickAction(_ sender: AXHoverButton) {
         // Forced because view wouldn't be shown on private windows
         appProperties.profileManager!.switchProfiles(to: sender.tag)
-        //appProperties.tabManager.switchedProfile()
     }
 }

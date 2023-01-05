@@ -21,31 +21,22 @@ class AXTabManager {
         appProperties.webContainerView.update(view: appProperties.currentProfile.tabs[appProperties.currentProfile.currentTab].view)
     }
     
-    // Updates every single view
-    func switchedProfile() {
-        //        appProperties.webContainerView.splitView.subviews.removeAll()
-        //
-        //        if appProperties.tabs.isEmpty {
-        //            appProperties.tabManager.createNewTab()
-        //            appProperties.currentTab = 0
-        //        }
-        //
-        //        appProperties.sidebarView.switchedProfile()
-        //        appProperties.webContainerView.update()
-    }
-    
     func tabMovedToNewWindow(_ i: Int) {
         let tab = appProperties.currentProfile.tabs[i]
         tab.view.removeFromSuperview()
         
         if appProperties.currentProfile.tabs.count != 1 {
-            // Same logic as remove tab
-            if appProperties.currentProfile.currentTab == i {
-                if i == appProperties.currentProfile.tabs.count {
-                    self.switch(to: i - 1)
+            // Go to previous tab
+            if appProperties.currentProfile.previousTab == appProperties.currentProfile.tabs.count - 1 {
+                if appProperties.currentProfile.currentTab == i {
+                    if i == appProperties.currentProfile.tabs.count - 1 {
+                        appProperties.currentProfile.currentTab -= 1
+                    }
+                } else if appProperties.currentProfile.currentTab > i {
+                    appProperties.currentProfile.currentTab -= 1
                 }
-            } else if appProperties.currentProfile.currentTab > i {
-                self.switch(to: i - 1)
+            } else {
+                appProperties.currentProfile.currentTab = appProperties.currentProfile.previousTab
             }
             
             appProperties.currentProfile.tabs.remove(at: i)
@@ -62,13 +53,17 @@ class AXTabManager {
         tab.view.removeFromSuperview()
         
         if appProperties.currentProfile.tabs.count != 1 {
-            // Same logic as remove tab
-            if appProperties.currentProfile.currentTab == i {
-                if i == appProperties.currentProfile.tabs.count - 1 {
-                    appProperties.currentProfile.currentTab = i - 1
+            // Go to previous tab
+            if appProperties.currentProfile.previousTab == appProperties.currentProfile.tabs.count - 1 {
+                if appProperties.currentProfile.currentTab == i {
+                    if i == appProperties.currentProfile.tabs.count - 1 {
+                        appProperties.currentProfile.currentTab -= 1
+                    }
+                } else if appProperties.currentProfile.currentTab > i {
+                    appProperties.currentProfile.currentTab -= 1
                 }
-            } else if appProperties.currentProfile.currentTab > i {
-                appProperties.currentProfile.currentTab = i - 1
+            } else {
+                appProperties.currentProfile.currentTab = appProperties.currentProfile.previousTab
             }
             
             appProperties.currentProfile.tabs.remove(at: i)
@@ -109,13 +104,17 @@ class AXTabManager {
         }
         
         if appProperties.currentProfile.tabs.count != 1 {
-            // Close tab algorithm
-            if appProperties.currentProfile.currentTab == at {
-                if at == appProperties.currentProfile.tabs.count - 1 {
+            // Go to previous tab
+            if appProperties.currentProfile.previousTab == appProperties.currentProfile.tabs.count - 1 {
+                if appProperties.currentProfile.currentTab == at {
+                    if at == appProperties.currentProfile.tabs.count - 1 {
+                        appProperties.currentProfile.currentTab -= 1
+                    }
+                } else if appProperties.currentProfile.currentTab > at {
                     appProperties.currentProfile.currentTab -= 1
                 }
-            } else if appProperties.currentProfile.currentTab > at {
-                appProperties.currentProfile.currentTab -= 1
+            } else {
+                appProperties.currentProfile.currentTab = appProperties.currentProfile.previousTab
             }
             
             appProperties.currentProfile.tabs.remove(at: at)

@@ -374,11 +374,17 @@ class AXSideBarView: NSView {
                 let otherAppProperty = button.appProperties!
                 
                 // Other window
-                //                appProperties.tabs.append(otherAppProperty.tabs[button.tag])
-                //                otherAppProperty.tabManager.tabDraggedToOtherWindow(button.tag)
+                appProperties.currentProfile.tabs.append(otherAppProperty.currentProfile.tabs[button.tag])
+                otherAppProperty.tabManager.tabDraggedToOtherWindow(button.tag)
+                
+                // Check if button is from another profile
+                if button.profile.name != appProperties.currentProfile.name {
+                    print("Button must be from the same profile")
+                }
                 
                 // Our window
                 button.appProperties = appProperties
+                button.profile = appProperties.currentProfile
                 insertTabFromOtherWindow(view: button)
                 
                 print("Button from another window")

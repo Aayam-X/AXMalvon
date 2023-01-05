@@ -21,13 +21,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Initializers
-        AXBrowserProfile.retriveProfiles()
         AXHistory.checkIfFileExists()
         checkForUpdates()
         
         // Create a window
         let window = AXWindow()
         window.makeKeyAndOrderFront(nil)
+        window.appProperties.AX_profiles.forEach { profile in
+            profile.retriveTabs()
+        }
+        
         // let window0 = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))
         // window0.contentView = AXWelcomeView()
         // window0.makeKeyAndOrderFront(nil)
@@ -51,8 +54,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        let names = AX_profiles.map { $0.saveProperties(); return $0.name }
-        UserDefaults.standard.set(names, forKey: "Profiles")
+        if let profiles = (NSApplication.shared.mainWindow as? AXWindow)?.appProperties.AX_profiles {
+            let names = profiles.map { $0.saveProperties(); return $0.name }
+            UserDefaults.standard.set(names, forKey: "Profiles")
+        }
         
         let alert = NSAlert()
         alert.messageText = "Do you want to quit Malvon"
@@ -68,8 +73,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationDidResignActive(_ notification: Notification) {
-        let names = AX_profiles.map { $0.saveProperties(); return $0.name }
-        UserDefaults.standard.set(names, forKey: "Profiles")
+        if let profiles = (NSApplication.shared.mainWindow as? AXWindow)?.appProperties.AX_profiles {
+            let names = profiles.map { $0.saveProperties(); return $0.name }
+            UserDefaults.standard.set(names, forKey: "Profiles")
+        }
     }
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

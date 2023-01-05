@@ -116,6 +116,23 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
         }
     }
     
+    override func removeFromSuperview() {
+        topBorderLayer = nil
+        topPointPath = nil
+        topAnimation = nil
+        rightBorderLayer = nil
+        rightPointPath = nil
+        rightAnimation = nil
+        bottomBorderLayer = nil
+        bottomPointPath = nil
+        bottomAnimation = nil
+        leftBorderLayer = nil
+        leftPointPath = nil
+        leftAnimation = nil
+        
+        super.removeFromSuperview()
+    }
+    
     override func viewDidEndLiveResize() {
         topPointPath.removeAllPoints()
         rightPointPath.removeAllPoints()
