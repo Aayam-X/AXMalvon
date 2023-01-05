@@ -105,7 +105,7 @@ class AXTabManager {
         
         if appProperties.currentProfile.tabs.count != 1 {
             // Go to previous tab
-            if appProperties.currentProfile.previousTab == appProperties.currentProfile.tabs.count - 1 {
+            if appProperties.currentProfile.previousTab >= appProperties.currentProfile.tabs.count - 1 {
                 if appProperties.currentProfile.currentTab == at {
                     if at == appProperties.currentProfile.tabs.count - 1 {
                         appProperties.currentProfile.currentTab -= 1

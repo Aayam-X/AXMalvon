@@ -7,6 +7,7 @@
 - SplitView Animation: https://stackoverflow.com/a/48608153
 - Animating NSWindow: https://github.com/jwilling/JNWAnimatableWindow
 - Textkit 2: https://developer.apple.com/videos/play/wwdc2021/10061/
+- Keychain: https://stackoverflow.com/q/52044285
 
 ## Other
 - [ ] Create transparent window buttons.
@@ -17,7 +18,11 @@
 - [ ] Create tab after current tab rather the at the end
 - [ ] Updater Application || Use xattr -cr Malvon after unzipping
 - [ ] Downloading Tabs || Subclass it
-- [ ] Memory Leaks
+- [ ] Memory Leaks when creating splitViews
+---
+- [x] Private windows
+- [x] Tab closing causes app to crash
+- [x] Opening from URLs from other apps
 ---
 - [x] A few memory leaks fixed
 - [x] Drag and drop problem

@@ -9,6 +9,19 @@
 import AppKit
 import WebKit
 
+class AXPrivateBrowserProfile: AXBrowserProfile {
+    init() {
+        super.init(name: "Private")
+        
+        webViewConfiguration = .init()
+        webViewConfiguration.websiteDataStore = .nonPersistent()
+        webViewConfiguration.processPool = .init()
+    }
+    
+    override func retriveProperties() {}
+    override func saveProperties() {}
+}
+
 class AXBrowserProfile {
     var name: String // User default string
     var webViewConfiguration: WKWebViewConfiguration

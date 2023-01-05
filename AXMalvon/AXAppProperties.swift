@@ -12,7 +12,7 @@ import WebKit
 // Every AXWindow will have one instance of this
 class AXAppProperties {
     // Views
-    let contentView: AXContentView
+    var contentView: AXContentView
     let sidebarView: AXSideBarView
     let webContainerView: AXWebContainerView
     weak var window: AXWindow! = nil
@@ -38,7 +38,7 @@ class AXAppProperties {
     // State Variables
     var isFullScreen: Bool = false
     var searchFieldShown: Bool = false
-    var sidebarToggled: Bool
+    var sidebarToggled: Bool = true
     var windowFrame: NSRect
     var sidebarWidth: CGFloat
     
@@ -56,14 +56,19 @@ class AXAppProperties {
     }
     
     init(isPrivate: Bool = false, restoresTab: Bool = true) {
-        // Get UserDefaults
-        sidebarToggled = UserDefaults.standard.bool(forKey: "sidebarToggled")
         sidebarWidth = (UserDefaults.standard.object(forKey: "sidebarWidth") as? CGFloat) ?? 225.0
         
         // Retrive the profiles
-        let profileNames = UserDefaults.standard.stringArray(forKey: "Profiles") ?? [.init("Default"), .init("Secondary")]
-        let profiles = profileNames.map { AXBrowserProfile(name: $0) }
-        AX_profiles = profiles
+        if !isPrivate {
+            let profileNames = UserDefaults.standard.stringArray(forKey: "Profiles") ?? [.init("Default"), .init("Secondary")]
+            let profiles = profileNames.map { AXBrowserProfile(name: $0) }
+            AX_profiles = profiles
+        } else {
+            let profile = AXPrivateBrowserProfile()
+            AX_profiles.append(profile)
+            currentProfile = profile
+            webViewConfiguration = profile.webViewConfiguration
+        }
         
         if let s = UserDefaults.standard.string(forKey: "windowFrame") {
             windowFrame = NSRectFromString(s)
@@ -82,11 +87,10 @@ class AXAppProperties {
         findBar = AXWebViewFindView()
         self.isPrivate = isPrivate
         
+        profileManager = AXProfileManager(self)
+        
         if !isPrivate {
-            profileManager = AXProfileManager(self)
             profileList = AXProfileListView(self)
-        } else {
-            webViewConfiguration.processPool = .init()
         }
         
         sidebarView.appProperties = self
@@ -98,7 +102,6 @@ class AXAppProperties {
     }
     
     func saveProperties() {
-        UserDefaults.standard.set(sidebarToggled, forKey: "sidebarToggled")
         UserDefaults.standard.set(NSStringFromRect(windowFrame), forKey: "windowFrame")
         UserDefaults.standard.set(sidebarWidth, forKey: "sidebarWidth")
     }

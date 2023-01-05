@@ -30,7 +30,11 @@ class AXSideBarView: NSView {
     var scrollView: AXScrollView!
     fileprivate let clipView = AXFlippedClipView()
     
-    var tabView: AXTabView!
+    lazy var tabView: AXTabView! = {
+        let tabView = AXTabView(profile: appProperties.currentProfile)
+        tabView.appProperties = self.appProperties
+        return tabView
+    }()
     
     lazy var toggleSidebarButton: AXHoverButton = {
         let button = AXHoverButton()
