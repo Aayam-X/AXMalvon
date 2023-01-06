@@ -17,6 +17,9 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     private var hasDrawn: Bool = false
     
     var suggestionWindow: NSPanel!
+    var mostVisitedWebsites: [String]
+    var searchedQueries: [String] = []
+    var skipSuggestions = false
     
     private var highlightedSuggestion = 0 {
         willSet(newValue) {
@@ -62,8 +65,20 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         searchField = nil
     }
     
+    override func removeFromSuperview() {
+        super.removeFromSuperview()
+        
+        let websiteCounts = searchedQueries.reduce(into: [:]) { counts, item in counts[item, default: 0] += 1 }
+        let websites = websiteCounts.filter { $0.value > 3 }.map { $0.key }
+        
+        let newWebsites = websites.filter { !mostVisitedWebsites.contains($0) }
+        mostVisitedWebsites.append(contentsOf: newWebsites)
+        UserDefaults.standard.set(mostVisitedWebsites, forKey: "MostVisitedWebsite")
+    }
+    
     init() {
         suggestionWindow = AXSearchFieldWindow()
+        mostVisitedWebsites = UserDefaults.standard.stringArray(forKey: "MostVisitedWebsite") ?? []
         super.init(frame: .zero)
         suggestionWindow.contentView = self
     }
@@ -141,6 +156,8 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         
         var url: URL?
         
+        searchedQueries.append(value)
+        
         if !searchField.stringValue.isEmpty {
             if value.starts(with: "malvon?") {
                 print(value.string(after: 7))
@@ -167,7 +184,21 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         if !searchField.stringValue.isEmpty {
             // First one will always be equal to the text
             suggestions[0]!.isHidden = false
-            suggestions[0]!.titleValue = searchField.stringValue
+            
+            let userInput = searchField.stringValue
+            let filteredWebsites = mostVisitedWebsites.filter { website in
+                return website.contains(userInput)
+            }
+            
+            if let autofillSuggestion = filteredWebsites.first {
+                let fieldEditor: NSText? = window?.fieldEditor(false, for: searchField)
+                if fieldEditor != nil {
+                    updateFieldEditor(fieldEditor, withSuggestion: autofillSuggestion)
+                    suggestions[0]!.titleValue = autofillSuggestion
+                }
+            } else {
+                suggestions[0]!.titleValue = searchField.stringValue
+            }
             
             SearchSuggestions.getQuerySuggestions(searchField.stringValue) { [self] results, error in
                 if error != nil {
@@ -225,12 +256,34 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             searchFieldAction()
             return true
         }
+        if commandSelector == #selector(NSResponder.deleteForward(_:)) || commandSelector == #selector(NSResponder.deleteBackward(_:)) {
+            let insertionRange = textView.selectedRanges[0].rangeValue
+            if commandSelector == #selector(NSResponder.deleteBackward(_:)) {
+                skipSuggestions = (insertionRange.location != 0 || insertionRange.length > 0)
+            } else {
+                skipSuggestions = (insertionRange.location != textView.string.count || insertionRange.length > 0)
+            }
+            return false
+        }
         
         return false
     }
     
+    private func updateFieldEditor(_ fieldEditor: NSText?, withSuggestion suggestion: String?) {
+        let selection = NSRange(location: fieldEditor?.selectedRange.location ?? 0, length: suggestion?.count ?? 0)
+        fieldEditor?.string = suggestion ?? ""
+        fieldEditor?.selectedRange = selection
+    }
+    
     func controlTextDidChange(_ obj: Notification) {
-        updateSuggestions()
+        if !skipSuggestions {
+            updateSuggestions()
+        } else {
+            skipSuggestions = false
+            suggestions.forEach { suggestion in
+                suggestion!.isHidden = true
+            }
+        }
     }
     
     func show() {

@@ -27,9 +27,6 @@ class AXSideBarView: NSView {
     let supportedDraggingTypes: [NSPasteboard.PasteboardType] = [.URL, .init("com.aayamx.malvon.tabButton")]
     override var tag: Int { 0x01 }
     
-    var scrollView: AXScrollView!
-    fileprivate let clipView = AXFlippedClipView()
-    
     lazy var tabView: AXTabView! = {
         let tabView = AXTabView(profile: appProperties.currentProfile)
         tabView.appProperties = self.appProperties
@@ -127,40 +124,6 @@ class AXSideBarView: NSView {
             backButton.rightAnchor.constraint(equalTo: forwardButton.leftAnchor, constant: -10).isActive = true
             backButton.widthAnchor.constraint(equalToConstant: 23).isActive = true
             backButton.heightAnchor.constraint(equalToConstant: 24).isActive = true
-            
-            // Setup the scrollview
-            scrollView = AXScrollView(horizontalScrollHandler: { [weak self] in
-                self?.updateProfile()
-            })
-            scrollView.horizontalScrollElasticity = .none
-            scrollView.horizontalScroller = nil
-            scrollView.hasHorizontalScroller = false
-            scrollView.translatesAutoresizingMaskIntoConstraints = false
-            scrollView.automaticallyAdjustsContentInsets = false
-            //scrollView.contentInsets = .init(top: 0, left: 9, bottom: 0, right: 0)
-            addSubview(scrollView)
-            scrollView.drawsBackground = false
-            scrollView.leftAnchor.constraint(equalTo: leftAnchor, constant: 10).isActive = true
-            scrollView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -44).isActive = true
-            scrollView.topAnchor.constraint(equalTo: topAnchor, constant: 35).isActive = true
-            
-            // Setup clipview
-            clipView.translatesAutoresizingMaskIntoConstraints = false
-            clipView.drawsBackground = false
-            scrollView.contentView = clipView
-            clipView.leftAnchor.constraint(equalTo: scrollView.leftAnchor).isActive = true
-            clipView.rightAnchor.constraint(equalTo: scrollView.rightAnchor).isActive = true
-            clipView.topAnchor.constraint(equalTo: scrollView.topAnchor).isActive = true
-            clipView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor).isActive = true
-            
-            let documentView = NSView()
-            documentView.translatesAutoresizingMaskIntoConstraints = false
-            scrollView.documentView = documentView
-            documentView.topAnchor.constraint(equalTo: clipView.topAnchor).isActive = true
-            documentView.leftAnchor.constraint(equalTo: clipView.leftAnchor).isActive = true
-            documentView.rightAnchor.constraint(equalTo: clipView.rightAnchor).isActive = true
-            documentView.heightAnchor.constraint(equalTo: clipView.heightAnchor).isActive = true
             
             // Setup profileListView
             if let profileList = appProperties.profileList {
@@ -350,10 +313,14 @@ class AXSideBarView: NSView {
             downloadsStackView.spacing = 1.08
             downloadsStackView.translatesAutoresizingMaskIntoConstraints = false
             
-            scrollView.documentView!.addSubview(downloadsStackView)
-            downloadsStackView.bottomAnchor.constraint(equalTo: scrollView.documentView!.bottomAnchor, constant: -44).isActive = true
-            downloadsStackView.leftAnchor.constraint(equalTo: scrollView.documentView!.leftAnchor).isActive = true
-            downloadsStackView.rightAnchor.constraint(equalTo: scrollView.documentView!.rightAnchor, constant: -8).isActive = true
+            addSubview(downloadsStackView)
+            downloadsStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -44).isActive = true
+            downloadsStackView.leftAnchor.constraint(equalTo: leftAnchor, constant: 10).isActive = true
+            downloadsStackView.rightAnchor.constraint(equalTo: rightAnchor, constant: -8).isActive = true
+        }
+        
+        if downloadsStackView.subviews.count == 3 {
+            downloadsStackView.subviews.first?.removeFromSuperview()
         }
         
         let button = AXSidebarDownloadButton(appProperties, d)
@@ -450,6 +417,13 @@ class AXSideBarView: NSView {
         
         self.tabView = AXTabView(profile: appProperties.currentProfile)
         tabView.translatesAutoresizingMaskIntoConstraints = false
+        
+        addSubview(tabView)
+        tabView.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        tabView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+        tabView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+        tabView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        
         tabView.appProperties = appProperties
         
         if tabView.profile.tabs.isEmpty {
@@ -457,9 +431,5 @@ class AXSideBarView: NSView {
         }
         
         tabView.update()
-        
-        scrollView.documentView!.addSubview(tabView)
-        tabView.topAnchor.constraint(equalTo: scrollView.documentView!.topAnchor).isActive = true
-        tabView.widthAnchor.constraint(equalTo: scrollView.documentView!.widthAnchor, constant: -8).isActive = true
     }
 }

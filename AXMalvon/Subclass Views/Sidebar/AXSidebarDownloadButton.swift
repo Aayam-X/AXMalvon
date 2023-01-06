@@ -123,12 +123,18 @@ class AXSidebarDownloadButton: NSButton {
             self?.progressBar.doubleValue = self!.downloadItem.download.progress.fractionCompleted * 100
         })
         
-        isFinishedObserver = downloadItem.download.progress.observe(\.isFinished, options: .new, changeHandler: { [weak self] _, _ in
+        isFinishedObserver = downloadItem.download.progress.observe(\.isFinished, changeHandler: { [weak self] _, _ in
             self?.stopObserving()
         })
     }
     
     func stopObserving() {
+        estimatedTimeRemainingOberver?.invalidate()
+        isFinishedObserver?.invalidate()
+        
+        estimatedTimeRemainingOberver = nil
+        isFinishedObserver = nil
+        
         if downloadItem.download.progress.isIndeterminate {
             progressBar.stopAnimation(nil)
         } else {

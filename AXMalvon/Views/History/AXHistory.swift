@@ -8,10 +8,14 @@
 
 import AppKit
 
-struct AXHistoryItem {
+struct AXHistoryItem: Equatable {
     var title: String
     var url: String
     var date: String
+    
+    static func == (lhs: AXHistoryItem, rhs: AXHistoryItem) -> Bool {
+        return lhs.url == rhs.url
+    }
 }
 
 class AXHistory {
@@ -65,6 +69,16 @@ class AXHistory {
         }
         
         try! result.write(to: AXHistory.filePath, atomically: true, encoding: .utf8)
+    }
+    
+    static func removeDuplicates() {
+        let items = getAllItems()
+        
+        let uniqueItems = items.filter { item in
+            items.firstIndex(of: item) == items.lastIndex(of: item)
+        }
+        
+        updateHistoryFile(items: uniqueItems)
     }
 }
 

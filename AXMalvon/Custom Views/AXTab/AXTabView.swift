@@ -14,6 +14,8 @@ class AXTabView: NSView {
     
     // Views
     var tabStackView = NSStackView()
+    var scrollView: AXScrollView!
+    fileprivate let clipView = AXFlippedClipView()
     
     init(profile: AXBrowserProfile) {
         self.profile = profile
@@ -24,10 +26,32 @@ class AXTabView: NSView {
         tabStackView.detachesHiddenViews = false
         tabStackView.translatesAutoresizingMaskIntoConstraints = false
         
+        // Create scrollView
+        scrollView = AXScrollView(horizontalScrollHandler: { [weak self] in
+            self?.appProperties.sidebarView.updateProfile()
+        })
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(scrollView)
+        scrollView.drawsBackground = false
+        scrollView.leftAnchor.constraint(equalTo: leftAnchor, constant: 10).isActive = true
+        scrollView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+        scrollView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -44).isActive = true
+        scrollView.topAnchor.constraint(equalTo: topAnchor, constant: 35).isActive = true
+        
+        // Setup clipview
+        clipView.translatesAutoresizingMaskIntoConstraints = false
+        clipView.drawsBackground = false
+        scrollView.contentView = clipView
+        clipView.leftAnchor.constraint(equalTo: scrollView.leftAnchor).isActive = true
+        clipView.rightAnchor.constraint(equalTo: scrollView.rightAnchor).isActive = true
+        clipView.topAnchor.constraint(equalTo: scrollView.topAnchor).isActive = true
+        clipView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor).isActive = true
+        
+        // Setup stackView
         addSubview(tabStackView)
-        tabStackView.heightAnchor.constraint(equalTo: heightAnchor).isActive = true
-        tabStackView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
-        tabStackView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+        tabStackView.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        tabStackView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -8).isActive = true
+        scrollView.documentView = tabStackView
     }
     
     required init?(coder: NSCoder) {

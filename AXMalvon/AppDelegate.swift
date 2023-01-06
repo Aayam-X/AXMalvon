@@ -73,6 +73,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return response ? .terminateNow : .terminateCancel
     }
     
+    func applicationWillTerminate(_ notification: Notification) {
+        AXHistory.removeDuplicates()
+    }
+    
     func applicationDidResignActive(_ notification: Notification) {
         if let profiles = (NSApplication.shared.mainWindow as? AXWindow)?.appProperties.AX_profiles {
             let names = profiles.map { $0.saveProperties(); return $0.name }

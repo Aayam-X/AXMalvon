@@ -231,7 +231,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             userMovedCursorRemovingSplitView()
             
             draggingState = .reorder
-            let index = Int((offset.y - appProperties.sidebarView.scrollView.frame.size.height) / -31)
+            let index = Int((offset.y - appProperties.sidebarView.frame.size.height) / -31)
             if index <= appProperties.sidebarView.tabView.tabStackView.arrangedSubviews.count - 1 && index >= 0 {
                 appProperties.tabManager.swapAt(self.tag, index)
             }
@@ -353,6 +353,13 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             // TODO: add self to stackview to prevent redrawing.
             window.appProperties.tabManager.updateAll()
         }
+        
+        self.removeFromSuperview()
+        self.titleView = nil
+        self.favIconImageView = nil
+        self.closeButton = nil
+        self.removeTrackingArea(trackingArea)
+        self.dragItem = nil
         
         window.setFrameTopLeftPoint(.init(x: NSEvent.mouseLocation.x, y: NSEvent.mouseLocation.y))
         window.makeKeyAndOrderFront(nil)

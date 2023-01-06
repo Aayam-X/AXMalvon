@@ -14,10 +14,14 @@
 
 ## 0.0.2
 - [ ] Improve command-f finding text functionality to use less power
-- [ ] History: Indexing + Most visited site || Clicking on tab opens || No duplicates?
+- [ ] Search suggestion: Switching tabs | Command Bar
 - [ ] Create tab after current tab rather the at the end
 - [ ] Updater Application || Use xattr -cr Malvon after unzipping
-- [ ] Memory Leaks when creating splitViews
+---
+- [x] Download stack view logic changed
+- [x] Search suggestions
+- [x] Duplicate history removed
+- [x] Memory Leaks when creating splitViews
 ---
 - [x] Download history | Similar to history
 - [x] Download progress indicator would be set to infinity even when you can track the progress
