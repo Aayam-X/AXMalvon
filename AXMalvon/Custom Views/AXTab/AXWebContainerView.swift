@@ -269,8 +269,8 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
             index += 1
         }
         
-        //let downloadItem = AXDownloadItem(fileName: suggestedFilename, location: fileUrl, download: download)
-        //appProperties.sidebarView.didDownload(downloadItem)
+        let downloadItem = AXDownloadItem(fileName: suggestedFilename, location: fileUrl.absoluteString, url: fileUrl, download: download)
+        appProperties.sidebarView.didDownload(downloadItem)
         
         completionHandler(fileUrl)
     }

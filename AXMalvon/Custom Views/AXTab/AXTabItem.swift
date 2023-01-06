@@ -46,9 +46,3 @@ struct AXTabItem: Codable {
         }
     }
 }
-
-struct AXDownloadItem {
-    var fileName: String
-    var location: URL
-    unowned var download: WKDownload
-}

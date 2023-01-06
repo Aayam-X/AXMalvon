@@ -17,8 +17,12 @@
 - [ ] History: Indexing + Most visited site || Clicking on tab opens || No duplicates?
 - [ ] Create tab after current tab rather the at the end
 - [ ] Updater Application || Use xattr -cr Malvon after unzipping
-- [ ] Downloading Tabs || Subclass it
 - [ ] Memory Leaks when creating splitViews
+---
+- [ ] Download history | Similar to history
+- [ ] Download progress indicator would be set to infinity even when you can track the progress
+---
+- [x] Downloading Tabs
 ---
 - [x] Private windows
 - [x] Tab closing causes app to crash

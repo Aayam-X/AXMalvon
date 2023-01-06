@@ -21,6 +21,7 @@
 		ED2735E52961FAAB00DE8126 /* AXProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2735E42961FAAB00DE8126 /* AXProfile.swift */; };
 		ED2735E72962136E00DE8126 /* AXProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2735E62962136E00DE8126 /* AXProfileManager.swift */; };
 		ED2735E92962586400DE8126 /* AXProfileListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2735E82962586400DE8126 /* AXProfileListView.swift */; };
+		ED27979C2967511400C7F81D /* AXDownloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED27979B2967511400C7F81D /* AXDownloads.swift */; };
 		ED3204FE293E61240055CD73 /* AXSplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FD293E61240055CD73 /* AXSplitView.swift */; };
 		ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FF293E632A0055CD73 /* AXAppProperties.swift */; };
 		ED4262612948A63900D2478E /* Appicon.icns in Resources */ = {isa = PBXBuildFile; fileRef = ED4262602948A63900D2478E /* Appicon.icns */; };
@@ -82,6 +83,7 @@
 		ED2735E42961FAAB00DE8126 /* AXProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXProfile.swift; sourceTree = "<group>"; };
 		ED2735E62962136E00DE8126 /* AXProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXProfileManager.swift; sourceTree = "<group>"; };
 		ED2735E82962586400DE8126 /* AXProfileListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXProfileListView.swift; sourceTree = "<group>"; };
+		ED27979B2967511400C7F81D /* AXDownloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXDownloads.swift; sourceTree = "<group>"; };
 		ED27D69E2944B5F000CA1911 /* Log.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Log.md; sourceTree = "<group>"; };
 		ED3204FD293E61240055CD73 /* AXSplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSplitView.swift; sourceTree = "<group>"; };
 		ED3204FF293E632A0055CD73 /* AXAppProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXAppProperties.swift; sourceTree = "<group>"; };
@@ -152,6 +154,14 @@
 				ED0B2865295B619F003D656F /* AXPreferenceGlobal.swift */,
 			);
 			path = Preference;
+			sourceTree = "<group>";
+		};
+		ED27979A2967510700C7F81D /* Downloads */ = {
+			isa = PBXGroup;
+			children = (
+				ED27979B2967511400C7F81D /* AXDownloads.swift */,
+			);
+			path = Downloads;
 			sourceTree = "<group>";
 		};
 		ED474EF829496EE400268FBD /* Resources */ = {
@@ -250,6 +260,7 @@
 		ED9B4CE92958A1E300961792 /* Other */ = {
 			isa = PBXGroup;
 			children = (
+				ED27979A2967510700C7F81D /* Downloads */,
 				ED6ED710295F372F00B08B30 /* History */,
 				ED9B4CEA2958A1EE00961792 /* Extensions.swift */,
 				EDE6969929638F230041B72D /* Subclasses.swift */,
@@ -421,6 +432,7 @@
 				ED95609D294033D400AC1C15 /* AXTabItem.swift in Sources */,
 				EDC611C1294E213A00524E88 /* AXWebViewFindView.swift in Sources */,
 				ED95609A2940339800AC1C15 /* AXWebContainerView.swift in Sources */,
+				ED27979C2967511400C7F81D /* AXDownloads.swift in Sources */,
 				EDD71EC8293BD96600256EA9 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

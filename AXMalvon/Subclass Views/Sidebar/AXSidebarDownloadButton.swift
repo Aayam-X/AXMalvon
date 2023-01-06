@@ -12,57 +12,61 @@ class AXSidebarDownloadButton: NSButton {
     weak var appProperties: AXAppProperties!
     var downloadItem: AXDownloadItem!
     
-    // Subviews
-    let titleView = NSTextField(frame: .zero)
-    var closeButton = AXHoverButton()
-    var progressBar = NSProgressIndicator()
-    
     // Colors
     var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
     var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
     
-    // Other
-    var estimatedTimeRemainingObserver: NSKeyValueObservation?
+    // Observers
+    var estimatedTimeRemainingOberver: NSKeyValueObservation?
     var isFinishedObserver: NSKeyValueObservation?
-    weak var titleViewWidthAnchor: NSLayoutConstraint?
-    var trackingArea: NSTrackingArea!
     
-    var isSelected: Bool = false {
-        didSet {
-            self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .clear
-        }
-    }
+    // Other
+    var trackingArea: NSTrackingArea!
+    weak var titleViewRightAnchor: NSLayoutConstraint?
+    private var hasDrawn: Bool = false
+    
+    // Views
+    var fileNameLabel: NSTextField = NSTextField()
+    var fileIconImageView: NSImageView = NSImageView()
+    var closeButton: AXHoverButton = AXHoverButton()
+    var progressBar = NSProgressIndicator()
     
     var tabTitle: String = "Untitled" {
         didSet {
-            titleView.stringValue = tabTitle
+            fileNameLabel.stringValue = tabTitle
         }
     }
     
-    init(_ appProperties: AXAppProperties) {
+    deinit {
+        estimatedTimeRemainingOberver?.invalidate()
+        isFinishedObserver?.invalidate()
+        estimatedTimeRemainingOberver = nil
+        isFinishedObserver = nil
+    }
+    
+    init(_ appProperties: AXAppProperties, _ downloadItem: AXDownloadItem) {
         self.appProperties = appProperties
+        self.downloadItem = downloadItem
         super.init(frame: .zero)
         self.wantsLayer = true
-        self.layer?.cornerRadius = 5
+        self.layer?.cornerRadius = 5.0
         self.isBordered = false
         self.bezelStyle = .shadowlessSquare
-        self.layer?.borderColor = .white
-        self.target = self
-        self.action = #selector(openInFinder)
-        title = ""
+        self.title = ""
+        self.layer?.backgroundColor = .clear
+        self.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        
         
         self.setTrackingArea()
         
-        // Setup circular progress bar
-        progressBar.style = .spinning
-        progressBar.isIndeterminate = false
-        progressBar.minValue = 0
-        progressBar.maxValue = 100
-        progressBar.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(progressBar)
-        progressBar.controlSize = .small
-        progressBar.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
-        progressBar.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
+        // Setup imageView
+        fileIconImageView.translatesAutoresizingMaskIntoConstraints = false
+        fileIconImageView.image = NSImage(systemSymbolName: "arrow.down.circle", accessibilityDescription: nil)
+        addSubview(fileIconImageView)
+        fileIconImageView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        fileIconImageView.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
+        fileIconImageView.widthAnchor.constraint(equalToConstant: 16).isActive = true
+        fileIconImageView.heightAnchor.constraint(equalToConstant: 16).isActive = true
         
         // Setup closeButton
         closeButton.translatesAutoresizingMaskIntoConstraints = false
@@ -73,99 +77,99 @@ class AXSidebarDownloadButton: NSButton {
         closeButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
         closeButton.heightAnchor.constraint(equalToConstant: 16).isActive = true
         closeButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -5).isActive = true
-        closeButton.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
+        closeButton.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
         closeButton.isHidden = true
         
         // Setup titleView
-        titleView.translatesAutoresizingMaskIntoConstraints = false
-        titleView.isEditable = false // This should be set to true in a while :)
-        titleView.alignment = .left
-        titleView.isBordered = false
-        titleView.usesSingleLineMode = true
-        titleView.drawsBackground = false
-        addSubview(titleView)
-        titleView.leftAnchor.constraint(equalTo: progressBar.rightAnchor, constant: 5).isActive = true
-        titleView.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
-        titleView.rightAnchor.constraint(equalTo: closeButton.leftAnchor).isActive = true
-    }
-    
-    func startObserving() {
-        tabTitle = downloadItem.fileName
+        fileNameLabel.translatesAutoresizingMaskIntoConstraints = false
+        fileNameLabel.isEditable = false // This should be set to true in a while :)
+        fileNameLabel.alignment = .left
+        fileNameLabel.isBordered = false
+        fileNameLabel.usesSingleLineMode = true
+        fileNameLabel.drawsBackground = false
+        fileNameLabel.lineBreakMode = .byTruncatingTail
+        addSubview(fileNameLabel)
+        fileNameLabel.leftAnchor.constraint(equalTo: fileIconImageView.rightAnchor, constant: 5).isActive = true
+        fileNameLabel.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
+        titleViewRightAnchor = fileNameLabel.rightAnchor.constraint(equalTo: closeButton.leftAnchor, constant: 5)
+        titleViewRightAnchor!.isActive = true
         
-        estimatedTimeRemainingObserver = downloadItem.download.progress.observe(\.fractionCompleted) { [self] _, _ in
-            progressBar.doubleValue = downloadItem.download.progress.fractionCompleted * 100
-        }
-        
-        isFinishedObserver = downloadItem.download.progress.observe(\.isFinished) { [self] _, _ in
-            stopObserving()
-        }
-    }
-    
-    func stopObserving() {
-        estimatedTimeRemainingObserver?.invalidate()
-        isFinishedObserver?.invalidate()
-        progressBar.removeFromSuperview()
-        
-        // Image of file
-        let imageView = NSImageView()
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.image = NSWorkspace.shared.icon(forFile: downloadItem.location.relativePath)
-        addSubview(imageView)
-        imageView.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
-        imageView.topAnchor.constraint(equalTo: topAnchor, constant: 7).isActive = true
-        imageView.widthAnchor.constraint(equalToConstant: 16).isActive = true
-        imageView.heightAnchor.constraint(equalToConstant: 16).isActive = true
-        titleView.leftAnchor.constraint(equalTo: imageView.rightAnchor, constant: 5.0).isActive = true
-    }
-    
-    // Opens the file in finder
-    @objc func openInFinder() {
-        NSWorkspace.shared.open(downloadItem.location)
-    }
-    
-    @objc func closeTab() {
-        // TODO: - Create
-        //        appProperties.tabManager.removeTab(self.tag)
+        // Add progress bar
+        progressBar.style = .bar
+        progressBar.isIndeterminate = downloadItem.download.progress.isIndeterminate
+        progressBar.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(progressBar)
+        progressBar.controlSize = .small
+        progressBar.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+        progressBar.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+        progressBar.bottomAnchor.constraint(equalTo: bottomAnchor, constant: 5).isActive = true
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
+    @objc func closeTab() {
+        self.removeFromSuperview()
+    }
+    
+    func startObserving() {
+        tabTitle = downloadItem.fileName
+        
+        if !downloadItem.download.progress.isIndeterminate {
+            estimatedTimeRemainingOberver = downloadItem.download.progress.observe(\.fractionCompleted, options: .new, changeHandler: { [weak self] _, _ in
+                self?.progressBar.doubleValue = self!.downloadItem.download.progress.fractionCompleted * 100
+            })
+        } else {
+            progressBar.startAnimation(nil)
+        }
+        
+        isFinishedObserver = downloadItem.download.progress.observe(\.isFinished, options: .new, changeHandler: { [weak self] _, _ in
+            self?.stopObserving()
+        })
+    }
+    
+    func stopObserving() {
+        if downloadItem.download.progress.isIndeterminate {
+            progressBar.stopAnimation(nil)
+        } else {
+            progressBar.isHidden = true
+        }
+        
+        fileIconImageView.image = NSWorkspace.shared.icon(forFile: downloadItem.url.relativePath)
+    }
+    
     func setTrackingArea() {
-        let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
+        let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited, .enabledDuringMouseDrag]
         trackingArea = NSTrackingArea.init(rect: self.bounds, options: options, owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
     }
     
-    override func mouseUp(with event: NSEvent) {
-        closeButton.isHidden = true
-        self.removeTrackingArea(self.trackingArea)
-        layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
-        
-        if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
-            sendAction(action, to: target)
-        }
-    }
-    
     override func mouseDown(with event: NSEvent) {
-        self.removeTrackingArea(self.trackingArea)
         self.layer?.backgroundColor = selectedColor.cgColor
     }
     
+    override func mouseUp(with event: NSEvent) {
+        self.layer?.backgroundColor = .none
+        openFileButtonAction()
+    }
+    
     override func mouseEntered(with event: NSEvent) {
-        titleViewWidthAnchor?.constant = 0
-        
+        titleViewRightAnchor?.constant = 0
         closeButton.isHidden = false
         
-        if !isSelected {
-            self.layer?.backgroundColor = hoverColor.cgColor
-        }
+        self.layer?.backgroundColor = hoverColor.cgColor
     }
     
     override func mouseExited(with event: NSEvent) {
-        titleViewWidthAnchor?.constant = 20
+        titleViewRightAnchor?.constant = 20
         closeButton.isHidden = true
-        self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
+        self.layer?.backgroundColor = .none
+    }
+    
+    @objc func openFileButtonAction() {
+        if let location = URL(string: downloadItem.location) {
+            NSWorkspace.shared.open(location)
+        }
     }
 }

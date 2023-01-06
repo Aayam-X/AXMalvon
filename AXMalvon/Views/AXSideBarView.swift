@@ -89,6 +89,8 @@ class AXSideBarView: NSView {
         return button
     }()
     
+    var downloadsStackView: NSStackView!
+    
     // MARK: - Functions
     override func viewWillDraw() {
         if !hasDrawn {
@@ -137,7 +139,7 @@ class AXSideBarView: NSView {
             scrollView.drawsBackground = false
             scrollView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
             scrollView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true // Put -44 because profile list view + 14x spacing
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -44).isActive = true
             scrollView.topAnchor.constraint(equalTo: topAnchor, constant: 35).isActive = true
             
             // Setup clipview
@@ -148,6 +150,14 @@ class AXSideBarView: NSView {
             clipView.rightAnchor.constraint(equalTo: scrollView.rightAnchor).isActive = true
             clipView.topAnchor.constraint(equalTo: scrollView.topAnchor).isActive = true
             clipView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor).isActive = true
+            
+            let documentView = NSView()
+            documentView.translatesAutoresizingMaskIntoConstraints = false
+            scrollView.documentView = documentView
+            documentView.topAnchor.constraint(equalTo: clipView.topAnchor).isActive = true
+            documentView.leftAnchor.constraint(equalTo: clipView.leftAnchor).isActive = true
+            documentView.rightAnchor.constraint(equalTo: clipView.rightAnchor).isActive = true
+            documentView.heightAnchor.constraint(equalTo: clipView.heightAnchor).isActive = true
             
             // Setup profileListView
             if let profileList = appProperties.profileList {
@@ -329,16 +339,28 @@ class AXSideBarView: NSView {
         tabView.removedTab(at)
     }
     
-    //    func didDownload(_ d: AXDownloadItem) {
-    //        let button = AXSidebarDownloadButton(appProperties)
-    //        button.downloadItem = d
-    //        button.startObserving()
-    //
-    //        stackView.addArrangedSubview(button)
-    //
-    //        button.heightAnchor.constraint(equalToConstant: 30).isActive = true
-    //        button.widthAnchor.constraint(equalTo: stackView.widthAnchor).isActive = true
-    //    }
+    func didDownload(_ d: AXDownloadItem) {
+        if downloadsStackView == nil {
+            downloadsStackView = NSStackView()
+            
+            downloadsStackView.orientation = .vertical
+            downloadsStackView.spacing = 1.08
+            downloadsStackView.translatesAutoresizingMaskIntoConstraints = false
+            
+            scrollView.documentView!.addSubview(downloadsStackView)
+            downloadsStackView.bottomAnchor.constraint(equalTo: scrollView.documentView!.bottomAnchor, constant: -50).isActive = true
+            downloadsStackView.leftAnchor.constraint(equalTo: scrollView.documentView!.leftAnchor).isActive = true
+            downloadsStackView.rightAnchor.constraint(equalTo: scrollView.documentView!.rightAnchor, constant: -15).isActive = true
+        }
+        
+        let button = AXSidebarDownloadButton(appProperties, d)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.startObserving()
+        
+        downloadsStackView.addArrangedSubview(button)
+        
+        button.widthAnchor.constraint(equalTo: downloadsStackView.widthAnchor).isActive = true
+    }
     
     func updateSelection() {
         tabView.updateSelection()
@@ -431,7 +453,8 @@ class AXSideBarView: NSView {
         
         tabView.update()
         
-        scrollView.documentView = tabView
-        tabView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -15).isActive = true
+        scrollView.documentView!.addSubview(tabView)
+        tabView.topAnchor.constraint(equalTo: scrollView.documentView!.topAnchor).isActive = true
+        tabView.widthAnchor.constraint(equalTo: scrollView.documentView!.widthAnchor, constant: -15).isActive = true
     }
 }

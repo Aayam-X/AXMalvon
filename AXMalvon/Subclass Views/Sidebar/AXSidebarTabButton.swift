@@ -77,7 +77,6 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         self.layer?.cornerRadius = 5
         self.isBordered = false
         self.bezelStyle = .shadowlessSquare
-        self.layer?.borderColor = .white
         title = ""
         heightAnchor.constraint(equalToConstant: 30).isActive = true
     }
