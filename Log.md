@@ -19,8 +19,8 @@
 - [ ] Updater Application || Use xattr -cr Malvon after unzipping
 - [ ] Memory Leaks when creating splitViews
 ---
-- [ ] Download history | Similar to history
-- [ ] Download progress indicator would be set to infinity even when you can track the progress
+- [x] Download history | Similar to history
+- [x] Download progress indicator would be set to infinity even when you can track the progress
 ---
 - [x] Profile switching bug
 ---

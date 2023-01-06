@@ -116,13 +116,12 @@ class AXSidebarDownloadButton: NSButton {
     func startObserving() {
         tabTitle = downloadItem.fileName
         
-        if !downloadItem.download.progress.isIndeterminate {
-            estimatedTimeRemainingOberver = downloadItem.download.progress.observe(\.fractionCompleted, options: .new, changeHandler: { [weak self] _, _ in
-                self?.progressBar.doubleValue = self!.downloadItem.download.progress.fractionCompleted * 100
-            })
-        } else {
-            progressBar.startAnimation(nil)
-        }
+        progressBar.startAnimation(self)
+        
+        estimatedTimeRemainingOberver = downloadItem.download.progress.observe(\.fractionCompleted, options: .new, changeHandler: { [weak self] _, _ in
+            self?.progressBar.isIndeterminate = false
+            self?.progressBar.doubleValue = self!.downloadItem.download.progress.fractionCompleted * 100
+        })
         
         isFinishedObserver = downloadItem.download.progress.observe(\.isFinished, options: .new, changeHandler: { [weak self] _, _ in
             self?.stopObserving()

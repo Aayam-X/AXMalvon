@@ -351,9 +351,9 @@ class AXSideBarView: NSView {
             downloadsStackView.translatesAutoresizingMaskIntoConstraints = false
             
             scrollView.documentView!.addSubview(downloadsStackView)
-            downloadsStackView.bottomAnchor.constraint(equalTo: scrollView.documentView!.bottomAnchor, constant: -50).isActive = true
+            downloadsStackView.bottomAnchor.constraint(equalTo: scrollView.documentView!.bottomAnchor, constant: -44).isActive = true
             downloadsStackView.leftAnchor.constraint(equalTo: scrollView.documentView!.leftAnchor).isActive = true
-            downloadsStackView.rightAnchor.constraint(equalTo: scrollView.documentView!.rightAnchor, constant: -15).isActive = true
+            downloadsStackView.rightAnchor.constraint(equalTo: scrollView.documentView!.rightAnchor, constant: -8).isActive = true
         }
         
         let button = AXSidebarDownloadButton(appProperties, d)

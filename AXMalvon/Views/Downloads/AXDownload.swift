@@ -1,5 +1,5 @@
 //
-//  AXDownloads.swift
+//  AXDownload.swift
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2023-01-05.
@@ -29,13 +29,13 @@ class AXDownload {
         }
     }
     
-    static func appendItem(title: String, url: String) {
+    static func appendItem(fileName: String, location: String) {
         let today = Date()
         let dateFormat = DateFormatter()
         dateFormat.dateFormat = "dd/MM/yyyy"
         let dateString = dateFormat.string(from: today)
         
-        let string = "\(title)\r\(url)\r\(dateString)\n"
+        let string = "\(fileName) \(location) \(dateString)\n"
         let data = string.data(using: .utf8)!
         let handle = FileHandle(forWritingAtPath: AXDownload.filePath.path)!
         handle.seekToEndOfFile()
@@ -66,7 +66,7 @@ class AXDownload {
         var result = ""
         
         for item in items {
-            result += "\(item.fileName) \(item.location) \(item.date)\n"
+            result += "\(item.fileName) \(item.location) \(item.date!)\n"
         }
         
         try! result.write(to: AXDownload.filePath, atomically: true, encoding: .utf8)

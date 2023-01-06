@@ -21,7 +21,7 @@
 		ED2735E52961FAAB00DE8126 /* AXProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2735E42961FAAB00DE8126 /* AXProfile.swift */; };
 		ED2735E72962136E00DE8126 /* AXProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2735E62962136E00DE8126 /* AXProfileManager.swift */; };
 		ED2735E92962586400DE8126 /* AXProfileListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2735E82962586400DE8126 /* AXProfileListView.swift */; };
-		ED27979C2967511400C7F81D /* AXDownloads.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED27979B2967511400C7F81D /* AXDownloads.swift */; };
+		ED27979C2967511400C7F81D /* AXDownload.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED27979B2967511400C7F81D /* AXDownload.swift */; };
 		ED3204FE293E61240055CD73 /* AXSplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FD293E61240055CD73 /* AXSplitView.swift */; };
 		ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FF293E632A0055CD73 /* AXAppProperties.swift */; };
 		ED4262612948A63900D2478E /* Appicon.icns in Resources */ = {isa = PBXBuildFile; fileRef = ED4262602948A63900D2478E /* Appicon.icns */; };
@@ -53,6 +53,7 @@
 		EDE6969A29638F230041B72D /* Subclasses.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDE6969929638F230041B72D /* Subclasses.swift */; };
 		EDF03DEB295F654600E62B9C /* AXHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF03DEA295F654600E62B9C /* AXHistory.swift */; };
 		EDF03DEF295F701B00E62B9C /* AXHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF03DEE295F701B00E62B9C /* AXHistoryView.swift */; };
+		EDF2A02E2968531300C34AC8 /* AXDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF2A02D2968531300C34AC8 /* AXDownloadView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -83,7 +84,7 @@
 		ED2735E42961FAAB00DE8126 /* AXProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXProfile.swift; sourceTree = "<group>"; };
 		ED2735E62962136E00DE8126 /* AXProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXProfileManager.swift; sourceTree = "<group>"; };
 		ED2735E82962586400DE8126 /* AXProfileListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXProfileListView.swift; sourceTree = "<group>"; };
-		ED27979B2967511400C7F81D /* AXDownloads.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXDownloads.swift; sourceTree = "<group>"; };
+		ED27979B2967511400C7F81D /* AXDownload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXDownload.swift; sourceTree = "<group>"; };
 		ED27D69E2944B5F000CA1911 /* Log.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Log.md; sourceTree = "<group>"; };
 		ED3204FD293E61240055CD73 /* AXSplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSplitView.swift; sourceTree = "<group>"; };
 		ED3204FF293E632A0055CD73 /* AXAppProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXAppProperties.swift; sourceTree = "<group>"; };
@@ -119,6 +120,7 @@
 		EDE6969929638F230041B72D /* Subclasses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Subclasses.swift; sourceTree = "<group>"; };
 		EDF03DEA295F654600E62B9C /* AXHistory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXHistory.swift; sourceTree = "<group>"; };
 		EDF03DEE295F701B00E62B9C /* AXHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXHistoryView.swift; sourceTree = "<group>"; };
+		EDF2A02D2968531300C34AC8 /* AXDownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXDownloadView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -156,14 +158,6 @@
 			path = Preference;
 			sourceTree = "<group>";
 		};
-		ED27979A2967510700C7F81D /* Downloads */ = {
-			isa = PBXGroup;
-			children = (
-				ED27979B2967511400C7F81D /* AXDownloads.swift */,
-			);
-			path = Downloads;
-			sourceTree = "<group>";
-		};
 		ED474EF829496EE400268FBD /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -180,14 +174,6 @@
 				ED5DF667295DC68000433D45 /* AXPurchaseBrowserView.swift */,
 			);
 			path = Welcome;
-			sourceTree = "<group>";
-		};
-		ED6ED710295F372F00B08B30 /* History */ = {
-			isa = PBXGroup;
-			children = (
-				EDF03DEA295F654600E62B9C /* AXHistory.swift */,
-			);
-			path = History;
 			sourceTree = "<group>";
 		};
 		ED7B549D295B6E61008A944F /* Views */ = {
@@ -211,6 +197,7 @@
 		ED9560942940065600AC1C15 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				EDF2A02C296852EC00C34AC8 /* Downloads */,
 				EDF03DF0295F731000E62B9C /* History */,
 				ED5DF662295CF8E000433D45 /* Welcome */,
 				ED0B285C295B2F84003D656F /* Preference */,
@@ -260,8 +247,6 @@
 		ED9B4CE92958A1E300961792 /* Other */ = {
 			isa = PBXGroup;
 			children = (
-				ED27979A2967510700C7F81D /* Downloads */,
-				ED6ED710295F372F00B08B30 /* History */,
 				ED9B4CEA2958A1EE00961792 /* Extensions.swift */,
 				EDE6969929638F230041B72D /* Subclasses.swift */,
 				ED2735E42961FAAB00DE8126 /* AXProfile.swift */,
@@ -312,8 +297,18 @@
 			isa = PBXGroup;
 			children = (
 				EDF03DEE295F701B00E62B9C /* AXHistoryView.swift */,
+				EDF03DEA295F654600E62B9C /* AXHistory.swift */,
 			);
 			path = History;
+			sourceTree = "<group>";
+		};
+		EDF2A02C296852EC00C34AC8 /* Downloads */ = {
+			isa = PBXGroup;
+			children = (
+				ED27979B2967511400C7F81D /* AXDownload.swift */,
+				EDF2A02D2968531300C34AC8 /* AXDownloadView.swift */,
+			);
+			path = Downloads;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -410,6 +405,7 @@
 				ED5DF664295CF8F700433D45 /* AXWelcomeView.swift in Sources */,
 				ED01B05A2957E3C700CB657E /* AXSearchFieldSuggestItem.swift in Sources */,
 				ED9B4CE82958835100961792 /* AXTextField.swift in Sources */,
+				EDF2A02E2968531300C34AC8 /* AXDownloadView.swift in Sources */,
 				ED0B2860295B3910003D656F /* AXPreferenceView.swift in Sources */,
 				ED9B4CEB2958A1EE00961792 /* Extensions.swift in Sources */,
 				ED7E39682960CFA100745CE0 /* AXAlertView.swift in Sources */,
@@ -432,7 +428,7 @@
 				ED95609D294033D400AC1C15 /* AXTabItem.swift in Sources */,
 				EDC611C1294E213A00524E88 /* AXWebViewFindView.swift in Sources */,
 				ED95609A2940339800AC1C15 /* AXWebContainerView.swift in Sources */,
-				ED27979C2967511400C7F81D /* AXDownloads.swift in Sources */,
+				ED27979C2967511400C7F81D /* AXDownload.swift in Sources */,
 				EDD71EC8293BD96600256EA9 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

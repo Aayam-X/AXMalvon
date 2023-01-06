@@ -22,6 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Initializers
         AXHistory.checkIfFileExists()
+        AXDownload.checkIfFileExists()
         checkForUpdates()
         
         // Create a window
@@ -178,6 +179,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let window = NSWindow.create(styleMask: [.closable, .miniaturizable, .resizable], size: .init(width: 500, height: 500))
             window.title = "History"
             window.contentView = AXHistoryView(appProperties: appProperties)
+            window.makeKeyAndOrderFront(nil)
+        }
+    }
+    
+    @IBAction func showDownloads(_ sender: Any) {
+        if let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties {
+            let window = NSWindow.create(styleMask: [.closable, .miniaturizable, .resizable], size: .init(width: 500, height: 500))
+            window.title = "Downloads"
+            window.contentView = AXDownloadView(appProperties: appProperties)
             window.makeKeyAndOrderFront(nil)
         }
     }
