@@ -132,12 +132,15 @@ class AXSideBarView: NSView {
             scrollView = AXScrollView(horizontalScrollHandler: { [weak self] in
                 self?.updateProfile()
             })
+            scrollView.horizontalScrollElasticity = .none
+            scrollView.horizontalScroller = nil
+            scrollView.hasHorizontalScroller = false
             scrollView.translatesAutoresizingMaskIntoConstraints = false
             scrollView.automaticallyAdjustsContentInsets = false
-            scrollView.contentInsets = .init(top: 0, left: 9, bottom: 0, right: 0)
+            //scrollView.contentInsets = .init(top: 0, left: 9, bottom: 0, right: 0)
             addSubview(scrollView)
             scrollView.drawsBackground = false
-            scrollView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+            scrollView.leftAnchor.constraint(equalTo: leftAnchor, constant: 10).isActive = true
             scrollView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
             scrollView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -44).isActive = true
             scrollView.topAnchor.constraint(equalTo: topAnchor, constant: 35).isActive = true
@@ -443,6 +446,8 @@ class AXSideBarView: NSView {
     
     // MARK: - Other Functions
     func switchedProfile() {
+        tabView.removeFromSuperview()
+        
         self.tabView = AXTabView(profile: appProperties.currentProfile)
         tabView.translatesAutoresizingMaskIntoConstraints = false
         tabView.appProperties = appProperties
@@ -455,6 +460,6 @@ class AXSideBarView: NSView {
         
         scrollView.documentView!.addSubview(tabView)
         tabView.topAnchor.constraint(equalTo: scrollView.documentView!.topAnchor).isActive = true
-        tabView.widthAnchor.constraint(equalTo: scrollView.documentView!.widthAnchor, constant: -15).isActive = true
+        tabView.widthAnchor.constraint(equalTo: scrollView.documentView!.widthAnchor, constant: -8).isActive = true
     }
 }

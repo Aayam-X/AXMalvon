@@ -22,6 +22,8 @@
 - [ ] Download history | Similar to history
 - [ ] Download progress indicator would be set to infinity even when you can track the progress
 ---
+- [x] Profile switching bug
+---
 - [x] Downloading Tabs
 ---
 - [x] Private windows
