@@ -19,6 +19,9 @@
 - [ ] Profile icons
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Add preference panes etc..
+- [ ] Seperate history based on profile
+---
+- [x] One instance of tabView per profile
 ---
 - [x] Preference Pane || Most visited Websites 
 ---

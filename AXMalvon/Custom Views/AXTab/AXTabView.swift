@@ -250,4 +250,11 @@ class AXTabView: NSView {
         
         appProperties.webContainerView.update(view: tab.view)
     }
+    
+    func updateAppPropertiesAndWebView() {
+        let button = tabStackView.arrangedSubviews[profile.currentTab] as! AXSidebarTabButton
+        let tab = profile.tabs[profile.currentTab]
+        
+        updateAppPropertiesAndWebView(button: button, tab: tab)
+    }
 }

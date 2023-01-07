@@ -33,6 +33,8 @@ class AXSideBarView: NSView {
         return tabView
     }()
     
+    var tabViews: [AXTabView] = []
+    
     lazy var toggleSidebarButton: AXHoverButton = {
         let button = AXHoverButton()
         
@@ -136,6 +138,8 @@ class AXSideBarView: NSView {
             }
             
             // Setup tabView
+            initializeProfiles()
+            
             appProperties.profileManager?.switchProfiles(to: appProperties.currentProfileIndex)
             
             hasDrawn = true
@@ -415,7 +419,8 @@ class AXSideBarView: NSView {
     func switchedProfile() {
         tabView.removeFromSuperview()
         
-        self.tabView = AXTabView(profile: appProperties.currentProfile)
+        self.tabView = tabViews[appProperties.currentProfileIndex]
+        tabView.updateAppPropertiesAndWebView()
         tabView.translatesAutoresizingMaskIntoConstraints = false
         
         addSubview(tabView)
@@ -423,13 +428,21 @@ class AXSideBarView: NSView {
         tabView.leftAnchor.constraint(equalTo: leftAnchor, constant: 10).isActive = true
         tabView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
         tabView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -44).isActive = true
-        
-        tabView.appProperties = appProperties
-        
-        if tabView.profile.tabs.isEmpty {
-            tabView.createTab()
+    }
+    
+    func initializeProfiles() {
+        for profile in appProperties.AX_profiles {
+            // Create tabViews
+            let tabView = AXTabView(profile: profile)
+            tabView.appProperties = appProperties
+            
+            if tabView.profile.tabs.isEmpty {
+                tabView.createTab()
+            }
+            
+            tabView.update()
+            
+            self.tabViews.append(tabView)
         }
-        
-        tabView.update()
     }
 }
