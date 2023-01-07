@@ -11,6 +11,7 @@
 
 ## Other
 - [ ] Create transparent window buttons.
+- [ ] WKWebView Experimental Debug Features Menu Items
 
 ## 0.0.2
 - [ ] Search suggestion: Switching tabs | Command Bar
@@ -20,6 +21,12 @@
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Add preference panes etc..
 - [ ] Seperate history based on profile
+---
+- [ ] TODO: Password encryption
+---
+- [x] Log in / Sign up
+- [x] Profile list button problem fixed
+- [x] WebView width equal when creating splitView 
 ---
 - [x] One instance of tabView per profile
 ---

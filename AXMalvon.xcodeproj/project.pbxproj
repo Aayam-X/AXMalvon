@@ -25,6 +25,7 @@
 		ED3204FE293E61240055CD73 /* AXSplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FD293E61240055CD73 /* AXSplitView.swift */; };
 		ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FF293E632A0055CD73 /* AXAppProperties.swift */; };
 		ED396B5A2969CAF400DC9492 /* AXPreferenceSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED396B592969CAF400DC9492 /* AXPreferenceSearchView.swift */; };
+		ED396B5C2969DEF400DC9492 /* AXGlobalProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED396B5B2969DEF400DC9492 /* AXGlobalProperties.swift */; };
 		ED4262612948A63900D2478E /* Appicon.icns in Resources */ = {isa = PBXBuildFile; fileRef = ED4262602948A63900D2478E /* Appicon.icns */; };
 		ED474EFA29496EEF00268FBD /* newtab.html in Resources */ = {isa = PBXBuildFile; fileRef = ED474EF929496EEF00268FBD /* newtab.html */; };
 		ED5DF664295CF8F700433D45 /* AXWelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED5DF663295CF8F700433D45 /* AXWelcomeView.swift */; };
@@ -44,6 +45,12 @@
 		ED9FE65E29464E1C00323453 /* AXSidebarTabButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9FE65D29464E1C00323453 /* AXSidebarTabButton.swift */; };
 		EDB1B1C829648A7B00C8942A /* AXTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB1B1C729648A7B00C8942A /* AXTabView.swift */; };
 		EDB514A42945219800EB0E8F /* AXTabManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB514A32945219800EB0E8F /* AXTabManager.swift */; };
+		EDBB1020296A2E3700D02F01 /* feature_list.html in Resources */ = {isa = PBXBuildFile; fileRef = EDBBCF74296A2E2900D02F01 /* feature_list.html */; };
+		EDBB421A296A2E4700D02F01 /* webpack.config.js in Resources */ = {isa = PBXBuildFile; fileRef = EDBB1017296A2E3600D02F01 /* webpack.config.js */; };
+		EDBB421C296A2E4700D02F01 /* package.json in Resources */ = {isa = PBXBuildFile; fileRef = EDBB1019296A2E3600D02F01 /* package.json */; };
+		EDBB421D296A2E4700D02F01 /* firebase.json in Resources */ = {isa = PBXBuildFile; fileRef = EDBB101A296A2E3600D02F01 /* firebase.json */; };
+		EDBB421F296A2E4700D02F01 /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = EDBB101E296A2E3700D02F01 /* index.html */; };
+		EDBB4220296A2E4700D02F01 /* index.js in Resources */ = {isa = PBXBuildFile; fileRef = EDBB101F296A2E3700D02F01 /* index.js */; };
 		EDC611C1294E213A00524E88 /* AXWebViewFindView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDC611C0294E213A00524E88 /* AXWebViewFindView.swift */; };
 		EDD71EC8293BD96600256EA9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD71EC7293BD96600256EA9 /* AppDelegate.swift */; };
 		EDD71ECA293BD96700256EA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EDD71EC9293BD96700256EA9 /* Assets.xcassets */; };
@@ -90,6 +97,7 @@
 		ED3204FD293E61240055CD73 /* AXSplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSplitView.swift; sourceTree = "<group>"; };
 		ED3204FF293E632A0055CD73 /* AXAppProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXAppProperties.swift; sourceTree = "<group>"; };
 		ED396B592969CAF400DC9492 /* AXPreferenceSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPreferenceSearchView.swift; sourceTree = "<group>"; };
+		ED396B5B2969DEF400DC9492 /* AXGlobalProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXGlobalProperties.swift; sourceTree = "<group>"; };
 		ED4262602948A63900D2478E /* Appicon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Appicon.icns; sourceTree = "<group>"; };
 		ED4262622948A64B00D2478E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		ED474EF929496EEF00268FBD /* newtab.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = newtab.html; sourceTree = "<group>"; };
@@ -111,6 +119,12 @@
 		ED9FE65D29464E1C00323453 /* AXSidebarTabButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSidebarTabButton.swift; sourceTree = "<group>"; };
 		EDB1B1C729648A7B00C8942A /* AXTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTabView.swift; sourceTree = "<group>"; };
 		EDB514A32945219800EB0E8F /* AXTabManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXTabManager.swift; sourceTree = "<group>"; };
+		EDBB1017296A2E3600D02F01 /* webpack.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = webpack.config.js; sourceTree = "<group>"; };
+		EDBB1019296A2E3600D02F01 /* package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
+		EDBB101A296A2E3600D02F01 /* firebase.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = firebase.json; sourceTree = "<group>"; };
+		EDBB101E296A2E3700D02F01 /* index.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = index.html; sourceTree = "<group>"; };
+		EDBB101F296A2E3700D02F01 /* index.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index.js; sourceTree = "<group>"; };
+		EDBBCF74296A2E2900D02F01 /* feature_list.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = feature_list.html; sourceTree = "<group>"; };
 		EDC611C0294E213A00524E88 /* AXWebViewFindView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWebViewFindView.swift; sourceTree = "<group>"; };
 		EDD71EC4293BD96600256EA9 /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EDD71EC7293BD96600256EA9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -164,6 +178,8 @@
 		ED474EF829496EE400268FBD /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				EDBBCF75296A2E2900D02F01 /* AuthWebsite */,
+				EDBBCF73296A2E2900D02F01 /* Website */,
 				ED474EF929496EEF00268FBD /* newtab.html */,
 				ED19C805294F904400E0924D /* WKWebViewSearch.js */,
 			);
@@ -260,6 +276,34 @@
 			path = Other;
 			sourceTree = "<group>";
 		};
+		EDBB101D296A2E3600D02F01 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				EDBB101E296A2E3700D02F01 /* index.html */,
+				EDBB101F296A2E3700D02F01 /* index.js */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		EDBBCF73296A2E2900D02F01 /* Website */ = {
+			isa = PBXGroup;
+			children = (
+				EDBBCF74296A2E2900D02F01 /* feature_list.html */,
+			);
+			path = Website;
+			sourceTree = SOURCE_ROOT;
+		};
+		EDBBCF75296A2E2900D02F01 /* AuthWebsite */ = {
+			isa = PBXGroup;
+			children = (
+				EDBB1017296A2E3600D02F01 /* webpack.config.js */,
+				EDBB1019296A2E3600D02F01 /* package.json */,
+				EDBB101A296A2E3600D02F01 /* firebase.json */,
+				EDBB101D296A2E3600D02F01 /* src */,
+			);
+			path = AuthWebsite;
+			sourceTree = SOURCE_ROOT;
+		};
 		EDD71EBB293BD96600256EA9 = {
 			isa = PBXGroup;
 			children = (
@@ -282,6 +326,7 @@
 			isa = PBXGroup;
 			children = (
 				ED3204FF293E632A0055CD73 /* AXAppProperties.swift */,
+				ED396B5B2969DEF400DC9492 /* AXGlobalProperties.swift */,
 				EDD71EC7293BD96600256EA9 /* AppDelegate.swift */,
 				EDD71ED8293BECE700256EA9 /* AXWindow.swift */,
 				ED9560942940065600AC1C15 /* Views */,
@@ -378,10 +423,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EDBB4220296A2E4700D02F01 /* index.js in Resources */,
 				EDD71ECA293BD96700256EA9 /* Assets.xcassets in Resources */,
+				EDBB421D296A2E4700D02F01 /* firebase.json in Resources */,
+				EDBB1020296A2E3700D02F01 /* feature_list.html in Resources */,
 				EDD71ECD293BD96700256EA9 /* MainMenu.xib in Resources */,
 				ED19C806294F904400E0924D /* WKWebViewSearch.js in Resources */,
+				EDBB421F296A2E4700D02F01 /* index.html in Resources */,
 				ED4262612948A63900D2478E /* Appicon.icns in Resources */,
+				EDBB421A296A2E4700D02F01 /* webpack.config.js in Resources */,
+				EDBB421C296A2E4700D02F01 /* package.json in Resources */,
 				ED474EFA29496EEF00268FBD /* newtab.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -411,6 +462,7 @@
 				ED5DF664295CF8F700433D45 /* AXWelcomeView.swift in Sources */,
 				ED01B05A2957E3C700CB657E /* AXSearchFieldSuggestItem.swift in Sources */,
 				ED9B4CE82958835100961792 /* AXTextField.swift in Sources */,
+				ED396B5C2969DEF400DC9492 /* AXGlobalProperties.swift in Sources */,
 				EDF2A02E2968531300C34AC8 /* AXDownloadView.swift in Sources */,
 				ED0B2860295B3910003D656F /* AXPreferenceView.swift in Sources */,
 				ED9B4CEB2958A1EE00961792 /* Extensions.swift in Sources */,

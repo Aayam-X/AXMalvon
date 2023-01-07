@@ -32,9 +32,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             profile.retriveTabs()
         }
         
-        // let window0 = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))
-        // window0.contentView = AXWelcomeView()
-        // window0.makeKeyAndOrderFront(nil)
+        if AXGlobalProperties.shared.userEmail == "" || AXGlobalProperties.shared.userPassword == "" {
+            let welcomeWindow = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))
+            welcomeWindow.contentView = AXWelcomeView()
+            window.beginSheet(welcomeWindow)
+        } else {
+            window.appProperties.contentView.checkIfBought()
+        }
         //
         // Always show this dialogue at start, if they haven't purchased it of course!
         // let window1 = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))

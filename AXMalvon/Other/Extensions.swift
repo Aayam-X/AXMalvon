@@ -33,7 +33,7 @@ extension Array {
 }
 
 extension String {
-    var isValidURL: Bool {
+    func isValidURL() -> Bool {
         let detector = try! NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
         if let match = detector.firstMatch(in: self, options: [], range: NSRange(location: 0, length: self.utf16.count)) {
             // it is a link, if the match covers the whole string
@@ -43,13 +43,30 @@ extension String {
         }
     }
     
-    var hasWhitespace: Bool {
+    func hasWhitespace() -> Bool {
         return rangeOfCharacter(from: .whitespacesAndNewlines) != nil
     }
     
     func string(after: Int) -> String {
         let index = self.index(startIndex, offsetBy: after)
         return String(self[index...])
+    }
+    
+    func isValidEmail() -> Bool {
+        guard self.count <= 254 else {
+            return false
+        }
+        let pos = self.lastIndex(of: "@") ?? self.endIndex
+        return (pos != self.startIndex)
+        && ((self.lastIndex(of: ".") ?? self.startIndex) > pos)
+        && (self[pos...].count > 4)
+    }
+    
+    func isValidPassword() -> Bool {
+        let password = self.trimmingCharacters(in: CharacterSet.whitespaces)
+        let passwordRegx = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[_#?!@$%^&<>*~:`-]).{8,}$"
+        let passwordCheck = NSPredicate(format: "SELF MATCHES %@", passwordRegx)
+        return passwordCheck.evaluate(with: password)
     }
 }
 

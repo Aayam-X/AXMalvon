@@ -89,7 +89,7 @@ class AXPreferenceAccountView: NSView {
             nameLabel.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
             
             // Email Label
-            emailLabel.stringValue = "email@gmail.com"
+            emailLabel.stringValue = AXGlobalProperties.shared.userEmail
             addSubview(emailLabel)
             emailLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 5).isActive = true
             emailLabel.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true

@@ -320,6 +320,9 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             webView.isSplitView = true
             webView1.isSplitView = true
             
+            webView.frame.size.width = appProperties.webContainerView.splitView.bounds.width / 2
+            webView1.frame.size.width = appProperties.webContainerView.splitView.bounds.width / 2
+            
             if draggingSide == .left {
                 appProperties.webContainerView.splitView.insertArrangedSubview(webView, at: 0)
             } else {

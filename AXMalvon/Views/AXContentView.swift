@@ -176,4 +176,34 @@ class AXContentView: NSView {
         
         super.keyDown(with: event)
     }
+    
+    func checkIfBought() {
+        let url = URL(string: "https://axmalvon.web.app/?email=\(AXGlobalProperties.shared.userEmail)&password=\(AXGlobalProperties.shared.userPassword)")!
+        
+        let privateConfig = WKWebViewConfiguration()
+        privateConfig.websiteDataStore = .nonPersistent()
+        privateConfig.processPool = .init()
+        let webView = WKWebView(frame: .zero, configuration: privateConfig)
+        webView.load(URLRequest(url: url))
+        
+        addSubview(webView)
+        webView.frame = .init(x: 0, y: 0, width: 0, height: 0)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
+            webView.evaluateJavaScript("document.getElementById('status').innerText") { (result, error) in
+                if let result = result as? String {
+                    if result == "success: true" {
+                        // Safe!
+                        return
+                    }
+                }
+                
+                AXGlobalProperties.shared.hasPaid = false
+                AXGlobalProperties.shared.userEmail = ""
+                AXGlobalProperties.shared.userPassword = ""
+                AXGlobalProperties.shared.save()
+                exit(1)
+            }
+        }
+    }
 }

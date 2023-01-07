@@ -7,9 +7,11 @@
 //
 
 import Cocoa
+import WebKit
 
-class AXWelcomeView: NSView {
+class AXWelcomeView: NSView, NSTextFieldDelegate {
     private var hasDrawn: Bool = false
+    private var signUpButtonClicked: Bool = false
     
     lazy var welcomeToMalvonLabel: NSTextField = {
         let label = NSTextField()
@@ -32,6 +34,7 @@ class AXWelcomeView: NSView {
         label.font = .systemFont(ofSize: 15)
         label.controlSize = .large
         label.focusRingType = .none
+        label.delegate = self
         return label
     }()
     
@@ -47,6 +50,8 @@ class AXWelcomeView: NSView {
         
         label.target = self
         label.action = #selector(enterAction(_:))
+        
+        label.delegate = self
         return label
     }()
     
@@ -166,23 +171,125 @@ class AXWelcomeView: NSView {
     }
     
     @objc func enterAction(_ sender: Any?) {
-        if emailAddressTextField.stringValue.isEmpty || passwordTextField.stringValue.isEmpty {
-            showError("Fields cannot be empty")
+        guard validateFields() else { return }
+        
+        let email = emailAddressTextField.stringValue
+        guard let password = passwordTextField.stringValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
+            showError("Unknown error")
+            return
+        }
+        
+        // TODO: Security flaw
+        AXGlobalProperties.shared.userEmail = email
+        AXGlobalProperties.shared.userPassword = password
+        
+        let url = URL(string: "https://axmalvon.web.app/?email=\(emailAddressTextField.stringValue)&password=\(password)")!
+        
+        let privateConfig = WKWebViewConfiguration()
+        privateConfig.websiteDataStore = .nonPersistent()
+        privateConfig.processPool = .init()
+        let webView = WKWebView(frame: .zero, configuration: privateConfig)
+        webView.load(URLRequest(url: url))
+        
+        addSubview(webView)
+        webView.frame = .init(x: 0, y: 0, width: 0, height: 0)
+        
+        self.welcomeToMalvonLabel.stringValue = "Loading..."
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            self.welcomeToMalvonLabel.stringValue = "Welcome to Malvon!"
+            webView.evaluateJavaScript("document.getElementById('status').innerText") { (result, error) in
+                if let result = result as? String {
+                    if result == "success: false" {
+                        AXGlobalProperties.shared.hasPaid = false
+                        self.welcomeToMalvonLabel.stringValue = "Payment needed to use Malvon"
+                        self.showError("You must pay for Malvon", time: 5.0)
+                        // Open link in default web browser
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                            exit(1)
+                        }
+                    } else if result == "success: true" {
+                        AXGlobalProperties.shared.hasPaid = true
+                        AXGlobalProperties.shared.save()
+                        self.window!.close()
+                    } else {
+                        self.showError("Error: \(result.string(after: 8))", time: 6.0)
+                    }
+                }
+            }
         }
     }
     
-    private func showError(_ message: String) {
+    func validateFields() -> Bool {
+        if emailAddressTextField.stringValue.isEmpty || passwordTextField.stringValue.isEmpty {
+            showError("Fields cannot be empty")
+            return false
+        }
+        
+        if !emailAddressTextField.stringValue.isValidEmail() {
+            showError("Enter valid email address")
+            return false
+        }
+        
+        if passwordTextField.stringValue.count < 8 {
+            showError("Password must be 8 or more characters long")
+            return false
+        }
+        
+        if !passwordTextField.stringValue.isValidPassword() {
+            showError("Password must have an uppercase letter, a numbers and a special character")
+            return false
+        }
+        
+        return true
+    }
+    
+    func validateFields2() -> Bool {
+        if enterNameTextField.stringValue.isEmpty || retypeSecurePasswordTextField.stringValue.isEmpty {
+            showError("Fields cannot be empty")
+            return false
+        }
+        
+        if enterNameTextField.stringValue.hasWhitespace() {
+            showError("Names may not have space, wait next update")
+            return false
+        }
+        
+        if retypeSecurePasswordTextField.stringValue != passwordTextField.stringValue {
+            showError("Passwords must match")
+            return false
+        }
+        
+        return true
+    }
+    
+    private func showError(_ message: String, time: CGFloat = 3.0) {
         errorLabel.isHidden = false
         errorLabel.stringValue = message
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + time) {
             self.errorLabel.isHidden = true
         }
+    }
+    
+    func controlTextDidChange(_ obj: Notification) {
+        enterNameTextField.isHidden = true
+        retypeSecurePasswordTextField.isHidden = true
+        signUpButton.defaultColor = .none
+        signUpButton.hoverColor = NSColor.lightGray.withAlphaComponent(0.3)
+        signUpButton.selectedColor = NSColor.lightGray.withAlphaComponent(0.6)
+        signUpButton.layer?.backgroundColor = .none
+        
+        signUpButton.action = #selector(displaySecondTextField(_:))
     }
     
     // Prevent reverse engineering
     // This is signUpButtonAction
     @objc func displaySecondTextField(_ sender: AXHoverButton) {
+        enterNameTextField.isHidden = false
+        retypeSecurePasswordTextField.isHidden = false
+        
         enterNameTextField.nextKeyView = retypeSecurePasswordTextField
         addSubview(enterNameTextField)
         enterNameTextField.topAnchor.constraint(equalTo: signUpButton.bottomAnchor, constant: 10).isActive = true
@@ -199,6 +306,8 @@ class AXWelcomeView: NSView {
         sender.defaultColor = NSColor.controlAccentColor.withAlphaComponent(0.4).cgColor
         sender.hoverColor = NSColor.controlAccentColor.withAlphaComponent(0.6)
         sender.selectedColor = NSColor.controlAccentColor
+        
+        sender.action = #selector(up)
     }
     
     // Doing this so people can't modify executable
@@ -210,7 +319,51 @@ class AXWelcomeView: NSView {
     }
     
     // Sign UP
-    private func up() {
+    @objc func up() {
+        guard validateFields() else { return }
+        guard validateFields2() else { return }
         
+        let email = emailAddressTextField.stringValue
+        let name = enterNameTextField.stringValue
+        guard let password = passwordTextField.stringValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
+            showError("Unknown error")
+            return
+        }
+        
+        // TODO: Security flaw
+        AXGlobalProperties.shared.userEmail = email
+        AXGlobalProperties.shared.userPassword = password
+        
+        let url = URL(string: "https://axmalvon.web.app/?name=\(name)&email=\(emailAddressTextField.stringValue)&password=\(password)")!
+        
+        let privateConfig = WKWebViewConfiguration()
+        privateConfig.websiteDataStore = .nonPersistent()
+        privateConfig.processPool = .init()
+        let webView = WKWebView(frame: .zero, configuration: privateConfig)
+        webView.load(URLRequest(url: url))
+        
+        addSubview(webView)
+        webView.frame = .init(x: 0, y: 0, width: 0, height: 0)
+        
+        self.welcomeToMalvonLabel.stringValue = "Loading..."
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            self.welcomeToMalvonLabel.stringValue = "Welcome to Malvon!"
+            webView.evaluateJavaScript("document.getElementById('status').innerText") { (result, error) in
+                if let result = result as? String {
+                    if result == "success: false" {
+                        AXGlobalProperties.shared.hasPaid = false
+                        self.welcomeToMalvonLabel.stringValue = "Registered Successfully"
+                        self.showError("You must pay for Malvon", time: 5.0)
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                            exit(1)
+                        }
+                    } else {
+                        self.showError("Error: \(result.string(after: 8))", time: 6.0)
+                    }
+                }
+            }
+        }
     }
 }

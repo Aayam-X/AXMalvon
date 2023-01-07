@@ -177,7 +177,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
                 }
             } else if value.starts(with: "file:///") {
                 url = URL(string: value)!
-            } else if value.isValidURL && !value.hasWhitespace {
+            } else if value.isValidURL() && !value.hasWhitespace() {
                 url = fixURL(URL(string: value)!)
             } else {
                 url = fixURL(URL(string: "https://www.google.com/search?client=Malvon&q=\(searchField.stringValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!)")!)

@@ -29,10 +29,9 @@ class AXProfileManager {
         appProperties.currentProfile = newProfile
         
         appProperties.webViewConfiguration = newProfile.webViewConfiguration
+        appProperties.profileList?.updateSelection(from: appProperties.currentProfileIndex, to: to)
         
         appProperties.currentProfileIndex = to
         appProperties.sidebarView.switchedProfile()
-        
-        appProperties.profileList?.updateSelection(from: appProperties.currentProfileIndex, to: to)
     }
 }
