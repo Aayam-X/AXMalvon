@@ -45,12 +45,6 @@
 		ED9FE65E29464E1C00323453 /* AXSidebarTabButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED9FE65D29464E1C00323453 /* AXSidebarTabButton.swift */; };
 		EDB1B1C829648A7B00C8942A /* AXTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB1B1C729648A7B00C8942A /* AXTabView.swift */; };
 		EDB514A42945219800EB0E8F /* AXTabManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB514A32945219800EB0E8F /* AXTabManager.swift */; };
-		EDBB1020296A2E3700D02F01 /* feature_list.html in Resources */ = {isa = PBXBuildFile; fileRef = EDBBCF74296A2E2900D02F01 /* feature_list.html */; };
-		EDBB421A296A2E4700D02F01 /* webpack.config.js in Resources */ = {isa = PBXBuildFile; fileRef = EDBB1017296A2E3600D02F01 /* webpack.config.js */; };
-		EDBB421C296A2E4700D02F01 /* package.json in Resources */ = {isa = PBXBuildFile; fileRef = EDBB1019296A2E3600D02F01 /* package.json */; };
-		EDBB421D296A2E4700D02F01 /* firebase.json in Resources */ = {isa = PBXBuildFile; fileRef = EDBB101A296A2E3600D02F01 /* firebase.json */; };
-		EDBB421F296A2E4700D02F01 /* index.html in Resources */ = {isa = PBXBuildFile; fileRef = EDBB101E296A2E3700D02F01 /* index.html */; };
-		EDBB4220296A2E4700D02F01 /* index.js in Resources */ = {isa = PBXBuildFile; fileRef = EDBB101F296A2E3700D02F01 /* index.js */; };
 		EDC611C1294E213A00524E88 /* AXWebViewFindView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDC611C0294E213A00524E88 /* AXWebViewFindView.swift */; };
 		EDD71EC8293BD96600256EA9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD71EC7293BD96600256EA9 /* AppDelegate.swift */; };
 		EDD71ECA293BD96700256EA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EDD71EC9293BD96700256EA9 /* Assets.xcassets */; };
@@ -423,16 +417,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EDBB4220296A2E4700D02F01 /* index.js in Resources */,
 				EDD71ECA293BD96700256EA9 /* Assets.xcassets in Resources */,
-				EDBB421D296A2E4700D02F01 /* firebase.json in Resources */,
-				EDBB1020296A2E3700D02F01 /* feature_list.html in Resources */,
 				EDD71ECD293BD96700256EA9 /* MainMenu.xib in Resources */,
 				ED19C806294F904400E0924D /* WKWebViewSearch.js in Resources */,
-				EDBB421F296A2E4700D02F01 /* index.html in Resources */,
 				ED4262612948A63900D2478E /* Appicon.icns in Resources */,
-				EDBB421A296A2E4700D02F01 /* webpack.config.js in Resources */,
-				EDBB421C296A2E4700D02F01 /* package.json in Resources */,
 				ED474EFA29496EEF00268FBD /* newtab.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
