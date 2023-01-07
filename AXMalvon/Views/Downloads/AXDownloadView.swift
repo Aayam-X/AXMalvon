@@ -102,7 +102,6 @@ class AXDownloadView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWind
             tableView.allowsMultipleSelection = true
             tableView.doubleAction = #selector(tableViewClickAction)
             tableView.frame = scrollView.bounds
-            addSubview(tableView)
             tableView.autoresizingMask = [.height, .width]
             
             scrollView.documentView = tableView

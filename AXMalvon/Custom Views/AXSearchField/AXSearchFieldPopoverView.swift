@@ -299,6 +299,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     
     func show() {
         appProperties.webContainerView.splitView.alphaValue = 0.5
+        mostVisitedWebsites = UserDefaults.standard.stringArray(forKey: "MostVisitedWebsite") ?? []
         
         // 300: Half the Width
         // 137: Half the Height

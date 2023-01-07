@@ -18,7 +18,9 @@
 - [ ] Updater Application || Use xattr -cr Malvon after unzipping
 - [ ] Profile icons
 - [ ] Improve command-f finding text functionality to use less power
-- [ ] Preference Pane | Most visited sites etc..
+- [ ] Add preference panes etc..
+---
+- [x] Preference Pane || Most visited Websites 
 ---
 - [x] Fixed tab loading problem
 - [x] Drag and drop fix

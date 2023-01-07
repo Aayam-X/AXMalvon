@@ -46,6 +46,16 @@ class AXPreferenceAccountView: NSView {
         return label
     }()
     
+    lazy var inviteAFriendButton: AXPreferenceButton = {
+        let button = AXPreferenceButton()
+        button.imageView.image = NSImage(systemSymbolName: "person.fill.badge.plus", accessibilityDescription: nil)
+        button.isBordered = true
+        button.bezelStyle = .texturedSquare
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.titleView.stringValue = "Invite a friend"
+        return button
+    }()
+    
     lazy var getSupportButton: AXPreferenceButton = {
         let button = AXPreferenceButton()
         button.imageView.image = NSImage(systemSymbolName: "hand.wave.fill", accessibilityDescription: nil)
@@ -90,9 +100,16 @@ class AXPreferenceAccountView: NSView {
             validUntilLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -5).isActive = true
             validUntilLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: 5).isActive = true
             
+            // Invite a friend button
+            addSubview(inviteAFriendButton)
+            inviteAFriendButton.topAnchor.constraint(equalTo: emailLabel.bottomAnchor, constant: 10).isActive = true
+            inviteAFriendButton.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+            inviteAFriendButton.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
+            inviteAFriendButton.heightAnchor.constraint(equalToConstant: 40).isActive = true
+            
             // Get support button
             addSubview(getSupportButton)
-            getSupportButton.topAnchor.constraint(equalTo: emailLabel.bottomAnchor, constant: 10).isActive = true
+            getSupportButton.topAnchor.constraint(equalTo: inviteAFriendButton.bottomAnchor, constant: 5).isActive = true
             getSupportButton.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
             getSupportButton.widthAnchor.constraint(equalTo: widthAnchor).isActive = true
             getSupportButton.heightAnchor.constraint(equalToConstant: 40).isActive = true

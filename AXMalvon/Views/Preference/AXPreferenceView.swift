@@ -67,7 +67,7 @@ class AXPreferenceView: NSView {
             // Add windowTitleLabel
             windowTitleLabel.stringValue = "General"
             addSubview(windowTitleLabel)
-            windowTitleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 15).isActive = true
+            windowTitleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 20).isActive = true
             windowTitleLabel.leftAnchor.constraint(equalTo: seperator.rightAnchor, constant: 30).isActive = true
             
             // Add second seperator
@@ -125,16 +125,23 @@ class AXPreferenceView: NSView {
         self.windowTitleLabel.stringValue = currentButton.titleView.stringValue
         currentButton.isSelected = true
         
+        
+        let view: NSView?
+        
         switch sender.tag {
         case 0:
-            let view = AXPreferenceAccountView()
-            scrollView.documentView = view
+            view = AXPreferenceAccountView()
         case 1:
             // General
-            let view = AXPreferenceGeneralView()
-            scrollView.documentView = view
+            view = AXPreferenceGeneralView()
+        case 2:
+            // Search
+            view = AXPreferenceSearchView()
         default:
-            break
+            return
         }
+        
+        scrollView.documentView = view
+        window?.makeFirstResponder(view)
     }
 }
