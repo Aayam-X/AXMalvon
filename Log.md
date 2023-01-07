@@ -13,11 +13,17 @@
 - [ ] Create transparent window buttons.
 
 ## 0.0.2
-- [ ] Improve command-f finding text functionality to use less power
 - [ ] Search suggestion: Switching tabs | Command Bar
 - [ ] Create tab after current tab rather the at the end
 - [ ] Updater Application || Use xattr -cr Malvon after unzipping
 - [ ] Profile icons
+- [ ] Improve command-f finding text functionality to use less power
+- [ ] Preference Pane | Most visited sites etc..
+---
+- [x] Fixed tab loading problem
+- [x] Drag and drop fix
+- [x] Search field copy paste problem
+- [x] Private window security fixed
 ---
 - [x] Change alpha value of splitView rather than webView search suggestions
 - [x] Free search suggestions array after x searches so less memory usage

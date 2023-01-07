@@ -15,7 +15,7 @@ class AXTabView: NSView {
     // Views
     var tabStackView = NSStackView()
     var scrollView: AXScrollView!
-    fileprivate let clipView = AXFlippedClipView()
+    let clipView = AXFlippedClipView()
     
     init(profile: AXBrowserProfile) {
         self.profile = profile
@@ -33,10 +33,10 @@ class AXTabView: NSView {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(scrollView)
         scrollView.drawsBackground = false
-        scrollView.leftAnchor.constraint(equalTo: leftAnchor, constant: 10).isActive = true
+        scrollView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
         scrollView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-        scrollView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -44).isActive = true
-        scrollView.topAnchor.constraint(equalTo: topAnchor, constant: 35).isActive = true
+        scrollView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        scrollView.topAnchor.constraint(equalTo: topAnchor).isActive = true
         
         // Setup clipview
         clipView.translatesAutoresizingMaskIntoConstraints = false
@@ -238,10 +238,10 @@ class AXTabView: NSView {
         }
         
         let tab = profile.tabs[to]
-        appProperties.webContainerView.update(view: tab.view)
-        appProperties.currentTab = tab
         
+        appProperties.currentTab = tab
         appProperties.currentTabButton = tabStackView.arrangedSubviews[to] as? AXSidebarTabButton
+        appProperties.webContainerView.update(view: tab.view)
     }
     
     func updateAppPropertiesAndWebView(button: AXSidebarTabButton, tab: AXTabItem) {

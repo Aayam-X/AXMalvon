@@ -55,9 +55,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        if let profiles = (NSApplication.shared.mainWindow as? AXWindow)?.appProperties.AX_profiles {
-            let names = profiles.map { $0.saveProperties(); return $0.name }
+        if let appProperties = (NSApplication.shared.mainWindow as? AXWindow)?.appProperties {
+            let names = appProperties.AX_profiles.map { $0.saveProperties(); return $0.name }
             UserDefaults.standard.set(names, forKey: "Profiles")
+            
+            appProperties.popOver.saveMostVisitedSites()
         }
         
         let alert = NSAlert()

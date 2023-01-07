@@ -419,10 +419,10 @@ class AXSideBarView: NSView {
         tabView.translatesAutoresizingMaskIntoConstraints = false
         
         addSubview(tabView)
-        tabView.topAnchor.constraint(equalTo: topAnchor).isActive = true
-        tabView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+        tabView.topAnchor.constraint(equalTo: topAnchor, constant: 35).isActive = true
+        tabView.leftAnchor.constraint(equalTo: leftAnchor, constant: 10).isActive = true
         tabView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-        tabView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        tabView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -44).isActive = true
         
         tabView.appProperties = appProperties
         

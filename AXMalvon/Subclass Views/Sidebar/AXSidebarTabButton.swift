@@ -231,7 +231,8 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             userMovedCursorRemovingSplitView()
             
             draggingState = .reorder
-            let index = Int((offset.y - appProperties.sidebarView.frame.size.height) / -31)
+            
+            let index = Int((offset.y - appProperties.sidebarView.tabView.frame.size.height - 44) / -31)
             if index <= appProperties.sidebarView.tabView.tabStackView.arrangedSubviews.count - 1 && index >= 0 {
                 appProperties.tabManager.swapAt(self.tag, index)
             }

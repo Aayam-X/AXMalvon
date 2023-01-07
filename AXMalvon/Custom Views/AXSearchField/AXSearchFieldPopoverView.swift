@@ -68,6 +68,10 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     override func removeFromSuperview() {
         super.removeFromSuperview()
         
+        saveMostVisitedSites()
+    }
+    
+    func saveMostVisitedSites() {
         let websiteCounts = searchedQueries.reduce(into: [:]) { counts, item in counts[item, default: 0] += 1 }
         let websites = websiteCounts.filter { $0.value > 3 }.map { $0.key }
         
@@ -92,7 +96,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             // Setup searchField
             searchField.delegate = self
             addSubview(searchField)
-            searchField.widthAnchor.constraint(equalTo: self.widthAnchor, constant: -50).isActive = true
+            searchField.widthAnchor.constraint(equalToConstant: 550).isActive = true
             searchField.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
             searchField.topAnchor.constraint(equalTo: topAnchor, constant: 25).isActive = true
             
@@ -156,7 +160,14 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         
         var url: URL?
         
-        searchedQueries.append(value)
+        if !appProperties.isPrivate {
+            searchedQueries.append(value)
+            
+            if searchedQueries.count == 15 {
+                saveMostVisitedSites()
+                searchedQueries.removeAll()
+            }
+        }
         
         if !searchField.stringValue.isEmpty {
             if value.starts(with: "malvon?") {
