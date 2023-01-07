@@ -245,9 +245,9 @@ class AXTabView: NSView {
     }
     
     func updateAppPropertiesAndWebView(button: AXSidebarTabButton, tab: AXTabItem) {
-        appProperties.webContainerView.update(view: tab.view)
         appProperties.currentTab = tab
-        
         appProperties.currentTabButton = button
+        
+        appProperties.webContainerView.update(view: tab.view)
     }
 }

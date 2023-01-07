@@ -17,6 +17,14 @@
 - [ ] Search suggestion: Switching tabs | Command Bar
 - [ ] Create tab after current tab rather the at the end
 - [ ] Updater Application || Use xattr -cr Malvon after unzipping
+- [ ] Profile icons
+---
+- [x] Change alpha value of splitView rather than webView search suggestions
+- [x] Free search suggestions array after x searches so less memory usage
+- [x] Search field private browser && Look for problems with private browsing 
+- [x] WebView goes back when you click on popup link
+- [x] Search suggestion problem
+- [x] Sidebar swipe much more responsive
 ---
 - [x] Download stack view logic changed
 - [x] Search suggestions

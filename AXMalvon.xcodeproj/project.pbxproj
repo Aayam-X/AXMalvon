@@ -91,6 +91,7 @@
 		ED4262602948A63900D2478E /* Appicon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Appicon.icns; sourceTree = "<group>"; };
 		ED4262622948A64B00D2478E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		ED474EF929496EEF00268FBD /* newtab.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = newtab.html; sourceTree = "<group>"; };
+		ED59EC0C29691945005CEFC8 /* UsefulCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsefulCode.swift; sourceTree = "<group>"; };
 		ED5DF663295CF8F700433D45 /* AXWelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWelcomeView.swift; sourceTree = "<group>"; };
 		ED5DF667295DC68000433D45 /* AXPurchaseBrowserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPurchaseBrowserView.swift; sourceTree = "<group>"; };
 		ED7B549E295B6E6F008A944F /* AXPreferenceGeneralView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPreferenceGeneralView.swift; sourceTree = "<group>"; };
@@ -259,6 +260,7 @@
 		EDD71EBB293BD96600256EA9 = {
 			isa = PBXGroup;
 			children = (
+				ED59EC0C29691945005CEFC8 /* UsefulCode.swift */,
 				ED27D69E2944B5F000CA1911 /* Log.md */,
 				EDD71EC6293BD96600256EA9 /* AXMalvon */,
 				EDD71EC5293BD96600256EA9 /* Products */,

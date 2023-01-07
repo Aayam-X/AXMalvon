@@ -95,7 +95,6 @@ class AXTabManager {
     }
     
     func closeTab(_ at: Int) {
-        print(appProperties.currentProfile.tabs.count)
         let tab = appProperties.currentProfile.tabs[at]
         tab.view.removeFromSuperview()
         

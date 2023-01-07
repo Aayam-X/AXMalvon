@@ -62,10 +62,17 @@ class AXProfileListView: NSView {
             stackView.addArrangedSubview(item)
             item.action = #selector(buttonClickAction(_:))
         }
+        
+        (stackView.arrangedSubviews[appProperties.currentProfileIndex] as! AXHoverButton).image = NSImage(systemSymbolName: "star.fill", accessibilityDescription: nil)
     }
     
     @objc func buttonClickAction(_ sender: AXHoverButton) {
         // Forced because view wouldn't be shown on private windows
         appProperties.profileManager!.switchProfiles(to: sender.tag)
+    }
+    
+    func updateSelection(from: Int, to: Int) {
+        (stackView.arrangedSubviews[from] as! AXHoverButton).image = NSImage(systemSymbolName: "star", accessibilityDescription: nil)
+        (stackView.arrangedSubviews[to] as! AXHoverButton).image = NSImage(systemSymbolName: "star.fill", accessibilityDescription: nil)
     }
 }

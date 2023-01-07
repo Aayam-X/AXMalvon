@@ -62,20 +62,15 @@ final class AXScrollView: NSScrollView {
     override func scrollWheel(with event: NSEvent) {
         super.scrollWheel(with: event)
         let x = event.scrollingDeltaX
-        let y = event.scrollingDeltaY
         
-        if x == 0 && y == 0 {
+        if x == 5.0 {
+            AXMalvon_SidebarView_scrollDirection = .left
             horizontalScrollHandler()
             return
-        }
-        
-        if y == 0 {
-            if x > 0 {
-                AXMalvon_SidebarView_scrollDirection = .left
-            }
-            if x < 0 {
-                AXMalvon_SidebarView_scrollDirection = .right
-            }
+        } else if x == -5.0 {
+            AXMalvon_SidebarView_scrollDirection = .right
+            horizontalScrollHandler()
+            return
         } else {
             AXMalvon_SidebarView_scrollDirection = nil
         }

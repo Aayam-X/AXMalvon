@@ -151,7 +151,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     }
     
     func searchFieldAction() {
-        appProperties.currentTab.view.alphaValue = 1.0
+        appProperties.webContainerView.splitView.alphaValue = 1.0
         let value = searchField.stringValue
         
         var url: URL?
@@ -187,7 +187,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             
             let userInput = searchField.stringValue
             let filteredWebsites = mostVisitedWebsites.filter { website in
-                return website.contains(userInput)
+                return website.starts(with: userInput)
             }
             
             if let autofillSuggestion = filteredWebsites.first {
@@ -287,7 +287,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     }
     
     func show() {
-        appProperties.currentTab.view.alphaValue = 0.5
+        appProperties.webContainerView.splitView.alphaValue = 0.5
         
         // 300: Half the Width
         // 137: Half the Height
@@ -307,7 +307,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             suggestion!.isHidden = true
         }
         
-        appProperties.currentTab.view.alphaValue = 1.0
+        appProperties.webContainerView.splitView.alphaValue = 1.0
         appProperties.window.removeChildWindow(suggestionWindow)
         
         if let localMouseDownEventMonitor = localMouseDownEventMonitor {

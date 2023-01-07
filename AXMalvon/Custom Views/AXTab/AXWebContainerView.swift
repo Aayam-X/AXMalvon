@@ -145,10 +145,11 @@ class AXWebContainerView: NSView {
 // WebView delegates
 extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDelegate {
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-        if let contextualMenuAction = (webView as? AXWebView)?.contextualMenuAction {
-            switch contextualMenuAction {
+        if let webView = (webView as? AXWebView), let contextMenu = webView.contextualMenuAction {
+            switch contextMenu {
             case .openInNewTab:
-                return appProperties.tabManager.createNewTab(request: navigationAction.request, config: configuration)
+                webView.contextualMenuAction = nil
+                return appProperties.tabManager.createNewTab(config: configuration)
             }
         }
         
@@ -184,19 +185,20 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
     }
     
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        guard let url = webView.url, let scheme = url.scheme else { return }
-        if !["https", "about", "http", "file"].contains(scheme) {
-            guard let appPath = NSWorkspace.shared.urlForApplication(toOpen: url) else { return }
-            
-            AXAlertView.presentAlert(window: appProperties.window) { response in
-                if response == true {
-                    let config = NSWorkspace.OpenConfiguration()
-                    config.activates = true
-                    
-                    NSWorkspace.shared.open([url], withApplicationAt: appPath, configuration: config)
-                }
-            }
-        }
+        /// Doesn't have much purpose right now, plus doesn't work on some apps (App Store)
+        //        guard let url = webView.url, let scheme = url.scheme else { return }
+        //        if !["https", "about", "http", "file"].contains(scheme) {
+        //            guard let appPath = NSWorkspace.shared.urlForApplication(toOpen: url) else { return }
+        //
+        //            AXAlertView.presentAlert(window: appProperties.window) { response in
+        //                if response == true {
+        //                    let config = NSWorkspace.OpenConfiguration()
+        //                    config.activates = true
+        //
+        //                    NSWorkspace.shared.open([url], withApplicationAt: appPath, configuration: config)
+        //                }
+        //            }
+        //        }
     }
     
     func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {

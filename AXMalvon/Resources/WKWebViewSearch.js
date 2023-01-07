@@ -7,7 +7,7 @@ function WKWebView_HighlightAllOccurrencesOfStringForElement(element, keyword) {
         if (element.nodeType === Node.TEXT_NODE) { // Text node
             // Create a regular expression to search for the keyword in the text node
             var regex = new RegExp(keyword, "gi");
-
+            
             // Use the regular expression to search for the keyword in the text node
             var match;
             while (match = regex.exec(element.nodeValue)) {
@@ -46,25 +46,24 @@ function WKWebView_SearchPrev() {
 function WKWebView_jump(increment) {
     prevSelected = currSelected;
     currSelected = (currSelected + increment) % WKWebView_SearchResultCount;
-
+    
     if (currSelected < 0) {
         currSelected = WKWebView_SearchResultCount + currSelected;
     }
-
+    
     var prevEl = document.getElementsByClassName("WKWebView_Highlight")[prevSelected];
-
+    
     if (prevEl) {
         prevEl.style.backgroundColor = "";
         prevEl.style.border = "1px solid #dedede";
         prevEl.style.color = "";
     }
-
+    
     var el = document.getElementsByClassName("WKWebView_Highlight")[currSelected];
     el.style.backgroundColor = "yellow";
     el.style.border = "";
     el.style.color = "black";
-
-
+    
     el.scrollIntoView({block: 'center'});
 }
 
