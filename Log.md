@@ -19,10 +19,12 @@
 - [ ] Updater Application || Use xattr -cr Malvon after unzipping
 - [ ] Profile icons
 - [ ] Improve command-f finding text functionality to use less power
-- [ ] Add preference panes etc..
+- [ ] Add preference panes
 - [ ] Seperate history based on profile
 ---
-- [ ] TODO: Password encryption
+- [ ] Deploy auth-website
+---
+- [x] Password encryption
 ---
 - [x] Log in / Sign up
 - [x] Profile list button problem fixed

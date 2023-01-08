@@ -178,12 +178,13 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
             showError("Unknown error")
             return
         }
+        let encryptedPassword = encrypt(string: password, key: email).addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
         
         // TODO: Security flaw
         AXGlobalProperties.shared.userEmail = email
-        AXGlobalProperties.shared.userPassword = password
+        AXGlobalProperties.shared.userPassword = encryptedPassword
         
-        let url = URL(string: "https://axmalvon.web.app/?email=\(emailAddressTextField.stringValue)&password=\(password)")!
+        let url = URL(string: "https://axmalvon.web.app/?email=\(emailAddressTextField.stringValue)&password=\(encryptedPassword)")!
         
         let privateConfig = WKWebViewConfiguration()
         privateConfig.websiteDataStore = .nonPersistent()
@@ -214,7 +215,7 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
                         AXGlobalProperties.shared.save()
                         self.window!.close()
                     } else {
-                        self.showError("Error: \(result.string(after: 8))", time: 6.0)
+                        self.showError("Error: \(result)", time: 6.0)
                     }
                 }
             }
@@ -325,16 +326,13 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
         
         let email = emailAddressTextField.stringValue
         let name = enterNameTextField.stringValue
-        guard let password = passwordTextField.stringValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
-            showError("Unknown error")
-            return
-        }
+        let password = passwordTextField.stringValue
+        let encryptedPassword = encrypt(string: password, key: email).addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
         
-        // TODO: Security flaw
         AXGlobalProperties.shared.userEmail = email
-        AXGlobalProperties.shared.userPassword = password
+        AXGlobalProperties.shared.userPassword = encryptedPassword
         
-        let url = URL(string: "https://axmalvon.web.app/?name=\(name)&email=\(emailAddressTextField.stringValue)&password=\(password)")!
+        let url = URL(string: "https://axmalvon.web.app/?name=\(name)&email=\(emailAddressTextField.stringValue)&password=\(encryptedPassword)")!
         
         let privateConfig = WKWebViewConfiguration()
         privateConfig.websiteDataStore = .nonPersistent()
@@ -360,10 +358,36 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
                             exit(1)
                         }
                     } else {
-                        self.showError("Error: \(result.string(after: 8))", time: 6.0)
+                        self.showError("Error: \(result)", time: 6.0)
                     }
                 }
             }
         }
     }
+}
+
+fileprivate func encrypt(string: String, key: String) -> String {
+    var characters = [Character](string)
+    
+    // Encrypt the characters
+    for i in 0..<characters.count {
+        let character = characters[i]
+        let encryptionKey = (i + key.count) * key.count ^ string.count / ((key.count * string.count) - key.count)
+        characters[i] = Character(UnicodeScalar((Int(character.unicodeScalars.first!.value) + encryptionKey))!)
+    }
+    
+    return String(characters)
+}
+
+fileprivate func decrypt(string: String, key: String) -> String {
+    var characters = [Character](string)
+    
+    // Encrypt the characters
+    for i in 0..<characters.count {
+        let character = characters[i]
+        let encryptionKey = (i + key.count) * key.count ^ string.count / ((key.count * string.count) - key.count)
+        characters[i] = Character(UnicodeScalar((Int(character.unicodeScalars.first!.value) - encryptionKey))!)
+    }
+    
+    return String(characters)
 }
