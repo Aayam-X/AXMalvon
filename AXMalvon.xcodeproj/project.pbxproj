@@ -620,7 +620,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
-				MARKETING_VERSION = 0.0.2;
+				MARKETING_VERSION = 0.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aayamx.malvon;
 				PRODUCT_NAME = Malvon;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -662,7 +662,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
-				MARKETING_VERSION = 0.0.2;
+				MARKETING_VERSION = 0.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aayamx.malvon;
 				PRODUCT_NAME = Malvon;
 				SWIFT_EMIT_LOC_STRINGS = YES;

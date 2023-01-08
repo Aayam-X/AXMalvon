@@ -8,18 +8,23 @@
 - Animating NSWindow: https://github.com/jwilling/JNWAnimatableWindow
 - Textkit 2: https://developer.apple.com/videos/play/wwdc2021/10061/
 - Keychain: https://stackoverflow.com/q/52044285
+- Compiler optimization tips: https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst 
 
 ## Other
 - [ ] Create transparent window buttons.
 - [ ] WKWebView Experimental Debug Features Menu Items
 
-## 0.0.2
+## 0.0.3
 - [ ] Search suggestion: Switching tabs | Command Bar
 - [ ] Create tab after current tab rather the at the end
 - [ ] Profile icons
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Add preference panes
+---
 - [ ] Seperate history based on profile
+
+## 0.0.2
+- [x] Finish 0.0.2
 ---
 - [x] Search suggestions re-write
 - [x] Current tab problem whe launching app

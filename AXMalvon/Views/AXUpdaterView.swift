@@ -68,7 +68,7 @@ class AXUpdaterView: NSView {
             scrollView.topAnchor.constraint(equalTo: updateFoundLabel.bottomAnchor, constant: 15).isActive = true
             scrollView.leftAnchor.constraint(equalTo: leftAnchor, constant: 15).isActive = true
             scrollView.rightAnchor.constraint(equalTo: rightAnchor, constant: -15).isActive = true
-            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -15).isActive = true
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -60).isActive = true
             
             // MARK: Update button
             updateButton.title = "Update"
@@ -128,11 +128,19 @@ class AXUpdaterView: NSView {
     }
     
     @objc func quitApp() {
-        exit(0)
+        self.window?.close()
     }
     
     @objc func update() {
-        NSWorkspace.shared.open(URL(string: "https://github.com/Aayam-X/Releases/raw/main/Malvon.zip")!)
+        let url = URL(string: "https://github.com/Aayam-X/Releases/raw/main/Malvon.zip")!
+        do {
+            let safariURL = try FileManager.default.url(for: .applicationDirectory, in: .localDomainMask, appropriateFor: nil, create: false).appendingPathComponent("Safari.app")
+            print(safariURL)
+            NSWorkspace.shared.open([url], withApplicationAt: safariURL, configuration: NSWorkspace.OpenConfiguration())
+        } catch {
+            print(error)
+        }
+        self.window?.close()
     }
     
 }

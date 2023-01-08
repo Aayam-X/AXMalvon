@@ -39,9 +39,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let welcomeWindow = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))
             welcomeWindow.contentView = AXWelcomeView()
             window.beginSheet(welcomeWindow)
-        } else {
-            window.appProperties.contentView.checkIfBought()
         }
+        
+        //else {
+        // Already handled by contentView
+        // window.appProperties.contentView.checkIfBought()
+        //}
         //
         // Always show this dialogue at start, if they haven't purchased it of course!
         // let window1 = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))
@@ -231,7 +234,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let trimmed = contents!.trimmingCharacters(in: .whitespacesAndNewlines)
             
             if trimmed != appVersion {
-                self.showUpdaterView()
+                await MainActor.run {
+                    self.showUpdaterView()
+                }
             }
         } else {
             showAlert(title: "Could not check for updates", description: "Developer used faulty URL string")
