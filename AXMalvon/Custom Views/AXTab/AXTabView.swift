@@ -77,6 +77,18 @@ class AXTabView: NSView {
         appProperties.webContainerView.update(view: tab.view)
     }
     
+    func updateInBackground() {
+        tabStackView.subviews.removeAll()
+        
+        for (index, tab) in profile.tabs.enumerated() {
+            createTabFromUpdate(index, tab)
+        }
+        
+        // Select the first tab
+        let currentButton = tabStackView.arrangedSubviews[profile.currentTab] as! AXSidebarTabButton
+        currentButton.isSelected = true
+    }
+    
     func createTab() {
         let webView = AXWebView(frame: .zero, configuration: appProperties.webViewConfiguration)
         webView.addConfigurations()

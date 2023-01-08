@@ -16,11 +16,15 @@
 ## 0.0.2
 - [ ] Search suggestion: Switching tabs | Command Bar
 - [ ] Create tab after current tab rather the at the end
-- [ ] Updater Application || Use xattr -cr Malvon after unzipping
 - [ ] Profile icons
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Add preference panes
 - [ ] Seperate history based on profile
+---
+- [x] Search suggestions re-write
+- [x] Current tab problem whe launching app
+- [x] Converted most of codebase into async/await
+- [x] Created Update View
 ---
 - [x] Deploy auth-website
 ---

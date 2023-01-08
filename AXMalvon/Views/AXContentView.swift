@@ -133,7 +133,7 @@ class AXContentView: NSView {
         alert.topAnchor.constraint(equalTo: topAnchor).isActive = true
         alert.rightAnchor.constraint(equalTo: rightAnchor, constant: -5).isActive = true
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             alert.removeFromSuperview()
         }
     }
@@ -189,21 +189,26 @@ class AXContentView: NSView {
         addSubview(webView)
         webView.frame = .init(x: 0, y: 0, width: 0, height: 0)
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
-            webView.evaluateJavaScript("document.getElementById('status').innerText") { (result, error) in
-                if let result = result as? String {
-                    if result == "success: true" {
-                        // Safe!
-                        return
-                    }
-                }
-                
-                AXGlobalProperties.shared.hasPaid = false
-                AXGlobalProperties.shared.userEmail = ""
-                AXGlobalProperties.shared.userPassword = ""
-                AXGlobalProperties.shared.save()
-                exit(1)
+        Task {
+            // 1 second = 1 billion nanoseconds
+            // We do this to piss the user off, they become excited for a bit then they get pissed off
+            try? await Task.sleep(nanoseconds: 10_000_000_000)
+            
+            do {
+                let result = try await webView.evaluateJavaScript("document.getElementById('status').innerText")
+                if (result as? String) == "success: true" { return }
+            } catch {
+                print("Error reading contents user information: \(error.localizedDescription)")
             }
+            
+            // Piss them off even more
+            try? await Task.sleep(nanoseconds: 20_000_000_000)
+            
+            AXGlobalProperties.shared.hasPaid = false
+            AXGlobalProperties.shared.userEmail = ""
+            AXGlobalProperties.shared.userPassword = ""
+            AXGlobalProperties.shared.save()
+            exit(1)
         }
     }
 }

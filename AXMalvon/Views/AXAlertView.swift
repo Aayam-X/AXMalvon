@@ -10,7 +10,7 @@ import AppKit
 import Carbon.HIToolbox
 
 class AXAlertView: NSView {
-    var completionHandler: ((Bool) -> Void)?
+    var response: Bool = false
     private var hasDrawn: Bool = false
     
     lazy var alertTitle: NSTextField = {
@@ -81,24 +81,24 @@ class AXAlertView: NSView {
         }
     }
     
-    static func presentAlert(window: NSWindow, completionHandler: @escaping (Bool) -> Void) {
+    static func presentAlert(window: NSWindow) async -> Bool {
         let view = AXAlertView()
-        view.completionHandler = completionHandler
         
         let localWindow = NSWindow.create(styleMask: .fullSizeContentView, size: .init(width: 550, height: 550))
         localWindow.contentView = view
         
-        window.beginSheet(localWindow)
+        await window.beginSheet(localWindow)
+        return view.response
     }
     
     @objc func yesButtonAction() {
-        self.window?.close()
-        completionHandler?(true)
+        response = true
+        self.window?.sheetParent?.endSheet(self.window!)
     }
     
     @objc func noButtonAction() {
-        self.window?.close()
-        completionHandler?(false)
+        response = false
+        self.window?.sheetParent?.endSheet(self.window!)
     }
     
     private func keyDown(with event: NSEvent) -> Bool {

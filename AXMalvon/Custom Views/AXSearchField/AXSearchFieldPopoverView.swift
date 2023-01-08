@@ -121,7 +121,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
                 suggestion!.target = self
                 suggestion!.action = #selector(searchSuggestionAction)
                 suggestionsStackView.addArrangedSubview(suggestion!)
-                suggestion!.widthAnchor.constraint(equalTo: suggestionsStackView.widthAnchor).isActive = true
+                suggestion!.widthAnchor.constraint(equalToConstant: 550).isActive = true
                 suggestion!.heightAnchor.constraint(equalToConstant: 35).isActive = true
             }
             
@@ -211,27 +211,28 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
                 suggestions[0]!.titleValue = searchField.stringValue
             }
             
-            SearchSuggestions.getQuerySuggestions(searchField.stringValue) { [self] results, error in
-                if error != nil {
-                    for index in 1..<suggestions.count {
-                        let suggestion = suggestions[index]
-                        DispatchQueue.main.async {
-                            suggestion!.isHidden = true
+            Task {
+                do {
+                    let terms = try await SearchSuggestions.getQuerySuggestion(searchField.stringValue)
+                    let suggestionsToUpdate: [(Int, String)] = terms.enumerated().map { (index, term) -> (Int, String) in
+                        return (index + 1, term)
+                    }
+                    
+                    await MainActor.run {
+                        for (index, suggestion) in suggestions.enumerated() {
+                            if let (_, term) = suggestionsToUpdate.first(where: { $0.0 == index + 1 }) {
+                                suggestion!.isHidden = false
+                                suggestion!.titleValue = term
+                            } else {
+                                suggestion!.isHidden = true
+                            }
                         }
                     }
-                    return
-                }
-                
-                let results = results!
-                
-                for index in 1..<suggestions.count {
-                    let suggestion = suggestions[index]
+                } catch {
+                    print("Search Suggestion: Error: \(error.localizedDescription)")
                     
-                    if index < results.count {
-                        suggestion!.isHidden = false
-                        suggestion!.titleValue = results[index]
-                    } else {
-                        suggestion!.isHidden = true
+                    for index in 1 ..< 5 {
+                        suggestions[index]!.isHidden = true
                     }
                 }
             }

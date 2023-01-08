@@ -440,7 +440,7 @@ class AXSideBarView: NSView {
                 tabView.createTab()
             }
             
-            tabView.update()
+            tabView.updateInBackground()
             
             self.tabViews.append(tabView)
         }

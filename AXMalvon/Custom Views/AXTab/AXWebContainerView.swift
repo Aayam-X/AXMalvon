@@ -158,10 +158,12 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
     
     func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
         let selectedTab = appProperties.currentTabButton
-        currentWebView.getFavicon { faviconURL in
-            if let favIcon = faviconURL {
-                selectedTab?.favIconImageView.download(from: favIcon)
-            } else {
+        
+        Task {
+            do {
+                let favIconURL = try await currentWebView.getFavicon()
+                selectedTab?.favIconImageView.download(from: favIconURL)
+            } catch {
                 selectedTab?.favIconImageView.image = NSImage(systemSymbolName: "square.fill", accessibilityDescription: nil)
             }
         }

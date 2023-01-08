@@ -18,6 +18,7 @@
 		ED0B2866295B619F003D656F /* AXPreferenceGlobal.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0B2865295B619F003D656F /* AXPreferenceGlobal.swift */; };
 		ED19C806294F904400E0924D /* WKWebViewSearch.js in Resources */ = {isa = PBXBuildFile; fileRef = ED19C805294F904400E0924D /* WKWebViewSearch.js */; };
 		ED212333294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED212332294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift */; };
+		ED25A318296B21CE00E65999 /* AXUpdaterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED25A317296B21CE00E65999 /* AXUpdaterView.swift */; };
 		ED2735E52961FAAB00DE8126 /* AXProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2735E42961FAAB00DE8126 /* AXProfile.swift */; };
 		ED2735E72962136E00DE8126 /* AXProfileManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2735E62962136E00DE8126 /* AXProfileManager.swift */; };
 		ED2735E92962586400DE8126 /* AXProfileListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2735E82962586400DE8126 /* AXProfileListView.swift */; };
@@ -58,19 +59,6 @@
 		EDF2A02E2968531300C34AC8 /* AXDownloadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDF2A02D2968531300C34AC8 /* AXDownloadView.swift */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		ED26A92B295DDCBC001915CF /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		ED01B0592957E3C700CB657E /* AXSearchFieldSuggestItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSearchFieldSuggestItem.swift; sourceTree = "<group>"; };
 		ED0203792958E5760054A6BB /* AXInformationAlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXInformationAlertView.swift; sourceTree = "<group>"; };
@@ -83,6 +71,7 @@
 		ED0B2865295B619F003D656F /* AXPreferenceGlobal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPreferenceGlobal.swift; sourceTree = "<group>"; };
 		ED19C805294F904400E0924D /* WKWebViewSearch.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = WKWebViewSearch.js; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.javascript; };
 		ED212332294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXRectangularProgressIndicator.swift; sourceTree = "<group>"; };
+		ED25A317296B21CE00E65999 /* AXUpdaterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXUpdaterView.swift; sourceTree = "<group>"; };
 		ED2735E42961FAAB00DE8126 /* AXProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXProfile.swift; sourceTree = "<group>"; };
 		ED2735E62962136E00DE8126 /* AXProfileManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXProfileManager.swift; sourceTree = "<group>"; };
 		ED2735E82962586400DE8126 /* AXProfileListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXProfileListView.swift; sourceTree = "<group>"; };
@@ -133,16 +122,6 @@
 		EDF03DEE295F701B00E62B9C /* AXHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXHistoryView.swift; sourceTree = "<group>"; };
 		EDF2A02D2968531300C34AC8 /* AXDownloadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXDownloadView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
-
-/* Begin PBXFrameworksBuildPhase section */
-		EDD71EC1293BD96600256EA9 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		ED0B1AC7294790EB00524F08 /* AXSearchField */ = {
@@ -211,6 +190,7 @@
 		ED9560942940065600AC1C15 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				ED25A317296B21CE00E65999 /* AXUpdaterView.swift */,
 				EDF2A02C296852EC00C34AC8 /* Downloads */,
 				EDF03DF0295F731000E62B9C /* History */,
 				ED5DF662295CF8E000433D45 /* Welcome */,
@@ -363,9 +343,7 @@
 			buildConfigurationList = EDD71ED1293BD96700256EA9 /* Build configuration list for PBXNativeTarget "AXMalvon" */;
 			buildPhases = (
 				EDD71EC0293BD96600256EA9 /* Sources */,
-				EDD71EC1293BD96600256EA9 /* Frameworks */,
 				EDD71EC2293BD96600256EA9 /* Resources */,
-				ED26A92B295DDCBC001915CF /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -432,6 +410,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED25A318296B21CE00E65999 /* AXUpdaterView.swift in Sources */,
 				ED0ACB0A294FFB9900BFBFC9 /* MXSearchSuggestion.swift in Sources */,
 				EDB514A42945219800EB0E8F /* AXTabManager.swift in Sources */,
 				ED907B33294DF4B30057A591 /* AXSidebarDownloadButton.swift in Sources */,

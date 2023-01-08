@@ -79,34 +79,30 @@ class AXWebView: WKWebView {
     
     // MARK: - Favicon
     
-    public func getFavicon(completion: @escaping(URL?) -> ()) {
-        evaluateJavaScript(favIconScript) { result, error in
-            var completionString: String = ""
-            
-            if let favIconURL = result as? String {
-                if favIconURL.starts(with: "//") {
-                    completionString = "https:" + favIconURL
-                } else if favIconURL.starts(with: "/") {
-                    print(self.url!.pathComponents)
-                    completionString = self.url!.scheme! + "://" + self.url!.host! + favIconURL
-                } else {
-                    completionString = favIconURL
-                }
-                
-                completion(URL(string: completionString))
-                return
-            }
-            
-            // If cannot find icon
-            // if let url = self.url {
-            //  completion(URL(string: "https://www.google.com/s2/favicons?sz=16&domain_url=" + url.absoluteString))
-            //  return
-            // }
-            
-            // Everything failed
-            completion(nil)
-            return
+    public func getFavicon() async throws -> URL {
+        let result = try await evaluateJavaScript(favIconScript)
+        
+        guard let faviconString = result as? String else { throw URLError(.badServerResponse) }
+        var finalizedURL: String = ""
+        
+        if faviconString.starts(with: "//") {
+            finalizedURL = "https:" + faviconString
+        } else if faviconString.starts(with: "/"), let url = self.url, let scheme = url.scheme, let host = url.host {
+            finalizedURL = scheme + "://" + host + faviconString
+        } else {
+            finalizedURL = faviconString
         }
+        
+        // If favicon cannot be found
+        // "https://www.google.com/s2/favicons?sz=16&domain_url=" + url.absoluteString
+        // Or
+        // url.absoluteString + "/favicon.ico"
+        
+        guard let result = URL(string: finalizedURL) else {
+            throw URLError(.badURL)
+        }
+        
+        return result
     }
     
     // MARK: - Right click menu

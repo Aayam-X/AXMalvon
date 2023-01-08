@@ -18,73 +18,56 @@ public enum SearchSuggestionsError: Error {
     case serializationError(String)
 }
 
-// TODO: Code cleanup
-
-public enum SearchSuggestions {
-    static let baseURL = "https://suggestqueries.google.com/complete/search?client=youtube&ds=yt&alt=json&q="
+struct SearchSuggestions {
+    static let baseURL = "https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&alt=json&q="
     
-    /// Fetch google's SearchSuggestions suggestions for a given seed term
-    ///
-    /// - Parameters:
-    ///   - term: a seed term
-    ///   - completionHandler: A completion handler after finishing task
-    public static func getQuerySuggestions(_ term: String, completionHandler: @escaping ([String]?, Error?) -> Void) {
-        DispatchQueue.global().async {
-            let URLString = baseURL + term
-            guard let url = URL(string: URLString.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed) ?? "") else {
-                completionHandler(nil, SearchSuggestionsError.invalidURL(URLString))
-                return
-            }
-            
-            guard let data = try? Data(contentsOf: url) else {
-                completionHandler(nil, SearchSuggestionsError.invalidData(URLString))
-                return
-            }
-            
-            guard let response = String(data: data, encoding: String.Encoding.ascii) else {
-                completionHandler(nil, SearchSuggestionsError.failToDecodeData(URLString))
-                return
-            }
-            
-            var JSON: NSString?
-            let scanner = Scanner(string: response)
-            
-            scanner.scanUpTo("[[", into: nil) // Scan to where the JSON begins
-            scanner.scanUpTo(",{", into: &JSON)
-            
-            guard JSON != nil else {
-                completionHandler(nil, SearchSuggestionsError.failedToRetrieveData(URLString))
-                return
-            }
-            
-            // The idea is to identify where the "real" JSON begins and ends.
-            JSON = NSString(format: "%@", JSON!)
-            
-            do {
-                let array = try JSONSerialization.jsonObject(with: JSON!.data(using: String.Encoding.utf8.rawValue) ?? Data(), options: .allowFragments)
-                var result = [String]()
-                for i in 0 ..< (array as AnyObject).count {
-                    if i <= 4 {
-                        for j in 0 ..< 1 {
-                            let suggestion = ((array as AnyObject).object(at: i) as AnyObject).object(at: j)
-                            if let str = suggestion as? String {
-                                result.append(str)
-                            }
-                        }
-                    } else {
-                        break
-                    }
-                }
-                
-                DispatchQueue.main.async {
-                    completionHandler(result, nil)
-                }
-            }
-            catch {
-                DispatchQueue.main.async {
-                    completionHandler(nil, SearchSuggestionsError.serializationError(URLString))
-                }
-            }
+    public static func getQuerySuggestion(_ term: String) async throws -> [String] {
+        let urlString = baseURL + term
+        guard let url = URL(string: urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "") else {
+            throw SearchSuggestionsError.invalidURL(urlString)
         }
+        
+        
+        let urlSessionConfig = URLSessionConfiguration.default
+        urlSessionConfig.httpCookieStorage = .none
+        //urlSessionConfig.urlCredentialStorage = .none
+        //urlSessionConfig.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        //urlSessionConfig.urlCache = .none
+        let (data, _) = try await URLSession(configuration: urlSessionConfig).data(from: url)
+        
+        guard let contents = String(data: data, encoding: .ascii) else {
+            throw SearchSuggestionsError.failToDecodeData(urlString)
+        }
+        
+        // Where to start the string from
+        let startingPosition = term.count + 5
+        
+        // All the search terms
+        var searchTerms: [String] = []
+        
+        // Current index
+        var index = contents.index(contents.startIndex, offsetBy: startingPosition)
+        
+        // Temp string
+        var tempString: String = ""
+        
+    characterLoop: for character in contents[index...] where searchTerms.count != 4 {
+        index = contents.index(after: index)
+        
+        switch character {
+        case "\"":
+            continue characterLoop
+        case ",":
+            searchTerms.append(tempString)
+            tempString = ""
+            continue characterLoop
+        case "]":
+            break characterLoop
+        default:
+            tempString.append(character)
+        }
+    }
+        
+        return searchTerms
     }
 }

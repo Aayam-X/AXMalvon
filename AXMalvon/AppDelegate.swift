@@ -15,7 +15,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     lazy var aboutViewWindow: NSWindow = AXAboutView.createAboutViewWindow()
     
-    lazy var preferenceWindow = AXPreferenceWindow()
+    var preferenceWindow = AXPreferenceWindow()
     
     // MARK: - App Delegates
     
@@ -23,7 +23,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Initializers
         AXHistory.checkIfFileExists()
         AXDownload.checkIfFileExists()
-        checkForUpdates()
+        
+        Task {
+            try? await checkForUpdates()
+        }
         
         // Create a window
         let window = AXWindow()
@@ -218,27 +221,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     // MARK: - Functions
     
-    func checkForUpdates() {
+    func checkForUpdates() async throws {
 #if !DEBUG
         let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
         
-        if let url = URL(string: "https://raw.githubusercontent.com/pdlashwin/update/main/latest.txt") {
-            URLSession.shared.dataTask(with: url) { (data, response, error) in
-                if let data = data {
-                    DispatchQueue.main.async {
-                        let contents = String(data: data, encoding: .utf8)
-                        let trimmed = contents!.trimmingCharacters(in: .whitespacesAndNewlines)
-                        
-                        if trimmed != appVersion {
-                            self.showAlert(title: "New Update Avaliable!", description: "Version: \(trimmed)")
-                        }
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        self.showAlert(title: "Unable to check for updates", description: "Invalid Data")
-                    }
-                }
-            }.resume()
+        if let url = URL(string: "https://raw.githubusercontent.com/Aayam-X/Releases/main/latest.txt") {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let contents = String(data: data, encoding: .utf8)
+            let trimmed = contents!.trimmingCharacters(in: .whitespacesAndNewlines)
+            
+            if trimmed != appVersion {
+                self.showUpdaterView()
+            }
         } else {
             showAlert(title: "Could not check for updates", description: "Developer used faulty URL string")
         }
@@ -251,6 +245,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         alert.informativeText = description
         alert.addButton(withTitle: "Ok")
         alert.runModal()
+    }
+    
+    func showUpdaterView() {
+        let window = NSWindow.create(styleMask: [.closable, .fullSizeContentView], size: .init(width: 500, height: 400))
+        window.contentView = AXUpdaterView()
+        
+        window.makeKeyAndOrderFront(nil)
+        window.orderFrontRegardless()
     }
     
     func setAsDefaultBrowser() {

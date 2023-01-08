@@ -197,27 +197,27 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
         
         self.welcomeToMalvonLabel.stringValue = "Loading..."
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-            self.welcomeToMalvonLabel.stringValue = "Welcome to Malvon!"
-            webView.evaluateJavaScript("document.getElementById('status').innerText") { (result, error) in
-                if let result = result as? String {
-                    if result == "success: false" {
-                        AXGlobalProperties.shared.hasPaid = false
-                        self.welcomeToMalvonLabel.stringValue = "Payment needed to use Malvon"
-                        self.showError("You must pay for Malvon", time: 5.0)
-                        // Open link in default web browser
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-                            exit(1)
-                        }
-                    } else if result == "success: true" {
-                        AXGlobalProperties.shared.hasPaid = true
-                        AXGlobalProperties.shared.save()
-                        self.window!.close()
-                    } else {
-                        self.showError("Error: \(result)", time: 6.0)
-                    }
+        Task {
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+            
+            do {
+                let result = try await webView.evaluateJavaScript("document.getElementById('status').innerText")
+                if (result as? String) == "success: false" {
+                    AXGlobalProperties.shared.hasPaid = false
+                    self.welcomeToMalvonLabel.stringValue = "Payment needed to use Malvon"
+                    self.showError("You must pay for Malvon", time: 5.0)
+                    
+                    try? await Task.sleep(nanoseconds: 5_000_000_000)
+                    exit(1)
+                } else if (result as? String) == "success: true" {
+                    AXGlobalProperties.shared.hasPaid = true
+                    AXGlobalProperties.shared.save()
+                    self.window!.close()
+                } else {
+                    self.showError("Error: \(result)", time: 6.0)
                 }
+            } catch {
+                print("Error reading contents of web page: \(error.localizedDescription)")
             }
         }
     }
@@ -345,22 +345,25 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
         
         self.welcomeToMalvonLabel.stringValue = "Loading..."
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-            self.welcomeToMalvonLabel.stringValue = "Welcome to Malvon!"
-            webView.evaluateJavaScript("document.getElementById('status').innerText") { (result, error) in
-                if let result = result as? String {
-                    if result == "success: false" {
-                        AXGlobalProperties.shared.hasPaid = false
-                        self.welcomeToMalvonLabel.stringValue = "Registered Successfully"
-                        self.showError("You must pay for Malvon", time: 5.0)
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-                            exit(1)
-                        }
-                    } else {
-                        self.showError("Error: \(result)", time: 6.0)
-                    }
+        Task {
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+            
+            do {
+                let result = try await webView.evaluateJavaScript("document.getElementById('status').innerText")
+                self.welcomeToMalvonLabel.stringValue = "Welcome to Malvon!"
+                
+                if (result as? String) == "success: false" {
+                    AXGlobalProperties.shared.hasPaid = false
+                    self.welcomeToMalvonLabel.stringValue = "Payment needed to use Malvon"
+                    self.showError("You must pay for Malvon", time: 5.0)
+                    
+                    try? await Task.sleep(nanoseconds: 5_000_000_000)
+                    exit(1)
+                } else {
+                    self.showError("Error: \(result)", time: 6.0)
                 }
+            } catch {
+                print("Error reading contents of web page: \(error.localizedDescription)")
             }
         }
     }
