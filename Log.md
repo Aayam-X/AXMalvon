@@ -22,7 +22,7 @@
 - [ ] Add preference panes
 - [ ] Seperate history based on profile
 ---
-- [ ] Deploy auth-website
+- [x] Deploy auth-website
 ---
 - [x] Password encryption
 ---
