@@ -53,8 +53,8 @@ class AXWebView: WKWebView {
             let appProperties = (window as! AXWindow).appProperties
             appProperties.sidebarView.webView_updateSelection(webView: self)
             
-            self.window?.title = self.title ?? "Untitled Tab"
-            appProperties.webContainerView.windowTitleLabel.stringValue = self.title ?? "Untitled Tab"
+            self.window?.title = self.title ?? "Untitled"
+            appProperties.webContainerView.windowTitleLabel.stringValue = self.title ?? "Untitled"
         }
         
         return super.becomeFirstResponder()

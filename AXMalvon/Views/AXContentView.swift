@@ -19,8 +19,6 @@ class AXContentView: NSView {
     let supportedDraggingTypes: [NSPasteboard.PasteboardType] = [.URL, .init("com.aayamx.malvon.tabButton")]
     
     override func viewWillDraw() {
-        checkIfBought()
-        
         if !hasDrawn {
             sidebarTrackingArea = NSTrackingArea(rect: .init(x: bounds.origin.x - 100, y: bounds.origin.y, width: 101, height: bounds.size.height), options: [.activeAlways, .mouseMoved], owner: self)
             addTrackingArea(sidebarTrackingArea)
@@ -204,7 +202,7 @@ class AXContentView: NSView {
             }
             
             // Piss them off even more
-            try? await Task.sleep(nanoseconds: 20_000_000_000)
+            try? await Task.sleep(nanoseconds: 15_000_000_000)
             
             AXGlobalProperties.shared.hasPaid = false
             AXGlobalProperties.shared.userEmail = ""

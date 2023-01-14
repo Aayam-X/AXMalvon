@@ -29,7 +29,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     // Subviews
     lazy var titleView: NSTextField! = NSTextField()
     lazy var favIconImageView: NSImageView! = NSImageView()
-    lazy var closeButton: AXHoverButton! = AXHoverButton()
+    lazy var closeButton: AXSidebarTabCloseButton! = AXSidebarTabCloseButton()
     
     // Drag and drop
     fileprivate var isDragging = false
@@ -159,6 +159,11 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
                     self?.favIconImageView.image = NSImage(systemSymbolName: "square.fill", accessibilityDescription: nil)
                 }
             }
+            
+            if self!.isSelected {
+                self?.appProperties.webContainerView.windowTitleLabel.stringValue = title
+                self?.window?.title = title
+            }
         })
         
         self.urlObserver = webView.observe(\.url, options: .new, changeHandler: { [weak self] _, _ in
@@ -206,22 +211,21 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     // MARK: - Drag and Drop
     
     override func mouseDragged(with event: NSEvent) {
-        if !isDragging {
+        if !isDragging && !closeButton.mouseDown {
             dragItem = NSDraggingItem(pasteboardWriter: self)
             dragItem.setDraggingFrame(self.bounds, contents: self.toImage())
             let draggingSession = self.beginDraggingSession(with: [dragItem], event: event, source: self)
             draggingSession.animatesToStartingPositionsOnCancelOrFail = false
+            
+            closeButton.isHidden = false
+            isDragging = true
+            
             isHidden = true
         }
     }
     
     func draggingSession(_ session: NSDraggingSession, sourceOperationMaskFor context: NSDraggingContext) -> NSDragOperation {
         return .move
-    }
-    
-    func draggingSession(_ session: NSDraggingSession, willBeginAt screenPoint: NSPoint) {
-        closeButton.isHidden = false
-        isDragging = true
     }
     
     func draggingSession(_ session: NSDraggingSession, movedTo screenPoint: NSPoint) {
@@ -272,13 +276,18 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         }
         
         isDragging = false
+        dragItem = nil
+        draggingState = nil
+        draggingSide = nil
+        closeButton.isHidden = false
     }
     
     override func concludeDragOperation(_ sender: NSDraggingInfo?) {
         isDragging = false
-        isHidden = false
-        closeButton.isHidden = false
         dragItem = nil
+        draggingState = nil
+        draggingSide = nil
+        closeButton.isHidden = false
     }
     
     // MARK: - Functions of Drag and Drop
@@ -305,12 +314,9 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             draggingSide = .left
             appProperties.webContainerView.splitView.insertArrangedSubview(tempView, at: 0)
         }
-        
-        appProperties.webContainerView.layer?.backgroundColor = NSColor.systemGray.withAlphaComponent(0.2).cgColor
     }
     
     private func createNewSplitView() {
-        appProperties.webContainerView.layer?.backgroundColor = .none
         tempView.removeFromSuperview()
         
         // Might need a better safe check..
@@ -341,7 +347,6 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     private func userMovedCursorRemovingSplitView() {
         isHidden = true
         tempView.removeFromSuperview()
-        appProperties.webContainerView.layer?.backgroundColor = .none
         
         if profile.currentTab != self.tag {
             profile.currentTab = self.tag

@@ -13,42 +13,43 @@ import Cocoa
 public enum SearchSuggestionsError: Error {
     case invalidURL(String)
     case invalidData(String)
-    case failedToRetrieveData(String)
     case failToDecodeData(String)
-    case serializationError(String)
+    case badRequest(String)
 }
 
 struct SearchSuggestions {
-    static let baseURL = "https://suggestqueries.google.com/complete/search?client=firefox&ds=yt&alt=json&q="
+    static let baseURL = "https://google.com/complete/search?client=chrome&q="
+    static var urlSession: URLSession = {
+        let urlSessionConfig = URLSessionConfiguration.default
+        urlSessionConfig.httpCookieStorage = .none
+        urlSessionConfig.urlCredentialStorage = .none
+        urlSessionConfig.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        urlSessionConfig.urlCache = .none
+        
+        return URLSession(configuration: urlSessionConfig)
+    }()
     
     public static func getQuerySuggestion(_ term: String) async throws -> [String] {
         let urlString = baseURL + term
+        
         guard let url = URL(string: urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "") else {
             throw SearchSuggestionsError.invalidURL(urlString)
         }
         
-        
-        let urlSessionConfig = URLSessionConfiguration.default
-        urlSessionConfig.httpCookieStorage = .none
-        //urlSessionConfig.urlCredentialStorage = .none
-        //urlSessionConfig.requestCachePolicy = .reloadIgnoringLocalAndRemoteCacheData
-        //urlSessionConfig.urlCache = .none
-        let (data, _) = try await URLSession(configuration: urlSessionConfig).data(from: url)
+        let (data, _) = try await urlSession.data(from: url)
         
         guard let contents = String(data: data, encoding: .ascii) else {
             throw SearchSuggestionsError.failToDecodeData(urlString)
         }
         
-        // Where to start the string from
+        if contents.starts(with: "<!DOCTYPE html>") {
+            throw SearchSuggestionsError.badRequest(urlString)
+        }
+        
         let startingPosition = term.count + 5
         
-        // All the search terms
         var searchTerms: [String] = []
-        
-        // Current index
         var index = contents.index(contents.startIndex, offsetBy: startingPosition)
-        
-        // Temp string
         var tempString: String = ""
         
     characterLoop: for character in contents[index...] where searchTerms.count != 4 {
@@ -67,6 +68,10 @@ struct SearchSuggestions {
             tempString.append(character)
         }
     }
+        
+        if !tempString.isEmpty {
+            searchTerms.append(tempString)
+        }
         
         return searchTerms
     }

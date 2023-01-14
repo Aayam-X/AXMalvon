@@ -19,9 +19,20 @@
 - [ ] Create tab after current tab rather the at the end
 - [ ] Profile icons
 - [ ] Improve command-f finding text functionality to use less power
-- [ ] Add preference panes
----
+- [ ] Add preference panes (Profiles)
+- [ ] Add colors to spaces
 - [ ] Seperate history based on profile
+- [ ] Multiple buttons would be selected when switching profiles
+---
+- [x] Light mode improvements
+- [x] Preference window would open when there are no windows
+- [x] Memory leak fixes
+- [x] Universal link fully works!
+- [x] Search suggestions memory leak
+- [x] Disable drag when close button pressed
+- [x] Window title not updating
+- [x] Clicking on app icon when window is minimized
+- [x] Preference window crashing
 
 ## 0.0.2
 - [x] Finish 0.0.2

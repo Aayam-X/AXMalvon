@@ -28,6 +28,7 @@ class AXPreferenceWindow: NSWindow, NSToolbarDelegate {
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
         isMovableByWindowBackground = true
+        self.isReleasedWhenClosed = false
         backgroundColor = .textBackgroundColor // NSWindow stuff
         
         updateTrafficLights()

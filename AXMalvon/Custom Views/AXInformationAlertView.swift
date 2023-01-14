@@ -34,6 +34,7 @@ class AXInformationAlertView: NSView {
             titleView.drawsBackground = false
             titleView.lineBreakMode = .byTruncatingTail
             addSubview(titleView)
+            titleView.textColor = .white
             titleView.topAnchor.constraint(equalTo: topAnchor, constant: 10).isActive = true
             titleView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -10).isActive = true
             titleView.rightAnchor.constraint(equalTo: rightAnchor, constant: -15).isActive = true

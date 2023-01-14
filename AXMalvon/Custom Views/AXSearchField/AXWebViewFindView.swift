@@ -61,7 +61,7 @@ class AXWebViewFindView: NSView {
     
     override func viewWillDraw() {
         if !hasDrawn {
-            layer?.backgroundColor = .black
+            layer?.backgroundColor = NSColor.textBackgroundColor.cgColor
             layer?.cornerRadius = 5.0
             layer?.borderColor = NSColor.systemGray.cgColor
             layer?.borderWidth = 0.9
@@ -90,14 +90,6 @@ class AXWebViewFindView: NSView {
             searchField.centerYAnchor.constraint(equalTo: centerYAnchor).isActive = true
             
             searchField.becomeFirstResponder()
-            
-            NSEvent.addLocalMonitorForEvents(matching: .keyDown) {
-                if self.keyDown(with: $0) {
-                    return nil // needed to get rid of purr sound
-                } else {
-                    return $0
-                }
-            }
             
             hasDrawn = true
         }
@@ -134,14 +126,13 @@ class AXWebViewFindView: NSView {
         searchForText()
     }
     
-    private func keyDown(with event: NSEvent) -> Bool {
+    override func keyDown(with event: NSEvent) {
         if event.keyCode == kVK_Escape {
             close()
-            return true
+            return
         }
         
         super.keyDown(with: event)
-        return false
     }
     
     func close() {

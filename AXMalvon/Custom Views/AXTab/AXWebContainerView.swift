@@ -116,7 +116,10 @@ class AXWebContainerView: NSView {
             }
         })
         
-        self.windowTitleLabel.stringValue = view.title ?? "Untitled"
+        if let title = view.title {
+            self.windowTitleLabel.stringValue = title
+            self.window?.title = title
+        }
     }
     
     func stopObserving() {
@@ -186,23 +189,6 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
         download.delegate = self
     }
     
-    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        /// Doesn't have much purpose right now, plus doesn't work on some apps (App Store)
-        //        guard let url = webView.url, let scheme = url.scheme else { return }
-        //        if !["https", "about", "http", "file"].contains(scheme) {
-        //            guard let appPath = NSWorkspace.shared.urlForApplication(toOpen: url) else { return }
-        //
-        //            AXAlertView.presentAlert(window: appProperties.window) { response in
-        //                if response == true {
-        //                    let config = NSWorkspace.OpenConfiguration()
-        //                    config.activates = true
-        //
-        //                    NSWorkspace.shared.open([url], withApplicationAt: appPath, configuration: config)
-        //                }
-        //            }
-        //        }
-    }
-    
     func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping ([URL]?) -> Void) {
         let dialog = NSOpenPanel()
         
@@ -220,6 +206,24 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
     }
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+        if let url = navigationAction.request.url, let scheme = url.scheme {
+            switch scheme {
+            case "https", "about", "http", "file":
+                break
+            default:
+                guard let appPath = NSWorkspace.shared.urlForApplication(toOpen: url) else { return }
+                Task {
+                    let alert = AXAlertView(title: "Do you want to open `\(appPath.lastPathComponent)`?")
+                    let response = await alert.presentAlert(window: self.window!)
+                    if response {
+                        let config = NSWorkspace.OpenConfiguration()
+                        config.activates = true
+                        NSWorkspace.shared.open([url], withApplicationAt: appPath, configuration: config, completionHandler: nil)
+                    }
+                }
+            }
+        }
+        
         // Download
         if navigationAction.shouldPerformDownload {
             decisionHandler(.download, preferences)

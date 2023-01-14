@@ -46,6 +46,7 @@ class AXWebSplitViewAddItemView: NSView {
         label.isBordered = false
         label.drawsBackground = false
         label.stringValue = "Create Split View"
+        label.textColor = .white
         label.font = .systemFont(ofSize: 15, weight: .medium)
         
         return label
@@ -58,6 +59,7 @@ class AXWebSplitViewAddItemView: NSView {
         imageView.sizeThatFits(.init(width: 512, height: 512))
         imageView.imageScaling = .scaleAxesIndependently
         imageView.controlSize = .large
+        imageView.contentTintColor = .white
         imageView.image = .init(systemSymbolName: "plus", accessibilityDescription: nil)
         return imageView
     }()

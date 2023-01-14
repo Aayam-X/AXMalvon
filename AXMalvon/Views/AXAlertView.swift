@@ -12,12 +12,12 @@ import Carbon.HIToolbox
 class AXAlertView: NSView {
     var response: Bool = false
     private var hasDrawn: Bool = false
+    var title: String = "Alert Title"
     
     lazy var alertTitle: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false
-        label.alignment = .left
         label.isBordered = false
         label.drawsBackground = false
         label.font = .systemFont(ofSize: 35, weight: .medium)
@@ -50,12 +50,22 @@ class AXAlertView: NSView {
         return button
     }()
     
+    init(title: String) {
+        self.title = title
+        super.init(frame: .zero)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewWillDraw() {
         if !hasDrawn {
-            alertTitle.stringValue = "Do you want to open 'Riot Client'"
+            alertTitle.stringValue = title
             addSubview(alertTitle)
-            alertTitle.topAnchor.constraint(equalTo: topAnchor, constant: 50).isActive = true
-            alertTitle.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
+            alertTitle.topAnchor.constraint(equalTo: topAnchor, constant: 30).isActive = true
+            alertTitle.leftAnchor.constraint(equalTo: leftAnchor, constant: 15).isActive = true
+            alertTitle.widthAnchor.constraint(equalToConstant: 520).isActive = true
             
             addSubview(okayButton)
             okayButton.heightAnchor.constraint(equalToConstant: 40).isActive = true
@@ -69,11 +79,12 @@ class AXAlertView: NSView {
             noButton.leftAnchor.constraint(equalTo: leftAnchor, constant: 15).isActive = true
             noButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -15).isActive = true
             
-            NSEvent.addLocalMonitorForEvents(matching: .keyDown) {
-                if self.keyDown(with: $0) {
+            NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+                guard let `self` = self else { return event }
+                if self.keyDown(with: event) {
                     return nil // needed to get rid of purr sound
                 } else {
-                    return $0
+                    return event
                 }
             }
             
@@ -81,14 +92,12 @@ class AXAlertView: NSView {
         }
     }
     
-    static func presentAlert(window: NSWindow) async -> Bool {
-        let view = AXAlertView()
-        
+    func presentAlert(window: NSWindow) async -> Bool {
         let localWindow = NSWindow.create(styleMask: .fullSizeContentView, size: .init(width: 550, height: 550))
-        localWindow.contentView = view
+        localWindow.contentView = self
         
         await window.beginSheet(localWindow)
-        return view.response
+        return response
     }
     
     @objc func yesButtonAction() {
@@ -103,14 +112,15 @@ class AXAlertView: NSView {
     
     private func keyDown(with event: NSEvent) -> Bool {
         if event.keyCode == kVK_Return {
-            yesButtonAction()
+            response = true
+            self.window?.sheetParent?.endSheet(self.window!)
             return true
         } else if event.keyCode == kVK_Escape {
-            noButtonAction()
+            response = false
+            self.window?.sheetParent?.endSheet(self.window!)
             return true
         }
         
-        super.keyDown(with: event)
         return false
     }
 }

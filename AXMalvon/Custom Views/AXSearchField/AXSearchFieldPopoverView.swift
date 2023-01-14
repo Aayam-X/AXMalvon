@@ -214,18 +214,13 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             Task {
                 do {
                     let terms = try await SearchSuggestions.getQuerySuggestion(searchField.stringValue)
-                    let suggestionsToUpdate: [(Int, String)] = terms.enumerated().map { (index, term) -> (Int, String) in
-                        return (index + 1, term)
-                    }
                     
-                    await MainActor.run {
-                        for (index, suggestion) in suggestions.enumerated() {
-                            if let (_, term) = suggestionsToUpdate.first(where: { $0.0 == index + 1 }) {
-                                suggestion!.isHidden = false
-                                suggestion!.titleValue = term
-                            } else {
-                                suggestion!.isHidden = true
-                            }
+                    for i in 1 ..< 5  {
+                        if i <= terms.count {
+                            suggestions[i]!.isHidden = false
+                            suggestions[i]!.titleValue = terms[i - 1]
+                        } else {
+                            suggestions[i]!.isHidden = true
                         }
                     }
                 } catch {

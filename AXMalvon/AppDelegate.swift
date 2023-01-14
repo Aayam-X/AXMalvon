@@ -15,7 +15,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     lazy var aboutViewWindow: NSWindow = AXAboutView.createAboutViewWindow()
     
-    var preferenceWindow = AXPreferenceWindow()
+    lazy var preferenceWindow = AXPreferenceWindow()
     
     // MARK: - App Delegates
     
@@ -39,6 +39,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let welcomeWindow = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))
             welcomeWindow.contentView = AXWelcomeView()
             window.beginSheet(welcomeWindow)
+        } else {
+            window.appProperties.contentView.checkIfBought()
         }
         
         //else {
@@ -98,11 +100,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
-            createNewWindow(self)
-            return true
+            let windows = sender.windows
+            
+            if windows.isEmpty {
+                createNewWindow(self)
+            } else {
+                windows[0].makeKeyAndOrderFront(self)
+            }
         }
         
-        return false
+        return true
     }
     
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
@@ -144,6 +151,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @IBAction func createNewWindow(_ sender: Any) {
         let window = AXWindow()
+        window.appProperties.AX_profiles.forEach { profile in
+            profile.retriveTabs()
+        }
+        
         window.makeKeyAndOrderFront(nil)
     }
     
