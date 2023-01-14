@@ -25,6 +25,9 @@
 - [ ] Multiple tabs would be selected when closing tabs
 - [ ] Tabs would have a "hovered" state when switching profiles
 ---
+- [x] Forgot about spacing for profile switching
+- [x] Profile switch buttons aren't working 
+---
 - [x] Preference button's text & image color is white on selected
 - [x] Sidebar sliding feature + animation
 ---

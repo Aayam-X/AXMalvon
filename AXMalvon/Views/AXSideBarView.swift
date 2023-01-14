@@ -206,7 +206,7 @@ class AXSideBarView: NSView {
     }
     
     @objc func scrollViewLiveScrollEnded(_ notification: NSNotification) {
-        let x: CGFloat = scrollDirection == .right ? previousXValue + appProperties.sidebarWidth : previousXValue - appProperties.sidebarWidth
+        let x: CGFloat = scrollDirection == .right ? previousXValue + appProperties.sidebarWidth + 25.0 : previousXValue - appProperties.sidebarWidth - 25.0
         clipView.animator().setBoundsOrigin(.init(x: x, y: 0))
     }
     
@@ -460,6 +460,19 @@ class AXSideBarView: NSView {
     func switchedProfile() {
         self.tabView = tabViews[appProperties.currentProfileIndex]
         tabView.updateAppPropertiesAndWebView()
+    }
+    
+    func switchProfileFromButtonClick(_ tag: Int) {
+        var x: CGFloat = 0.0
+        
+        if appProperties.currentProfileIndex > tag {
+            x = previousXValue - appProperties.sidebarWidth - 25.0
+        } else if appProperties.currentProfileIndex < tag {
+            x = previousXValue + appProperties.sidebarWidth + 25.0
+        }
+        
+        clipView.animator().setBoundsOrigin(.init(x: x, y: 0))
+        previousXValue = scrollView.documentVisibleRect.origin.x
     }
     
     func initializeProfiles() {
