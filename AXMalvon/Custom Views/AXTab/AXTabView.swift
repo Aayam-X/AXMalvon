@@ -14,7 +14,7 @@ class AXTabView: NSView {
     
     // Views
     var tabStackView = NSStackView()
-    var scrollView: AXScrollView!
+    var scrollView: AXSidebarScrollView!
     let clipView = AXFlippedClipView()
     
     init(profile: AXBrowserProfile) {
@@ -27,9 +27,7 @@ class AXTabView: NSView {
         tabStackView.translatesAutoresizingMaskIntoConstraints = false
         
         // Create scrollView
-        scrollView = AXScrollView(horizontalScrollHandler: { [weak self] in
-            self?.appProperties.sidebarView.updateProfile()
-        })
+        scrollView = AXSidebarScrollView(scrollWheelHandler: {self.appProperties.sidebarView.scrollWheel(with: $0)})
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(scrollView)
         scrollView.drawsBackground = false
@@ -48,10 +46,9 @@ class AXTabView: NSView {
         clipView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor).isActive = true
         
         // Setup stackView
-        addSubview(tabStackView)
-        tabStackView.topAnchor.constraint(equalTo: topAnchor).isActive = true
-        tabStackView.widthAnchor.constraint(equalTo: clipView.widthAnchor, constant: -8).isActive = true
         scrollView.documentView = tabStackView
+        tabStackView.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        tabStackView.widthAnchor.constraint(equalTo: clipView.widthAnchor).isActive = true
     }
     
     required init?(coder: NSCoder) {
@@ -107,6 +104,7 @@ class AXTabView: NSView {
     
     func createTabFromUpdate(_ index: Int, _ tab: AXTabItem) {
         let button = AXSidebarTabButton(appProperties, profile)
+        button.translatesAutoresizingMaskIntoConstraints = false
         button.tag = index
         button.startObserving()
         
@@ -124,6 +122,7 @@ class AXTabView: NSView {
         
         let tab = profile.tabs[index]
         let button = AXSidebarTabButton(appProperties, profile)
+        button.translatesAutoresizingMaskIntoConstraints = false
         
         button.tag = index
         profile.currentTab = index
@@ -143,6 +142,7 @@ class AXTabView: NSView {
     // Adds a button to the stackView
     func addTabToStackViewInBackground(index: Int) {
         let button = AXSidebarTabButton(appProperties, profile)
+        button.translatesAutoresizingMaskIntoConstraints = false
         
         button.tag = index
         button.target = self

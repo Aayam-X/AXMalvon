@@ -14,8 +14,6 @@ enum AXScrollViewScrollDirection {
     case right
 }
 
-var AXMalvon_SidebarView_scrollDirection: AXScrollViewScrollDirection! = .left
-
 
 class AXSideBarView: NSView {
     // MARK: - Variables
@@ -32,6 +30,11 @@ class AXSideBarView: NSView {
         tabView.appProperties = self.appProperties
         return tabView
     }()
+    
+    
+    var scrollView: NSScrollView!
+    var clipView: NSClipView!
+    var gridView: NSGridView!
     
     var tabViews: [AXTabView] = []
     
@@ -137,16 +140,79 @@ class AXSideBarView: NSView {
                 profileList.heightAnchor.constraint(equalToConstant: 30).isActive = true
             }
             
-            // Setup tabView
+            // Setup profiles
             initializeProfiles()
-            
             appProperties.profileManager?.switchProfiles(to: appProperties.currentProfileIndex)
+            
+            scrollView = NSScrollView(frame: .zero)
+            scrollView.translatesAutoresizingMaskIntoConstraints = false
+            scrollView.automaticallyAdjustsContentInsets = false
+            addSubview(scrollView)
+            scrollView.drawsBackground = false
+            scrollView.leftAnchor.constraint(equalTo: leftAnchor, constant: 10).isActive = true
+            scrollView.rightAnchor.constraint(equalTo: rightAnchor, constant: -9).isActive = true // -1 px cz splitView divider
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -44).isActive = true
+            scrollView.topAnchor.constraint(equalTo: topAnchor, constant: 35).isActive = true
+            
+            // Setup clipview
+            clipView = NSClipView()
+            clipView.translatesAutoresizingMaskIntoConstraints = false
+            clipView.drawsBackground = false
+            scrollView.contentView = clipView
+            clipView.leftAnchor.constraint(equalTo: scrollView.leftAnchor).isActive = true
+            clipView.rightAnchor.constraint(equalTo: scrollView.rightAnchor).isActive = true
+            clipView.topAnchor.constraint(equalTo: scrollView.topAnchor).isActive = true
+            clipView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor).isActive = true
+            
+            gridView = NSGridView(views: [tabViews])
+            gridView.columnSpacing = 25.0
+            gridView.column(at: 0).width = appProperties.sidebarWidth - 19
+            gridView.column(at: 1).width = appProperties.sidebarWidth - 19
+            
+            gridView.translatesAutoresizingMaskIntoConstraints = false
+            scrollView.documentView = gridView
+            gridView.topAnchor.constraint(equalTo: clipView.topAnchor).isActive = true
+            gridView.leftAnchor.constraint(equalTo: clipView.leftAnchor).isActive = true
+            gridView.bottomAnchor.constraint(equalTo: clipView.bottomAnchor).isActive = true
+            
+            NotificationCenter.default.addObserver(self, selector: #selector(scrollViewLiveScroll(_:)), name: NSScrollView.didLiveScrollNotification, object: scrollView)
+            NotificationCenter.default.addObserver(self, selector: #selector(scrollViewWillStartLiveScroll(_:)), name: NSScrollView.willStartLiveScrollNotification, object: scrollView)
+            NotificationCenter.default.addObserver(self, selector: #selector(scrollViewLiveScrollEnded(_:)), name: NSScrollView.didEndLiveScrollNotification, object: scrollView)
             
             hasDrawn = true
         }
     }
     
     // MARK: - Actions
+    fileprivate var previousXValue: CGFloat = 0.0
+    fileprivate var scrollDirection: AXScrollViewScrollDirection! = .left
+    
+    @objc func scrollViewLiveScroll(_ notification: NSNotification) {
+        let width: CGFloat = (appProperties.sidebarWidth + 6)
+        let x = scrollView.documentVisibleRect.origin.x
+        let diff = x - previousXValue
+        
+        var index: Int = appProperties.currentProfileIndex
+        
+        if diff > width/2 {
+            index += 1
+            scrollDirection = .right
+        } else if diff < -width/2 {
+            index -= 1
+            scrollDirection = .left
+        }
+        
+        appProperties.profileManager?.switchProfiles(to: index)
+    }
+    
+    @objc func scrollViewLiveScrollEnded(_ notification: NSNotification) {
+        let x: CGFloat = scrollDirection == .right ? previousXValue + appProperties.sidebarWidth : previousXValue - appProperties.sidebarWidth
+        clipView.animator().setBoundsOrigin(.init(x: x, y: 0))
+    }
+    
+    @objc func scrollViewWillStartLiveScroll(_ notification: NSNotification) {
+        previousXValue = scrollView.documentVisibleRect.origin.x
+    }
     
     @objc func toggleSidebar() {
         appProperties.sidebarToggled.toggle()
@@ -194,20 +260,6 @@ class AXSideBarView: NSView {
     
     // MARK: - Mouse Functions
     
-    func updateProfile() {
-        if let direction = AXMalvon_SidebarView_scrollDirection {
-            // Update the profile
-            var index: Int = appProperties.currentProfileIndex
-            if direction == .left {
-                index -= 1
-            } else {
-                index += 1
-            }
-            
-            appProperties.profileManager?.switchProfiles(to: index)
-        }
-    }
-    
     override func mouseExited(with event: NSEvent) {
         if !appProperties.sidebarToggled {
             NSAnimationContext.runAnimationGroup({ context in
@@ -223,25 +275,7 @@ class AXSideBarView: NSView {
     }
     
     override func scrollWheel(with event: NSEvent) {
-        super.scrollWheel(with: event)
-        let x = event.scrollingDeltaX
-        let y = event.scrollingDeltaY
-        
-        if x == 0 && y == 0 {
-            updateProfile()
-            return
-        }
-        
-        if y == 0 {
-            if x > 0 {
-                AXMalvon_SidebarView_scrollDirection = .left
-            }
-            if x < 0 {
-                AXMalvon_SidebarView_scrollDirection = .right
-            }
-        } else {
-            AXMalvon_SidebarView_scrollDirection = nil
-        }
+        scrollView.scrollWheel(with: event)
     }
     
     override func mouseDown(with event: NSEvent) {
@@ -261,7 +295,14 @@ class AXSideBarView: NSView {
         }
     }
     
+    @objc func resizeTabViews() {
+        gridView.column(at: 0).width = self.frame.size.width - 19
+        gridView.column(at: 1).width = self.frame.size.width - 19
+    }
+    
     override func resizeSubviews(withOldSize oldSize: NSSize) {
+        resizeTabViews()
+        
         if oldSize.height == frame.height {
             if !appProperties.isFullScreen && appProperties.sidebarToggled {
                 if frame.width >= 210 {
@@ -417,17 +458,8 @@ class AXSideBarView: NSView {
     
     // MARK: - Other Functions
     func switchedProfile() {
-        tabView.removeFromSuperview()
-        
         self.tabView = tabViews[appProperties.currentProfileIndex]
         tabView.updateAppPropertiesAndWebView()
-        tabView.translatesAutoresizingMaskIntoConstraints = false
-        
-        addSubview(tabView)
-        tabView.topAnchor.constraint(equalTo: topAnchor, constant: 35).isActive = true
-        tabView.leftAnchor.constraint(equalTo: leftAnchor, constant: 10).isActive = true
-        tabView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-        tabView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -44).isActive = true
     }
     
     func initializeProfiles() {

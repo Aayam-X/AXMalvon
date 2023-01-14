@@ -47,11 +47,11 @@ final class AXFlippedClipViewCentered: NSClipView {
     }
 }
 
-final class AXScrollView: NSScrollView {
-    var horizontalScrollHandler: (() -> Void)
+final class AXSidebarScrollView: NSScrollView {
+    var scrollWheelHandler: ((NSEvent) -> Void)?
     
-    init(horizontalScrollHandler: @escaping () -> Void) {
-        self.horizontalScrollHandler = horizontalScrollHandler
+    init(scrollWheelHandler: @escaping (NSEvent) -> Void) {
+        self.scrollWheelHandler = scrollWheelHandler
         super.init(frame: .zero)
     }
     
@@ -61,18 +61,6 @@ final class AXScrollView: NSScrollView {
     
     override func scrollWheel(with event: NSEvent) {
         super.scrollWheel(with: event)
-        let x = event.scrollingDeltaX
-        
-        if x == 5.0 {
-            AXMalvon_SidebarView_scrollDirection = .left
-            horizontalScrollHandler()
-            return
-        } else if x == -5.0 {
-            AXMalvon_SidebarView_scrollDirection = .right
-            horizontalScrollHandler()
-            return
-        } else {
-            AXMalvon_SidebarView_scrollDirection = nil
-        }
+        scrollWheelHandler?(event)
     }
 }

@@ -16,6 +16,8 @@ class AXPreferenceButton: NSButton {
     var isSelected: Bool = false {
         didSet {
             self.layer?.backgroundColor = isSelected ? NSColor.controlAccentColor.cgColor : .clear
+            self.titleView.textColor = isSelected ? .white : .textColor
+            self.imageView.contentTintColor = isSelected ? .white : .textColor
         }
     }
     

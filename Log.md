@@ -22,7 +22,11 @@
 - [ ] Add preference panes (Profiles)
 - [ ] Add colors to spaces
 - [ ] Seperate history based on profile
-- [ ] Multiple buttons would be selected when switching profiles
+- [ ] Multiple tabs would be selected when closing tabs
+- [ ] Tabs would have a "hovered" state when switching profiles
+---
+- [x] Preference button's text & image color is white on selected
+- [x] Sidebar sliding feature + animation
 ---
 - [x] Light mode improvements
 - [x] Preference window would open when there are no windows
