@@ -166,8 +166,10 @@ class AXSideBarView: NSView {
             
             gridView = NSGridView(views: [tabViews])
             gridView.columnSpacing = 25.0
-            gridView.column(at: 0).width = appProperties.sidebarWidth - 19
-            gridView.column(at: 1).width = appProperties.sidebarWidth - 19
+            
+            for i in 0..<tabViews.count {
+                gridView.column(at: i).width = appProperties.sidebarWidth - 19
+            }
             
             gridView.translatesAutoresizingMaskIntoConstraints = false
             scrollView.documentView = gridView
@@ -296,8 +298,9 @@ class AXSideBarView: NSView {
     }
     
     @objc func resizeTabViews() {
-        gridView.column(at: 0).width = self.frame.size.width - 19
-        gridView.column(at: 1).width = self.frame.size.width - 19
+        for i in 0..<tabViews.count {
+            gridView.column(at: i).width = self.frame.size.width - 19
+        }
     }
     
     override func resizeSubviews(withOldSize oldSize: NSSize) {

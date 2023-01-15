@@ -23,7 +23,11 @@
 - [ ] Add colors to spaces
 - [ ] Seperate history based on profile
 - [ ] Multiple tabs would be selected when closing tabs
-- [ ] Tabs would have a "hovered" state when switching profiles
+- [ ] Adjusting width of sidebar will cause problems
+- [ ] Sidebar, remove adding 10x and 9x and apply to the buttons not the stack view
+---
+- [x] Private window problem
+- [x] Tabs would have a "hovered" state when switching profiles
 ---
 - [x] Forgot about spacing for profile switching
 - [x] Profile switch buttons aren't working 

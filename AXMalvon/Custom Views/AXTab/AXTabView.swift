@@ -48,7 +48,8 @@ class AXTabView: NSView {
         // Setup stackView
         scrollView.documentView = tabStackView
         tabStackView.topAnchor.constraint(equalTo: topAnchor).isActive = true
-        tabStackView.widthAnchor.constraint(equalTo: clipView.widthAnchor).isActive = true
+        tabStackView.leftAnchor.constraint(equalTo: clipView.leftAnchor).isActive = true
+        tabStackView.rightAnchor.constraint(equalTo: clipView.rightAnchor).isActive = true
     }
     
     required init?(coder: NSCoder) {
