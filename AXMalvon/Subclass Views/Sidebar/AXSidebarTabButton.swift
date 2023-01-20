@@ -161,8 +161,10 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             }
             
             if self!.isSelected {
-                self?.appProperties.webContainerView.windowTitleLabel.stringValue = title
-                self?.window?.title = title
+                if self!.profile.index == self!.appProperties.currentProfileIndex {
+                    self?.appProperties.webContainerView.windowTitleLabel.stringValue = title
+                    self?.window?.title = title
+                }
             }
         })
         

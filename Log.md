@@ -23,8 +23,12 @@
 - [ ] Add colors to spaces
 - [ ] Seperate history based on profile
 - [ ] Multiple tabs would be selected when closing tabs
-- [ ] Adjusting width of sidebar will cause problems
-- [ ] Sidebar, remove adding 10x and 9x and apply to the buttons not the stack view
+- [ ] Adjusting width of sidebar will cause problems (If on second space, the scrollView must scroll to end of it, Button title width also plays a role)
+---
+- [x] Swiping between sidebar profiles will not update
+- [x] Sidebar, remove adding 10x and 9x and apply to the buttons not the stack view
+- [x] Title from another profile will change the webContainerView's title even when not active
+- [x] Preference contentTint color persists even when not intended to
 ---
 - [x] Private window problem
 - [x] Tabs would have a "hovered" state when switching profiles

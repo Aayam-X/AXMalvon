@@ -146,11 +146,10 @@ class AXSideBarView: NSView {
             
             scrollView = NSScrollView(frame: .zero)
             scrollView.translatesAutoresizingMaskIntoConstraints = false
-            scrollView.automaticallyAdjustsContentInsets = false
             addSubview(scrollView)
             scrollView.drawsBackground = false
-            scrollView.leftAnchor.constraint(equalTo: leftAnchor, constant: 10).isActive = true
-            scrollView.rightAnchor.constraint(equalTo: rightAnchor, constant: -9).isActive = true // -1 px cz splitView divider
+            scrollView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
+            scrollView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
             scrollView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -44).isActive = true
             scrollView.topAnchor.constraint(equalTo: topAnchor, constant: 35).isActive = true
             
@@ -168,7 +167,7 @@ class AXSideBarView: NSView {
             gridView.columnSpacing = 25.0
             
             for i in 0..<tabViews.count {
-                gridView.column(at: i).width = appProperties.sidebarWidth - 19
+                gridView.column(at: i).width = appProperties.sidebarWidth
             }
             
             gridView.translatesAutoresizingMaskIntoConstraints = false
@@ -196,12 +195,14 @@ class AXSideBarView: NSView {
         
         var index: Int = appProperties.currentProfileIndex
         
-        if diff > width/2 {
+        if diff >= width/2 {
             index += 1
             scrollDirection = .right
-        } else if diff < -width/2 {
+            previousXValue = CGFloat(index) * appProperties.sidebarWidth
+        } else if diff <= -width/2 {
             index -= 1
             scrollDirection = .left
+            previousXValue = CGFloat(index) * appProperties.sidebarWidth
         }
         
         appProperties.profileManager?.switchProfiles(to: index)
@@ -209,6 +210,7 @@ class AXSideBarView: NSView {
     
     @objc func scrollViewLiveScrollEnded(_ notification: NSNotification) {
         let x: CGFloat = scrollDirection == .right ? previousXValue + appProperties.sidebarWidth + 25.0 : previousXValue - appProperties.sidebarWidth - 25.0
+        
         clipView.animator().setBoundsOrigin(.init(x: x, y: 0))
     }
     
@@ -299,7 +301,7 @@ class AXSideBarView: NSView {
     
     @objc func resizeTabViews() {
         for i in 0..<tabViews.count {
-            gridView.column(at: i).width = self.frame.size.width - 19
+            gridView.column(at: i).width = self.frame.size.width
         }
     }
     
@@ -482,6 +484,7 @@ class AXSideBarView: NSView {
         for profile in appProperties.AX_profiles {
             // Create tabViews
             let tabView = AXTabView(profile: profile)
+            tabView.translatesAutoresizingMaskIntoConstraints = false
             tabView.appProperties = appProperties
             
             if tabView.profile.tabs.isEmpty {

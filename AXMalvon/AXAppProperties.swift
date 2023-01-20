@@ -60,9 +60,16 @@ class AXAppProperties {
         
         // Retrive the profiles
         if !isPrivate {
-            let profileNames = UserDefaults.standard.stringArray(forKey: "Profiles") ?? [.init("Default"), .init("Secondary")]
-            let profiles = profileNames.map { AXBrowserProfile(name: $0) }
-            AX_profiles = profiles
+            if let profileNames = UserDefaults.standard.stringArray(forKey: "Profiles") {
+                let profiles = profileNames.map { AXBrowserProfile(name: $0) }
+                AX_profiles = profiles
+            } else {
+                let profiles: [AXBrowserProfile] = [.init(name: "Default", 0), .init(name: "Secondary", 1)]
+                AX_profiles = profiles
+                
+                let names = AX_profiles.map { $0.saveProperties(); return $0.name }
+                UserDefaults.standard.set(names, forKey: "Profiles")
+            }
         } else {
             let profile = AXPrivateBrowserProfile()
             AX_profiles.append(profile)

@@ -29,6 +29,11 @@ class AXPreferenceButton: NSButton {
         imageView.image = NSImage(systemSymbolName: icon, accessibilityDescription: nil)
         titleView.stringValue = title
         
+        // Setup colors
+        self.layer?.backgroundColor = .clear
+        self.titleView.textColor = .textColor
+        self.imageView.contentTintColor = .textColor
+        
         self.tag = tag
         self.widthAnchor.constraint(equalToConstant: 190).isActive = true
         self.heightAnchor.constraint(equalToConstant: 30).isActive = true

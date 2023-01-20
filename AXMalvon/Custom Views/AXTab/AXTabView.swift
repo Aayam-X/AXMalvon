@@ -21,10 +21,10 @@ class AXTabView: NSView {
         self.profile = profile
         super.init(frame: .zero)
         
+        tabStackView.translatesAutoresizingMaskIntoConstraints = false
         tabStackView.orientation = .vertical
         tabStackView.spacing = 1.08
         tabStackView.detachesHiddenViews = false
-        tabStackView.translatesAutoresizingMaskIntoConstraints = false
         
         // Create scrollView
         scrollView = AXSidebarScrollView(scrollWheelHandler: {self.appProperties.sidebarView.scrollWheel(with: $0)})
@@ -112,9 +112,7 @@ class AXTabView: NSView {
         button.target = self
         button.action = #selector(tabClick(_:))
         button.tabTitle = tab.title ?? "Untitled"
-        tabStackView.addArrangedSubview(button)
-        
-        button.widthAnchor.constraint(equalTo: tabStackView.widthAnchor).isActive = true
+        addButtonToStackView(button)
     }
     
     // Adds a button to the stackView
@@ -131,8 +129,7 @@ class AXTabView: NSView {
         button.action = #selector(tabClick(_:))
         button.tabTitle = tab.title ?? "Untitled"
         
-        tabStackView.addArrangedSubview(button)
-        button.widthAnchor.constraint(equalTo: tabStackView.widthAnchor).isActive = true
+        addButtonToStackView(button)
         
         updateSelection()
         button.startObserving()
@@ -148,8 +145,7 @@ class AXTabView: NSView {
         button.tag = index
         button.target = self
         button.action = #selector(tabClick(_:))
-        tabStackView.addArrangedSubview(button)
-        button.widthAnchor.constraint(equalTo: tabStackView.widthAnchor).isActive = true
+        addButtonToStackView(button)
         
         button.startObserving()
     }
@@ -217,10 +213,9 @@ class AXTabView: NSView {
         
         button.target = self
         button.action = #selector(tabClick(_:))
-        tabStackView.addArrangedSubview(button)
-        button.isSelected = true
+        addButtonToStackView(button)
         
-        button.widthAnchor.constraint(equalTo: tabStackView.widthAnchor).isActive = true
+        button.isSelected = true
         
         profile.currentTab = tabStackView.subviews.count - 1
         button.tag = profile.currentTab
@@ -269,5 +264,11 @@ class AXTabView: NSView {
         let tab = profile.tabs[profile.currentTab]
         
         updateAppPropertiesAndWebView(button: button, tab: tab)
+    }
+    
+    private func addButtonToStackView(_ button: NSButton) {
+        tabStackView.addArrangedSubview(button)
+        button.leftAnchor.constraint(equalTo: tabStackView.leftAnchor, constant: 10).isActive = true
+        button.rightAnchor.constraint(equalTo: tabStackView.rightAnchor, constant: -9).isActive = true
     }
 }

@@ -24,6 +24,7 @@ class AXPrivateBrowserProfile: AXBrowserProfile {
 
 class AXBrowserProfile {
     var name: String // User default string
+    var index: Int
     var webViewConfiguration: WKWebViewConfiguration
     var tabs: [AXTabItem] = []
     var previouslyClosedTabs: [URL] = []
@@ -53,6 +54,21 @@ class AXBrowserProfile {
         self.webViewConfiguration = WKWebViewConfiguration()
         webViewConfiguration.websiteDataStore = .nonPersistent()
         
+        index = UserDefaults.standard.integer(forKey: "\(name)-Index")
+        
+        retriveProperties()
+    }
+    
+    init(name: String, _ index: Int) {
+        self.name = name
+        
+        // Create the configuration
+        self.webViewConfiguration = WKWebViewConfiguration()
+        webViewConfiguration.websiteDataStore = .nonPersistent()
+        
+        self.index = index
+        UserDefaults.standard.set(index, forKey: "\(name)-Index")
+        
         retriveProperties()
     }
     
@@ -81,7 +97,7 @@ class AXBrowserProfile {
                 decoder.userInfo[AXTabItem.webViewConfigurationUserInfoKey] = webViewConfiguration
                 self.tabs = try decoder.decode([AXTabItem].self, from: data)
                 
-                // Retrive the currentTab
+                // Retrive the currentTab & Index
                 currentTab = UserDefaults.standard.integer(forKey: "\(name)-CurrentTab")
             } catch {
                 print("Unable to Decode Tabs (\(error))")
@@ -90,8 +106,9 @@ class AXBrowserProfile {
     }
     
     func saveProperties() {
-        // Save current tab
+        // Save current tab & Index
         UserDefaults.standard.set(currentTab, forKey: "\(name)-CurrentTab")
+        UserDefaults.standard.set(index, forKey: "\(name)-Index")
         
         // Save tabs
         do {

@@ -35,6 +35,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             profile.retriveTabs()
         }
         
+#if !DEBUG
         if AXGlobalProperties.shared.userEmail == "" || AXGlobalProperties.shared.userPassword == "" {
             let welcomeWindow = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))
             welcomeWindow.contentView = AXWelcomeView()
@@ -42,6 +43,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             window.appProperties.contentView.checkIfBought()
         }
+#endif
         
         //else {
         // Already handled by contentView
