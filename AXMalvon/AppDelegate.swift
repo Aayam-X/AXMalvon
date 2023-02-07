@@ -21,7 +21,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Initializers
-        AXHistory.checkIfFileExists()
         AXDownload.checkIfFileExists()
         
         Task {
@@ -31,7 +30,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Create a window
         let window = AXWindow()
         window.makeKeyAndOrderFront(nil)
-        window.appProperties.AX_profiles.forEach { profile in
+        
+        AXGlobalProperties.shared.profiles.forEach { profile in
             profile.retriveTabs()
         }
         
@@ -69,10 +69,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        AXGlobalProperties.shared.profiles.forEach { $0.saveProperties() }
+        
         if let appProperties = (NSApplication.shared.mainWindow as? AXWindow)?.appProperties {
-            let names = appProperties.AX_profiles.map { $0.saveProperties(); return $0.name }
-            UserDefaults.standard.set(names, forKey: "Profiles")
-            
             appProperties.popOver.saveMostVisitedSites()
         }
         
@@ -90,14 +89,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationWillTerminate(_ notification: Notification) {
-        AXHistory.removeDuplicates()
+        AXGlobalProperties.shared.profiles.forEach { $0.history.removeDuplicates() }
     }
     
     func applicationDidResignActive(_ notification: Notification) {
-        if let profiles = (NSApplication.shared.mainWindow as? AXWindow)?.appProperties.AX_profiles {
-            let names = profiles.map { $0.saveProperties(); return $0.name }
-            UserDefaults.standard.set(names, forKey: "Profiles")
-        }
+        AXGlobalProperties.shared.profiles.forEach { $0.saveProperties() }
     }
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -153,10 +149,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @IBAction func createNewWindow(_ sender: Any) {
         let window = AXWindow()
-        window.appProperties.AX_profiles.forEach { profile in
-            profile.retriveTabs()
-        }
-        
         window.makeKeyAndOrderFront(nil)
     }
     

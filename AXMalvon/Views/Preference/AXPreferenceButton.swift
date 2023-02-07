@@ -13,33 +13,20 @@ class AXPreferenceButton: NSButton {
     
     let imageView = NSImageView()
     
-    var isSelected: Bool = false {
-        didSet {
-            self.layer?.backgroundColor = isSelected ? NSColor.controlAccentColor.cgColor : .clear
-            self.titleView.textColor = isSelected ? .white : .textColor
-            self.imageView.contentTintColor = isSelected ? .white : .textColor
-        }
-    }
-    
-    init(title: String, icon: String, tag: Int) {
+    init() {
         super.init(frame: .zero)
         configure()
-        
-        // Setup self
-        imageView.image = NSImage(systemSymbolName: icon, accessibilityDescription: nil)
-        titleView.stringValue = title
-        
-        // Setup colors
-        self.layer?.backgroundColor = .clear
-        self.titleView.textColor = .textColor
-        self.imageView.contentTintColor = .textColor
-        
-        self.tag = tag
-        self.widthAnchor.constraint(equalToConstant: 190).isActive = true
-        self.heightAnchor.constraint(equalToConstant: 30).isActive = true
     }
     
-    private func configure() {
+    override init(frame: NSRect) {
+        super.init(frame: frame)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    func configure() {
         // Style Self
         self.wantsLayer = true
         self.isBordered = false
@@ -70,13 +57,47 @@ class AXPreferenceButton: NSButton {
         titleView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
     }
     
-    init() {
+    // By default, the mouseUp function would be called for action
+    override func mouseDown(with event: NSEvent) {
+        if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
+            sendAction(action, to: target)
+        }
+    }
+}
+
+class AXPreferenceSidebarButton: AXPreferenceButton {
+    var isSelected: Bool = false {
+        didSet {
+            self.layer?.backgroundColor = isSelected ? NSColor.controlAccentColor.cgColor : .clear
+            self.titleView.textColor = isSelected ? .white : .textColor
+            self.imageView.contentTintColor = isSelected ? .white : .textColor
+        }
+    }
+    
+    init(title: String, icon: String, tag: Int) {
         super.init(frame: .zero)
         configure()
+        
+        // Setup self
+        imageView.image = NSImage(systemSymbolName: icon, accessibilityDescription: nil)
+        titleView.stringValue = title
+        
+        // Setup colors
+        self.layer?.backgroundColor = .clear
+        self.titleView.textColor = .textColor
+        self.imageView.contentTintColor = .textColor
+        
+        self.tag = tag
+        self.widthAnchor.constraint(equalToConstant: 190).isActive = true
+        self.heightAnchor.constraint(equalToConstant: 30).isActive = true
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func draw(_ dirtyRect: NSRect) {
+        self.layer?.backgroundColor = isSelected ? NSColor.controlAccentColor.cgColor : .clear
     }
     
     // By default, the mouseUp function would be called for action

@@ -59,8 +59,12 @@ class AXTabView: NSView {
     func update() {
         tabStackView.subviews.removeAll()
         
-        for (index, tab) in profile.tabs.enumerated() {
+        var index = 0
+        while index < appProperties.tabs[profile.index].count {
+            let tab = appProperties.tabs[profile.index][index]
             createTabFromUpdate(index, tab)
+            
+            index += 1
         }
         
         // Select the first tab
@@ -70,21 +74,31 @@ class AXTabView: NSView {
         appProperties.currentTabButton = currentButton
         
         // Go to the first tab
-        let tab = profile.tabs[profile.currentTab]
+        let tab = appProperties.tabs[profile.index][profile.currentTab]
         appProperties.currentTab = tab
         appProperties.webContainerView.update(view: tab.view)
     }
     
     func updateInBackground() {
         tabStackView.subviews.removeAll()
+        let tabCount = appProperties.tabs[profile.index].count
         
-        for (index, tab) in profile.tabs.enumerated() {
+        var index = 0
+        while index < tabCount {
+            let tab = appProperties.tabs[profile.index][index]
             createTabFromUpdate(index, tab)
+            
+            index += 1
         }
         
-        // Select the first tab
-        let currentButton = tabStackView.arrangedSubviews[profile.currentTab] as! AXSidebarTabButton
-        currentButton.isSelected = true
+        print(profile.currentTab, tabCount)
+        if let currentButton = tabStackView.arrangedSubviews[safe: profile.currentTab] as? AXSidebarTabButton {
+            currentButton.isSelected = true
+        } else {
+            profile.currentTab = 0
+            let currentButton = tabStackView.arrangedSubviews[0] as? AXSidebarTabButton
+            currentButton?.isSelected = true
+        }
     }
     
     func createTab() {
@@ -92,15 +106,15 @@ class AXTabView: NSView {
         webView.addConfigurations()
         webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
         
-        var tabItem = AXTabItem(view: webView)
+        let tabItem = AXTabItem(view: webView)
         tabItem.url = webView.url
-        profile.tabs.append(tabItem)
-        addTabToStackView()
+        appProperties.tabs[profile.index].append(tabItem)
+        addTabToStackView(tabItem)
     }
     
     func createTab(_ tab: AXTabItem) {
-        profile.tabs.append(tab)
-        addTabToStackView()
+        appProperties.currentTabs.append(tab)
+        addTabToStackView(tab)
     }
     
     func createTabFromUpdate(_ index: Int, _ tab: AXTabItem) {
@@ -116,10 +130,9 @@ class AXTabView: NSView {
     }
     
     // Adds a button to the stackView
-    func addTabToStackView() {
-        let index = profile.tabs.count - 1
+    func addTabToStackView(_ tab: AXTabItem) {
+        let index = appProperties.currentTabs.count - 1
         
-        let tab = profile.tabs[index]
         let button = AXSidebarTabButton(appProperties, profile)
         button.translatesAutoresizingMaskIntoConstraints = false
         
@@ -138,13 +151,18 @@ class AXTabView: NSView {
     }
     
     // Adds a button to the stackView
-    func addTabToStackViewInBackground(index: Int) {
+    func addTabToStackViewInBackground(_ tab: AXTabItem) {
+        appProperties.tabs[profile.index].append(tab)
+        let index = appProperties.tabs[profile.index].count - 1
+        
         let button = AXSidebarTabButton(appProperties, profile)
         button.translatesAutoresizingMaskIntoConstraints = false
         
         button.tag = index
         button.target = self
         button.action = #selector(tabClick(_:))
+        button.tabTitle = tab.title ?? "Untitled"
+        
         addButtonToStackView(button)
         
         button.startObserving()
@@ -162,7 +180,7 @@ class AXTabView: NSView {
         tabStackView.insertArrangedSubview(secondButton, at: first)
         
         profile.currentTab = second
-        profile.tabs.swapAt(first, second)
+        appProperties.tabs[profile.index].swapAt(first, second)
     }
     
     func removedTab(_ at: Int) {
@@ -197,7 +215,7 @@ class AXTabView: NSView {
         profile.currentTab = to
         
         let button = tabStackView.arrangedSubviews[to] as? AXSidebarTabButton
-        let tab = profile.tabs[to]
+        let tab = appProperties.tabs[profile.index][to]
         
         appProperties.currentTab = tab
         appProperties.currentTabButton = button
@@ -221,7 +239,7 @@ class AXTabView: NSView {
         button.tag = profile.currentTab
         button.startObserving()
         
-        let view = profile.tabs[button.tag].view
+        let view = appProperties.tabs[profile.index][button.tag].view
         appProperties.webContainerView.update(view: view)
     }
     
@@ -245,7 +263,7 @@ class AXTabView: NSView {
             updateSelection()
         }
         
-        let tab = profile.tabs[to]
+        let tab = appProperties.currentTabs[to]
         
         appProperties.currentTab = tab
         appProperties.currentTabButton = tabStackView.arrangedSubviews[to] as? AXSidebarTabButton
@@ -261,7 +279,7 @@ class AXTabView: NSView {
     
     func updateAppPropertiesAndWebView() {
         let button = tabStackView.arrangedSubviews[profile.currentTab] as! AXSidebarTabButton
-        let tab = profile.tabs[profile.currentTab]
+        let tab = appProperties.tabs[profile.index][profile.currentTab]
         
         updateAppPropertiesAndWebView(button: button, tab: tab)
     }

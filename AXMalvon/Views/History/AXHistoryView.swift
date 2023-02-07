@@ -212,13 +212,13 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
     }
     
     @objc func reloadButtonAction() {
-        items = AXHistory.getAllItems().reversed()
+        items = appProperties.currentProfile.history.getAllItems().reversed()
         filteredItems = items
         tableView.reloadData()
     }
     
     @objc func removeAllButtonAction() {
-        AXHistory.removeAll()
+        appProperties.currentProfile.history.removeAll()
         reloadButtonAction()
     }
     
@@ -226,7 +226,7 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
     
     func updateChanges() {
         if changesMade {
-            AXHistory.updateHistoryFile(items: self.items)
+            appProperties.currentProfile.history.updateHistoryFile(items: self.items)
             changesMade = false
         }
     }

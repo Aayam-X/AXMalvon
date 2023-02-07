@@ -177,7 +177,8 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
         self.windowTitleLabel.stringValue = webView.title ?? "Untitled"
         
         if webView.url != nil && !appProperties.isPrivate {
-            AXHistory.appendItem(title: webView.title ?? "Untitled", url: webView.url!.absoluteString)
+            appProperties.currentProfile.history.appendItem(title: webView.title ?? "Untitled", url: webView.url!.absoluteString)
+            appProperties.currentProfile.quickSaveProperties()
         }
     }
     
@@ -211,14 +212,15 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
             case "https", "about", "http", "file":
                 break
             default:
-                guard let appPath = NSWorkspace.shared.urlForApplication(toOpen: url) else { return }
-                Task {
-                    let alert = AXAlertView(title: "Do you want to open `\(appPath.lastPathComponent)`?")
-                    let response = await alert.presentAlert(window: self.window!)
-                    if response {
-                        let config = NSWorkspace.OpenConfiguration()
-                        config.activates = true
-                        NSWorkspace.shared.open([url], withApplicationAt: appPath, configuration: config, completionHandler: nil)
+                if let appPath = NSWorkspace.shared.urlForApplication(toOpen: url) {
+                    Task {
+                        let alert = AXAlertView(title: "Do you want to open `\(appPath.lastPathComponent)`?")
+                        let response = await alert.presentAlert(window: self.window!)
+                        if response {
+                            let config = NSWorkspace.OpenConfiguration()
+                            config.activates = true
+                            NSWorkspace.shared.open([url], withApplicationAt: appPath, configuration: config, completionHandler: nil)
+                        }
                     }
                 }
             }
@@ -234,14 +236,14 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
         switch navigationAction.modifierFlags {
         case .command: // New tab
             appProperties.tabManager.navigatesToNewTabOnCreate = false
-            fallthrough
+            appProperties.tabManager.createNewTab(request: navigationAction.request)
+            decisionHandler(.cancel, preferences)
+            return
         case [.shift, .command]: // New tab + Go to tab
             appProperties.tabManager.createNewTab(request: navigationAction.request)
             decisionHandler(.cancel, preferences)
             return
-            
-            
-        case [.option, .command]: // New window
+        case [.option, .command]: // New window in background
             fallthrough
         case [.shift, .option, .command]: // New window + show window
             let window = AXWindow(isPrivate: appProperties.isPrivate, restoresTab: false)
@@ -277,12 +279,15 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
             index += 1
         }
         
-        let downloadItem = AXDownloadItem(fileName: suggestedFilename, location: fileUrl.absoluteString, url: fileUrl, download: download)
-        appProperties.sidebarView.didDownload(downloadItem)
         
-        // Save to downloads
         if !appProperties.isPrivate {
-            AXDownload.appendItem(fileName: suggestedFilename, location: fileUrl.relativePath)
+            let downloadItem = AXDownloadItem(fileName: suggestedFilename, location: fileUrl.absoluteString, url: fileUrl, download: download)
+            appProperties.sidebarView.didDownload(downloadItem)
+            
+            // Save to downloads
+            if !appProperties.isPrivate {
+                AXDownload.appendItem(fileName: suggestedFilename, location: fileUrl.relativePath)
+            }
         }
         
         completionHandler(fileUrl)

@@ -212,7 +212,7 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
                 } else if (result as? String) == "success: true" {
                     AXGlobalProperties.shared.hasPaid = true
                     AXGlobalProperties.shared.save()
-                    self.window!.close()
+                    self.window?.sheetParent?.endSheet(self.window!)
                 } else {
                     self.showError("Error: \(result)", time: 6.0)
                 }
@@ -220,6 +220,8 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
                 print("Error reading contents of web page: \(error.localizedDescription)")
             }
         }
+        
+        self.welcomeToMalvonLabel.stringValue = "Welcome to Malvon!"
     }
     
     func validateFields() -> Bool {

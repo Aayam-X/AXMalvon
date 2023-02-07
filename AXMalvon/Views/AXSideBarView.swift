@@ -334,8 +334,8 @@ class AXSideBarView: NSView {
     }
     
     // Add a new item into the stackview
-    func didCreateTab() {
-        tabView.addTabToStackView()
+    func didCreateTab(_ tab: AXTabItem) {
+        tabView.addTabToStackView(tab)
     }
     
     func createTab(_ tab: AXTabItem) {
@@ -343,8 +343,8 @@ class AXSideBarView: NSView {
     }
     
     // Add a new item into the stackview
-    func didCreateTabInBackground(index: Int) {
-        tabView.addTabToStackViewInBackground(index: index)
+    func didCreateTabInBackground(_ tab: AXTabItem) {
+        tabView.addTabToStackViewInBackground(tab)
     }
     
     func swapAt(_ first: Int, _ second: Int) {
@@ -420,7 +420,7 @@ class AXSideBarView: NSView {
                 let otherAppProperty = button.appProperties!
                 
                 // Other window
-                appProperties.currentProfile.tabs.append(otherAppProperty.currentProfile.tabs[button.tag])
+                appProperties.currentTabs.append(otherAppProperty.currentTabs[button.tag])
                 otherAppProperty.tabManager.tabDraggedToOtherWindow(button.tag)
                 
                 // Check if button is from another profile
@@ -481,13 +481,13 @@ class AXSideBarView: NSView {
     }
     
     func initializeProfiles() {
-        for profile in appProperties.AX_profiles {
+        for profile in AXGlobalProperties.shared.profiles {
             // Create tabViews
             let tabView = AXTabView(profile: profile)
             tabView.translatesAutoresizingMaskIntoConstraints = false
             tabView.appProperties = appProperties
             
-            if tabView.profile.tabs.isEmpty {
+            if appProperties.tabs[profile.index].isEmpty {
                 tabView.createTab()
             }
             

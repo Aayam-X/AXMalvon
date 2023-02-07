@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		ED01B05A2957E3C700CB657E /* AXSearchFieldSuggestItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED01B0592957E3C700CB657E /* AXSearchFieldSuggestItem.swift */; };
 		ED02037A2958E5760054A6BB /* AXInformationAlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0203792958E5760054A6BB /* AXInformationAlertView.swift */; };
+		ED05FFE729802D08001E5F13 /* AXPreferenceProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED05FFE629802D08001E5F13 /* AXPreferenceProfileView.swift */; };
 		ED0ACB0A294FFB9900BFBFC9 /* MXSearchSuggestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0ACB09294FFB9900BFBFC9 /* MXSearchSuggestion.swift */; };
 		ED0B1AC92947910800524F08 /* AXSearchFieldPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0B1AC82947910800524F08 /* AXSearchFieldPopoverView.swift */; };
 		ED0B284C2959C6A7003D656F /* AXWebSplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0B284B2959C6A7003D656F /* AXWebSplitView.swift */; };
@@ -63,6 +64,7 @@
 /* Begin PBXFileReference section */
 		ED01B0592957E3C700CB657E /* AXSearchFieldSuggestItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSearchFieldSuggestItem.swift; sourceTree = "<group>"; };
 		ED0203792958E5760054A6BB /* AXInformationAlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXInformationAlertView.swift; sourceTree = "<group>"; };
+		ED05FFE629802D08001E5F13 /* AXPreferenceProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPreferenceProfileView.swift; sourceTree = "<group>"; };
 		ED0ACB09294FFB9900BFBFC9 /* MXSearchSuggestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MXSearchSuggestion.swift; sourceTree = "<group>"; };
 		ED0B1AC82947910800524F08 /* AXSearchFieldPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSearchFieldPopoverView.swift; sourceTree = "<group>"; };
 		ED0B284B2959C6A7003D656F /* AXWebSplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWebSplitView.swift; sourceTree = "<group>"; };
@@ -176,6 +178,7 @@
 				ED7B54A0295B798C008A944F /* AXPreferenceAccountView.swift */,
 				ED7B549E295B6E6F008A944F /* AXPreferenceGeneralView.swift */,
 				ED396B592969CAF400DC9492 /* AXPreferenceSearchView.swift */,
+				ED05FFE629802D08001E5F13 /* AXPreferenceProfileView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -422,6 +425,7 @@
 				ED0B284C2959C6A7003D656F /* AXWebSplitView.swift in Sources */,
 				ED7B54A1295B798C008A944F /* AXPreferenceAccountView.swift in Sources */,
 				ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */,
+				ED05FFE729802D08001E5F13 /* AXPreferenceProfileView.swift in Sources */,
 				ED0B1AC92947910800524F08 /* AXSearchFieldPopoverView.swift in Sources */,
 				ED396B5A2969CAF400DC9492 /* AXPreferenceSearchView.swift in Sources */,
 				ED5DF668295DC68000433D45 /* AXPurchaseBrowserView.swift in Sources */,

@@ -16,3 +16,15 @@ import WebKit
 // Experimental Menu Items
 let experimentalFeatures = WKPreferences.value(forKey: "experimentalFeatures")
 // as! _WKExperimentalFeature
+
+
+// Cookie or something
+let response = navigationResponse.response as! HTTPURLResponse
+let headFields = response.allHeaderFields as! [String: String]
+
+
+print("HEADERF FIELDS: \(headFields)")
+// let cookies = HTTPCookie.cookies(withResponseHeaderFields: headFields, for: response.url!)
+// for cookie in cookies {
+//  print("name: \(cookie.name) value: \(cookie.value)")
+// }

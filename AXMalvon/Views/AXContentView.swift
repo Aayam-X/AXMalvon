@@ -63,6 +63,10 @@ class AXContentView: NSView {
             
             appProperties.sidebarView.wantsLayer = true
             
+#if !DEBUG
+            checkIfBought()
+#endif
+            
             hasDrawn = true
         }
     }
@@ -150,22 +154,22 @@ class AXContentView: NSView {
             switch event.characters {
             case "1": // There is always going to be one tab, so no checking
                 appProperties.tabManager.switch(to: 0)
-            case "2" where 2 <= appProperties.currentProfile.tabs.count:
+            case "2" where 2 <= appProperties.currentTabs.count:
                 appProperties.tabManager.switch(to: 1)
-            case "3" where 3 <= appProperties.currentProfile.tabs.count:
+            case "3" where 3 <= appProperties.currentTabs.count:
                 appProperties.tabManager.switch(to: 2)
-            case "4" where 4 <= appProperties.currentProfile.tabs.count:
+            case "4" where 4 <= appProperties.currentTabs.count:
                 appProperties.tabManager.switch(to: 3)
-            case "5" where 5 <= appProperties.currentProfile.tabs.count:
+            case "5" where 5 <= appProperties.currentTabs.count:
                 appProperties.tabManager.switch(to: 4)
-            case "6" where 6 <= appProperties.currentProfile.tabs.count:
+            case "6" where 6 <= appProperties.currentTabs.count:
                 appProperties.tabManager.switch(to: 5)
-            case "7" where 7 <= appProperties.currentProfile.tabs.count:
+            case "7" where 7 <= appProperties.currentTabs.count:
                 appProperties.tabManager.switch(to: 6)
-            case "8" where 8 <= appProperties.currentProfile.tabs.count:
+            case "8" where 8 <= appProperties.currentTabs.count:
                 appProperties.tabManager.switch(to: 7)
             case "9":
-                appProperties.tabManager.switch(to: appProperties.currentProfile.tabs.count - 1)
+                appProperties.tabManager.switch(to: appProperties.currentTabs.count - 1)
             case "r":
                 appProperties.sidebarView.reloadButtonAction()
             default:
@@ -202,7 +206,7 @@ class AXContentView: NSView {
             }
             
             // Piss them off even more
-            try? await Task.sleep(nanoseconds: 15_000_000_000)
+            try? await Task.sleep(nanoseconds: 5_000_000_000)
             
             AXGlobalProperties.shared.hasPaid = false
             AXGlobalProperties.shared.userEmail = ""

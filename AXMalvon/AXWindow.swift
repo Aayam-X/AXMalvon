@@ -92,10 +92,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
         appProperties.webContainerView.stopObserving()
         appProperties.webContainerView.removeDelegates()
         
-        appProperties.AX_profiles.forEach { profile in
-            profile.saveProperties()
-            profile.tabs.removeAll()
-        }
+        AXGlobalProperties.shared.profiles.forEach { $0.saveProperties() }
         
         super.close()
     }

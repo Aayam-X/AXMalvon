@@ -21,10 +21,18 @@
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Add preference panes (Profiles)
 - [ ] Add colors to spaces
-- [ ] Seperate history based on profile
 - [ ] Multiple tabs would be selected when closing tabs
 - [ ] Adjusting width of sidebar will cause problems (If on second space, the scrollView must scroll to end of it, Button title width also plays a role)
 ---
+- [x] Logging in will cause sidebar swipe problems
+- [x] Pressing command will open tab in background and NOT MAKE IT CURRENT TAB
+- [x] WebContainerView: Save cookies on didFinish
+- [x] Have two types of Save Properties for the profile. One for quick switching and another when the app is about to quits
+- [x] Seperate history based on profile
+- [x] Log in userdefault not getting set when restarting mac
+---
+- [x] Open new window to bypass log in / sign up alert || Doesn't matter
+- [x] Log in without wifi problem
 - [x] Swiping between sidebar profiles will not update
 - [x] Sidebar, remove adding 10x and 9x and apply to the buttons not the stack view
 - [x] Title from another profile will change the webContainerView's title even when not active

@@ -50,12 +50,12 @@ class AXProfileListView: NSView {
     }
     
     func addProfileButtons() {
-        for (index, profile) in appProperties.AX_profiles.enumerated() {
+        for (index, profile) in AXGlobalProperties.shared.profiles.enumerated() {
             let item = AXHoverButton()
             item.translatesAutoresizingMaskIntoConstraints = false
             item.heightAnchor.constraint(equalToConstant: 30).isActive = true
             item.widthAnchor.constraint(equalToConstant: 35).isActive = true
-            item.image = NSImage(systemSymbolName: "star", accessibilityDescription: nil)
+            item.image = NSImage(systemSymbolName: profile.icon, accessibilityDescription: nil)
             item.toolTip = profile.name
             item.target = self
             item.tag = index
@@ -63,7 +63,8 @@ class AXProfileListView: NSView {
             item.action = #selector(buttonClickAction(_:))
         }
         
-        (stackView.arrangedSubviews[appProperties.currentProfileIndex] as! AXHoverButton).image = NSImage(systemSymbolName: "star.fill", accessibilityDescription: nil)
+        let profile = AXGlobalProperties.shared.profiles[appProperties.currentProfileIndex]
+        (stackView.arrangedSubviews[appProperties.currentProfileIndex] as! AXHoverButton).image = NSImage(systemSymbolName: "\(profile.icon).fill", accessibilityDescription: nil)
     }
     
     @objc func buttonClickAction(_ sender: AXHoverButton) {
@@ -73,7 +74,10 @@ class AXProfileListView: NSView {
     }
     
     func updateSelection(from: Int, to: Int) {
-        (stackView.arrangedSubviews[from] as! AXHoverButton).image = NSImage(systemSymbolName: "star", accessibilityDescription: nil)
-        (stackView.arrangedSubviews[to] as! AXHoverButton).image = NSImage(systemSymbolName: "star.fill", accessibilityDescription: nil)
+        let fromProfile = AXGlobalProperties.shared.profiles[from]
+        let toProfile = AXGlobalProperties.shared.profiles[to]
+        
+        (stackView.arrangedSubviews[from] as! AXHoverButton).image = NSImage(systemSymbolName: fromProfile.icon, accessibilityDescription: nil)
+        (stackView.arrangedSubviews[to] as! AXHoverButton).image = NSImage(systemSymbolName: "\(toProfile.icon).fill", accessibilityDescription: nil)
     }
 }

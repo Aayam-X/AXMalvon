@@ -26,8 +26,12 @@ class AXBrowserProfile {
     var name: String // User default string
     var index: Int
     var webViewConfiguration: WKWebViewConfiguration
-    var tabs: [AXTabItem] = []
+    var urls: [URL] = []
     var previouslyClosedTabs: [URL] = []
+    var history: AXHistory
+    
+    // Configuration
+    var icon: String // SF Symbols
     
     lazy var tabStackView: NSStackView = {
         let stackView = NSStackView()
@@ -49,18 +53,21 @@ class AXBrowserProfile {
     
     init(name: String) {
         self.name = name
+        self.history = AXHistory(profileName: name)
         
         // Create the configuration
         self.webViewConfiguration = WKWebViewConfiguration()
         webViewConfiguration.websiteDataStore = .nonPersistent()
         
         index = UserDefaults.standard.integer(forKey: "\(name)-Index")
+        icon = UserDefaults.standard.string(forKey: "\(name)-Icon") ?? "star"
         
         retriveProperties()
     }
     
     init(name: String, _ index: Int) {
         self.name = name
+        self.history = AXHistory(profileName: name)
         
         // Create the configuration
         self.webViewConfiguration = WKWebViewConfiguration()
@@ -68,6 +75,10 @@ class AXBrowserProfile {
         
         self.index = index
         UserDefaults.standard.set(index, forKey: "\(name)-Index")
+        
+        
+        self.icon = "star"
+        UserDefaults.standard.set(icon, forKey: "\(name)-Icon")
         
         retriveProperties()
     }
@@ -91,17 +102,16 @@ class AXBrowserProfile {
     
     func retriveTabs() {
         // Retrive the tabs
-        if let data = UserDefaults.standard.data(forKey: "\(name)-AXTabItem") {
-            do {
-                let decoder = JSONDecoder()
-                decoder.userInfo[AXTabItem.webViewConfigurationUserInfoKey] = webViewConfiguration
-                self.tabs = try decoder.decode([AXTabItem].self, from: data)
-                
-                // Retrive the currentTab & Index
-                currentTab = UserDefaults.standard.integer(forKey: "\(name)-CurrentTab")
-            } catch {
-                print("Unable to Decode Tabs (\(error))")
-            }
+        if let urls = UserDefaults.standard.array(forKey: "\(name)-URLs") as? [URL] {
+            self.urls = urls
+            currentTab = UserDefaults.standard.integer(forKey: "\(name)-CurrentTab")
+        }
+    }
+    
+    func quickSaveProperties() {
+        // Save cookies
+        webViewConfiguration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
+            setData(cookies, key: "\(self.name)-HTTPCookie")
         }
     }
     
@@ -109,15 +119,10 @@ class AXBrowserProfile {
         // Save current tab & Index
         UserDefaults.standard.set(currentTab, forKey: "\(name)-CurrentTab")
         UserDefaults.standard.set(index, forKey: "\(name)-Index")
+        UserDefaults.standard.set(icon, forKey: "\(name)-Icon")
         
         // Save tabs
-        do {
-            let encoder = JSONEncoder()
-            let data = try encoder.encode(tabs)
-            UserDefaults.standard.set(data, forKey: "\(name)-AXTabItem")
-        } catch {
-            print("Unable to Encode Tabs (\(error.localizedDescription))")
-        }
+        UserDefaults.standard.set(urls, forKey: "\(name)-URLs")
         
         // Save cookies
         webViewConfiguration.websiteDataStore.httpCookieStore.getAllCookies { cookies in

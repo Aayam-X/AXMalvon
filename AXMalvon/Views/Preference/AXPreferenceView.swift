@@ -15,7 +15,8 @@ class AXPreferenceView: NSView {
     lazy var settingPanes = [
         ("Account", "person.crop.circle", 0),
         ("General", "gearshape", 1),
-        ("Search", "magnifyingglass", 2)
+        ("Search", "magnifyingglass", 2),
+        ("Profiles", "person.2.fill", 3),
     ]
     
     let seperator = NSBox()
@@ -106,22 +107,22 @@ class AXPreferenceView: NSView {
     
     func setUpButtons() {
         for pane in settingPanes {
-            let button = AXPreferenceButton(title: pane.0, icon: pane.1, tag: pane.2)
+            let button = AXPreferenceSidebarButton(title: pane.0, icon: pane.1, tag: pane.2)
             button.target = self
             button.action = #selector(buttonAction(_:))
             sidebarStackView.addArrangedSubview(button)
         }
         
-        let firstButton = sidebarStackView.subviews[AXPreferenceGlobal.selectedTab] as! AXPreferenceButton
+        let firstButton = sidebarStackView.subviews[AXPreferenceGlobal.selectedTab] as! AXPreferenceSidebarButton
         firstButton.isSelected = true
     }
     
     @objc func buttonAction(_ sender: AXPreferenceButton) {
-        let previousButton = sidebarStackView.subviews[AXPreferenceGlobal.selectedTab] as! AXPreferenceButton
+        let previousButton = sidebarStackView.subviews[AXPreferenceGlobal.selectedTab] as! AXPreferenceSidebarButton
         previousButton.isSelected = false
         
         AXPreferenceGlobal.selectedTab = sender.tag
-        let currentButton = sidebarStackView.subviews[AXPreferenceGlobal.selectedTab] as! AXPreferenceButton
+        let currentButton = sidebarStackView.subviews[AXPreferenceGlobal.selectedTab] as! AXPreferenceSidebarButton
         self.windowTitleLabel.stringValue = currentButton.titleView.stringValue
         currentButton.isSelected = true
         
@@ -137,6 +138,9 @@ class AXPreferenceView: NSView {
         case 2:
             // Search
             view = AXPreferenceSearchView()
+        case 3:
+            // Profiles
+            view = AXPreferenceProfileView()
         default:
             return
         }

@@ -11,6 +11,11 @@ import WebKit
 
 // Every AXWindow will have one instance of this
 class AXAppProperties {
+    // Tabs
+    var tabs = [[AXTabItem]]()
+    
+    var currentTabs = [AXTabItem]()
+    
     // Views
     var contentView: AXContentView
     let sidebarView: AXSideBarView
@@ -27,7 +32,7 @@ class AXAppProperties {
     // Other
     let tabManager: AXTabManager
     var profileManager: AXProfileManager?
-    var AX_profiles: [AXBrowserProfile] = []
+    var privateBrowsingProfile: AXPrivateBrowserProfile?
     var webViewConfiguration: WKWebViewConfiguration = {
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .nonPersistent()
@@ -45,8 +50,13 @@ class AXAppProperties {
     // Variables
     var isPrivate: Bool
     
-    var currentProfile: AXBrowserProfile!
     var currentProfileIndex: Int = 0
+    var currentProfile: AXBrowserProfile {
+        get {
+           AXGlobalProperties.shared.profiles[currentProfileIndex]
+        }
+    }
+    
     var currentTab: AXTabItem!
     var currentTabButton: AXSidebarTabButton!
     
@@ -58,23 +68,44 @@ class AXAppProperties {
     init(isPrivate: Bool = false, restoresTab: Bool = true) {
         sidebarWidth = (UserDefaults.standard.object(forKey: "sidebarWidth") as? CGFloat) ?? 225.0
         
-        // Retrive the profiles
-        if !isPrivate {
-            if let profileNames = UserDefaults.standard.stringArray(forKey: "Profiles") {
-                let profiles = profileNames.map { AXBrowserProfile(name: $0) }
-                AX_profiles = profiles
-            } else {
-                let profiles: [AXBrowserProfile] = [.init(name: "Default", 0), .init(name: "Secondary", 1)]
-                AX_profiles = profiles
-                
-                let names = AX_profiles.map { $0.saveProperties(); return $0.name }
-                UserDefaults.standard.set(names, forKey: "Profiles")
-            }
+        if isPrivate {
+            privateBrowsingProfile = AXPrivateBrowserProfile()
+            webViewConfiguration = privateBrowsingProfile!.webViewConfiguration
         } else {
-            let profile = AXPrivateBrowserProfile()
-            AX_profiles.append(profile)
-            currentProfile = profile
-            webViewConfiguration = profile.webViewConfiguration
+            self.webViewConfiguration = AXGlobalProperties.shared.profiles[currentProfileIndex].webViewConfiguration
+            
+            let profiles = AXGlobalProperties.shared.profiles
+            
+            for profile in profiles {
+                let configuration = profile.webViewConfiguration
+                
+                let profileTabs: [AXTabItem]!
+                
+                if !profile.urls.isEmpty {
+                    profileTabs = profile.urls.map { url in
+                        let webView = AXWebView(frame: .zero, configuration: configuration)
+                        webView.addConfigurations()
+                        webView.load(URLRequest(url: url))
+                        
+                        let tabItem = AXTabItem(view: webView)
+                        tabItem.url = url
+                        
+                        return tabItem
+                    }
+                } else {
+                    let webView = AXWebView(frame: .zero, configuration: configuration)
+                    webView.addConfigurations()
+                    webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
+                    profileTabs = [
+                        .init(view: webView)
+                    ]
+                }
+                
+                tabs.append(profileTabs)
+            }
+            
+            // I want this to be a reference
+            currentTabs = tabs[0]
         }
         
         if let s = UserDefaults.standard.string(forKey: "windowFrame") {
