@@ -481,7 +481,7 @@ class AXSideBarView: NSView {
     }
     
     func initializeProfiles() {
-        for profile in appProperties.AX_profiles {
+        for profile in appProperties.profiles {
             // Create tabViews
             let tabView = AXTabView(profile: profile)
             tabView.translatesAutoresizingMaskIntoConstraints = false

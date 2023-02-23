@@ -65,20 +65,15 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         searchField = nil
     }
     
-    override func removeFromSuperview() {
-        super.removeFromSuperview()
-        
-        saveMostVisitedSites()
-    }
-    
-    func saveMostVisitedSites() {
-        let websiteCounts = searchedQueries.reduce(into: [:]) { counts, item in counts[item, default: 0] += 1 }
-        let websites = websiteCounts.filter { $0.value > 3 }.map { $0.key }
-        
-        let newWebsites = websites.filter { !mostVisitedWebsites.contains($0) }
-        mostVisitedWebsites.append(contentsOf: newWebsites)
-        UserDefaults.standard.set(mostVisitedWebsites, forKey: "MostVisitedWebsite")
-    }
+    //    func saveMostVisitedSites() {
+    //        print("func saveMostVisitedSites()")
+    //        let websiteCounts = searchedQueries.reduce(into: [:]) { counts, item in counts[item, default: 0] += 1 }
+    //        let websites = websiteCounts.filter { $0.value > 3 }.map { $0.key }
+    //
+    //        let newWebsites = websites.filter { !mostVisitedWebsites.contains($0) }
+    //        mostVisitedWebsites.append(contentsOf: newWebsites)
+    //        UserDefaults.standard.set(mostVisitedWebsites, forKey: "MostVisitedWebsite")
+    //    }
     
     init() {
         suggestionWindow = AXSearchFieldWindow()
@@ -164,7 +159,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             searchedQueries.append(value)
             
             if searchedQueries.count == 15 {
-                saveMostVisitedSites()
+                //saveMostVisitedSites()
                 searchedQueries.removeAll()
             }
         }

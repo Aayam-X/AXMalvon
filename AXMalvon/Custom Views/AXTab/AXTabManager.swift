@@ -162,7 +162,7 @@ class AXTabManager {
         }
         
         // Create webView
-        let webView = AXWebView(frame: .zero, configuration: appProperties.webViewConfiguration)
+        let webView = AXWebView(frame: .zero, configuration: appProperties.currentWebViewConfiguration)
         webView.addConfigurations()
         webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL)
         
@@ -178,7 +178,7 @@ class AXTabManager {
         }
         
         // Create webView
-        let webView = AXWebView(frame: .zero, configuration: appProperties.webViewConfiguration)
+        let webView = AXWebView(frame: .zero, configuration: appProperties.currentWebViewConfiguration)
         webView.addConfigurations()
         webView.load(URLRequest(url: url))
         
@@ -193,7 +193,7 @@ class AXTabManager {
         }
         
         // Create webView
-        let webView = AXWebView(frame: .zero, configuration: appProperties.webViewConfiguration)
+        let webView = AXWebView(frame: .zero, configuration: appProperties.currentWebViewConfiguration)
         webView.addConfigurations()
         webView.load(request)
         
@@ -222,7 +222,7 @@ class AXTabManager {
         }
         
         // Create webView
-        let webView = AXWebView(frame: .zero, configuration: appProperties.webViewConfiguration)
+        let webView = AXWebView(frame: .zero, configuration: appProperties.currentWebViewConfiguration)
         webView.addConfigurations()
         webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
         
@@ -246,7 +246,7 @@ class AXTabManager {
     
     func createNewPrivateTab() {
         // Create webView
-        let webView = AXWebView(frame: .zero, configuration: appProperties.webViewConfiguration)
+        let webView = AXWebView(frame: .zero, configuration: appProperties.currentWebViewConfiguration)
         webView.addConfigurations()
         webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
         
@@ -255,7 +255,7 @@ class AXTabManager {
     }
     
     func createNewPrivateTab(fileURL: URL) {
-        let webView = AXWebView(frame: .zero, configuration: appProperties.webViewConfiguration)
+        let webView = AXWebView(frame: .zero, configuration: appProperties.currentWebViewConfiguration)
         webView.addConfigurations()
         webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL)
         
@@ -264,7 +264,7 @@ class AXTabManager {
     }
     
     func createNewPrivateTab(url: URL) {
-        let webView = AXWebView(frame: .zero, configuration: appProperties.webViewConfiguration)
+        let webView = AXWebView(frame: .zero, configuration: appProperties.currentWebViewConfiguration)
         webView.addConfigurations()
         webView.load(URLRequest(url: url))
         
@@ -273,7 +273,7 @@ class AXTabManager {
     }
     
     func createNewPrivateTab(request: URLRequest) {
-        let webView = AXWebView(frame: .zero, configuration: appProperties.webViewConfiguration)
+        let webView = AXWebView(frame: .zero, configuration: appProperties.currentWebViewConfiguration)
         webView.addConfigurations()
         webView.load(request)
         
@@ -282,10 +282,10 @@ class AXTabManager {
     }
     
     func createNewPrivateTab(request: URLRequest, config: WKWebViewConfiguration) -> AXWebView {
-        config.websiteDataStore = appProperties.webViewConfiguration.websiteDataStore
-        config.processPool = appProperties.webViewConfiguration.processPool
+        config.websiteDataStore = appProperties.currentWebViewConfiguration.websiteDataStore
+        config.processPool = appProperties.currentWebViewConfiguration.processPool
         
-        let webView = AXWebView(frame: .zero, configuration: appProperties.webViewConfiguration)
+        let webView = AXWebView(frame: .zero, configuration: appProperties.currentWebViewConfiguration)
         webView.addConfigurations()
         webView.load(request)
         
@@ -294,8 +294,8 @@ class AXTabManager {
     }
     
     func createNewPrivateTab(configuration: WKWebViewConfiguration) -> AXWebView {
-        configuration.websiteDataStore = appProperties.webViewConfiguration.websiteDataStore
-        configuration.processPool = appProperties.webViewConfiguration.processPool
+        configuration.websiteDataStore = appProperties.currentWebViewConfiguration.websiteDataStore
+        configuration.processPool = appProperties.currentWebViewConfiguration.processPool
         
         let webView = AXWebView(frame: .zero, configuration: configuration)
         webView.addConfigurations()

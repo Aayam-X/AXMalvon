@@ -24,16 +24,13 @@ class AXAppProperties {
     let progressBar: AXRectangularProgressIndicator
     let findBar: AXWebViewFindView
     
-    // Other
+    // Profile related
+    var profiles: [AXBrowserProfile] = []
+    var currentWebViewConfiguration: WKWebViewConfiguration!
+    
+    // Managers
     let tabManager: AXTabManager
     var profileManager: AXProfileManager?
-    var AX_profiles: [AXBrowserProfile] = []
-    var webViewConfiguration: WKWebViewConfiguration = {
-        let config = WKWebViewConfiguration()
-        config.websiteDataStore = .nonPersistent()
-        
-        return config
-    }()
     
     // State Variables
     var isFullScreen: Bool = false
@@ -58,23 +55,14 @@ class AXAppProperties {
     init(isPrivate: Bool = false, restoresTab: Bool = true) {
         sidebarWidth = (UserDefaults.standard.object(forKey: "sidebarWidth") as? CGFloat) ?? 225.0
         
-        // Retrive the profiles
+        // Retrive the browser profiles
         if !isPrivate {
             if let profileNames = UserDefaults.standard.stringArray(forKey: "Profiles") {
-                let profiles = profileNames.map { AXBrowserProfile(name: $0) }
-                AX_profiles = profiles
+                self.profiles = profileNames.map { AXBrowserProfile(name: $0) }
             } else {
-                let profiles: [AXBrowserProfile] = [.init(name: "Default", 0), .init(name: "Secondary", 1)]
-                AX_profiles = profiles
-                
-                let names = AX_profiles.map { $0.saveProperties(); return $0.name }
-                UserDefaults.standard.set(names, forKey: "Profiles")
+                self.profiles = [.init(name: "Default", 0), .init(name: "Secondary", 1)]
+                UserDefaults.standard.set(["Default", "Secondary"], forKey: "Profiles")
             }
-        } else {
-            let profile = AXPrivateBrowserProfile()
-            AX_profiles.append(profile)
-            currentProfile = profile
-            webViewConfiguration = profile.webViewConfiguration
         }
         
         if let s = UserDefaults.standard.string(forKey: "windowFrame") {

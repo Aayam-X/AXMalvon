@@ -50,7 +50,7 @@ class AXProfileListView: NSView {
     }
     
     func addProfileButtons() {
-        for (index, profile) in appProperties.AX_profiles.enumerated() {
+        for (index, profile) in appProperties.profiles.enumerated() {
             let item = AXHoverButton()
             item.translatesAutoresizingMaskIntoConstraints = false
             item.heightAnchor.constraint(equalToConstant: 30).isActive = true

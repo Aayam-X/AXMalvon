@@ -21,7 +21,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Initializers
-        AXHistory.checkIfFileExists()
         AXDownload.checkIfFileExists()
         
         Task {
@@ -31,9 +30,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Create a window
         let window = AXWindow()
         window.makeKeyAndOrderFront(nil)
-        window.appProperties.AX_profiles.forEach { profile in
-            profile.retriveTabs()
-        }
         
 #if !DEBUG
         if AXGlobalProperties.shared.userEmail == "" || AXGlobalProperties.shared.userPassword == "" {
@@ -69,12 +65,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        if let appProperties = (NSApplication.shared.mainWindow as? AXWindow)?.appProperties {
-            let names = appProperties.AX_profiles.map { $0.saveProperties(); return $0.name }
-            UserDefaults.standard.set(names, forKey: "Profiles")
-            
-            appProperties.popOver.saveMostVisitedSites()
-        }
+        AXGlobalProperties.shared.save()
         
         let alert = NSAlert()
         alert.messageText = "Do you want to quit Malvon"
@@ -90,14 +81,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func applicationWillTerminate(_ notification: Notification) {
+        // Maybe have a background application to remove/organize history
         AXHistory.removeDuplicates()
+        
+        for window in NSApplication.shared.windows where window is AXWindow {
+            let window = window as! AXWindow
+            
+            // HISTORYYYYY
+            //window.appProperties.AX_profiles.history.removeDuplicates()
+        }
     }
     
     func applicationDidResignActive(_ notification: Notification) {
-        if let profiles = (NSApplication.shared.mainWindow as? AXWindow)?.appProperties.AX_profiles {
-            let names = profiles.map { $0.saveProperties(); return $0.name }
-            UserDefaults.standard.set(names, forKey: "Profiles")
-        }
+        //        if let profiles = (NSApplication.shared.mainWindow as? AXWindow)?.appProperties.profiles {
+        //            let names = profiles.map { $0.saveProperties(); return $0.name }
+        //            UserDefaults.standard.set(names, forKey: "Profiles")
+        //        }
     }
     
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -153,9 +152,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @IBAction func createNewWindow(_ sender: Any) {
         let window = AXWindow()
-        window.appProperties.AX_profiles.forEach { profile in
-            profile.retriveTabs()
-        }
+        
+        // Create new window and create blank window
+        window.appProperties.profiles.forEach { $0.retriveTabs() }
         
         window.makeKeyAndOrderFront(nil)
     }

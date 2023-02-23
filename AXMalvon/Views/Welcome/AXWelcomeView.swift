@@ -180,7 +180,7 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
         }
         let encryptedPassword = encrypt(string: password, key: email).addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
         
-        // TODO: Security flaw
+        // TODO: Security flaw, do not use HTTPS URL for password
         AXGlobalProperties.shared.userEmail = email
         AXGlobalProperties.shared.userPassword = encryptedPassword
         
@@ -213,6 +213,8 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
                     AXGlobalProperties.shared.hasPaid = true
                     AXGlobalProperties.shared.save()
                     self.window!.close()
+                    
+                    relaunchApplication()
                 } else {
                     self.showError("Error: \(result)", time: 6.0)
                 }
@@ -220,6 +222,15 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
                 print("Error reading contents of web page: \(error.localizedDescription)")
             }
         }
+    }
+    
+    func relaunchApplication() -> Never {
+        let task = Process()
+        task.launchPath = "/bin/sh"
+        task.arguments = ["-c", "sleep \(0.5); open \"\(Bundle.main.bundlePath)\""]
+        task.launch()
+        
+        exit(0)
     }
     
     func validateFields() -> Bool {

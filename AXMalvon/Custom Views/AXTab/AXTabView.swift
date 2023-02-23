@@ -83,12 +83,18 @@ class AXTabView: NSView {
         }
         
         // Select the first tab
+        if profile.currentTab >= tabStackView.arrangedSubviews.count - 1 {
+            profile.currentTab = 0
+        }
+        
         let currentButton = tabStackView.arrangedSubviews[profile.currentTab] as! AXSidebarTabButton
         currentButton.isSelected = true
     }
     
     func createTab() {
-        let webView = AXWebView(frame: .zero, configuration: appProperties.webViewConfiguration)
+        let config = (profile != nil) ? AXGlobalProperties.shared.profiles[profile.index].configuration : appProperties.currentWebViewConfiguration!
+        
+        let webView = AXWebView(frame: .zero, configuration: config)
         webView.addConfigurations()
         webView.loadFileURL(newtabURL!, allowingReadAccessTo: newtabURL!)
         
