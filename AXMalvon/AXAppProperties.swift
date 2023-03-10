@@ -63,6 +63,15 @@ class AXAppProperties {
                 self.profiles = [.init(name: "Default", 0), .init(name: "Secondary", 1)]
                 UserDefaults.standard.set(["Default", "Secondary"], forKey: "Profiles")
             }
+        } else {
+            let privateProfile = AXPrivateBrowserProfile()
+            
+            self.currentWebViewConfiguration = WKWebViewConfiguration()
+            self.currentWebViewConfiguration.websiteDataStore = .nonPersistent()
+            self.currentWebViewConfiguration.processPool = WKProcessPool()
+            
+            currentProfile = privateProfile
+            profiles.append(privateProfile)
         }
         
         if let s = UserDefaults.standard.string(forKey: "windowFrame") {

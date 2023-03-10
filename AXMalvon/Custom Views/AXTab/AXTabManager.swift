@@ -147,7 +147,7 @@ class AXTabManager {
         if navigatesToNewTabOnCreate {
             appProperties.sidebarView.createTab(tabItem)
         } else {
-            appProperties.sidebarView.didCreateTabInBackground(index: appProperties.currentProfile.tabs.count - 1)
+            appProperties.sidebarView.didCreateTabInBackground(tabItem: tabItem)
             navigatesToNewTabOnCreate = true
         }
         

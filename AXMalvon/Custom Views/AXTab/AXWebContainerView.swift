@@ -206,20 +206,17 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
     }
     
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
-        if let url = navigationAction.request.url, let scheme = url.scheme {
-            switch scheme {
-            case "https", "about", "http", "file":
-                break
-            default:
-                guard let appPath = NSWorkspace.shared.urlForApplication(toOpen: url) else { return }
-                Task {
-                    let alert = AXAlertView(title: "Do you want to open `\(appPath.lastPathComponent)`?")
-                    let response = await alert.presentAlert(window: self.window!)
-                    if response {
-                        let config = NSWorkspace.OpenConfiguration()
-                        config.activates = true
-                        NSWorkspace.shared.open([url], withApplicationAt: appPath, configuration: config, completionHandler: nil)
-                    }
+        if let url = navigationAction.request.url,
+           let scheme = url.scheme,
+           !["https", "about", "http", "file"].contains(scheme),
+           let appPath = NSWorkspace.shared.urlForApplication(toOpen: url) {
+            Task {
+                let alert = AXAlertView(title: "Do you want to open `\(appPath.lastPathComponent)`?")
+                let response = await alert.presentAlert(window: self.window!)
+                if response {
+                    let config = NSWorkspace.OpenConfiguration()
+                    config.activates = true
+                    NSWorkspace.shared.open([url], withApplicationAt: appPath, configuration: config, completionHandler: nil)
                 }
             }
         }
@@ -234,14 +231,14 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
         switch navigationAction.modifierFlags {
         case .command: // New tab
             appProperties.tabManager.navigatesToNewTabOnCreate = false
-            fallthrough
+            appProperties.tabManager.createNewTab(request: navigationAction.request)
+            decisionHandler(.cancel, preferences)
+            return
         case [.shift, .command]: // New tab + Go to tab
             appProperties.tabManager.createNewTab(request: navigationAction.request)
             decisionHandler(.cancel, preferences)
             return
-            
-            
-        case [.option, .command]: // New window
+        case [.option, .command]: // New window in background
             fallthrough
         case [.shift, .option, .command]: // New window + show window
             let window = AXWindow(isPrivate: appProperties.isPrivate, restoresTab: false)

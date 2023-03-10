@@ -92,7 +92,7 @@ class AXTabView: NSView {
     }
     
     func createTab() {
-        let config = (profile != nil) ? AXGlobalProperties.shared.profiles[profile.index].configuration : appProperties.currentWebViewConfiguration!
+        let config = (profile.index == -1) ? appProperties.currentWebViewConfiguration! : AXGlobalProperties.shared.profiles[profile.index].configuration
         
         let webView = AXWebView(frame: .zero, configuration: config)
         webView.addConfigurations()
@@ -144,13 +144,17 @@ class AXTabView: NSView {
     }
     
     // Adds a button to the stackView
-    func addTabToStackViewInBackground(index: Int) {
+    func addTabToStackViewInBackground(tabItem: AXTabItem) {
+        profile.tabs.append(tabItem)
+        let index = profile.tabs.count - 1
+        
         let button = AXSidebarTabButton(appProperties, profile)
         button.translatesAutoresizingMaskIntoConstraints = false
         
         button.tag = index
         button.target = self
         button.action = #selector(tabClick(_:))
+        button.tabTitle = tabItem.title ?? "Untitled"
         addButtonToStackView(button)
         
         button.startObserving()
@@ -270,6 +274,12 @@ class AXTabView: NSView {
         let tab = profile.tabs[profile.currentTab]
         
         updateAppPropertiesAndWebView(button: button, tab: tab)
+    }
+    
+    private func addButtonToStackView(_ button: NSButton, _ index: Int) {
+        tabStackView.insertArrangedSubview(button, at: index)
+        button.leftAnchor.constraint(equalTo: tabStackView.leftAnchor, constant: 10).isActive = true
+        button.rightAnchor.constraint(equalTo: tabStackView.rightAnchor, constant: -9).isActive = true
     }
     
     private func addButtonToStackView(_ button: NSButton) {

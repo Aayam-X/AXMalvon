@@ -55,6 +55,7 @@ class AXGlobalBrowserProfile {
         
         // Create the configuration
         self.configuration = WKWebViewConfiguration()
+        self.configuration.processPool = WKProcessPool()
         self.configuration.websiteDataStore = .nonPersistent()
         
         // Retrive the cookies

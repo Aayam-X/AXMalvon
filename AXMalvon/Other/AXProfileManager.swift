@@ -14,6 +14,10 @@ class AXProfileManager {
     init(_ appProperties: AXAppProperties!) {
         self.appProperties = appProperties
         
+        // Ignore when appProperties is private
+        if appProperties.isPrivate { return }
+        
+        
         // Update the current profile
         guard let profile = appProperties.profiles[safe: appProperties.currentProfileIndex] else { return }
         

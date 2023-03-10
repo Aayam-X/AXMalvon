@@ -8,7 +8,10 @@
 - Animating NSWindow: https://github.com/jwilling/JNWAnimatableWindow
 - Textkit 2: https://developer.apple.com/videos/play/wwdc2021/10061/
 - Keychain: https://stackoverflow.com/q/52044285
-- Compiler optimization tips: https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst 
+- Compiler optimization tips: https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst
+
+## Niche features
+- [ ] Custom Picture in Picture 
 
 ## Future
 - [ ] Create transparent window buttons.
@@ -17,6 +20,7 @@
 - [ ] Add more preference panes and ability to create/edit new profiles
 - [ ] Add colors to spaces
 - [ ] Search suggestion: Switching tabs | Command Bar
+- [ ] SplitView tabs
 
 ## Implement soon
 - [ ] Create new window and create blank window options
@@ -24,14 +28,17 @@
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Seperate history based on profile
 - [ ] Profile icons
+- [ ] Clicking back on a pop up tab will close it and return to the original web page
 
 ## Needs fixing on
-- [ ] Private window doesn't work properly
 - [ ] When you close a tab, the `selectedTab` variable will be turned on for multiple tabs
 - [ ] Create tab after current tab rather the at the end
 
 
 ## 0.0.3
+- [x] Fix with opening links in background
+- [x] Private window doesn't work properly
+- [x] Fixed `AXWelcomeView` bug that caused sidebar swipes to not work when user just logged in
 ---
 - [x] Cookie system now updated
 - [x] Global instance of WKWebViewConfiguration instead of having an instance per window. This way cookies are spread and saved properly

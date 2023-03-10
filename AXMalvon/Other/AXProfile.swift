@@ -9,6 +9,15 @@
 import AppKit
 import WebKit
 
+final class AXPrivateBrowserProfile: AXBrowserProfile {
+    init() {
+        super.init(name: "PrivateWindow-\(UUID().uuidString)", -1)
+    }
+    
+    override func retriveTabs() {}
+    override func saveProperties() {}
+}
+
 class AXBrowserProfile {
     var name: String // User default string
     var index: Int

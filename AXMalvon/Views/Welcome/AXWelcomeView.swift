@@ -212,9 +212,7 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
                 } else if (result as? String) == "success: true" {
                     AXGlobalProperties.shared.hasPaid = true
                     AXGlobalProperties.shared.save()
-                    self.window!.close()
-                    
-                    relaunchApplication()
+                    self.window?.sheetParent?.endSheet(self.window!)
                 } else {
                     self.showError("Error: \(result)", time: 6.0)
                 }
@@ -222,15 +220,8 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
                 print("Error reading contents of web page: \(error.localizedDescription)")
             }
         }
-    }
-    
-    func relaunchApplication() -> Never {
-        let task = Process()
-        task.launchPath = "/bin/sh"
-        task.arguments = ["-c", "sleep \(0.5); open \"\(Bundle.main.bundlePath)\""]
-        task.launch()
         
-        exit(0)
+        self.welcomeToMalvonLabel.stringValue = "Welcome to Malvon!"
     }
     
     func validateFields() -> Bool {
