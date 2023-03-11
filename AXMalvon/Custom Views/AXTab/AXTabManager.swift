@@ -81,10 +81,12 @@ class AXTabManager {
         }
     }
     
+    // Shows the search field
     func showSearchField() {
         appProperties.contentView.showSearchBar()
     }
     
+    // Opens the search bar popover
     func openSearchBar() {
         appProperties.contentView.displaySearchBarPopover()
     }
@@ -102,29 +104,27 @@ class AXTabManager {
             appProperties.currentProfile.previouslyClosedTabs.append(url)
         }
         
-        if appProperties.currentProfile.tabs.count != 1 {
-            // Go to previous tab
-            if appProperties.currentProfile.previousTab >= appProperties.currentProfile.tabs.count - 1 {
-                if appProperties.currentProfile.currentTab == at {
-                    if at == appProperties.currentProfile.tabs.count - 1 {
-                        appProperties.currentProfile.currentTab -= 1
-                    }
-                } else if appProperties.currentProfile.currentTab > at {
-                    appProperties.currentProfile.currentTab -= 1
-                }
-            } else {
-                appProperties.currentProfile.currentTab = appProperties.currentProfile.previousTab
-            }
-            
-            appProperties.currentProfile.tabs.remove(at: at)
-            appProperties.sidebarView.removedTab(at)
-            
-            appProperties.webContainerView.update(view: appProperties.currentTab.view)
-        } else {
+        if appProperties.currentProfile.tabs.count == 1 {
             // Close window
             appProperties.window.close()
+            return
         }
+        
+        if appProperties.currentProfile.previousTab >= appProperties.currentProfile.tabs.count - 1,
+           appProperties.currentProfile.currentTab == at,
+           at == appProperties.currentProfile.tabs.count - 1 {
+            appProperties.currentProfile.currentTab -= 1
+        } else if appProperties.currentProfile.currentTab > at {
+            appProperties.currentProfile.currentTab -= 1
+        } else if appProperties.currentProfile.currentTab == appProperties.currentProfile.tabs.count - 1 {
+            appProperties.currentProfile.currentTab = appProperties.currentProfile.previousTab
+        }
+        
+        appProperties.currentProfile.tabs.remove(at: at)
+        appProperties.sidebarView.removedTab(at)
+        appProperties.webContainerView.update(view: appProperties.currentTab.view)
     }
+    
     
     func restoreTab() {
         if !appProperties.currentProfile.previouslyClosedTabs.isEmpty {
@@ -147,7 +147,7 @@ class AXTabManager {
         if navigatesToNewTabOnCreate {
             appProperties.sidebarView.createTab(tabItem)
         } else {
-            appProperties.sidebarView.didCreateTabInBackground(tabItem: tabItem)
+            appProperties.sidebarView.didCreateTabInBackground(tabItem: tabItem, index: appProperties.currentProfile.currentTab + 1)
             navigatesToNewTabOnCreate = true
         }
         

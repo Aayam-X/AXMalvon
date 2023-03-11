@@ -333,18 +333,13 @@ class AXSideBarView: NSView {
         tabView.update()
     }
     
-    // Add a new item into the stackview
-    func didCreateTab() {
-        tabView.addTabToStackView()
-    }
-    
     func createTab(_ tab: AXTabItem) {
         tabView.createTab(tab)
     }
     
     // Add a new item into the stackview
-    func didCreateTabInBackground(tabItem: AXTabItem) {
-        tabView.addTabToStackViewInBackground(tabItem: tabItem)
+    func didCreateTabInBackground(tabItem: AXTabItem, index: Int) {
+        tabView.addTabToStackViewInBackground(tab: tabItem, index)
     }
     
     func swapAt(_ first: Int, _ second: Int) {

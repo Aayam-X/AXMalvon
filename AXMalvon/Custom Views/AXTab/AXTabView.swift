@@ -100,13 +100,18 @@ class AXTabView: NSView {
         
         var tabItem = AXTabItem(view: webView)
         tabItem.url = webView.url
-        profile.tabs.append(tabItem)
-        addTabToStackView()
+        createTab(tabItem, 0)
     }
     
     func createTab(_ tab: AXTabItem) {
-        profile.tabs.append(tab)
-        addTabToStackView()
+        let index = profile.currentTab + 1
+        profile.tabs.insert(tab, at: index)
+        addTabToStackView(tab: tab, index)
+    }
+    
+    func createTab(_ tab: AXTabItem, _ index: Int) {
+        profile.tabs.insert(tab, at: index)
+        addTabToStackView(tab: tab, index)
     }
     
     func createTabFromUpdate(_ index: Int, _ tab: AXTabItem) {
@@ -122,10 +127,7 @@ class AXTabView: NSView {
     }
     
     // Adds a button to the stackView
-    func addTabToStackView() {
-        let index = profile.tabs.count - 1
-        
-        let tab = profile.tabs[index]
+    func addTabToStackView(tab: AXTabItem, _ index: Int) {
         let button = AXSidebarTabButton(appProperties, profile)
         button.translatesAutoresizingMaskIntoConstraints = false
         
@@ -135,7 +137,7 @@ class AXTabView: NSView {
         button.action = #selector(tabClick(_:))
         button.tabTitle = tab.title ?? "Untitled"
         
-        addButtonToStackView(button)
+        addButtonToStackView(button, index)
         
         updateSelection()
         button.startObserving()
@@ -144,9 +146,8 @@ class AXTabView: NSView {
     }
     
     // Adds a button to the stackView
-    func addTabToStackViewInBackground(tabItem: AXTabItem) {
-        profile.tabs.append(tabItem)
-        let index = profile.tabs.count - 1
+    func addTabToStackViewInBackground(tab: AXTabItem, _ index: Int) {
+        profile.tabs.insert(tab, at: index)
         
         let button = AXSidebarTabButton(appProperties, profile)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -154,8 +155,8 @@ class AXTabView: NSView {
         button.tag = index
         button.target = self
         button.action = #selector(tabClick(_:))
-        button.tabTitle = tabItem.title ?? "Untitled"
-        addButtonToStackView(button)
+        button.tabTitle = tab.title ?? "Untitled"
+        addButtonToStackView(button, index)
         
         button.startObserving()
     }

@@ -73,6 +73,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         self.profile = profile
         self.appProperties = appProperties
         super.init(frame: .zero)
+        self.translatesAutoresizingMaskIntoConstraints = false
         self.wantsLayer = true
         self.layer?.cornerRadius = 5
         self.isBordered = false

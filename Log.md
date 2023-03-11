@@ -31,11 +31,12 @@
 - [ ] Clicking back on a pop up tab will close it and return to the original web page
 
 ## Needs fixing on
-- [ ] When you close a tab, the `selectedTab` variable will be turned on for multiple tabs
-- [ ] Create tab after current tab rather the at the end
-
+- [ ] Fixing of sidebar tab button width
 
 ## 0.0.3
+- [x] Create tab after current tab rather the at the end
+- [x] When you close a tab, the `selectedTab` variable will be turned on for multiple tabs
+---
 - [x] Fix with opening links in background
 - [x] Private window doesn't work properly
 - [x] Fixed `AXWelcomeView` bug that caused sidebar swipes to not work when user just logged in

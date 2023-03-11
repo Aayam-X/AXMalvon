@@ -31,7 +31,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let window = AXWindow()
         window.makeKeyAndOrderFront(nil)
         
-#if !DEBUG
+#if DEBUG
+        //UserDefaults.standard.set(true, forKey: "NSConstraintBasedLayoutVisualizeMutuallyExclusiveConstraints")
+#else
         if AXGlobalProperties.shared.userEmail == "" || AXGlobalProperties.shared.userPassword == "" {
             let welcomeWindow = NSWindow.create(styleMask: [.fullSizeContentView, .closable, .miniaturizable], size: .init(width: 500, height: 500))
             welcomeWindow.contentView = AXWelcomeView()
@@ -84,12 +86,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Maybe have a background application to remove/organize history
         AXHistory.removeDuplicates()
         
-        for window in NSApplication.shared.windows where window is AXWindow {
-            let window = window as! AXWindow
-            
-            // HISTORYYYYY
-            //window.appProperties.AX_profiles.history.removeDuplicates()
-        }
+        //        for window in NSApplication.shared.windows where window is AXWindow {
+        //            let window = window as! AXWindow
+        
+        // HISTORYYYYY
+        //window.appProperties.AX_profiles.history.removeDuplicates()
+        //        }
     }
     
     func applicationDidResignActive(_ notification: Notification) {
