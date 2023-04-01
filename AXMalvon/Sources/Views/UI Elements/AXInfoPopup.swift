@@ -1,5 +1,5 @@
 //
-//  AXInformationAlertView.swift
+//  AXInfoPopup.swift
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2022-12-25.
@@ -8,7 +8,7 @@
 
 import AppKit
 
-class AXInformationAlertView: NSView {
+class AXInfoPopup: NSView {
     private var hasDrawn: Bool = false
     
     let titleView = NSTextField(frame: .zero)

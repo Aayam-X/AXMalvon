@@ -124,7 +124,7 @@ class AXContentView: NSView {
     }
     
     func displayMessage(message: String) {
-        let alert = AXInformationAlertView(frame: .zero)
+        let alert = AXInfoPopup(frame: .zero)
         alert.message = message
         
         alert.translatesAutoresizingMaskIntoConstraints = false

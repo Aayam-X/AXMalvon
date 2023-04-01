@@ -5,7 +5,8 @@
 //  Created by Ashwin Paudel on 2022-12-18.
 //  Copyright © 2022-2023 Aayam(X). All rights reserved.
 //
-// Code From: https://github.com/geek1706/swift-google-autocomplete
+// Code from: https://github.com/geek1706/swift-google-autocomplete
+// Modified by Ashwin Paudel: Only 5 terms and follows Async APIs
 //
 
 import Cocoa

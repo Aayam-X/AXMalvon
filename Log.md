@@ -34,6 +34,8 @@
 - [ ] Fixing of sidebar tab button width
 
 ## 0.0.3
+
+---
 - [x] Create tab after current tab rather the at the end
 - [x] When you close a tab, the `selectedTab` variable will be turned on for multiple tabs
 ---

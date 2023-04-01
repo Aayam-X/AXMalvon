@@ -7,6 +7,7 @@
 //
 
 import AppKit
+import SwiftUI
 
 class AXUpdaterView: NSView {
     private var hasDrawn: Bool = false
