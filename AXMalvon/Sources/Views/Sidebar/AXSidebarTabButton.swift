@@ -27,9 +27,9 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     var profile: AXBrowserProfile!
     
     // Subviews
-    lazy var titleView: NSTextField! = NSTextField()
-    lazy var favIconImageView: NSImageView! = NSImageView()
-    lazy var closeButton: AXSidebarTabCloseButton! = AXSidebarTabCloseButton()
+    var titleView: NSTextField! = NSTextField()
+    var favIconImageView: NSImageView! = NSImageView()
+    var closeButton: AXSidebarTabCloseButton! = AXSidebarTabCloseButton()
     
     // Drag and drop
     fileprivate var isDragging = false

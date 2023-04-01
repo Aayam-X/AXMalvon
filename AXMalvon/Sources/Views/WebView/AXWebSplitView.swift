@@ -38,7 +38,7 @@ class AXWebSplitView: NSSplitView, NSSplitViewDelegate {
 class AXWebSplitViewAddItemView: NSView {
     private var hasDrawn: Bool = false
     
-    lazy var addSplitViewLabel: NSTextField = {
+    var addSplitViewLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false
@@ -52,7 +52,7 @@ class AXWebSplitViewAddItemView: NSView {
         return label
     }()
     
-    lazy var plusImageView: NSImageView = {
+    var plusImageView: NSImageView = {
         let imageView = NSImageView(frame: .zero)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.setFrameSize(.init(width: 512, height: 512))

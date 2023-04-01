@@ -14,7 +14,7 @@ class AXAlertView: NSView {
     private var hasDrawn: Bool = false
     var title: String = "Alert Title"
     
-    lazy var alertTitle: NSTextField = {
+    var alertTitle: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false

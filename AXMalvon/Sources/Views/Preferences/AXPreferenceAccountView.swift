@@ -11,7 +11,7 @@ import Cocoa
 class AXPreferenceAccountView: NSView {
     private var hasDrawn: Bool = false
     
-    lazy var nameLabel: NSTextField = {
+    var nameLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false
@@ -22,7 +22,7 @@ class AXPreferenceAccountView: NSView {
         return label
     }()
     
-    lazy var emailLabel: NSTextField = {
+    var emailLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false
@@ -34,7 +34,7 @@ class AXPreferenceAccountView: NSView {
         return label
     }()
     
-    lazy var validUntilLabel: NSTextField = {
+    var validUntilLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false
@@ -46,7 +46,7 @@ class AXPreferenceAccountView: NSView {
         return label
     }()
     
-    lazy var inviteAFriendButton: AXPreferenceButton = {
+    var inviteAFriendButton: AXPreferenceButton = {
         let button = AXPreferenceButton()
         button.imageView.image = NSImage(systemSymbolName: "person.fill.badge.plus", accessibilityDescription: nil)
         button.isBordered = true
@@ -56,7 +56,7 @@ class AXPreferenceAccountView: NSView {
         return button
     }()
     
-    lazy var getSupportButton: AXPreferenceButton = {
+    var getSupportButton: AXPreferenceButton = {
         let button = AXPreferenceButton()
         button.imageView.image = NSImage(systemSymbolName: "hand.wave.fill", accessibilityDescription: nil)
         button.isBordered = true
@@ -66,7 +66,7 @@ class AXPreferenceAccountView: NSView {
         return button
     }()
     
-    lazy var cancelSubscriptionButton: AXPreferenceButton = {
+    var cancelSubscriptionButton: AXPreferenceButton = {
         let button = AXPreferenceButton()
         button.imageView.image = NSImage(systemSymbolName: "xmark.octagon.fill", accessibilityDescription: nil)
         button.isBordered = true

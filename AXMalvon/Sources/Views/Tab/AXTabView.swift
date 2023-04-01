@@ -49,7 +49,10 @@ class AXTabView: NSView {
         scrollView.documentView = tabStackView
         tabStackView.topAnchor.constraint(equalTo: topAnchor).isActive = true
         tabStackView.leftAnchor.constraint(equalTo: clipView.leftAnchor).isActive = true
-        tabStackView.rightAnchor.constraint(equalTo: clipView.rightAnchor).isActive = true
+    }
+    
+    override func viewWillDraw() {
+        tabStackView.widthAnchor.constraint(equalTo: appProperties.sidebarView.widthAnchor).isActive = true
     }
     
     required init?(coder: NSCoder) {
@@ -279,12 +282,14 @@ class AXTabView: NSView {
     
     private func addButtonToStackView(_ button: NSButton, _ index: Int) {
         tabStackView.insertArrangedSubview(button, at: index)
+        
         button.leftAnchor.constraint(equalTo: tabStackView.leftAnchor, constant: 10).isActive = true
         button.rightAnchor.constraint(equalTo: tabStackView.rightAnchor, constant: -9).isActive = true
     }
     
     private func addButtonToStackView(_ button: NSButton) {
         tabStackView.addArrangedSubview(button)
+        
         button.leftAnchor.constraint(equalTo: tabStackView.leftAnchor, constant: 10).isActive = true
         button.rightAnchor.constraint(equalTo: tabStackView.rightAnchor, constant: -9).isActive = true
     }

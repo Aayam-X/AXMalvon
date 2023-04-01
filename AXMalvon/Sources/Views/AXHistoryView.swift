@@ -23,7 +23,7 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
     let scrollView = NSScrollView()
     
     lazy var reloadButton: AXHoverButton = {
-        let button = AXHoverButton()
+        let button: AXHoverButton = AXHoverButton()
         
         button.imagePosition = .imageOnly
         button.image = NSImage(systemSymbolName: "arrow.clockwise", accessibilityDescription: nil)
@@ -37,7 +37,7 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
     }()
     
     lazy var removeAllButton: AXHoverButton = {
-        let button = AXHoverButton()
+        let button: AXHoverButton = AXHoverButton()
         
         button.imagePosition = .imageOnly
         button.image = NSImage(systemSymbolName: "trash", accessibilityDescription: nil)
@@ -50,6 +50,7 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
         
         return button
     }()
+
     
     init(appProperties: AXAppProperties) {
         self.appProperties = appProperties

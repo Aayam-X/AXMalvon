@@ -13,7 +13,7 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
     private var hasDrawn: Bool = false
     private var signUpButtonClicked: Bool = false
     
-    lazy var welcomeToMalvonLabel: NSTextField = {
+    var welcomeToMalvonLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false
@@ -70,7 +70,7 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
         return label
     }()
     
-    lazy var enterNameTextField: NSTextField = {
+    var enterNameTextField: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.drawsBackground = false
@@ -104,7 +104,7 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
         return button
     }()
     
-    lazy var errorLabel: NSTextField = {
+    var errorLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false
@@ -171,57 +171,7 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
     }
     
     @objc func enterAction(_ sender: Any?) {
-        guard validateFields() else { return }
-        
-        let email = emailAddressTextField.stringValue
-        guard let password = passwordTextField.stringValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
-            showError("Unknown error")
-            return
-        }
-        let encryptedPassword = encrypt(string: password, key: email).addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
-        
-        // TODO: Security flaw, do not use HTTPS URL for password
-        AXGlobalProperties.shared.userEmail = email
-        AXGlobalProperties.shared.userPassword = encryptedPassword
-        
-        let url = URL(string: "https://axmalvon.web.app/?email=\(emailAddressTextField.stringValue)&password=\(encryptedPassword)")!
-        
-        let privateConfig = WKWebViewConfiguration()
-        privateConfig.websiteDataStore = .nonPersistent()
-        privateConfig.processPool = .init()
-        let webView = WKWebView(frame: .zero, configuration: privateConfig)
-        webView.load(URLRequest(url: url))
-        
-        addSubview(webView)
-        webView.frame = .init(x: 0, y: 0, width: 0, height: 0)
-        
-        self.welcomeToMalvonLabel.stringValue = "Loading..."
-        
-        Task {
-            try? await Task.sleep(nanoseconds: 3_000_000_000)
-            
-            do {
-                let result = try await webView.evaluateJavaScript("document.getElementById('status').innerText")
-                if (result as? String) == "success: false" {
-                    AXGlobalProperties.shared.hasPaid = false
-                    self.welcomeToMalvonLabel.stringValue = "Payment needed to use Malvon"
-                    self.showError("You must pay for Malvon", time: 5.0)
-                    
-                    try? await Task.sleep(nanoseconds: 5_000_000_000)
-                    exit(1)
-                } else if (result as? String) == "success: true" {
-                    AXGlobalProperties.shared.hasPaid = true
-                    AXGlobalProperties.shared.save()
-                    self.window?.sheetParent?.endSheet(self.window!)
-                } else {
-                    self.showError("Error: \(result)", time: 6.0)
-                }
-            } catch {
-                print("Error reading contents of web page: \(error.localizedDescription)")
-            }
-        }
-        
-        self.welcomeToMalvonLabel.stringValue = "Welcome to Malvon!"
+        self.in()
     }
     
     func validateFields() -> Bool {
@@ -319,9 +269,59 @@ class AXWelcomeView: NSView, NSTextFieldDelegate {
     // Sign IN
     private func `in`() {
         // Database
+        guard validateFields() else { return }
+        
+        let email = emailAddressTextField.stringValue
+        guard let password = passwordTextField.stringValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed) else {
+            showError("Unknown error")
+            return
+        }
+        let encryptedPassword = encrypt(string: password, key: email).addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!
+        
+        // TODO: Security flaw, do not use HTTPS URL for password
+        AXGlobalProperties.shared.userEmail = email
+        AXGlobalProperties.shared.userPassword = encryptedPassword
+        
+        let url = URL(string: "https://axmalvon.web.app/?email=\(emailAddressTextField.stringValue)&password=\(encryptedPassword)")!
+        
+        let privateConfig = WKWebViewConfiguration()
+        privateConfig.websiteDataStore = .nonPersistent()
+        privateConfig.processPool = .init()
+        let webView = WKWebView(frame: .zero, configuration: privateConfig)
+        webView.load(URLRequest(url: url))
+        
+        addSubview(webView)
+        webView.frame = .init(x: 0, y: 0, width: 0, height: 0)
+        
+        self.welcomeToMalvonLabel.stringValue = "Loading..."
+        
+        Task {
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+            
+            do {
+                let result = try await webView.evaluateJavaScript("document.getElementById('status').innerText")
+                if (result as? String) == "success: false" {
+                    AXGlobalProperties.shared.hasPaid = false
+                    self.welcomeToMalvonLabel.stringValue = "Payment needed to use Malvon"
+                    self.showError("You must pay for Malvon", time: 5.0)
+                    
+                    try? await Task.sleep(nanoseconds: 5_000_000_000)
+                    exit(1)
+                } else if (result as? String) == "success: true" {
+                    AXGlobalProperties.shared.hasPaid = true
+                    self.window?.sheetParent?.endSheet(self.window!)
+                } else {
+                    self.showError("Error: \(result)", time: 6.0)
+                }
+            } catch {
+                print("Error reading contents of web page: \(error.localizedDescription)")
+            }
+        }
+        
+        self.welcomeToMalvonLabel.stringValue = "Welcome to Malvon!"
     }
     
-    // Sign UP
+    // Sign Up
     @objc func up() {
         guard validateFields() else { return }
         guard validateFields2() else { return }

@@ -12,7 +12,7 @@ import WebKit
 class AXPurchaseBrowserView: NSView {
     private var hasDrawn: Bool = false
     
-    lazy var welcomeToMalvonLabel: NSTextField = {
+    var welcomeToMalvonLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false
@@ -24,7 +24,7 @@ class AXPurchaseBrowserView: NSView {
         return label
     }()
     
-    lazy var reasonsToBuyLabel: NSTextField = {
+    var reasonsToBuyLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false

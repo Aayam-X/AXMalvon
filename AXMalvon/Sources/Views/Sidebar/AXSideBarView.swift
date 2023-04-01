@@ -165,6 +165,8 @@ class AXSideBarView: NSView {
             
             gridView = NSGridView(views: [tabViews])
             gridView.columnSpacing = 25.0
+            gridView.xPlacement = .fill // this was key part of the solution
+            gridView.yPlacement = .fill
             
             for i in 0..<tabViews.count {
                 gridView.column(at: i).width = appProperties.sidebarWidth

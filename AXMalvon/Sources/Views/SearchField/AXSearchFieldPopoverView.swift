@@ -28,7 +28,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         }
     }
     
-    lazy var searchField: AXTextField! = {
+    var searchField: AXTextField! = {
         let searchField = AXTextField()
         searchField.translatesAutoresizingMaskIntoConstraints = false
         searchField.alignment = .left
@@ -43,7 +43,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         return searchField
     }()
     
-    lazy var suggestionsStackView: NSStackView! = {
+    var suggestionsStackView: NSStackView! = {
         let s = NSStackView()
         s.orientation = .vertical
         s.spacing = 1.08

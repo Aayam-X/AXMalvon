@@ -20,7 +20,7 @@ class AXWebContainerView: NSView {
     
     var currentWebView: AXWebView!
     
-    lazy var windowTitleLabel: NSTextField = {
+    var windowTitleLabel: NSTextField = {
         let title = NSTextField()
         title.isEditable = false
         title.alignment = .left

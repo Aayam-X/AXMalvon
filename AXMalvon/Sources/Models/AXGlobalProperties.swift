@@ -38,10 +38,13 @@ class AXGlobalProperties {
     }
     
     func save() {
+        profiles.forEach { $0.saveProperties() }
+    }
+    
+    // Save the credentials
+    func saveCreds() {
         UserDefaults.standard.set(userEmail, forKey: "UserEmail")
         UserDefaults.standard.set(userPassword, forKey: "UserPassword")
-        
-        profiles.forEach { $0.saveProperties() }
     }
 }
 

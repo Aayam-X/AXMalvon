@@ -12,7 +12,7 @@ class AXPreferenceView: NSView {
     private var hasDrawn: Bool = false
     
     // Views
-    lazy var settingPanes = [
+    var settingPanes = [
         ("Account", "person.crop.circle", 0),
         ("General", "gearshape", 1),
         ("Search", "magnifyingglass", 2)
@@ -23,7 +23,7 @@ class AXPreferenceView: NSView {
     let scrollView = NSScrollView()
     fileprivate let clipView = AXFlippedClipViewCenteredX()
     
-    lazy var windowTitleLabel: NSTextField = {
+    var windowTitleLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false
@@ -34,7 +34,7 @@ class AXPreferenceView: NSView {
         return label
     }()
     
-    lazy var sidebarStackView: NSStackView = {
+    var sidebarStackView: NSStackView = {
         let stackView = NSStackView()
         
         stackView.orientation = .vertical

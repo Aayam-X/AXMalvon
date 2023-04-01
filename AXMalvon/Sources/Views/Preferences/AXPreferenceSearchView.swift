@@ -11,7 +11,7 @@ import AppKit
 class AXPreferenceSearchView: NSView, NSTableViewDataSource, NSTableViewDelegate {
     private var hasDrawn: Bool = false
     
-    lazy var mostVisitedWebsites: [String] = {
+    var mostVisitedWebsites: [String] = {
         return UserDefaults.standard.stringArray(forKey: "MostVisitedWebsite") ?? []
     }()
     
@@ -19,7 +19,7 @@ class AXPreferenceSearchView: NSView, NSTableViewDataSource, NSTableViewDelegate
     let tableView = NSTableView()
     let scrollView = NSScrollView()
     
-    lazy var mostVisitedWebsitesLabel: NSTextField = {
+    var mostVisitedWebsitesLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false
@@ -31,7 +31,7 @@ class AXPreferenceSearchView: NSView, NSTableViewDataSource, NSTableViewDelegate
         return label
     }()
     
-    lazy var addButton: AXPreferenceButton = {
+    var addButton: AXPreferenceButton = {
         let button = AXPreferenceButton()
         button.imageView.image = NSImage(systemSymbolName: "plus", accessibilityDescription: nil)
         button.isBordered = true
@@ -42,7 +42,7 @@ class AXPreferenceSearchView: NSView, NSTableViewDataSource, NSTableViewDelegate
         return button
     }()
     
-    lazy var removeButton: AXPreferenceButton = {
+    var removeButton: AXPreferenceButton = {
         let button = AXPreferenceButton()
         button.imageView.image = NSImage(systemSymbolName: "trash", accessibilityDescription: nil)
         button.isBordered = true

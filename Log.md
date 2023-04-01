@@ -28,13 +28,15 @@
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Seperate history based on profile
 - [ ] Profile icons
-- [ ] Clicking back on a pop up tab will close it and return to the original web page
+- [ ] Clicking back button on a pop up tab will close it and return to the original web page
 
 ## Needs fixing on
-- [ ] Fixing of sidebar tab button width
+- [ ] Something
 
 ## 0.0.3
-
+- [x] Fixing of sidebar tab button width
+- [x] Restores tabs on launch
+- [ ] Removed unnessasry lazy vars
 ---
 - [x] Create tab after current tab rather the at the end
 - [x] When you close a tab, the `selectedTab` variable will be turned on for multiple tabs

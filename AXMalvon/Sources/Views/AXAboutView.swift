@@ -9,14 +9,14 @@
 import AppKit
 
 class AXAboutView: NSView {
-    lazy var bundleInfoDic = Bundle.main.infoDictionary
+    var bundleInfoDic = Bundle.main.infoDictionary
     private var hasDrawn: Bool = false
     
-    lazy var donateButton = NSButton()
-    lazy var feedbackButton = NSButton()
-    lazy var appIconImageView = NSImageView(frame: .init(x: 0, y: 0, width: 225, height: 225))
+    var donateButton = NSButton()
+    var feedbackButton = NSButton()
+    var appIconImageView = NSImageView(frame: .init(x: 0, y: 0, width: 225, height: 225))
     
-    lazy var appNameLabel: NSTextField = {
+    var appNameLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false
@@ -27,7 +27,7 @@ class AXAboutView: NSView {
         return label
     }()
     
-    lazy var appVersionLabel: NSTextField = {
+    var appVersionLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false
@@ -40,7 +40,7 @@ class AXAboutView: NSView {
         return label
     }()
     
-    lazy var copyrightLabel: NSTextField = {
+    var copyrightLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false
@@ -52,7 +52,7 @@ class AXAboutView: NSView {
         return label
     }()
     
-    lazy var taglineLabel: NSTextField = {
+    var taglineLabel: NSTextField = {
         let label = NSTextField()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.isEditable = false

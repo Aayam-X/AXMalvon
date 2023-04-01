@@ -14,7 +14,7 @@ class AXWebViewFindView: NSView {
     
     private var hasDrawn: Bool = false
     
-    lazy var searchField: NSSearchField = {
+    var searchField: NSSearchField = {
         let searchField = NSSearchField()
         searchField.translatesAutoresizingMaskIntoConstraints = false
         searchField.drawsBackground = false
@@ -26,7 +26,7 @@ class AXWebViewFindView: NSView {
         return searchField
     }()
     
-    lazy var occurancesCountLabel: NSTextField = {
+    var occurancesCountLabel: NSTextField = {
         let label = NSTextField()
         label.isEditable = false // This should be set to true in a while :)
         label.alignment = .left

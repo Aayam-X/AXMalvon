@@ -24,7 +24,7 @@ class AXBrowserProfile {
     var tabs: [AXTabItem] = []
     var previouslyClosedTabs: [URL] = []
     
-    lazy var tabStackView: NSStackView = {
+    var tabStackView: NSStackView = {
         let stackView = NSStackView()
         stackView.orientation = .vertical
         stackView.spacing = 1.08

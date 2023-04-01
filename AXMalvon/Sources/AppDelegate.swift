@@ -28,8 +28,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         // Create a window
-        let window = AXWindow()
-        window.makeKeyAndOrderFront(nil)
+        createNewWindow(self)
         
 #if DEBUG
         //UserDefaults.standard.set(true, forKey: "NSConstraintBasedLayoutVisualizeMutuallyExclusiveConstraints")
