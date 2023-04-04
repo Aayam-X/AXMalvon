@@ -28,7 +28,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         
         // Create a window
-        createNewWindow(self)
+        let window = AXWindow()
+        window.appProperties.profiles.forEach { $0.retriveTabs() }
+        
+        window.makeKeyAndOrderFront(nil)
         
 #if DEBUG
         //UserDefaults.standard.set(true, forKey: "NSConstraintBasedLayoutVisualizeMutuallyExclusiveConstraints")
@@ -141,11 +144,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
-    @IBAction func createNewPrivateWindow(_ sender: Any) {
-        let window = AXWindow(isPrivate: true)
-        window.makeKeyAndOrderFront(nil)
-    }
-    
     @IBAction func createNewTab(_ sender: Any) {
         let tabManager = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.tabManager
         tabManager?.openSearchBar()
@@ -157,6 +155,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Create new window and create blank window
         window.appProperties.profiles.forEach { $0.retriveTabs() }
         
+        window.makeKeyAndOrderFront(nil)
+    }
+    
+    @IBAction func createNewBlankWindow(_ sender: Any) {
+        let window = AXWindow()
+        window.makeKeyAndOrderFront(nil)
+    }
+    
+    @IBAction func createNewPrivateWindow(_ sender: Any) {
+        let window = AXWindow(isPrivate: true)
         window.makeKeyAndOrderFront(nil)
     }
     
@@ -241,7 +249,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 #if !DEBUG
         let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as! String
         
-        if let url = URL(string: "https://raw.githubusercontent.com/Aayam-X/Releases/main/latest.txt") {
+        if let url = URL(string: "https://raw.githubusercontent.com/ashp0/Update/main/latest.txt") {
             let (data, _) = try await URLSession.shared.data(from: url)
             let contents = String(data: data, encoding: .utf8)
             let trimmed = contents!.trimmingCharacters(in: .whitespacesAndNewlines)

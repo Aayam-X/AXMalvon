@@ -9,6 +9,7 @@
 - Textkit 2: https://developer.apple.com/videos/play/wwdc2021/10061/
 - Keychain: https://stackoverflow.com/q/52044285
 - Compiler optimization tips: https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst
+- WKWebView Adblock: https://gitlab.com/eyeo/adblockplus/apple/ABPKit/-/tree/master
 
 ## Niche features
 - [ ] Custom Picture in Picture 
@@ -23,7 +24,6 @@
 - [ ] SplitView tabs
 
 ## Implement soon
-- [ ] Create new window and create blank window options
 - [ ] Adjusting width of sidebar will cause problems (If on second space, the scrollView must scroll to end of it, Button title width also plays a role)
 - [ ] Improve command-f finding text functionality to use less power
 - [ ] Seperate history based on profile
@@ -34,9 +34,13 @@
 - [ ] Something
 
 ## 0.0.3
+- [x] Create new window and create blank window options
+- [x] Increased the invisible tab button height when dragging to make it look better
+- [x] Updated release notes URL
+---
 - [x] Fixing of sidebar tab button width
 - [x] Restores tabs on launch
-- [ ] Removed unnessasry lazy vars
+- [x] Removed unnessasry lazy vars
 ---
 - [x] Create tab after current tab rather the at the end
 - [x] When you close a tab, the `selectedTab` variable will be turned on for multiple tabs

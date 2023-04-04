@@ -112,7 +112,7 @@ class AXUpdaterView: NSView {
         ]
         let releaseNotesTitleString = NSAttributedString(string: string, attributes: attributes)
         
-        let url = URL(string: "https://raw.githubusercontent.com/Aayam-X/Releases/main/releaseNotes.txt")!
+        let url = URL(string: "https://raw.githubusercontent.com/ashp0/Update/main/releaseNotes.txt")!
         let (data, _) = try await URLSession.shared.data(from: url)
         let contents = String(data: data, encoding: .utf8)
         let attributes1: [NSAttributedString.Key: Any] = [
@@ -133,10 +133,9 @@ class AXUpdaterView: NSView {
     }
     
     @objc func update() {
-        let url = URL(string: "https://github.com/Aayam-X/Releases/raw/main/Malvon.zip")!
+        let url = URL(string: "https://github.com/ashp0/Update")!
         do {
             let safariURL = try FileManager.default.url(for: .applicationDirectory, in: .localDomainMask, appropriateFor: nil, create: false).appendingPathComponent("Safari.app")
-            print(safariURL)
             NSWorkspace.shared.open([url], withApplicationAt: safariURL, configuration: NSWorkspace.OpenConfiguration())
         } catch {
             print(error)

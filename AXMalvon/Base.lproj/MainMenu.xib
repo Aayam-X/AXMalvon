@@ -90,6 +90,12 @@
                                     <action selector="createNewWindow:" target="-1" id="7Go-51-RPc"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="New Empty Window" keyEquivalent="N" id="cd7-Mn-uZh">
+                                <modifierMask key="keyEquivalentModifierMask" control="YES"/>
+                                <connections>
+                                    <action selector="createNewBlankWindow:" target="Voe-Tx-rLC" id="1Kb-dl-tU9"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="New Private Window" keyEquivalent="N" id="U2f-TN-Z1u">
                                 <connections>
                                     <action selector="createNewPrivateWindow:" target="-1" id="Iq4-T0-GCh"/>

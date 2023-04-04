@@ -47,6 +47,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     
     // Other
     weak var titleViewRightAnchor: NSLayoutConstraint?
+    weak var heightConstraint: NSLayoutConstraint?
     var trackingArea: NSTrackingArea!
     private var hasDrawn: Bool = false
     
@@ -79,7 +80,8 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         self.isBordered = false
         self.bezelStyle = .shadowlessSquare
         title = ""
-        heightAnchor.constraint(equalToConstant: 30).isActive = true
+        self.heightConstraint = heightAnchor.constraint(equalToConstant: 30)
+        heightConstraint!.isActive = true
     }
     
     required init?(coder: NSCoder) {
@@ -223,6 +225,9 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
             closeButton.isHidden = false
             isDragging = true
             
+            // TODO..
+            heightConstraint?.constant = 35
+            
             isHidden = true
         }
     }
@@ -283,6 +288,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         draggingState = nil
         draggingSide = nil
         closeButton.isHidden = false
+        heightConstraint?.constant = 30
     }
     
     override func concludeDragOperation(_ sender: NSDraggingInfo?) {
@@ -291,6 +297,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         draggingState = nil
         draggingSide = nil
         closeButton.isHidden = false
+        heightConstraint?.constant = 30
     }
     
     // MARK: - Functions of Drag and Drop
