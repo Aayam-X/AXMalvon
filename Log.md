@@ -1,7 +1,299 @@
-# Malvon Web Browser
-> Project no longer in development
+# Log
 
-An attempt to develop a WebKit-based web browser similar to that of the Arc browser.
-<img width="1910" alt="Screenshot 2023-08-13 at 6 50 36 PM" src="https://github.com/ashp0/Malvon/assets/62433766/53f07c40-591d-41b4-89c3-6d7cf8a40a90">
-<img width="1910" alt="Screenshot 2023-08-13 at 6 51 04 PM" src="https://github.com/ashp0/Malvon/assets/62433766/6f93ba17-c1a2-4757-a255-0382afb6b49e">
-<img width="912" alt="Screenshot 2023-08-13 at 6 50 57 PM" src="https://github.com/ashp0/Malvon/assets/62433766/1ef10efe-a7fe-4d98-a3a4-446eb4af835c">
+## Links:
+- Custom NSTextField: https://stackoverflow.com/a/11833209
+- SplitView Animation: https://stackoverflow.com/a/48608153
+- Animating NSWindow: https://github.com/jwilling/JNWAnimatableWindow
+- Textkit 2: https://developer.apple.com/videos/play/wwdc2021/10061/
+- Keychain: https://stackoverflow.com/q/52044285
+- Compiler optimization tips: https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst
+- WKWebView Adblock: https://gitlab.com/eyeo/adblockplus/apple/ABPKit/-/tree/master
+
+## Niche features
+- [ ] Custom Picture in Picture 
+
+## Future
+- [ ] Create transparent window buttons.
+- [ ] WKWebView Experimental Debug Features Menu Items
+- [ ] Have a background application that organizes history
+- [ ] Add more preference panes and ability to create/edit new profiles
+- [ ] Add colors to spaces
+- [ ] Search suggestion: Switching tabs | Command Bar
+- [ ] SplitView tabs
+
+## Implement soon
+- [ ] Adjusting width of sidebar will cause problems (If on second space, the scrollView must scroll to end of it, Button title width also plays a role)
+- [ ] Improve command-f finding text functionality to use less power
+- [ ] Seperate history based on profile
+- [ ] Profile icons
+- [ ] Clicking back button on a pop up tab will close it and return to the original web page
+
+## Needs fixing on
+- [ ] Something
+
+## 0.0.3
+- [x] Create new window and create blank window options
+- [x] Increased the invisible tab button height when dragging to make it look better
+- [x] Updated release notes URL
+---
+- [x] Fixing of sidebar tab button width
+- [x] Restores tabs on launch
+- [x] Removed unnessasry lazy vars
+---
+- [x] Create tab after current tab rather the at the end
+- [x] When you close a tab, the `selectedTab` variable will be turned on for multiple tabs
+---
+- [x] Fix with opening links in background
+- [x] Private window doesn't work properly
+- [x] Fixed `AXWelcomeView` bug that caused sidebar swipes to not work when user just logged in
+---
+- [x] Cookie system now updated
+- [x] Global instance of WKWebViewConfiguration instead of having an instance per window. This way cookies are spread and saved properly
+- [x] When user logs in, relaunch the application.
+- [x] Camera and microphone parameters enabled in info.plist
+---
+- [x] Swiping between sidebar profiles will not update
+- [x] Sidebar, remove adding 10x and 9x and apply to the buttons not the stack view
+- [x] Title from another profile will change the webContainerView's title even when not active
+- [x] Preference contentTint color persists even when not intended to
+---
+- [x] Private window problem
+- [x] Tabs would have a "hovered" state when switching profiles
+---
+- [x] Forgot about spacing for profile switching
+- [x] Profile switch buttons aren't working 
+---
+- [x] Preference button's text & image color is white on selected
+- [x] Sidebar sliding feature + animation
+---
+- [x] Light mode improvements
+- [x] Preference window would open when there are no windows
+- [x] Memory leak fixes
+- [x] Universal link fully works!
+- [x] Search suggestions memory leak
+- [x] Disable drag when close button pressed
+- [x] Window title not updating
+- [x] Clicking on app icon when window is minimized
+- [x] Preference window crashing
+
+## 0.0.2
+- [x] Finish 0.0.2
+---
+- [x] Search suggestions re-write
+- [x] Current tab problem whe launching app
+- [x] Converted most of codebase into async/await
+- [x] Created Update View
+---
+- [x] Deploy auth-website
+---
+- [x] Password encryption
+---
+- [x] Log in / Sign up
+- [x] Profile list button problem fixed
+- [x] WebView width equal when creating splitView 
+---
+- [x] One instance of tabView per profile
+---
+- [x] Preference Pane || Most visited Websites 
+---
+- [x] Fixed tab loading problem
+- [x] Drag and drop fix
+- [x] Search field copy paste problem
+- [x] Private window security fixed
+---
+- [x] Change alpha value of splitView rather than webView search suggestions
+- [x] Free search suggestions array after x searches so less memory usage
+- [x] Search field private browser && Look for problems with private browsing 
+- [x] WebView goes back when you click on popup link
+- [x] Search suggestion problem
+- [x] Sidebar swipe much more responsive
+---
+- [x] Download stack view logic changed
+- [x] Search suggestions
+- [x] Duplicate history removed
+- [x] Memory Leaks when creating splitViews
+---
+- [x] Download history | Similar to history
+- [x] Download progress indicator would be set to infinity even when you can track the progress
+---
+- [x] Profile switching bug
+---
+- [x] Downloading Tabs
+---
+- [x] Private windows
+- [x] Tab closing causes app to crash
+- [x] Opening from URLs from other apps
+---
+- [x] A few memory leaks fixed
+- [x] Drag and drop problem
+- [x] SplitView problems
+- [x] Creating new window problem
+- [x] Window close improvements
+- [x] Switches to previous tab (if exists) instead of tab above or below
+---
+- [x] Cookies are saved when app quits
+- [x] Swipe gesture for profile
+- [x] Stop re-loading of the tabs when switching between profiles (Have a shared tabStackView)
+---
+- [x] Created an entirely new AXTabView class & updated some of the code
+---
+- [x] Menu item will be disabled if application is set as default browser
+- [x] Private window not private
+- [x] Webview border being 2.0 fixed to 1.0
+---
+- [x] Code cleanup 🚛
+---
+- [x] Finish up the UI for profiles
+---
+- [x] Keep Window on Top option
+- [x] Profiles code finished
+- [x] Bit of UI for profiles, still have to make a bit more stuff
+- [x] 2023 Copyright update
+---
+- [x] File uploading in the webView
+- [x] New alert view, AXAlertView
+- [x] Universal Link Support
+- [x] What to do in private tabs with popups??
+- [x] Halfway done browser profiles
+---
+- [x] WebView Menu override
+- [x] WebView Command-Click new tab + Other types of clicks
+---
+- [x] Finish history problem with multiple selection + History action
+- [x] Moved the app will terminate logic to nswindow
+---
+- [x] History!!
+---
+- [x] Window Buttons not working (minimize, full screen etc..)
+---
+- [x] Fix app safety
+- [x] Fix problems with moveTabToNewWindow
+- [x] Sidebar view will popup when user is dragging a tab if their sidebar view is hidden.
+---
+- [x] Memory leaks found, fix them
+- [x] Command-Shift-T || Restore closed tab. 
+- [x] Button would have selectedState when hovered.
+---
+- [x] Fix drag and drop between windows problem
+---
+- [x] All memory leaks fixed!!
+---
+- [x] Closing tab problem resolved!!!!!!
+- [x] Remove unnecessary code
+- [x] WKWebView close on popups
+---
+- [x] Sidebar's background color would be clear when resizing
+- [x] Search field window would change size if search field's text was long
+- [x] Memory improvements
+---
+- [x] System Setting Implementation..
+---
+- [x] Other stuff I forgot to mention..
+- [x] Split View Functionality
+- [x] Tab Closing Problems Fixed
+---
+- [x] Increased size of search field window
+- [x] Mini-Alerts show when you do a certain action (Copy URL)
+- [x] Window color will be black if the user is on private mode
+- [x] Created seperator in Search Field View
+- [x] Prevent loading of all the tabs
+- [x] Sidebar will stay red instead of returning back to clear
+---
+- [x] Favicons
+---
+- [x] Drag and drop to create new window
+- [x] Improve the search suggestions to use arrow keys
+- [x] Search field improvements
+- [x] Reduced energy usage when searching
+- [x] Code cleanup 🚛
+---
+- [x] Search Field Improvement
+---
+- [x] Copy link shortcut
+- [x] Sidebar Hover Animation
+- [x] New About Malvon view
+- [x] Progress Indicator Inbalance in the bottom
+- [x] Removed the format menu
+---
+- [x] Make the window title less distractive
+- [x] Reload button doesn't work when sidebar isn't shown
+- [x] Do not show "Create new window" when using private window
+- [x] Uses native macOS API for Drag and Drop instead of custom made
+- [x] Search Bar: Text alignment problem
+---
+- [x] Improved animations to the Progress Bar!!
+- [x] Fixed Command-1, Command-2, etc.. not working
+- [x] Closing tab algorithm perfected!
+- [x] Fixed progress bar animation getting stuck at 100
+- [x] Loading of http links
+- [x] Progress Indicator will be active when tab is closed, when it should not
+- [x] Progress Indicator Problem when resizing window
+- [x] Sidebar shows on hover!!
+- [x] Fixed redraw issue when switching to light/dark mode
+- [x] Title on top of view!!!
+- [x] Darkmode/Lightmode improvements
+---
+- [x] Progress bar problem when going full screen
+- [x] Created entirely new style of progress bar
+- [x] Tabs are saved by default
+- [x] Back/Forward button enable/disable
+- [x] Command-1, Command-2 etc.. tab switching
+- [x] New cursor when dragging tabs
+- [x] Creating new windows will open with the same tabs
+- [x] Search suggestions
+---
+- [x] Command-F | Finding text in webView
+- [x] Application crashes on launch when wifi is turned off
+- [x] Make a UI for download files
+- [x] Duplicate file problem when downloading files
+- [x] Progress bar
+- [x] WebView not being selected when switching tabs
+---
+- [x] Do not save the state of private windows
+- [x] Custom searchfield, custom popover
+- [x] Create new window from dragging buttons
+- [x] SplitView in WebView (CurrentTab + 1 is the second view in the splitview)
+- [x] Fixed code style and optimize the code and fix bugs
+- [x] Downloading files!
+---
+- [x] Be able to set as default browser
+- [x] URL opening
+- [x] Saving tabs
+- [x] Window title not updating
+- [x] Custom start page (Should change in the future)
+- [x] Dragging tabs
+---
+- [x] Closing tabs & windows
+- [x] Creating tab bug fix (Improved Algorithm)
+- [x] Add the close tab icon in the buttons
+- [x] Add padding to the sidebar
+- [x] Fix the title problem in the tab button
+- [x] Fix bug with opening target_blank links with more than one tab
+- [x] Memory Improvements
+- [x] Improved traffic lights when entering full screen
+- [x] New App Icon
+---
+- [x] Show the webView Title as the window title
+- [x] WebView would still be active underneath which is bad
+- [x] Private Browsing (https://stackoverflow.com/a/68389106/20489332)
+- [x] Change color to black when private browsing
+- [x] Make a seperate AXHoverButton class,
+- [x] Fix the color of the button, Change from hoverColor to selectedColor
+- [x] Toggle Sidebar Button Issue still persists
+- [x] Remove the left side when doing inset(14, 14) on the webview when sidebar toggled
+- [x] Add a bit of drop shadow to the webView
+- [x] Performance Improvements
+---
+- [x] Sidebar Close/Show Button Problem when entering full screen
+- [x] Back/Forward/Refresh Buttons
+- [x] Save the width of the vertical tab sidebar
+- [x] Displays whether the width of the sidebar is okay or not through colors
+- [x] Show the selected tab
+- [x] Performance Improvements
+---
+- [x] Save window position
+- [x] Use scrollview and vertical stackview for tabs instead of tableView
+- [x] Open target_blank links 
+
+## 0.0.1
+- [x] First Release!
