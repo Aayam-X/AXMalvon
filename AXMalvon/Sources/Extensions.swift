@@ -3,7 +3,7 @@
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2022-12-25.
-//  Copyright © 2022-2023 Aayam(X). All rights reserved.
+//  Copyright © 2022-2024 Aayam(X). All rights reserved.
 //
 
 import AppKit
@@ -86,6 +86,10 @@ extension NSBezierPath {
                 path.addCurve(to: points[2], control1: points[0], control2: points[1])
             case .closePath:
                 path.closeSubpath()
+            case .cubicCurveTo:
+                break
+            case .quadraticCurveTo:
+                break
             @unknown default:
                 break
             }

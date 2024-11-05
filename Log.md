@@ -7,10 +7,10 @@
 - Textkit 2: https://developer.apple.com/videos/play/wwdc2021/10061/
 - Keychain: https://stackoverflow.com/q/52044285
 - Compiler optimization tips: https://github.com/apple/swift/blob/main/docs/OptimizationTips.rst
-- WKWebView Adblock: https://gitlab.com/eyeo/adblockplus/apple/ABPKit/-/tree/master
+- WKWebView Adblock: https://gitlab.com/eyeo/adblockplus/apple/ABPKit/-/tree/master + WBlock Extension (Migrate it)
 
 ## Niche features
-- [ ] Custom Picture in Picture 
+- [ ] Custom Picture in Picture
 
 ## Future
 - [ ] Create transparent window buttons.
@@ -29,7 +29,14 @@
 - [ ] Clicking back button on a pop up tab will close it and return to the original web page
 
 ## Needs fixing on
-- [ ] Something
+- [ ] Adapt to the new WKDownload protocol when downloading files.
+- [ ] Migrate code to use new WebKit profile protocol and delagates.
+
+## 0.1
+- [x] Thicker Progress Bar
+- [x] 2024 copyright updates
+- [x] More optimizations
+- [x] Implemented the ability to edit tab titles
 
 ## 0.0.3
 - [x] Create new window and create blank window options

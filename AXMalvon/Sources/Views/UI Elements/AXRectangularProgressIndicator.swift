@@ -3,7 +3,7 @@
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2022-12-18.
-//  Copyright © 2022-2023 Aayam(X). All rights reserved.
+//  Copyright © 2022-2024 Aayam(X). All rights reserved.
 //
 
 import AppKit
@@ -29,10 +29,10 @@ class AXRectangularProgressIndicator: NSView, CAAnimationDelegate {
     
     init() {
         super.init(frame: .zero)
-        topBorderLayer.lineWidth = 5
-        rightBorderLayer.lineWidth = 5
-        bottomBorderLayer.lineWidth = 5
-        leftBorderLayer.lineWidth = 5
+        topBorderLayer.lineWidth = 9
+        rightBorderLayer.lineWidth = 9
+        bottomBorderLayer.lineWidth = 9
+        leftBorderLayer.lineWidth = 9
         
         leftAnimation.delegate = self
         leftAnimation.isRemovedOnCompletion = true

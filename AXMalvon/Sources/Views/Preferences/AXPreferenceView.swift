@@ -3,7 +3,7 @@
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2022-12-27.
-//  Copyright © 2022-2023 Aayam(X). All rights reserved.
+//  Copyright © 2022-2024 Aayam(X). All rights reserved.
 //
 
 import AppKit
@@ -15,7 +15,8 @@ class AXPreferenceView: NSView {
     var settingPanes = [
         ("Account", "person.crop.circle", 0),
         ("General", "gearshape", 1),
-        ("Search", "magnifyingglass", 2)
+        ("Search", "magnifyingglass", 2),
+        ("Profiles", "person.crop.square", 3),
     ]
     
     let seperator = NSBox()
@@ -137,6 +138,9 @@ class AXPreferenceView: NSView {
         case 2:
             // Search
             view = AXPreferenceSearchView()
+        case 3:
+            // Profiles
+            view = AXPreferenceProfilesView()
         default:
             return
         }

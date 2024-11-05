@@ -3,7 +3,7 @@
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2022-12-03.
-//  Copyright © 2022-2023 Aayam(X). All rights reserved.
+//  Copyright © 2022-2024 Aayam(X). All rights reserved.
 //
 
 import AppKit
@@ -22,6 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         // Initializers
         AXDownload.checkIfFileExists()
+        AXHistory.checkIfFileExists()
         
         Task {
             try? await checkForUpdates()

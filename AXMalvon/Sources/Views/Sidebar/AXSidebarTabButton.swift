@@ -3,7 +3,7 @@
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2022-12-11.
-//  Copyright © 2022-2023 Aayam(X). All rights reserved.
+//  Copyright © 2022-2024 Aayam(X). All rights reserved.
 //
 
 import AppKit
@@ -24,7 +24,7 @@ fileprivate let tempView: AXWebSplitViewAddItemView! = AXWebSplitViewAddItemView
 
 class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPasteboardReading {
     weak var appProperties: AXAppProperties!
-    var profile: AXBrowserProfile!
+    weak var profile: AXBrowserProfile!
     
     // Subviews
     var titleView: NSTextField! = NSTextField()
@@ -57,9 +57,20 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         }
     }
     
+    var hasCustomTitle = false
+    var userDoubleClicked = false
+    
     var tabTitle: String = "Untitled" {
         didSet {
-            titleView.stringValue = tabTitle
+            if !hasCustomTitle {
+                titleView.stringValue = tabTitle
+            }
+        }
+    }
+    
+    var webTitle: String = "Untitled" {
+        didSet {
+            tabTitle = webTitle
         }
     }
     
@@ -152,16 +163,16 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         self.titleObserver = webView.observe(\.title, options: .new, changeHandler: { [weak self] _, _ in
             let title = webView.title ?? "Untitled"
             self?.profile.tabs[self!.tag].title = title
-            self?.tabTitle = title
+            self?.webTitle = title
             
-            Task { [weak self] in
-                do {
-                    let favIconURL = try await webView.getFavicon()
-                    self?.favIconImageView.download(from: favIconURL)
-                } catch {
-                    self?.favIconImageView.image = NSImage(systemSymbolName: "square.fill", accessibilityDescription: nil)
-                }
-            }
+//            Task { [weak self] in
+//                do {
+//                    let favIconURL = try await webView.getFavicon()
+//                    self?.favIconImageView.download(from: favIconURL)
+//                } catch {
+//                    self?.favIconImageView.image = NSImage(systemSymbolName: "square.fill", accessibilityDescription: nil)
+//                }
+//            }
             
             if self!.isSelected {
                 if self!.profile.index == self!.appProperties.currentProfileIndex {
@@ -191,8 +202,19 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     }
     
     override func mouseDown(with event: NSEvent) {
-        if self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds) {
+        
+        // I had the code here, but don't know what it was for: self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds)
+        
+        if event.clickCount == 1 {
             sendAction(action, to: target)
+        } else if event.clickCount == 2 {
+            // Edit the title.
+            print("Double click")
+            
+            userDoubleClicked = true
+            titleView.isEditable = true
+            titleView.placeholderString = titleView.stringValue
+            window?.makeFirstResponder(titleView)
         }
         self.layer?.backgroundColor = selectedColor.cgColor
     }
@@ -210,6 +232,19 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         titleViewRightAnchor?.constant = 20
         closeButton.isHidden = true
         self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
+        
+        if userDoubleClicked {
+            if titleView.stringValue.isEmpty || titleView.stringValue == titleView.placeholderString {
+                hasCustomTitle = false
+                titleView.stringValue = webTitle
+            } else {
+                hasCustomTitle = true
+            }
+            
+            titleView.currentEditor()?.selectedRange = .init(location: -1, length: 0)
+            titleView.isEditable = false
+            userDoubleClicked = false
+        }
     }
     
     

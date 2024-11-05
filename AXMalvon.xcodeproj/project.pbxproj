@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -16,6 +16,7 @@
 		ED0B2860295B3910003D656F /* AXPreferenceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0B285F295B3910003D656F /* AXPreferenceView.swift */; };
 		ED0B2864295B5EC1003D656F /* AXPreferenceButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0B2863295B5EC1003D656F /* AXPreferenceButton.swift */; };
 		ED0B2866295B619F003D656F /* AXPreferenceGlobal.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0B2865295B619F003D656F /* AXPreferenceGlobal.swift */; };
+		ED0ED2F12CDA963C00D71DE6 /* AXPreferenceProfilesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED0ED2F02CDA963C00D71DE6 /* AXPreferenceProfilesView.swift */; };
 		ED19C806294F904400E0924D /* WKWebViewSearch.js in Resources */ = {isa = PBXBuildFile; fileRef = ED19C805294F904400E0924D /* WKWebViewSearch.js */; };
 		ED212333294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED212332294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift */; };
 		ED25A318296B21CE00E65999 /* AXUpdaterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED25A317296B21CE00E65999 /* AXUpdaterView.swift */; };
@@ -70,6 +71,7 @@
 		ED0B285F295B3910003D656F /* AXPreferenceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPreferenceView.swift; sourceTree = "<group>"; };
 		ED0B2863295B5EC1003D656F /* AXPreferenceButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPreferenceButton.swift; sourceTree = "<group>"; };
 		ED0B2865295B619F003D656F /* AXPreferenceGlobal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPreferenceGlobal.swift; sourceTree = "<group>"; };
+		ED0ED2F02CDA963C00D71DE6 /* AXPreferenceProfilesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPreferenceProfilesView.swift; sourceTree = "<group>"; };
 		ED19C805294F904400E0924D /* WKWebViewSearch.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = WKWebViewSearch.js; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.javascript; };
 		ED212332294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXRectangularProgressIndicator.swift; sourceTree = "<group>"; };
 		ED25A317296B21CE00E65999 /* AXUpdaterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXUpdaterView.swift; sourceTree = "<group>"; };
@@ -130,6 +132,7 @@
 			isa = PBXGroup;
 			children = (
 				EDD71EC7293BD96600256EA9 /* AppDelegate.swift */,
+				EDD71ED8293BECE700256EA9 /* AXWindow.swift */,
 				ED57869829D84EBC00B6E67D /* Views */,
 				ED57869929D84F5000B6E67D /* Models */,
 				ED57869F29D8510100B6E67D /* Managers */,
@@ -184,6 +187,7 @@
 				ED396B592969CAF400DC9492 /* AXPreferenceSearchView.swift */,
 				ED0B285F295B3910003D656F /* AXPreferenceView.swift */,
 				ED0B285D295B2F8C003D656F /* AXPreferenceWindow.swift */,
+				ED0ED2F02CDA963C00D71DE6 /* AXPreferenceProfilesView.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -262,7 +266,6 @@
 		ED5786A329D8527600B6E67D /* Browser */ = {
 			isa = PBXGroup;
 			children = (
-				EDD71ED8293BECE700256EA9 /* AXWindow.swift */,
 				EDD71EDA293BF0F900256EA9 /* AXContentView.swift */,
 			);
 			path = Browser;
@@ -392,7 +395,7 @@
 				BuildIndependentTargetsInParallel = 1;
 				CLASSPREFIX = AX;
 				LastSwiftUpdateCheck = 1410;
-				LastUpgradeCheck = 1420;
+				LastUpgradeCheck = 1610;
 				ORGANIZATIONNAME = "Aayam(X)";
 				TargetAttributes = {
 					EDD71EC3293BD96600256EA9 = {
@@ -402,7 +405,6 @@
 				};
 			};
 			buildConfigurationList = EDD71EBF293BD96600256EA9 /* Build configuration list for PBXProject "AXMalvon" */;
-			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -410,6 +412,7 @@
 				Base,
 			);
 			mainGroup = EDD71EBB293BD96600256EA9;
+			preferredProjectObjectVersion = 77;
 			productRefGroup = EDD71EC5293BD96600256EA9 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -465,6 +468,7 @@
 				ED7E39682960CFA100745CE0 /* AXAlertView.swift in Sources */,
 				ED989DA6293D25E90081ABCF /* AXSideBarView.swift in Sources */,
 				EDD71ED9293BECE700256EA9 /* AXWindow.swift in Sources */,
+				ED0ED2F12CDA963C00D71DE6 /* AXPreferenceProfilesView.swift in Sources */,
 				ED6F602C2972F0D10039E6B6 /* AXSidebarTabCloseButton.swift in Sources */,
 				EDF03DEF295F701B00E62B9C /* AXHistoryView.swift in Sources */,
 				ED7B549F295B6E6F008A944F /* AXPreferenceGeneralView.swift in Sources */,
@@ -506,6 +510,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -539,6 +544,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -567,6 +573,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -600,6 +607,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -631,7 +639,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = B29PGN9AG4;
+				DEVELOPMENT_TEAM = 3TJDS4N2C3;
 				ENABLE_HARDENED_RUNTIME = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -644,7 +652,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Malvon needs access to your camera";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2023 Aayam(X) Inc. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2024 Aayam(X) Inc. All rights reserved.";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Malvon needs access to your microphone";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -653,7 +661,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
-				MARKETING_VERSION = 0.0.3;
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aayamx.malvon;
 				PRODUCT_NAME = Malvon;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -676,7 +684,7 @@
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = B29PGN9AG4;
+				DEVELOPMENT_TEAM = 3TJDS4N2C3;
 				ENABLE_HARDENED_RUNTIME = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -689,7 +697,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Malvon needs access to your camera";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2023 Aayam(X) Inc. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2024 Aayam(X) Inc. All rights reserved.";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Malvon needs access to your microphone";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -698,7 +706,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
-				MARKETING_VERSION = 0.0.3;
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aayamx.malvon;
 				PRODUCT_NAME = Malvon;
 				SWIFT_EMIT_LOC_STRINGS = YES;
