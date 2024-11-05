@@ -1,5 +1,5 @@
 //
-//  AXAppProperties.swift
+//  AXSessionProperties.swift
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2022-12-05.
@@ -10,7 +10,7 @@ import AppKit
 import WebKit
 
 // Every AXWindow will have one instance of this
-class AXAppProperties {
+class AXSessionProperties {
     // Views
     var contentView: AXContentView
     let sidebarView: AXSideBarView

@@ -17,7 +17,7 @@ enum AXScrollViewScrollDirection {
 
 class AXSideBarView: NSView {
     // MARK: - Variables
-    weak var appProperties: AXAppProperties!
+    weak var appProperties: AXSessionProperties!
     private var hasDrawn: Bool = false
     
     var trackingArea: NSTrackingArea!
@@ -52,8 +52,8 @@ class AXSideBarView: NSView {
         return button
     }()
     
-    lazy var backButton: AXHoverButton = {
-        let button = AXHoverButton()
+    lazy var backButton: AXButton = {
+        let button = AXButton()
         
         button.imagePosition = .imageOnly
         button.image = NSImage(systemSymbolName: "arrow.backward", accessibilityDescription: nil)
@@ -65,8 +65,8 @@ class AXSideBarView: NSView {
         return button
     }()
     
-    lazy var forwardButton: AXHoverButton = {
-        let button = AXHoverButton()
+    lazy var forwardButton: AXButton = {
+        let button = AXButton()
         
         button.imagePosition = .imageOnly
         button.image = NSImage(systemSymbolName: "arrow.forward", accessibilityDescription: nil)
@@ -78,8 +78,8 @@ class AXSideBarView: NSView {
         return button
     }()
     
-    lazy var reloadButton: AXHoverButton = {
-        let button = AXHoverButton()
+    lazy var reloadButton: AXButton = {
+        let button = AXButton()
         
         button.imagePosition = .imageOnly
         button.image = NSImage(systemSymbolName: "arrow.clockwise", accessibilityDescription: nil)

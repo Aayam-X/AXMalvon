@@ -30,7 +30,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Create a window
         let window = AXWindow()
-        window.appProperties.profiles.forEach { $0.retriveTabs() }
+        window.sessionProperties.profiles.forEach { $0.retriveTabs() }
         
         window.makeKeyAndOrderFront(nil)
         
@@ -59,13 +59,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func application(_ app: NSApplication, didDecodeRestorableState coder: NSCoder) {
         if let window = app.keyWindow as? AXWindow {
-            window.appProperties.tabManager.updateAll()
+            window.sessionProperties.tabManager.updateAll()
         }
     }
     
     func application(_ app: NSApplication, willEncodeRestorableState coder: NSCoder) {
         if let window = app.keyWindow as? AXWindow {
-            window.appProperties.saveProperties()
+            window.sessionProperties.saveProperties()
         }
     }
     
@@ -126,14 +126,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if application.windows.count != 0 {
             if let window = application.keyWindow as? AXWindow {
                 for url in urls {
-                    window.appProperties.tabManager.createNewTab(url: url)
+                    window.sessionProperties.tabManager.createNewTab(url: url)
                 }
             }
         } else {
             let window = AXWindow()
             window.makeKeyAndOrderFront(nil)
             for url in urls {
-                window.appProperties.tabManager.createNewTab(url: url)
+                window.sessionProperties.tabManager.createNewTab(url: url)
             }
         }
     }
@@ -146,7 +146,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @IBAction func createNewTab(_ sender: Any) {
-        let tabManager = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.tabManager
+        let tabManager = (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties.tabManager
         tabManager?.openSearchBar()
     }
     
@@ -154,7 +154,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let window = AXWindow()
         
         // Create new window and create blank window
-        window.appProperties.profiles.forEach { $0.retriveTabs() }
+        window.sessionProperties.profiles.forEach { $0.retriveTabs() }
         
         window.makeKeyAndOrderFront(nil)
     }
@@ -179,7 +179,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @IBAction func findInWebpage(_ sender: Any) {
-        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
+        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties
         appProperties?.webContainerView.showFindView()
     }
     
@@ -194,7 +194,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @IBAction func removeCurrentTab(_ sender: Any) {
-        guard let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties else { return }
+        guard let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties else { return }
         
         if appProperties.searchFieldShown {
             appProperties.popOver.close()
@@ -204,7 +204,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @IBAction func restoreTab(_ sender: Any) {
-        guard let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties else { return }
+        guard let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties else { return }
         appProperties.tabManager.restoreTab()
     }
     
@@ -213,7 +213,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @IBAction func showHistory(_ sender: Any) {
-        if let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties {
+        if let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties {
             let window = NSWindow.create(styleMask: [.closable, .miniaturizable, .resizable], size: .init(width: 500, height: 500))
             window.title = "History"
             window.contentView = AXHistoryView(appProperties: appProperties)
@@ -222,7 +222,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @IBAction func showDownloads(_ sender: Any) {
-        if let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties {
+        if let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties {
             let window = NSWindow.create(styleMask: [.closable, .miniaturizable, .resizable], size: .init(width: 500, height: 500))
             window.title = "Downloads"
             window.contentView = AXDownloadView(appProperties: appProperties)
@@ -235,13 +235,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     @IBAction func showSearchField(_ sender: Any) {
-        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.appProperties
+        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties
         appProperties?.popOver.newTabMode = false
         appProperties?.tabManager.showSearchField()
     }
     
     @IBAction func toggleSidebar(_ sender: Any) {
-        (NSApplication.shared.keyWindow as? AXWindow)?.appProperties.sidebarView.toggleSidebar()
+        (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties.sidebarView.toggleSidebar()
     }
     
     // MARK: - Functions

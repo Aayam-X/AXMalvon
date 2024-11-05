@@ -10,7 +10,7 @@ import AppKit
 import Carbon.HIToolbox
 
 class AXWebViewFindView: NSView {
-    weak var appProperties: AXAppProperties!
+    weak var appProperties: AXSessionProperties!
     
     private var hasDrawn: Bool = false
     

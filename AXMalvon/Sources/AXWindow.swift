@@ -9,7 +9,7 @@
 import AppKit
 
 class AXWindow: NSWindow, NSWindowDelegate {
-    var appProperties: AXAppProperties
+    var sessionProperties: AXSessionProperties
     
     override var title: String {
         didSet {
@@ -19,9 +19,9 @@ class AXWindow: NSWindow, NSWindowDelegate {
     }
     
     init(isPrivate: Bool = false, restoresTab: Bool = true) {
-        appProperties = AXAppProperties(isPrivate: isPrivate, restoresTab: restoresTab)
+        sessionProperties = AXSessionProperties(isPrivate: isPrivate, restoresTab: restoresTab)
         super.init(
-            contentRect: appProperties.windowFrame,
+            contentRect: sessionProperties.windowFrame,
             styleMask: [.closable, .titled, .resizable, .miniaturizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
@@ -34,16 +34,16 @@ class AXWindow: NSWindow, NSWindowDelegate {
         isMovableByWindowBackground = true
         self.minSize = .init(width: 300, height: 300)
         self.isReleasedWhenClosed = false
-        appProperties.window = self
+        sessionProperties.window = self
         backgroundColor = .textBackgroundColor // NSWindow has hidden NSVisualEffectView, to remove we must use this code
-        self.contentView = appProperties.contentView
+        self.contentView = sessionProperties.contentView
         updateTrafficLights()
         
-        if !appProperties.sidebarToggled {
+        if !sessionProperties.sidebarToggled {
             hideTrafficLights(true)
         }
         
-        if appProperties.isPrivate {
+        if sessionProperties.isPrivate {
             self.appearance = .init(named: .darkAqua)
         }
     }
@@ -51,10 +51,10 @@ class AXWindow: NSWindow, NSWindowDelegate {
     // MARK: - Window Functions
     override func makeKey() {
         // Make searchField first responder
-        if appProperties.searchFieldShown {
+        if sessionProperties.searchFieldShown {
             let window1 = childWindows![0]
             window1.makeKey()
-            window1.makeFirstResponder(appProperties.popOver.searchField)
+            window1.makeFirstResponder(sessionProperties.popOver.searchField)
             return
         }
         
@@ -66,41 +66,56 @@ class AXWindow: NSWindow, NSWindowDelegate {
     }
     
     func windowWillEnterFullScreen(_ notification: Notification) {
-        appProperties.isFullScreen = true
-        appProperties.sidebarView.enteredFullScreen()
-        appProperties.webContainerView.enteredFullScreen()
+        sessionProperties.isFullScreen = true
+        sessionProperties.sidebarView.enteredFullScreen()
+        sessionProperties.webContainerView.enteredFullScreen()
         _hideTrafficLights(false)
     }
     
     func windowWillExitFullScreen(_ notification: Notification) {
-        appProperties.isFullScreen = false
-        hideTrafficLights(!appProperties.sidebarToggled)
-        appProperties.sidebarView.exitedFullScreen()
-        appProperties.webContainerView.exitedFullScreen()
+        sessionProperties.isFullScreen = false
+        hideTrafficLights(!sessionProperties.sidebarToggled)
+        sessionProperties.sidebarView.exitedFullScreen()
+        sessionProperties.webContainerView.exitedFullScreen()
     }
     
     override func close() {
         // Save the window
-        appProperties.windowFrame = self.frame
-        appProperties.saveProperties()
+        sessionProperties.windowFrame = self.frame
+        sessionProperties.saveProperties()
         
-        appProperties.sidebarView.tabView.tabStackView.arrangedSubviews.forEach { view in
+        sessionProperties.sidebarView.tabView.tabStackView.arrangedSubviews.forEach { view in
             (view as! AXSidebarTabButton).stopObserving()
             view.removeFromSuperview()
         }
         
-        appProperties.webContainerView.stopObserving()
-        appProperties.webContainerView.removeDelegates()
+        sessionProperties.webContainerView.stopObserving()
+        sessionProperties.webContainerView.removeDelegates()
         
-        appProperties.profiles.forEach { $0.saveProperties(); $0.tabs.removeAll() }
+        sessionProperties.profiles.forEach { $0.saveProperties(); $0.tabs.removeAll() }
         
         super.close()
+    }
+    
+    override func mouseUp(with event: NSEvent) {
+        if event.clickCount >= 2 && isPointInTitleBar(point: event.locationInWindow) { // double-click in title bar
+            self.performZoom(nil)
+        }
+        super.mouseUp(with: event)
+    }
+
+    fileprivate func isPointInTitleBar(point: CGPoint) -> Bool {
+        if let windowFrame = self.contentView?.frame {
+            let titleBarRect = NSRect(x: self.contentLayoutRect.origin.x, y: self.contentLayoutRect.origin.y+self.contentLayoutRect.height, width: self.contentLayoutRect.width, height: windowFrame.height-self.contentLayoutRect.height)
+            return titleBarRect.contains(point)
+        }
+        return false
     }
     
     // MARK: - Public
     
     public func hideTrafficLights(_ b: Bool) {
-        if !appProperties.isFullScreen {
+        if !sessionProperties.isFullScreen {
             _hideTrafficLights(b)
         }
     }

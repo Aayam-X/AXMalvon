@@ -25,7 +25,7 @@
 		ED2735E92962586400DE8126 /* AXProfileListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED2735E82962586400DE8126 /* AXProfileListView.swift */; };
 		ED27979C2967511400C7F81D /* AXDownload.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED27979B2967511400C7F81D /* AXDownload.swift */; };
 		ED3204FE293E61240055CD73 /* AXSplitView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FD293E61240055CD73 /* AXSplitView.swift */; };
-		ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FF293E632A0055CD73 /* AXAppProperties.swift */; };
+		ED320500293E632A0055CD73 /* AXSessionProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED3204FF293E632A0055CD73 /* AXSessionProperties.swift */; };
 		ED396B5A2969CAF400DC9492 /* AXPreferenceSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED396B592969CAF400DC9492 /* AXPreferenceSearchView.swift */; };
 		ED396B5C2969DEF400DC9492 /* AXGlobalProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED396B5B2969DEF400DC9492 /* AXGlobalProperties.swift */; };
 		ED4262612948A63900D2478E /* Appicon.icns in Resources */ = {isa = PBXBuildFile; fileRef = ED4262602948A63900D2478E /* Appicon.icns */; };
@@ -49,6 +49,7 @@
 		EDB1B1C829648A7B00C8942A /* AXTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB1B1C729648A7B00C8942A /* AXTabView.swift */; };
 		EDB514A42945219800EB0E8F /* AXTabManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB514A32945219800EB0E8F /* AXTabManager.swift */; };
 		EDC611C1294E213A00524E88 /* AXWebViewFindView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDC611C0294E213A00524E88 /* AXWebViewFindView.swift */; };
+		EDD371912CDA9F760085DC66 /* AXButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD371902CDA9F760085DC66 /* AXButton.swift */; };
 		EDD71EC8293BD96600256EA9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDD71EC7293BD96600256EA9 /* AppDelegate.swift */; };
 		EDD71ECA293BD96700256EA9 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EDD71EC9293BD96700256EA9 /* Assets.xcassets */; };
 		EDD71ECD293BD96700256EA9 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = EDD71ECB293BD96700256EA9 /* MainMenu.xib */; };
@@ -81,7 +82,7 @@
 		ED27979B2967511400C7F81D /* AXDownload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXDownload.swift; sourceTree = "<group>"; };
 		ED27D69E2944B5F000CA1911 /* Log.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Log.md; sourceTree = "<group>"; };
 		ED3204FD293E61240055CD73 /* AXSplitView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSplitView.swift; sourceTree = "<group>"; };
-		ED3204FF293E632A0055CD73 /* AXAppProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXAppProperties.swift; sourceTree = "<group>"; };
+		ED3204FF293E632A0055CD73 /* AXSessionProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXSessionProperties.swift; sourceTree = "<group>"; };
 		ED396B592969CAF400DC9492 /* AXPreferenceSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXPreferenceSearchView.swift; sourceTree = "<group>"; };
 		ED396B5B2969DEF400DC9492 /* AXGlobalProperties.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXGlobalProperties.swift; sourceTree = "<group>"; };
 		ED4262602948A63900D2478E /* Appicon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Appicon.icns; sourceTree = "<group>"; };
@@ -113,6 +114,7 @@
 		EDBB101F296A2E3700D02F01 /* index.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index.js; sourceTree = "<group>"; };
 		EDBBCF74296A2E2900D02F01 /* feature_list.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = feature_list.html; sourceTree = "<group>"; };
 		EDC611C0294E213A00524E88 /* AXWebViewFindView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXWebViewFindView.swift; sourceTree = "<group>"; };
+		EDD371902CDA9F760085DC66 /* AXButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AXButton.swift; sourceTree = "<group>"; };
 		EDD71EC4293BD96600256EA9 /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EDD71EC7293BD96600256EA9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EDD71EC9293BD96700256EA9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -170,7 +172,7 @@
 			children = (
 				ED5786A029D8512800B6E67D /* Tabs */,
 				ED57869B29D84FE900B6E67D /* Profiles */,
-				ED3204FF293E632A0055CD73 /* AXAppProperties.swift */,
+				ED3204FF293E632A0055CD73 /* AXSessionProperties.swift */,
 				ED396B5B2969DEF400DC9492 /* AXGlobalProperties.swift */,
 				ED27979B2967511400C7F81D /* AXDownload.swift */,
 				EDF03DEA295F654600E62B9C /* AXHistory.swift */,
@@ -299,6 +301,7 @@
 				ED212332294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift */,
 				ED3204FD293E61240055CD73 /* AXSplitView.swift */,
 				ED9B4CE72958835100961792 /* AXTextField.swift */,
+				EDD371902CDA9F760085DC66 /* AXButton.swift */,
 			);
 			path = "UI Elements";
 			sourceTree = "<group>";
@@ -450,12 +453,13 @@
 				ED212333294F2D4A008A2E04 /* AXRectangularProgressIndicator.swift in Sources */,
 				ED0B284C2959C6A7003D656F /* AXWebSplitView.swift in Sources */,
 				ED7B54A1295B798C008A944F /* AXPreferenceAccountView.swift in Sources */,
-				ED320500293E632A0055CD73 /* AXAppProperties.swift in Sources */,
+				ED320500293E632A0055CD73 /* AXSessionProperties.swift in Sources */,
 				ED0B1AC92947910800524F08 /* AXSearchFieldPopoverView.swift in Sources */,
 				ED396B5A2969CAF400DC9492 /* AXPreferenceSearchView.swift in Sources */,
 				ED5DF668295DC68000433D45 /* AXPurchaseBrowserView.swift in Sources */,
 				ED0B2866295B619F003D656F /* AXPreferenceGlobal.swift in Sources */,
 				EDF03DEB295F654600E62B9C /* AXHistory.swift in Sources */,
+				EDD371912CDA9F760085DC66 /* AXButton.swift in Sources */,
 				ED0B2864295B5EC1003D656F /* AXPreferenceButton.swift in Sources */,
 				EDE6969A29638F230041B72D /* Subclasses.swift in Sources */,
 				ED5DF664295CF8F700433D45 /* AXWelcomeView.swift in Sources */,

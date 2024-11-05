@@ -23,7 +23,7 @@ fileprivate enum DraggingSide {
 fileprivate let tempView: AXWebSplitViewAddItemView! = AXWebSplitViewAddItemView()
 
 class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPasteboardReading {
-    weak var appProperties: AXAppProperties!
+    weak var appProperties: AXSessionProperties!
     weak var profile: AXBrowserProfile!
     
     // Subviews
@@ -81,7 +81,7 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
         urlObserver = nil
     }
     
-    init(_ appProperties: AXAppProperties, _ profile: AXBrowserProfile?) {
+    init(_ appProperties: AXSessionProperties, _ profile: AXBrowserProfile?) {
         self.profile = profile
         self.appProperties = appProperties
         super.init(frame: .zero)
@@ -401,12 +401,12 @@ class AXSidebarTabButton: NSButton, NSDraggingSource, NSPasteboardWriting, NSPas
     
     private func moveTabToNewWindow() {
         let window = AXWindow(restoresTab: false)
-        window.appProperties.currentProfile.tabs.append(appProperties.currentProfile.tabs[tag])
+        window.sessionProperties.currentProfile.tabs.append(appProperties.currentProfile.tabs[tag])
         appProperties.tabManager.tabMovedToNewWindow(tag)
         
         DispatchQueue.main.async {
             // TODO: add self to stackview to prevent redrawing.
-            window.appProperties.tabManager.updateAll()
+            window.sessionProperties.tabManager.updateAll()
         }
         
         self.removeFromSuperview()

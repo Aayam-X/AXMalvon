@@ -9,7 +9,7 @@
 import AppKit
 
 class AXDownloadView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindowDelegate {
-    weak var appProperties: AXAppProperties!
+    weak var appProperties: AXSessionProperties!
     
     // Items
     var items: [AXDownloadItem] = []
@@ -51,7 +51,7 @@ class AXDownloadView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWind
         return button
     }()
     
-    init(appProperties: AXAppProperties) {
+    init(appProperties: AXSessionProperties) {
         self.appProperties = appProperties
         super.init(frame: .zero)
     }

@@ -10,7 +10,7 @@ import AppKit
 import WebKit
 
 class AXContentView: NSView {
-    weak var appProperties: AXAppProperties!
+    weak var appProperties: AXSessionProperties!
     
     private var hasDrawn: Bool = false
     var isAnimating: Bool = false

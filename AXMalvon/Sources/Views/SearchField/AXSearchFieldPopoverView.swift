@@ -10,7 +10,7 @@ import AppKit
 import Carbon.HIToolbox
 
 class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
-    weak var appProperties: AXAppProperties!
+    weak var appProperties: AXSessionProperties!
     
     var newTabMode: Bool = true
     private var localMouseDownEventMonitor: Any?

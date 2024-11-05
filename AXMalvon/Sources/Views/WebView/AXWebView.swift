@@ -50,7 +50,7 @@ class AXWebView: WKWebView {
     override func becomeFirstResponder() -> Bool {
         if isSplitView {
             self.layer?.borderWidth = 1.0
-            let appProperties = (window as! AXWindow).appProperties
+            let appProperties = (window as! AXWindow).sessionProperties
             appProperties.sidebarView.webView_updateSelection(webView: self)
             
             self.window?.title = self.title ?? "Untitled"

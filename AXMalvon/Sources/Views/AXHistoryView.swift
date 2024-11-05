@@ -9,7 +9,7 @@
 import AppKit
 
 class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindowDelegate {
-    weak var appProperties: AXAppProperties!
+    weak var appProperties: AXSessionProperties!
     
     // Items
     var items: [AXHistoryItem] = []
@@ -52,7 +52,7 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
     }()
 
     
-    init(appProperties: AXAppProperties) {
+    init(appProperties: AXSessionProperties) {
         self.appProperties = appProperties
         super.init(frame: .zero)
     }
@@ -191,7 +191,7 @@ class AXHistoryView: NSView, NSTableViewDelegate, NSTableViewDataSource, NSWindo
             if let window = window as? AXWindow {
                 for rowIndex in selectedRows {
                     let url = filteredItems[rowIndex].url
-                    window.appProperties.tabManager.createNewTab(url: URL(string: url)!)
+                    window.sessionProperties.tabManager.createNewTab(url: URL(string: url)!)
                 }
                 self.window?.close()
                 break

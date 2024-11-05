@@ -9,7 +9,7 @@
 import AppKit
 
 class AXTabView: NSView {
-    weak var appProperties: AXAppProperties!
+    weak var appProperties: AXSessionProperties!
     unowned var profile: AXBrowserProfile! // Disabled on private mode
     
     // Views

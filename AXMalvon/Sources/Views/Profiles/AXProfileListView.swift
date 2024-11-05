@@ -9,13 +9,13 @@
 import Cocoa
 
 class AXProfileListView: NSView {
-    weak var appProperties: AXAppProperties!
+    weak var appProperties: AXSessionProperties!
     
     let scrollView = NSScrollView()
     let clipView = AXFlippedClipViewCentered()
     let stackView = NSStackView()
     
-    init(_ appProperties: AXAppProperties!) {
+    init(_ appProperties: AXSessionProperties!) {
         self.appProperties = appProperties
         super.init(frame: .zero)
         

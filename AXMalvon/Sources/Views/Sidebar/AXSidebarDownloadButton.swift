@@ -9,7 +9,7 @@
 import AppKit
 
 class AXSidebarDownloadButton: NSButton {
-    weak var appProperties: AXAppProperties!
+    weak var appProperties: AXSessionProperties!
     var downloadItem: AXDownloadItem!
     
     // Colors
@@ -44,7 +44,7 @@ class AXSidebarDownloadButton: NSButton {
         isFinishedObserver = nil
     }
     
-    init(_ appProperties: AXAppProperties, _ downloadItem: AXDownloadItem) {
+    init(_ appProperties: AXSessionProperties, _ downloadItem: AXDownloadItem) {
         self.appProperties = appProperties
         self.downloadItem = downloadItem
         super.init(frame: .zero)

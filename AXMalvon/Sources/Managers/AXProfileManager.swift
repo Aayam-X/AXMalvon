@@ -9,9 +9,9 @@
 import Foundation
 
 class AXProfileManager {
-    weak var appProperties: AXAppProperties!
+    weak var appProperties: AXSessionProperties!
     
-    init(_ appProperties: AXAppProperties!) {
+    init(_ appProperties: AXSessionProperties!) {
         self.appProperties = appProperties
         
         // Ignore when appProperties is private

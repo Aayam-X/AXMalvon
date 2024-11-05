@@ -10,7 +10,7 @@ import AppKit
 import WebKit
 
 class AXTabManager {
-    weak var appProperties: AXAppProperties!
+    weak var appProperties: AXSessionProperties!
     
     // When a new tab is created, we will go to that tab
     var navigatesToNewTabOnCreate = true

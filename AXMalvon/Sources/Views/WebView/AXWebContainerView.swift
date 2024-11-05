@@ -11,7 +11,7 @@ import Carbon.HIToolbox
 import WebKit
 
 class AXWebContainerView: NSView {
-    weak var appProperties: AXAppProperties!
+    weak var appProperties: AXSessionProperties!
     
     var progressBarObserver: NSKeyValueObservation?
     private var hasDrawn: Bool = false
@@ -242,7 +242,7 @@ extension AXWebContainerView: WKUIDelegate, WKNavigationDelegate, WKDownloadDele
             fallthrough
         case [.shift, .option, .command]: // New window + show window
             let window = AXWindow(isPrivate: appProperties.isPrivate, restoresTab: false)
-            window.appProperties.tabManager.createNewTab(request: navigationAction.request)
+            window.sessionProperties.tabManager.createNewTab(request: navigationAction.request)
             window.makeKeyAndOrderFront(nil)
             decisionHandler(.cancel, preferences)
             return
