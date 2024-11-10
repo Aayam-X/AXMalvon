@@ -22,6 +22,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
         self.titlebarAppearsTransparent = true
         self.updateTrafficLights()
         self.delegate = self
+        backgroundColor = .textBackgroundColor // NSWindow has hidden NSVisualEffectView, to remove we must use this code
         
         // Other Configurations
         sessionProperties.window = self

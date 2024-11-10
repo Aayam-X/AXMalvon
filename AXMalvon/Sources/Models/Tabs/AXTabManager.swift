@@ -22,6 +22,7 @@ class AXTabManager {
     
     // Tab Group Information
     var currentTabGroup: AXTabGroup { currentProfile.currentTabGroup }
+    var currentWebView: AXWebView { currentProfile.currentTabGroup.currentTab.webView }
     
     init(appProperties: AXSessionProperties?) {
         self.appProperties = appProperties
@@ -33,9 +34,24 @@ class AXTabManager {
 }
 
 // MARK: Tab Functions
-extension AXTabManager {    
+extension AXTabManager {
+//    func switchTab(to: Int) {
+//        let currentTabGroup = currentProfile.currentTabGroup
+//        currentTabGroup.currentTabIndex = to
+//        
+//        appProperties.containerView.updateView(webView: currentTabGroup.currentTab.webView)
+//    }
+    
+//    func updateWebContainerView() {
+//        appProperties.containerView.updateView(webView: currentTabGroup.currentTab.webView)
+//    }
+    
+    func updateWebContainerView(tab: AXTab) {
+        appProperties.containerView.updateView(webView: tab.webView)
+    }
+    
     func createNewTab(from stringURL: String) {
-        let url = URL(string: stringURL)!
+        guard let url = URL(string: stringURL) else { return }
         let webView = AXWebView(frame: .zero, configuration: currentProfile.configuration)
         webView.load(URLRequest(url: url))
         
@@ -53,11 +69,14 @@ extension AXTabManager {
         currentProfile.currentTabGroup.addTab(tab)
     }
     
-    func switchTab(to: Int) {
-        let currentTabGroup = currentProfile.currentTabGroup
-        currentTabGroup.currentTabIndex = to
+    func createNewPopupTab(with configuration: WKWebViewConfiguration) -> AXWebView {
+        let webView = AXWebView(frame: .zero, configuration: configuration)
         
-        appProperties.containerView.updateView(webView: currentTabGroup.currentTab.webView)
+        
+        let tab = AXTab(webView: webView)
+        currentProfile.currentTabGroup.addTab(tab)
+        
+        return webView
     }
     
     func updateTitle(forTab at: Int, with: String) {

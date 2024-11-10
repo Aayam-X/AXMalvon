@@ -8,10 +8,10 @@
 import WebKit
 
 class AXTab {
-    var url: URL
+    var url: URL!
     var webView: AXWebView
     
-    init(url: URL, webView: AXWebView) {
+    init(url: URL! = nil, webView: AXWebView) {
         self.url = url
         self.webView = webView
     }

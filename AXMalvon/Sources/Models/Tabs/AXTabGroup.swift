@@ -13,6 +13,8 @@ class AXTabGroup {
     var name: String
     weak var appProperties: AXSessionProperties?
     
+    var isCurrentTabGroup = false
+    
     
     var tabs: [AXTab] = []
     var currentTabIndex: Int = 0
@@ -37,13 +39,29 @@ class AXTabGroup {
         // Nothing else ig???
     }
     
+    func activeTitleChanged(_ newTitle: String) {
+        if self.isCurrentTabGroup {
+            appProperties?.containerView.websiteTitleLabel.stringValue = newTitle
+        }
+    }
+    
     func addTab(_ tab: AXTab) {
-        let previousIndex = tabs.count - 1
+        let previousIndex = currentTabIndex
         
         tabs.append(tab)
         tabBarView.addTab(tab: tab)
-        tabBarView.updateActiveTab(from: previousIndex, to: tabs.count - 1)
         
-        appProperties!.tabManager.switchTab(to: tabs.count - 1)
+        if previousIndex == -1 {
+            tabBarView.updateActiveTab(to: 0)
+        } else {
+            tabBarView.updateActiveTab(from: previousIndex, to: tabs.count - 1)
+        }        
+    }
+    
+    func switchTab(to index: Int) {
+        let previousIndex = currentTabIndex
+        currentTabIndex = index
+        
+        tabBarView.updateActiveTab(from: previousIndex, to: index)
     }
 }

@@ -73,8 +73,6 @@ class AXTabBarView: NSView {
         
         button.tag = tabGroup.tabs.count - 1
         tabGroup.currentTabIndex = button.tag
-        button.target = self
-        button.action = #selector(tabClick)
         button.tabTitle = tabGroup.currentTab.webView.title ?? "Untitled"
         
         addButtonToStackView(button)
@@ -100,12 +98,20 @@ class AXTabBarView: NSView {
         
         let newButton = tabStackView.arrangedSubviews[to] as! AXTabButton
         newButton.isSelected = true
+        
+        // I believe it is far more efficient if this code is handled here;
+        // As that means calling less functions.
+        let tab = tabGroup.tabs[to]
+        appProperties.tabManager.updateWebContainerView(tab: tab)
     }
-       
-       @objc func tabClick() {
-           print("Tab Click")
-           
-       }
+    
+    func updateActiveTab(to: Int) {
+        let newButton = tabStackView.arrangedSubviews[to] as! AXTabButton
+        newButton.isSelected = true
+        
+        let tab = tabGroup.tabs[to]
+        appProperties.tabManager.updateWebContainerView(tab: tab)
+    }
 }
 
 final class AXFlippedClipView: NSClipView {

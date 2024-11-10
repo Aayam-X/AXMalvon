@@ -15,9 +15,9 @@
         <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
         <menu title="Main Menu" systemMenu="main" id="Wvu-2r-zyW">
             <items>
-                <menuItem title="AXMalvon" id="Law-TS-xLl">
+                <menuItem title="Malvon" id="Law-TS-xLl">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <menu key="submenu" title="AXMalvon" systemMenu="apple" id="TKU-4q-G0i">
+                    <menu key="submenu" title="Malvon" systemMenu="apple" id="TKU-4q-G0i">
                         <items>
                             <menuItem title="About AXMalvon" id="OyB-Wd-BX4">
                                 <modifierMask key="keyEquivalentModifierMask"/>

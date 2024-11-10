@@ -18,7 +18,13 @@ class AXWebKitProfile {
     /// Tab Groups
     var isCurrent: Bool = false
     var tabGroups: [AXTabGroup]
-    var currentTabGroupIndex = 0
+    var currentTabGroupIndex = 0 {
+        didSet {
+            tabGroups[oldValue].isCurrentTabGroup = false
+            tabGroups[currentTabGroupIndex].isCurrentTabGroup = true
+        }
+    }
+    
     var currentTabGroup: AXTabGroup {
         get { tabGroups[currentTabGroupIndex] }
     }
@@ -34,6 +40,8 @@ class AXWebKitProfile {
         
         let tabGroup = AXTabGroup(name: "Default", appProperties)
         tabGroups = [tabGroup]
+        
+        tabGroups[0].isCurrentTabGroup = true
     }
     
     func deleteProfile() async {

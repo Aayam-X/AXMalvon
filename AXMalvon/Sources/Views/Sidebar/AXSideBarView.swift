@@ -114,15 +114,15 @@ class AXSidebarView: NSView {
     }
     
     @objc func backButtonAction() {
-        print("backButtonAction")
+        appProperties.containerView.currentWebView?.goBack()
     }
     
     @objc func forwardButtonAction() {
-        print("forwardButtonAction")
+        appProperties.containerView.currentWebView?.goForward()
     }
     
     @objc func reloadButtonAction() {
-        print("reloadButtonAction")
+        appProperties.containerView.currentWebView?.reload()
     }
     
     

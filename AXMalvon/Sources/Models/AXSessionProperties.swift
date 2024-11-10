@@ -20,6 +20,7 @@ class AXSessionProperties {
     lazy var containerView = AXWebContainerView(appProperties: self)
     lazy var sidebarView = AXSidebarView(appProperties: self)
     lazy var searchBarWindow = AXSearchBarWindow(appProperties: self)
+    lazy var progressBar = AXProgressIndicatorView(appProperties: self)
     
     /// Managers
     lazy var tabManager = AXTabManager(appProperties: self)

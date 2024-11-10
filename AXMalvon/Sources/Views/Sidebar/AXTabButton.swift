@@ -139,6 +139,10 @@ class AXTabButton: NSButton {
             self?.tabGroup.updateTitle(fromTab: self!.tag, to: title)
             
             self?.webTitle = title
+            
+            if self!.isSelected {
+                self!.tabGroup.activeTitleChanged(title)
+            }
         })
     }
     
@@ -155,7 +159,7 @@ class AXTabButton: NSButton {
         // I had the code here, but don't know what it was for: self.isMousePoint(self.convert(event.locationInWindow, from: nil), in: self.bounds)
         
         if event.clickCount == 1 {
-            sendAction(action, to: target)
+            self.switchTab()
             self.isSelected = true
         } else if event.clickCount == 2 {
             // Edit the title.
@@ -195,6 +199,14 @@ class AXTabButton: NSButton {
             titleView.isEditable = false
             userDoubleClicked = false
         }
+    }
+    
+    // This would be called directly from a button click
+    @objc func switchTab() {
+        let previousTag = tabGroup.currentTabIndex
+        tabGroup.currentTabIndex = self.tag
+    
+        tabGroup.tabBarView.updateActiveTab(from: previousTag, to: self.tag)
     }
 }
 

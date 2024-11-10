@@ -13,21 +13,9 @@ class AXContentView: NSView {
     weak var appProperties: AXSessionProperties!
     private var hasDrawn: Bool = false
     
-    private lazy var visualEffectView: NSVisualEffectView = {
-        let view = NSVisualEffectView()
-        view.material = .popover
-        view.blendingMode = .behindWindow
-        view.state = .followsWindowActiveState
-        view.autoresizingMask = [.height, .width]
-        return view
-    }()
-    
     override func viewWillDraw() {
         if hasDrawn { return }
         defer { hasDrawn = true }
-        
-        visualEffectView.frame = bounds
-        addSubview(visualEffectView)
         
         appProperties.containerView.frame = bounds
         addSubview(appProperties.containerView)
