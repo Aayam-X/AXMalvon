@@ -7,7 +7,7 @@
 
 import Cocoa
 
-class AXTabBarView: NSView {
+class AXTabBarView: NSView, AXTabButtonDelegate {
     weak var appProperties: AXSessionProperties!
     var tabGroup: AXTabGroup
     private var hasDrawn = false
@@ -78,17 +78,24 @@ class AXTabBarView: NSView {
         addButtonToStackView(button)
         
         button.startObserving()
+        button.delegate = self
         
         // appProperties.tabManager.switchTab(to: index)
     }
     
-
+    func tabButtonDidSelect(_ tabButton: AXTabButton) {
+        let previousTag = tabGroup.currentTabIndex
+        tabGroup.currentTabIndex = tabButton.tag
+        
+        tabGroup.tabBarView.updateActiveTab(from: previousTag, to: tabButton.tag)
+    }
+    
     private func addButtonToStackView(_ button: NSButton) {
         tabStackView.addArrangedSubview(button)
         
         NSLayoutConstraint.activate([
-            button.leadingAnchor.constraint(equalTo: tabStackView.leadingAnchor, constant: 10),
-            button.trailingAnchor.constraint(equalTo: tabStackView.trailingAnchor, constant: -9),
+            button.leadingAnchor.constraint(equalTo: tabStackView.leadingAnchor, constant: 5),
+            button.trailingAnchor.constraint(equalTo: tabStackView.trailingAnchor, constant: -4),
         ])
     }
     
@@ -122,7 +129,15 @@ class AXTabBarView: NSView {
             }
         }
     }
-
+    
+    func tabButtonWillClose(_ tabButton: AXTabButton) {
+        for (index, button) in tabStackView.arrangedSubviews.enumerated().dropFirst(tabButton.tag) {
+            if let button = button as? AXTabButton {
+                button.tag = index
+            }
+        }
+    }
+    
 }
 
 final class AXFlippedClipView: NSClipView {

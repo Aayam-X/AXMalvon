@@ -11,15 +11,6 @@ class AXSidebarView: NSView {
     weak var appProperties: AXSessionProperties!
     private var hasDrawn: Bool = false
     
-    lazy var tabGroupOrProfileButton: AXButton = {
-        let button = AXButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        
-        button.title = appProperties.tabManager.currentProfile.name + " — " + appProperties.tabManager.currentProfile.currentTabGroup.name
-        button.lineBreakMode = .byTruncatingTail
-        return button
-    }()
-    
     override var tag: Int {
         return 0x01
     }
@@ -36,16 +27,10 @@ class AXSidebarView: NSView {
         gestureView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
         gestureView.heightAnchor.constraint(equalToConstant: 40).isActive = true
         
-        
-        addSubview(tabGroupOrProfileButton)
-        tabGroupOrProfileButton.topAnchor.constraint(equalTo: gestureView.bottomAnchor, constant: 3).isActive = true
-        tabGroupOrProfileButton.leftAnchor.constraint(equalTo: leftAnchor, constant: 10).isActive = true
-        tabGroupOrProfileButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -10).isActive = true
-        
         let tabBarView = appProperties.tabManager.currentProfile.currentTabGroup.tabBarView
         addSubview(tabBarView)
         NSLayoutConstraint.activate([
-            tabBarView.topAnchor.constraint(equalTo: tabGroupOrProfileButton.bottomAnchor, constant: 5),
+            tabBarView.topAnchor.constraint(equalTo: gestureView.bottomAnchor, constant: 5),
             tabBarView.leadingAnchor.constraint(equalTo: leadingAnchor),
             tabBarView.trailingAnchor.constraint(equalTo: trailingAnchor),
             tabBarView.bottomAnchor.constraint(equalTo: bottomAnchor),

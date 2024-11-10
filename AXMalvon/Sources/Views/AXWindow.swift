@@ -10,6 +10,7 @@ import AppKit
 
 class AXWindow: NSWindow, NSWindowDelegate {
     var sessionProperties = AXSessionProperties()
+    lazy var trafficLightManager = AXTrafficLightOverlayManager(window: self)
     private let splitView = AXSplitView()
     
     init() {
@@ -21,7 +22,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
         )
         // Window Configurations
         self.titlebarAppearsTransparent = true
-        self.updateTrafficLights()
+        trafficLightManager.updateTrafficLights()
         self.delegate = self
         backgroundColor = .textBackgroundColor // NSWindow has hidden NSVisualEffectView, to remove we must use this code
         
@@ -42,67 +43,36 @@ class AXWindow: NSWindow, NSWindowDelegate {
             
             if splitView.subviews.count == 2 {
                 splitView.arrangedSubviews[0].removeFromSuperview()
-                hideTrafficLights(true)
+                trafficLightManager.hideTrafficLights(true)
             } else {
                 splitView.insertArrangedSubview(sessionProperties.sidebarView, at: 0)
-                hideTrafficLights(false)
+                trafficLightManager.hideTrafficLights(false)
             }
             
             splitView.layoutSubtreeIfNeeded()
         }
     }
-
+    
     
     // MARK: Window Events
     func windowDidResize(_ notification: Notification) {
-        updateTrafficLights()
+        trafficLightManager.updateTrafficLights()
     }
     
     override func mouseUp(with event: NSEvent) {
         // Double-click in title bar
         if event.clickCount >= 2 && isPointInTitleBar(point: event.locationInWindow) {
-            self.performZoom(nil)
+            self.zoom(nil)
         }
         super.mouseUp(with: event)
     }
-
+    
     fileprivate func isPointInTitleBar(point: CGPoint) -> Bool {
         if let windowFrame = self.contentView?.frame {
             let titleBarRect = NSRect(x: self.contentLayoutRect.origin.x, y: self.contentLayoutRect.origin.y+self.contentLayoutRect.height, width: self.contentLayoutRect.width, height: windowFrame.height-self.contentLayoutRect.height)
             return titleBarRect.contains(point)
         }
         return false
-    }
-    
-    // MARK: Traffic Light Functions
-    fileprivate func hideTrafficLights(_ b: Bool) {
-        standardWindowButton(.closeButton)?.isHidden = b
-        standardWindowButton(.miniaturizeButton)!.isHidden = b
-        standardWindowButton(.zoomButton)!.isHidden = b
-    }
-    
-    
-    fileprivate func updateTrafficLights() {
-        let closeButton = standardWindowButton(.closeButton)!
-        closeButton.frame.origin.x = 13.0
-        closeButton.frame.origin.y = 0
-        closeButton.layer?.cornerRadius = 8
-        closeButton.layer?.borderWidth = 0.2
-        closeButton.layer?.borderColor = .white
-        
-        let miniaturizeButton = standardWindowButton(.miniaturizeButton)!
-        miniaturizeButton.frame.origin.x = 33.0
-        miniaturizeButton.frame.origin.y = 0
-        miniaturizeButton.layer?.cornerRadius = 8
-        miniaturizeButton.layer?.borderWidth = 0.2
-        miniaturizeButton.layer?.borderColor = .white
-        
-        let zoomButton = standardWindowButton(.zoomButton)!
-        zoomButton.frame.origin.x = 53.0
-        zoomButton.frame.origin.y = 0
-        zoomButton.layer?.cornerRadius = 8
-        zoomButton.layer?.borderWidth = 0.2
-        zoomButton.layer?.borderColor = .white
     }
 }
 
@@ -154,7 +124,7 @@ extension AXWindow {
         let window = AXWindow()
         
         // Create new window and create blank window
-//        window.sessionProperties.profiles.forEach { $0.retriveTabs() }
+        //        window.sessionProperties.profiles.forEach { $0.retriveTabs() }
         
         window.makeKeyAndOrderFront(nil)
     }
@@ -164,10 +134,9 @@ extension AXWindow {
     }
     
     @IBAction func showSidebar(_ sender: Any) {
-        print("HELLO WORLD")
         toggleTabSidebar()
     }
-
+    
     override var acceptsFirstResponder: Bool {
         true
     }

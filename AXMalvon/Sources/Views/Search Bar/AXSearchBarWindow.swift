@@ -52,6 +52,23 @@ class AXSearchBarWindow: NSPanel, NSWindowDelegate {
     
     func showCurrentURL() {
         // Implement this
+        guard isViewClosed else { self.close(); return }
+        appProperties.containerView.alphaValue = 0.5
+        
+        self.setFrameOrigin(.init(x: appProperties.window.frame.midX - 300, y: appProperties.window.frame.midY - 137))
+        appProperties.window.addChildWindow(self, ordered: .above)
+        self.makeKeyAndOrderFront(nil)
+        
+        searchBarView.newTabMode = false
+        searchBarView.searchField.stringValue = appProperties.containerView.currentWebView?.url?.absoluteString ?? ""
+        
+        let range = NSRange(location: 0, length: searchBarView.searchField.stringValue.count)
+        let editor = searchBarView.searchField.currentEditor()
+        editor?.selectedRange = range
+        
+        observer()
+        
+        _ = searchBarView.searchField.becomeFirstResponder()
     }
     
     override func close() {

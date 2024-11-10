@@ -65,6 +65,7 @@ class AXWebContainerView: NSView {
         currentWebView?.removeFromSuperview()
         
         self.currentWebView = webView
+        self.websiteTitleLabel.stringValue = webView.title ?? "Untitled Page"
         self.currentWebView!.uiDelegate = self
         self.currentWebView!.navigationDelegate = self
         splitView.addArrangedSubview(webView)

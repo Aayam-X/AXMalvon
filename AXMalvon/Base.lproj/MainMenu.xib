@@ -371,7 +371,11 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="View" id="ZdR-mQ-XQT">
                         <items>
-                            <menuItem title="Show Search Field" keyEquivalent="l" id="zok-a6-1wB"/>
+                            <menuItem title="Show Search Field" keyEquivalent="l" id="zok-a6-1wB">
+                                <connections>
+                                    <action selector="toggleSearchField:" target="-1" id="gpt-QM-gkU"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="tEW-jz-yui"/>
                             <menuItem title="Show History" keyEquivalent="y" id="Txt-we-5GE"/>
                             <menuItem title="Show Downloads" keyEquivalent="J" id="vQm-IY-C9B"/>

@@ -55,7 +55,7 @@ class AXProgressIndicatorView: NSView, CAAnimationDelegate {
     }
     
     func updateProgress(_ newValue: CGFloat, _ duration: CGFloat = 0.2) {
-        let color = NSColor.textColor.withAlphaComponent(CGFloat.random(in: 0.5..<1.0)).cgColor
+        let color = NSColor.systemPink.withAlphaComponent(CGFloat.random(in: 0.3..<0.9)).cgColor
         
         // Top Point
         topPointPath.move(to: .init(x: 0, y: bounds.height))

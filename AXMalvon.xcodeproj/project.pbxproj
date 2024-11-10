@@ -6,13 +6,31 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		ED3BA1492CE11E520094F6E9 /* 1TODO.md in Resources */ = {isa = PBXBuildFile; fileRef = ED3BA1482CE11E480094F6E9 /* 1TODO.md */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
-		ED3AEFE22CDAED2F002AE6CC /* AXMalvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AXMalvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED3AEFE22CDAED2F002AE6CC /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED3BA1482CE11E480094F6E9 /* 1TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = 1TODO.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		ED3BA1422CE1074A0094F6E9 /* Exceptions for "AXMalvon" folder in "Malvon" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = ED3AEFE12CDAED2F002AE6CC /* Malvon */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		ED3AEFE42CDAED2F002AE6CC /* AXMalvon */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				ED3BA1422CE1074A0094F6E9 /* Exceptions for "AXMalvon" folder in "Malvon" target */,
+			);
 			path = AXMalvon;
 			sourceTree = "<group>";
 		};
@@ -32,6 +50,7 @@
 		ED3AEFD92CDAED2F002AE6CC = {
 			isa = PBXGroup;
 			children = (
+				ED3BA1482CE11E480094F6E9 /* 1TODO.md */,
 				ED3AEFE42CDAED2F002AE6CC /* AXMalvon */,
 				ED3AEFE32CDAED2F002AE6CC /* Products */,
 			);
@@ -40,7 +59,7 @@
 		ED3AEFE32CDAED2F002AE6CC /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				ED3AEFE22CDAED2F002AE6CC /* AXMalvon.app */,
+				ED3AEFE22CDAED2F002AE6CC /* Malvon.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -48,9 +67,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		ED3AEFE12CDAED2F002AE6CC /* AXMalvon */ = {
+		ED3AEFE12CDAED2F002AE6CC /* Malvon */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = ED3AEFEF2CDAED30002AE6CC /* Build configuration list for PBXNativeTarget "AXMalvon" */;
+			buildConfigurationList = ED3AEFEF2CDAED30002AE6CC /* Build configuration list for PBXNativeTarget "Malvon" */;
 			buildPhases = (
 				ED3AEFDE2CDAED2F002AE6CC /* Sources */,
 				ED3AEFDF2CDAED2F002AE6CC /* Frameworks */,
@@ -63,11 +82,11 @@
 			fileSystemSynchronizedGroups = (
 				ED3AEFE42CDAED2F002AE6CC /* AXMalvon */,
 			);
-			name = AXMalvon;
+			name = Malvon;
 			packageProductDependencies = (
 			);
 			productName = AXMalvon;
-			productReference = ED3AEFE22CDAED2F002AE6CC /* AXMalvon.app */;
+			productReference = ED3AEFE22CDAED2F002AE6CC /* Malvon.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -100,7 +119,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				ED3AEFE12CDAED2F002AE6CC /* AXMalvon */,
+				ED3AEFE12CDAED2F002AE6CC /* Malvon */,
 			);
 		};
 /* End PBXProject section */
@@ -110,6 +129,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED3BA1492CE11E520094F6E9 /* 1TODO.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -256,8 +276,13 @@
 				DEVELOPMENT_TEAM = 3TJDS4N2C3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_FILE = AXMalvon/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Malvon needs access to your camera";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2024 Ashwin Paudel. All rights reserved.";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Malvon needs access to your microphone";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -283,8 +308,13 @@
 				DEVELOPMENT_TEAM = 3TJDS4N2C3;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_FILE = AXMalvon/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Malvon needs access to your camera";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2024 Ashwin Paudel. All rights reserved.";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Malvon needs access to your microphone";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -310,7 +340,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		ED3AEFEF2CDAED30002AE6CC /* Build configuration list for PBXNativeTarget "AXMalvon" */ = {
+		ED3AEFEF2CDAED30002AE6CC /* Build configuration list for PBXNativeTarget "Malvon" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				ED3AEFF02CDAED30002AE6CC /* Debug */,

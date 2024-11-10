@@ -27,8 +27,8 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         }
     }
     
-    var searchField: AXTextField! = {
-        let searchField = AXTextField()
+    var searchField: NSTextField! = {
+        let searchField = NSTextField()
         searchField.translatesAutoresizingMaskIntoConstraints = false
         searchField.alignment = .left
         searchField.isBordered = false
@@ -76,7 +76,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     
     init(appProperties: AXSessionProperties) {
         self.appProperties = appProperties
-//        mostVisitedWebsites = UserDefaults.standard.stringArray(forKey: "MostVisitedWebsite") ?? []
+        //        mostVisitedWebsites = UserDefaults.standard.stringArray(forKey: "MostVisitedWebsite") ?? []
         super.init(frame: .zero)
     }
     
@@ -120,9 +120,9 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             
             highlightedSuggestion = 0
             
-//            if appProperties.isPrivate {
-//                suggestionWindow.appearance = .init(named: .darkAqua)
-//            }
+            //            if appProperties.isPrivate {
+            //                suggestionWindow.appearance = .init(named: .darkAqua)
+            //            }
             
             hasDrawn = true
             _ = searchField.becomeFirstResponder()
@@ -154,20 +154,20 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         
         var url: URL?
         
-//        if !appProperties.isPrivate {
-//            searchedQueries.append(value)
-//
-//            if searchedQueries.count == 15 {
-//                //saveMostVisitedSites()
-//                searchedQueries.removeAll()
-//            }
-//        }
+        //        if !appProperties.isPrivate {
+        //            searchedQueries.append(value)
+        //
+        //            if searchedQueries.count == 15 {
+        //                //saveMostVisitedSites()
+        //                searchedQueries.removeAll()
+        //            }
+        //        }
         
         if !searchField.stringValue.isEmpty {
             if value.starts(with: "malvon?") {
                 print(value.string(after: 7))
                 if let url = Bundle.main.url(forResource: value.string(after: 7), withExtension: "html") {
-//                    appProperties.tabManager.createNewTab(fileURL: url)
+                    //                    appProperties.tabManager.createNewTab(fileURL: url)
                 }
             } else if value.starts(with: "file:///") {
                 url = URL(string: value)!
@@ -314,18 +314,6 @@ fileprivate func fixURL(_ url: URL) -> URL {
     newURL += url.path
     newURL += url.query ?? ""
     return URL(string: newURL)!
-}
-
-class AXTextField: NSTextField {
-    // Prevent the text from being selected when becoming first responder
-    override func becomeFirstResponder() -> Bool {
-        let status = super.becomeFirstResponder()
-        
-        let selectionRange = currentEditor()?.selectedRange
-        currentEditor()?.selectedRange = .init(location: selectionRange?.length ?? 0, length: 0)
-        
-        return status
-    }
 }
 
 extension String {

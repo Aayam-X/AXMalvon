@@ -7,8 +7,14 @@
 
 import AppKit
 
+protocol AXTabButtonDelegate: AnyObject {
+    func tabButtonDidSelect(_ tabButton: AXTabButton)
+    func tabButtonWillClose(_ tabButton: AXTabButton)
+}
+
 class AXTabButton: NSButton {
     var tabGroup: AXTabGroup
+    var delegate: AXTabButtonDelegate?
     
     // Subviews
     var titleView: NSTextField! = NSTextField()
@@ -53,9 +59,9 @@ class AXTabButton: NSButton {
     
     deinit {
         titleObserver?.invalidate()
-//        urlObserver?.invalidate()
+        //        urlObserver?.invalidate()
         titleObserver = nil
-//        urlObserver = nil
+        //        urlObserver = nil
     }
     
     init(tabGroup: AXTabGroup) {
@@ -122,7 +128,8 @@ class AXTabButton: NSButton {
     
     @objc func closeTab() {
         stopObserving()
-//        appProperties.tabManager.closeTab(self.tag)
+        delegate?.tabButtonWillClose(self)
+        self.removeFromSuperview()
     }
     
     public func stopObserving() {
@@ -203,10 +210,7 @@ class AXTabButton: NSButton {
     
     // This would be called directly from a button click
     @objc func switchTab() {
-        let previousTag = tabGroup.currentTabIndex
-        tabGroup.currentTabIndex = self.tag
-    
-        tabGroup.tabBarView.updateActiveTab(from: previousTag, to: self.tag)
+        delegate?.tabButtonDidSelect(self)
     }
 }
 

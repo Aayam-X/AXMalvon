@@ -21,7 +21,7 @@ class AXNavigationGestureView: NSView {
     
     private var scrollEventFinished: Bool = false
     var trackingArea: NSTrackingArea!
-
+    
     lazy var swipeDirectionLabel: NSTextField = {
         let title = NSTextField()
         title.isEditable = false
@@ -35,6 +35,8 @@ class AXNavigationGestureView: NSView {
         return title
     }()
     
+    lazy var tabGroupSwapperView = AXTabGroupSwapperView()
+    
     override func viewWillDraw() {
         if hasDrawn { return }
         defer { hasDrawn = true }
@@ -46,6 +48,12 @@ class AXNavigationGestureView: NSView {
         swipeDirectionLabel.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
         swipeDirectionLabel.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
         swipeDirectionLabel.topAnchor.constraint(equalTo: topAnchor).isActive = true
+        
+        tabGroupSwapperView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(tabGroupSwapperView)
+        tabGroupSwapperView.leftAnchor.constraint(equalTo: leftAnchor, constant: 80).isActive = true
+        tabGroupSwapperView.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
+        tabGroupSwapperView.topAnchor.constraint(equalTo: topAnchor, constant: 4).isActive = true
     }
     
     init(appProperties: AXSessionProperties) {
@@ -64,7 +72,7 @@ class AXNavigationGestureView: NSView {
         self.addTrackingArea(trackingArea)
     }
     
-
+    
     override func scrollWheel(with event: NSEvent) {
         let x = event.deltaX
         let y = event.deltaY
@@ -85,7 +93,7 @@ class AXNavigationGestureView: NSView {
         guard abs(x) > 0.5 || abs(y) > 0.5, !scrollEventFinished else {
             return
         }
-
+        
         
         // Handle X-axis scroll
         if x != 0 {
@@ -99,7 +107,7 @@ class AXNavigationGestureView: NSView {
             swipeDirectionLabel.stringValue = y > 0 ? "Refresh" : ""
         }
     }
-
+    
     
     override func mouseEntered(with event: NSEvent) {
         print("Mouse entered")
@@ -111,6 +119,7 @@ class AXNavigationGestureView: NSView {
         scrollEventFinished = true
         swipeDirectionLabel.stringValue = ""
         swipeDirectionLabel.isHidden = true
+        appProperties.window.trafficLightManager.showButtons()
         
         switch swipeColorValue {
         case .backwards:
