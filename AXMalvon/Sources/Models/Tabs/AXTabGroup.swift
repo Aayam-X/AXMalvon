@@ -64,4 +64,17 @@ class AXTabGroup {
         
         tabBarView.updateActiveTab(from: previousIndex, to: index)
     }
+    
+    func removeTab(at: Int) {
+        tabs.remove(at: at)
+        currentTabIndex = currentTabIndex > at ? currentTabIndex - 1 : currentTabIndex
+        
+        tabBarView.removeTabButton(at)
+    }
+    
+    func removeTab() {
+        tabs.remove(at: currentTabIndex)
+        currentTabIndex -= 1
+        tabBarView.removeTabButton(currentTabIndex)
+    }
 }

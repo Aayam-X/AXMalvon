@@ -50,6 +50,10 @@ class AXSearchBarWindow: NSPanel, NSWindowDelegate {
         _ = searchBarView.searchField.becomeFirstResponder()
     }
     
+    func showCurrentURL() {
+        // Implement this
+    }
+    
     override func close() {
         isViewClosed = true
         searchBarView.windowClosed()

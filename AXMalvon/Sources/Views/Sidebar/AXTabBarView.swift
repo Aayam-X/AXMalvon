@@ -112,6 +112,17 @@ class AXTabBarView: NSView {
         let tab = tabGroup.tabs[to]
         appProperties.tabManager.updateWebContainerView(tab: tab)
     }
+    
+    func removeTabButton(_ at: Int) {
+        tabStackView.arrangedSubviews[at].removeFromSuperview()
+        
+        for (index, button) in tabStackView.arrangedSubviews.enumerated().dropFirst(at) {
+            if let button = button as? AXTabButton {
+                button.tag = index
+            }
+        }
+    }
+
 }
 
 final class AXFlippedClipView: NSClipView {

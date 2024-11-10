@@ -89,7 +89,7 @@
                             <menuItem isSeparatorItem="YES" id="H8T-v7-OGG"/>
                             <menuItem title="Close Tab" keyEquivalent="w" id="gTe-Ws-oas">
                                 <connections>
-                                    <action selector="removeCurrentTab:" target="-1" id="FDr-CP-faA"/>
+                                    <action selector="closeTab:" target="-1" id="h6j-NE-bGz"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Close Window" keyEquivalent="W" id="l4G-ai-0ZP">
@@ -378,6 +378,9 @@
                             <menuItem isSeparatorItem="YES" id="8nx-Vr-Jq1"/>
                             <menuItem title="Toggle Sidebar" keyEquivalent="s" id="frp-Ij-3tT">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
+                                <connections>
+                                    <action selector="showSidebar:" target="-1" id="3ll-YA-1ic"/>
+                                </connections>
                             </menuItem>
                             <menuItem title="Enter Full Screen" keyEquivalent="f" id="S7n-z9-xAq">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>

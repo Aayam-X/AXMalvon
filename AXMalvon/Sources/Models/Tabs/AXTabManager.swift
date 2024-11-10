@@ -35,17 +35,6 @@ class AXTabManager {
 
 // MARK: Tab Functions
 extension AXTabManager {
-//    func switchTab(to: Int) {
-//        let currentTabGroup = currentProfile.currentTabGroup
-//        currentTabGroup.currentTabIndex = to
-//        
-//        appProperties.containerView.updateView(webView: currentTabGroup.currentTab.webView)
-//    }
-    
-//    func updateWebContainerView() {
-//        appProperties.containerView.updateView(webView: currentTabGroup.currentTab.webView)
-//    }
-    
     func updateWebContainerView(tab: AXTab) {
         appProperties.containerView.updateView(webView: tab.webView)
     }
@@ -83,6 +72,10 @@ extension AXTabManager {
         appProperties.containerView.websiteTitleLabel.stringValue = with
         self.appProperties.window.title = with
         // Later on we'll do the sidebar
+    }
+    
+    func closeTab(at: Int) {
+        currentTabGroup.removeTab(at: at)
     }
 }
 

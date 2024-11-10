@@ -138,6 +138,10 @@ class AXProgressIndicatorView: NSView, CAAnimationDelegate {
     
     override func viewDidEndLiveResize() {
         self.isHidden = false
+        topPointPath.removeAllPoints()
+        rightPointPath.removeAllPoints()
+        bottomPointPath.removeAllPoints()
+        leftPointPath.removeAllPoints()
     }
     
     override func viewWillStartLiveResize() {

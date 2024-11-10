@@ -10,6 +10,7 @@ import AppKit
 
 class AXWindow: NSWindow, NSWindowDelegate {
     var sessionProperties = AXSessionProperties()
+    private let splitView = AXSplitView()
     
     init() {
         super.init(
@@ -27,13 +28,30 @@ class AXWindow: NSWindow, NSWindowDelegate {
         // Other Configurations
         sessionProperties.window = self
         
-        let splitView = AXSplitView()
         splitView.addArrangedSubview(sessionProperties.sidebarView)
         splitView.addArrangedSubview(sessionProperties.containerView)
         
         self.contentView = splitView
         sessionProperties.sidebarView.frame.size.width = 180
     }
+    
+    func toggleTabSidebar() {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.25 // Adjust duration as needed
+            context.allowsImplicitAnimation = true
+            
+            if splitView.subviews.count == 2 {
+                splitView.arrangedSubviews[0].removeFromSuperview()
+                hideTrafficLights(true)
+            } else {
+                splitView.insertArrangedSubview(sessionProperties.sidebarView, at: 0)
+                hideTrafficLights(false)
+            }
+            
+            splitView.layoutSubtreeIfNeeded()
+        }
+    }
+
     
     // MARK: Window Events
     func windowDidResize(_ notification: Notification) {
@@ -68,14 +86,23 @@ class AXWindow: NSWindow, NSWindowDelegate {
         let closeButton = standardWindowButton(.closeButton)!
         closeButton.frame.origin.x = 13.0
         closeButton.frame.origin.y = 0
+        closeButton.layer?.cornerRadius = 8
+        closeButton.layer?.borderWidth = 0.2
+        closeButton.layer?.borderColor = .white
         
         let miniaturizeButton = standardWindowButton(.miniaturizeButton)!
         miniaturizeButton.frame.origin.x = 33.0
         miniaturizeButton.frame.origin.y = 0
+        miniaturizeButton.layer?.cornerRadius = 8
+        miniaturizeButton.layer?.borderWidth = 0.2
+        miniaturizeButton.layer?.borderColor = .white
         
         let zoomButton = standardWindowButton(.zoomButton)!
         zoomButton.frame.origin.x = 53.0
         zoomButton.frame.origin.y = 0
+        zoomButton.layer?.cornerRadius = 8
+        zoomButton.layer?.borderWidth = 0.2
+        zoomButton.layer?.borderColor = .white
     }
 }
 
@@ -111,6 +138,10 @@ private class AXSplitView: NSSplitView, NSSplitViewDelegate {
 
 extension AXWindow {
     // MARK: - Menu Bar Item Actions
+    @IBAction func toggleSearchField(_ sender: Any) {
+        sessionProperties.searchBarWindow.showCurrentURL()
+    }
+    
     @IBAction func closeWindow(_ sender: Any) {
         self.close()
     }
@@ -127,89 +158,54 @@ extension AXWindow {
         
         window.makeKeyAndOrderFront(nil)
     }
-//    
-//    @IBAction func createNewBlankWindow(_ sender: Any) {
-//        let window = AXWindow()
-//        window.makeKeyAndOrderFront(nil)
-//    }
-//    
-//    @IBAction func createNewPrivateWindow(_ sender: Any) {
-//        let window = AXWindow(isPrivate: true)
-//        window.makeKeyAndOrderFront(nil)
-//    }
-//    
-//    @IBAction func customAboutView(_ sender: Any) {
-//        if aboutView == nil {
-//            aboutView = AXAboutView()
-//            aboutViewWindow.contentView = aboutView
-//        }
-//        aboutViewWindow.center()
-//        aboutViewWindow.makeKeyAndOrderFront(self)
-//    }
-//    
-//    @IBAction func findInWebpage(_ sender: Any) {
-//        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties
-//        appProperties?.webContainerView.showFindView()
-//    }
-//    
-//    @IBAction func keepWindowOnTop(_ sender: Any) {
-//        if let window = (NSApplication.shared.keyWindow as? AXWindow) {
-//            if window.level == .floating {
-//                window.level = .normal
-//            } else {
-//                window.level = .floating
-//            }
-//        }
-//    }
-//    
-//    @IBAction func removeCurrentTab(_ sender: Any) {
-//        guard let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties else { return }
-//        
-//        if appProperties.searchFieldShown {
-//            appProperties.popOver.close()
-//        } else {
-//            appProperties.tabManager.closeTab(appProperties.currentProfile.currentTab)
-//        }
-//    }
-//    
-//    @IBAction func restoreTab(_ sender: Any) {
-//        guard let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties else { return }
-//        appProperties.tabManager.restoreTab()
-//    }
-//    
-//    @IBAction func setAsDefaultBrowser(_ sender: Any) {
-//        setAsDefaultBrowser()
-//    }
-//    
-//    @IBAction func showHistory(_ sender: Any) {
-//        if let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties {
-//            let window = NSWindow.create(styleMask: [.closable, .miniaturizable, .resizable], size: .init(width: 500, height: 500))
-//            window.title = "History"
-//            window.contentView = AXHistoryView(appProperties: appProperties)
-//            window.makeKeyAndOrderFront(nil)
-//        }
-//    }
-//    
-//    @IBAction func showDownloads(_ sender: Any) {
-//        if let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties {
-//            let window = NSWindow.create(styleMask: [.closable, .miniaturizable, .resizable], size: .init(width: 500, height: 500))
-//            window.title = "Downloads"
-//            window.contentView = AXDownloadView(appProperties: appProperties)
-//            window.makeKeyAndOrderFront(nil)
-//        }
-//    }
-//    
-//    @IBAction func showPreferences(_ sender: Any) {
-//        preferenceWindow.makeKeyAndOrderFront(nil)
-//    }
-//    
-//    @IBAction func showSearchField(_ sender: Any) {
-//        let appProperties = (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties
-//        appProperties?.popOver.newTabMode = false
-//        appProperties?.tabManager.showSearchField()
-//    }
-//    
-//    @IBAction func toggleSidebar(_ sender: Any) {
-//        (NSApplication.shared.keyWindow as? AXWindow)?.sessionProperties.sidebarView.toggleSidebar()
-//    }
+    
+    @IBAction func closeTab(_ sender: Any) {
+        sessionProperties.tabManager.currentTabGroup.removeTab()
+    }
+    
+    @IBAction func showSidebar(_ sender: Any) {
+        print("HELLO WORLD")
+        toggleTabSidebar()
+    }
+
+    override var acceptsFirstResponder: Bool {
+        true
+    }
+    
+    override func keyDown(with event: NSEvent) {
+        if event.modifierFlags.contains(.command) {
+            switch event.keyCode {
+            case 18: // '1' key
+                switchToTab(index: 0)
+            case 19: // '2' key
+                switchToTab(index: 1)
+            case 20: // '3' key
+                switchToTab(index: 2)
+            case 21: // '4' key
+                switchToTab(index: 3)
+            case 22: // '5' key
+                switchToTab(index: 4)
+            case 23: // '6' key
+                switchToTab(index: 5)
+            case 26: // '7' key
+                switchToTab(index: 6)
+            default:
+                break
+            }
+        } else {
+            super.keyDown(with: event)
+        }
+    }
+    
+    func switchToTab(index: Int) {
+        // Check if the tab index is valid
+        if index < sessionProperties.tabManager.currentTabGroup.tabs.count {
+            // Hide all tabs
+            sessionProperties.tabManager.currentTabGroup.switchTab(to: index)
+        } else {
+            guard sessionProperties.tabManager.currentTabGroup.tabs.count > 0 else { return }
+            // Switch to the last tab if the index is out of range
+            sessionProperties.tabManager.currentTabGroup.switchTab(to: sessionProperties.tabManager.currentTabGroup.tabs.count - 1)
+        }
+    }
 }
