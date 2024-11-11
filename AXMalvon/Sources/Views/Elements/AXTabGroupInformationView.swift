@@ -19,7 +19,7 @@ struct AXTabGroupInformationSwiftUIView: View {
     
     let tabGroups = ["Math", "Science", "English", "Global Politics"]
     let profiles = ["School", "Personal"]
-    let colors: [Color] = [.red, .pink, .orange, .yellow, .blue]
+    let colors: [Color] = [.red, .orange, .yellow, .green, .blue, .indigo, .purple, .gray, .black]
     
     var body: some View {
         TabView {
@@ -44,19 +44,21 @@ struct AXTabGroupInformationSwiftUIView: View {
                 Text("Tab Group Color")
                     .font(.subheadline)
                 
-                HStack {
-                    ForEach(colors, id: \.self) { color in
-                        Circle()
-                            .fill(color)
-                            .frame(width: 30, height: 30)
-                            .onTapGesture {
-                                tabGroupColor = color
-                                updateColor()
-                            }
-                            .overlay(
-                                Circle()
-                                    .stroke(tabGroupColor == color ? Color.gray : Color.clear, lineWidth: 2)
-                            )
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack {
+                        ForEach(colors, id: \.self) { color in
+                            Circle()
+                                .fill(color)
+                                .frame(width: 30, height: 30)
+                                .onTapGesture {
+                                    tabGroupColor = color
+                                    updateColor()
+                                }
+                                .overlay(
+                                    Circle()
+                                        .stroke(tabGroupColor == color ? Color.gray : Color.clear, lineWidth: 2)
+                                )
+                        }
                     }
                 }
             }

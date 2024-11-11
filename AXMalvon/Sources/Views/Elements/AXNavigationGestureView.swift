@@ -23,6 +23,12 @@ class AXNavigationGestureView: NSView {
     var trackingArea: NSTrackingArea!
     
     lazy var tabGroupSwapperView = AXTabGroupSwapperView()
+    var backgroundColor: NSColor = .red.withAlphaComponent(0.3) {
+        didSet {
+            self.layer?.backgroundColor = backgroundColor.cgColor
+            updateProgressLayer()
+        }
+    }
     
     lazy var tabProfileGroupSwapperPopover: NSPopover = {
         let popover = NSPopover()
@@ -31,12 +37,25 @@ class AXNavigationGestureView: NSView {
         return popover
     }()
     
+    private var progressLayer = CALayer()
+    
+    // Progress property
+    var progress: CGFloat = 0.0 {
+        didSet {
+            updateProgressLayer()
+        }
+    }
+    
     override func viewWillDraw() {
         if hasDrawn { return }
         defer { hasDrawn = true }
         
         self.layer?.backgroundColor = NSColor.red.withAlphaComponent(0.3).cgColor
         self.wantsLayer = true
+        
+        progressLayer.backgroundColor = NSColor.red.withAlphaComponent(0.3).cgColor
+        progressLayer.frame = CGRect(x: 0, y: 0, width: 0, height: bounds.height)
+        layer?.addSublayer(progressLayer)
         
         tabGroupSwapperView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(tabGroupSwapperView)
@@ -55,12 +74,43 @@ class AXNavigationGestureView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    private func updateProgressLayer() {
+        let newWidth = bounds.width * progress
+        let newAlpha = 1.0 - 0.7 * progress // Interpolate alpha from 1.0 to 0.3
+        let newColor = self.backgroundColor.withAlphaComponent(newAlpha).cgColor
+
+        // Animate frame width change
+        let frameAnimation = CABasicAnimation(keyPath: "frame.size.width")
+        frameAnimation.fromValue = progressLayer.frame.size.width
+        frameAnimation.toValue = newWidth
+        frameAnimation.duration = 0.3
+        frameAnimation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        
+        // Update the frame and add animation
+        progressLayer.frame.size.width = newWidth
+        progressLayer.add(frameAnimation, forKey: "frameAnimation")
+
+        // Animate color change
+        let colorAnimation = CABasicAnimation(keyPath: "backgroundColor")
+        colorAnimation.fromValue = progressLayer.backgroundColor
+        colorAnimation.toValue = newColor
+        colorAnimation.duration = 0.3
+        
+        // Update the color and add animation
+        progressLayer.backgroundColor = newColor
+        progressLayer.add(colorAnimation, forKey: "colorAnimation")
+    }
+    
     func setTrackingArea() {
         let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
         trackingArea = NSTrackingArea.init(rect: self.bounds, options: options, owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
     }
     
+    override func layout() {
+        super.layout()
+        updateProgressLayer()
+    }
     
     override func scrollWheel(with event: NSEvent) {
         let x = event.deltaX

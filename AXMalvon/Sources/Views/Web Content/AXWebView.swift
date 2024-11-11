@@ -10,22 +10,22 @@ import WebKit
 
 class AXWebView: WKWebView {
     override init(frame: CGRect, configuration: WKWebViewConfiguration) {
-        configuration.preferences.setValue(true, forKey: "offlineApplicationCacheIsEnabled")
-        configuration.preferences.setValue(true, forKey: "fullScreenEnabled")
-        configuration.preferences.setValue(true, forKey: "allowsPictureInPictureMediaPlayback")
-        configuration.preferences.setValue(true, forKey: "acceleratedDrawingEnabled")
-        configuration.preferences.setValue(true, forKey: "largeImageAsyncDecodingEnabled")
-        configuration.preferences.setValue(true, forKey: "animatedImageAsyncDecodingEnabled")
-        configuration.preferences.setValue(true, forKey: "developerExtrasEnabled")
-        configuration.preferences.setValue(true, forKey: "loadsImagesAutomatically")
-        configuration.preferences.setValue(true, forKey: "acceleratedCompositingEnabled")
-        configuration.preferences.setValue(true, forKey: "canvasUsesAcceleratedDrawing")
-        configuration.preferences.setValue(true, forKey: "localFileContentSniffingEnabled")
-        configuration.preferences.setValue(true, forKey: "usesPageCache")
-        configuration.preferences.setValue(true, forKey: "aggressiveTileRetentionEnabled")
-        configuration.preferences.setValue(true, forKey: "appNapEnabled")
-        configuration.preferences.setValue(true, forKey: "aggressiveTileRetentionEnabled")
-        configuration.preferences.setValue(false, forKey: "backspaceKeyNavigationEnabled")
+//        configuration.preferences.setValue(true, forKey: "offlineApplicationCacheIsEnabled")
+//        configuration.preferences.setValue(true, forKey: "fullScreenEnabled")
+//        configuration.preferences.setValue(true, forKey: "allowsPictureInPictureMediaPlayback")
+//        configuration.preferences.setValue(true, forKey: "acceleratedDrawingEnabled")
+//        configuration.preferences.setValue(true, forKey: "largeImageAsyncDecodingEnabled")
+//        configuration.preferences.setValue(true, forKey: "animatedImageAsyncDecodingEnabled")
+//        configuration.preferences.setValue(true, forKey: "developerExtrasEnabled")
+//        configuration.preferences.setValue(true, forKey: "loadsImagesAutomatically")
+//        configuration.preferences.setValue(true, forKey: "acceleratedCompositingEnabled")
+//        configuration.preferences.setValue(true, forKey: "canvasUsesAcceleratedDrawing")
+//        configuration.preferences.setValue(true, forKey: "localFileContentSniffingEnabled")
+//        configuration.preferences.setValue(true, forKey: "usesPageCache")
+//        configuration.preferences.setValue(true, forKey: "aggressiveTileRetentionEnabled")
+//        configuration.preferences.setValue(true, forKey: "appNapEnabled")
+//        configuration.preferences.setValue(true, forKey: "aggressiveTileRetentionEnabled")
+//        configuration.preferences.setValue(false, forKey: "backspaceKeyNavigationEnabled")
         super.init(frame: frame, configuration: configuration)
         
         
@@ -37,4 +37,6 @@ class AXWebView: WKWebView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    override var isOpaque: Bool { false }
 }

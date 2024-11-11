@@ -39,19 +39,12 @@ class AXWebContainerView: NSView {
         websiteTitleLabel.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true
         websiteTitleLabel.stringValue = "Empty Window"
         
-        splitView.frame = bounds.insetBy(dx: 14, dy: 14)
+        splitView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(splitView)
-        splitView.autoresizingMask = [.height, .width]
-        
-        // Setup progress bar
-        appProperties.progressBar.translatesAutoresizingMaskIntoConstraints = false
-        self.addSubview(appProperties.progressBar)
-        appProperties.progressBar.topAnchor.constraint(equalTo: topAnchor, constant: 0).isActive = true
-        appProperties.progressBar.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
-        appProperties.progressBar.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-        appProperties.progressBar.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
-        
-        appProperties.progressBar.smoothProgress(50)
+        splitView.topAnchor.constraint(equalTo: topAnchor, constant: 14).isActive = true
+        splitView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -14).isActive = true
+        splitView.leftAnchor.constraint(equalTo: leftAnchor, constant: 14).isActive = true
+        splitView.rightAnchor.constraint(equalTo: rightAnchor, constant: -14).isActive = true
     }
     
     init(appProperties: AXSessionProperties) {
@@ -70,18 +63,20 @@ class AXWebContainerView: NSView {
         self.websiteTitleLabel.stringValue = webView.title ?? "Untitled Page"
         self.currentWebView!.uiDelegate = self
         self.currentWebView!.navigationDelegate = self
+        
+        webView.frame = splitView.frame
         splitView.addArrangedSubview(webView)
+        webView.autoresizingMask = [.height, .width]
+        
         self.window?.makeFirstResponder(currentWebView)
         
         progressBarObserver = webView.observe(\.estimatedProgress, changeHandler: { [self] _, _ in
-            let progress: CGFloat = webView.estimatedProgress
-            if progress >= 0.93 {
-                // Go very fast to 100!
-                appProperties.progressBar.updateProgress(1.0)
-            } else {
-                appProperties.progressBar.smoothProgress(progress)
-            }
+            updateProgress(webView.estimatedProgress)
         })
+    }
+    
+    func updateProgress(_ newValue: CGFloat) {
+        appProperties.sidebarView.gestureView.progress = newValue
     }
 }
 
@@ -122,4 +117,8 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate {
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         return appProperties.tabManager.createNewPopupTab(with: configuration)
     }
+}
+
+fileprivate func insetWebView(_ bounds: NSRect) -> NSRect {
+    return NSRect(x: bounds.origin.x + 1, y: bounds.origin.y + 14, width: bounds.size.width - 15, height: bounds.size.height - 28)
 }

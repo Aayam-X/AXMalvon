@@ -20,7 +20,6 @@ class AXSessionProperties {
     lazy var containerView = AXWebContainerView(appProperties: self)
     lazy var sidebarView = AXSidebarView(appProperties: self)
     lazy var searchBarWindow = AXSearchBarWindow(appProperties: self)
-    lazy var progressBar = AXProgressIndicatorView(appProperties: self)
     
     /// Managers
     lazy var tabManager = AXTabManager(appProperties: self)
@@ -41,9 +40,13 @@ class AXSessionProperties {
     }
     
     func updateColor(newColor: NSColor) {
-        containerView.layer?.backgroundColor = newColor.withAlphaComponent(0.3).cgColor
-        sidebarView.layer?.backgroundColor = newColor.withAlphaComponent(0.3).cgColor
-        sidebarView.gestureView.layer?.backgroundColor = newColor.withAlphaComponent(0.3).cgColor
-        progressBar.progressColor = newColor.withAlphaComponent(0.3)
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.5 // Adjust duration as needed
+            context.allowsImplicitAnimation = true
+            
+            containerView.layer?.backgroundColor = newColor.withAlphaComponent(0.3).cgColor
+            sidebarView.layer?.backgroundColor = newColor.withAlphaComponent(0.3).cgColor
+            sidebarView.gestureView.backgroundColor = newColor.withAlphaComponent(0.3)
+        }
     }
 }
