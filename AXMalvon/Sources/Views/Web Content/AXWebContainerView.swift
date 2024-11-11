@@ -77,6 +77,13 @@ class AXWebContainerView: NSView {
     
     func updateProgress(_ newValue: CGFloat) {
         appProperties.sidebarView.gestureView.progress = newValue
+        
+        if newValue >= 0.93 {
+             // Go very fast to 100!
+            appProperties.window.splitView.updateProgress(1.0)
+         } else {
+             appProperties.window.splitView.smoothProgress(newValue)
+         }
     }
 }
 
