@@ -11,6 +11,8 @@ class AXSidebarView: NSView {
     weak var appProperties: AXSessionProperties!
     private var hasDrawn: Bool = false
     
+    lazy var gestureView = AXNavigationGestureView(appProperties: appProperties)
+    
     override var tag: Int {
         return 0x01
     }
@@ -19,7 +21,8 @@ class AXSidebarView: NSView {
         if hasDrawn { return }
         defer { hasDrawn = true }
         
-        let gestureView = AXNavigationGestureView(appProperties: appProperties)
+        self.layer?.backgroundColor = NSColor.red.withAlphaComponent(0.3).cgColor
+        
         gestureView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(gestureView)
         gestureView.topAnchor.constraint(equalTo: topAnchor).isActive = true

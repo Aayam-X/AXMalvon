@@ -32,6 +32,8 @@ class AXWebContainerView: NSView {
         if hasDrawn { return }
         defer { hasDrawn = true }
         
+        self.layer?.backgroundColor = NSColor.red.withAlphaComponent(0.3).cgColor
+        
         addSubview(websiteTitleLabel)
         websiteTitleLabel.topAnchor.constraint(equalTo: topAnchor, constant: -0.5).isActive = true
         websiteTitleLabel.centerXAnchor.constraint(equalTo: centerXAnchor).isActive = true

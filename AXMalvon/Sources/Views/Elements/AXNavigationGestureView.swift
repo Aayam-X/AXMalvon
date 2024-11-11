@@ -22,20 +22,14 @@ class AXNavigationGestureView: NSView {
     private var scrollEventFinished: Bool = false
     var trackingArea: NSTrackingArea!
     
-    lazy var swipeDirectionLabel: NSTextField = {
-        let title = NSTextField()
-        title.isEditable = false
-        title.alignment = .center
-        title.isBordered = false
-        title.usesSingleLineMode = true
-        title.drawsBackground = false
-        title.translatesAutoresizingMaskIntoConstraints = false
-        
-        title.isHidden = true
-        return title
-    }()
-    
     lazy var tabGroupSwapperView = AXTabGroupSwapperView()
+    
+    lazy var tabProfileGroupSwapperPopover: NSPopover = {
+        let popover = NSPopover()
+        popover.behavior = .transient
+        popover.contentViewController = AXTabGroupInformationView(appProperties: appProperties)
+        return popover
+    }()
     
     override func viewWillDraw() {
         if hasDrawn { return }
@@ -43,11 +37,6 @@ class AXNavigationGestureView: NSView {
         
         self.layer?.backgroundColor = NSColor.red.withAlphaComponent(0.3).cgColor
         self.wantsLayer = true
-        
-        addSubview(swipeDirectionLabel)
-        swipeDirectionLabel.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
-        swipeDirectionLabel.rightAnchor.constraint(equalTo: rightAnchor).isActive = true
-        swipeDirectionLabel.topAnchor.constraint(equalTo: topAnchor).isActive = true
         
         tabGroupSwapperView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(tabGroupSwapperView)
@@ -76,18 +65,25 @@ class AXNavigationGestureView: NSView {
     override func scrollWheel(with event: NSEvent) {
         let x = event.deltaX
         let y = event.deltaY
-        
+                
         // Handle event phase
         switch event.phase {
         case .began:
             scrollEventFinished = false
         case .mayBegin:
-            swipeDirectionLabel.stringValue = "Cancelled"
-            print(event.phase.rawValue)
+            // Cancelled
             return
         default:
             break
         }
+        
+        if (event.phase == .ended || event.momentumPhase == .ended) && !scrollEventFinished {
+            // Handle the end of the scroll
+            print("Scroll ended")
+            handleScrollEnd()
+            return
+        }
+        
         
         // Early return for small delta values or if the scroll event is finished
         guard abs(x) > 0.5 || abs(y) > 0.5, !scrollEventFinished else {
@@ -98,28 +94,27 @@ class AXNavigationGestureView: NSView {
         // Handle X-axis scroll
         if x != 0 {
             swipeColorValue = x > 0 ? .backwards : .forwards
-            swipeDirectionLabel.stringValue = x > 0 ? "Go Back" : "Go Forward"
         }
         
         // Handle Y-axis scroll
         if y != 0 {
             swipeColorValue = y > 0 ? .reload : .nothing
-            swipeDirectionLabel.stringValue = y > 0 ? "Refresh" : ""
         }
     }
     
     
     override func mouseEntered(with event: NSEvent) {
         print("Mouse entered")
-        swipeDirectionLabel.isHidden = false
+        appProperties.window.trafficLightManager.hideButtons()
     }
     
     override func mouseExited(with event: NSEvent) {
         print("Mouse exited")
-        scrollEventFinished = true
-        swipeDirectionLabel.stringValue = ""
-        swipeDirectionLabel.isHidden = true
         appProperties.window.trafficLightManager.showButtons()
+    }
+    
+    func handleScrollEnd() {
+        scrollEventFinished = true
         
         switch swipeColorValue {
         case .backwards:
@@ -138,6 +133,10 @@ class AXNavigationGestureView: NSView {
     override func rightMouseDown(with event: NSEvent) {
         print("Hide sidebar")
         appProperties.window.toggleTabSidebar()
+    }
+    
+    override func mouseDown(with event: NSEvent) {
+        tabProfileGroupSwapperPopover.show(relativeTo: self.bounds, of: self, preferredEdge: .minY)
     }
     
     func goForward() {

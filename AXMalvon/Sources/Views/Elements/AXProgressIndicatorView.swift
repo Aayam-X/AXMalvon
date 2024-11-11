@@ -12,6 +12,8 @@ class AXProgressIndicatorView: NSView, CAAnimationDelegate {
     private var progress: CGFloat = 0.0
     weak var appProperties: AXSessionProperties!
     
+    var progressColor: NSColor = .systemPink
+    
     var topBorderLayer: CAShapeLayer! = CAShapeLayer()
     var topPointPath: NSBezierPath! = NSBezierPath()
     var topAnimation: CABasicAnimation! = CABasicAnimation(keyPath: "strokeEnd")
@@ -55,7 +57,7 @@ class AXProgressIndicatorView: NSView, CAAnimationDelegate {
     }
     
     func updateProgress(_ newValue: CGFloat, _ duration: CGFloat = 0.2) {
-        let color = NSColor.systemPink.withAlphaComponent(CGFloat.random(in: 0.3..<0.9)).cgColor
+        let color = progressColor.withAlphaComponent(CGFloat.random(in: 0.3..<0.9)).cgColor
         
         // Top Point
         topPointPath.move(to: .init(x: 0, y: bounds.height))

@@ -39,4 +39,11 @@ class AXSessionProperties {
             return NSMakeRect(100, 100, screenFrame.width / 2, screenFrame.height / 2)
         }
     }
+    
+    func updateColor(newColor: NSColor) {
+        containerView.layer?.backgroundColor = newColor.withAlphaComponent(0.3).cgColor
+        sidebarView.layer?.backgroundColor = newColor.withAlphaComponent(0.3).cgColor
+        sidebarView.gestureView.layer?.backgroundColor = newColor.withAlphaComponent(0.3).cgColor
+        progressBar.progressColor = newColor.withAlphaComponent(0.3)
+    }
 }

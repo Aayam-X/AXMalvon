@@ -7,15 +7,8 @@
 
 import Cocoa
 
-protocol OverlayViewDelegate: AnyObject {
-    func overlayViewDidEnter(_ overlay: OverlayView)
-}
-
 class OverlayView: NSView {
-    weak var delegate: OverlayViewDelegate?
-    
-    init(frame: NSRect, color: NSColor = .lightGray, delegate: OverlayViewDelegate) {
-        self.delegate = delegate
+    init(frame: NSRect, color: NSColor = .lightGray) {
         super.init(frame: frame)
         
         self.wantsLayer = true
@@ -41,13 +34,9 @@ class OverlayView: NSView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    override func mouseEntered(with event: NSEvent) {
-        delegate?.overlayViewDidEnter(self)
-    }
 }
 
-class AXTrafficLightOverlayManager: OverlayViewDelegate {
+class AXTrafficLightOverlayManager {
     var window: AXWindow
     private var overlays: [OverlayView] = []
     private var buttons: [NSButton]
@@ -71,7 +60,7 @@ class AXTrafficLightOverlayManager: OverlayViewDelegate {
                 height: overlaySize
             )
             
-            let overlayView = OverlayView(frame: overlayFrame, delegate: self)
+            let overlayView = OverlayView(frame: overlayFrame)
             button.addSubview(overlayView, positioned: .above, relativeTo: nil)
             overlays.append(overlayView)
         }
@@ -90,12 +79,7 @@ class AXTrafficLightOverlayManager: OverlayViewDelegate {
         }
     }
     
-    // Delegate methods to handle overlay view mouse events
-    func overlayViewDidEnter(_ overlay: OverlayView) {
-        hideButtons()
-    }
-    
-    private func hideButtons() {
+    func hideButtons() {
         for button in buttons {
             button.alphaValue = 1.0
         }

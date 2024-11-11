@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		ED3BA1492CE11E520094F6E9 /* 1TODO.md in Resources */ = {isa = PBXBuildFile; fileRef = ED3BA1482CE11E480094F6E9 /* 1TODO.md */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
 		ED3AEFE22CDAED2F002AE6CC /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED3BA1482CE11E480094F6E9 /* 1TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = 1TODO.md; sourceTree = "<group>"; };
@@ -129,7 +125,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ED3BA1492CE11E520094F6E9 /* 1TODO.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

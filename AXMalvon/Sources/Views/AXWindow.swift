@@ -25,6 +25,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
         trafficLightManager.updateTrafficLights()
         self.delegate = self
         backgroundColor = .textBackgroundColor // NSWindow has hidden NSVisualEffectView, to remove we must use this code
+        isMovableByWindowBackground = true
         
         // Other Configurations
         sessionProperties.window = self
