@@ -32,7 +32,7 @@ class AXWebContainerView: NSView {
         if hasDrawn { return }
         defer { hasDrawn = true }
         
-        self.layer?.backgroundColor = NSColor.red.withAlphaComponent(0.3).cgColor
+        self.layer?.backgroundColor = appProperties.tabManager.currentTabGroup.color.cgColor
         
         addSubview(websiteTitleLabel)
         websiteTitleLabel.topAnchor.constraint(equalTo: topAnchor, constant: -0.5).isActive = true
@@ -118,7 +118,9 @@ fileprivate class AXWebContainerSplitView: NSSplitView, NSSplitViewDelegate {
 
 extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        print("WebView finished loading webpage")
+        //        if let themeColor = webView.themeColor {
+        //            appProperties.updateColor(newColor: themeColor)
+        //        }
     }
     
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {

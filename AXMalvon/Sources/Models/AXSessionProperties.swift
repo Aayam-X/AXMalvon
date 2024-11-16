@@ -50,3 +50,7 @@ class AXSessionProperties {
         }
     }
 }
+
+extension CodingUserInfoKey {
+    static let appPropertiesKey = CodingUserInfoKey(rawValue: "appPropertiesKey")!
+}

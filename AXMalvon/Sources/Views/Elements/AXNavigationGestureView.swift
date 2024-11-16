@@ -50,7 +50,7 @@ class AXNavigationGestureView: NSView {
         if hasDrawn { return }
         defer { hasDrawn = true }
         
-        self.layer?.backgroundColor = NSColor.red.withAlphaComponent(0.3).cgColor
+        self.layer?.backgroundColor = appProperties.tabManager.currentTabGroup.color.cgColor
         self.wantsLayer = true
         
         progressLayer.backgroundColor = NSColor.red.withAlphaComponent(0.3).cgColor
@@ -73,6 +73,18 @@ class AXNavigationGestureView: NSView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    func updateTitles(title: String, subtitle: String) {
+        tabGroupSwapperView.tabGroupLabel.stringValue = title
+        tabGroupSwapperView.profileLabel.stringValue = subtitle
+    }
+    
+//    func updateTitles() {
+//        let title: String = appProperties.tabManager.currentTabGroup.name,
+//            subtitle: String = appProperties.tabManager.currentProfile.name
+//        
+//        updateTitles(title: title, subtitle: subtitle)
+//    }
     
     private func updateProgressLayer() {
         let newWidth = bounds.width * progress

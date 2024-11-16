@@ -10,16 +10,29 @@ import SwiftUI
 
 // Define SwiftUI view for tab groups and profiles
 struct AXTabGroupInformationSwiftUIView: View {
-    weak var appProperties: AXSessionProperties?
+    weak var appProperties: AXSessionProperties!
     
-    @State private var selectedTabGroup: String = "Math"
+    @State private var selectedTabGroup = ""
+    
     @State private var tabGroupName: String = ""
     @State private var tabGroupColor: Color = .red
     @State private var selectedProfile: String = "School"
     
-    let tabGroups = ["Math", "Science", "English", "Global Politics"]
-    let profiles = ["School", "Personal"]
+    var tabGroups: [String] {
+        appProperties.tabManager.currentProfile.tabGroups.map(\.name)
+    }
+
+    var profiles: [String] {
+        appProperties.tabManager.profiles.map(\.name)
+    }
+    
     let colors: [Color] = [.red, .orange, .yellow, .green, .blue, .indigo, .purple, .gray, .black]
+    
+    init(appProperties: AXSessionProperties!) {
+        self.appProperties = appProperties
+        // Initialize selectedTabGroup here
+        _selectedTabGroup = State(initialValue: appProperties.tabManager.currentProfile.currentTabGroup.name)
+    }
     
     var body: some View {
         TabView {
@@ -34,6 +47,9 @@ struct AXTabGroupInformationSwiftUIView: View {
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
+                .onChange(of: selectedTabGroup) { _, _ in
+                    updateTabGroup()
+                }
                 
                 // TextField for changing the tab group name
                 TextField("Tab Group Name", text: $tabGroupName)
@@ -86,8 +102,21 @@ struct AXTabGroupInformationSwiftUIView: View {
         .frame(width: 300, height: 250)
     }
     
+    func updateTabGroup() {
+        // Find the index of the item that matches the "selectedTabGroup" variable
+        if let index = appProperties.tabManager.currentProfile.tabGroups.firstIndex(where: { $0.name == selectedTabGroup }) {
+            // Use the index to switch to the tab group
+            appProperties.tabManager.switchTabGroups(to: index)
+        } else {
+            // Handle the case where no matching tab group is found
+            print("Tab group with name '\(selectedTabGroup)' not found.")
+        }
+    }
+
     func updateColor() {
-        appProperties?.updateColor(newColor: NSColor(tabGroupColor))
+        let color = NSColor(tabGroupColor)
+        appProperties?.updateColor(newColor: color)
+        appProperties.tabManager.currentTabGroup.color = color.withAlphaComponent(0.3)
     }
 }
 
@@ -112,8 +141,4 @@ class AXTabGroupInformationView: NSViewController {
         // Create an NSHostingView with the SwiftUI view
         self.view = NSHostingView(rootView: swiftUIView)
     }
-}
-
-#Preview {
-    AXTabGroupInformationSwiftUIView()
 }

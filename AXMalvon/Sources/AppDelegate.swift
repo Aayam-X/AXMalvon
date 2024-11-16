@@ -9,15 +9,18 @@ import Cocoa
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
+    let window = AXWindow()
     
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        let window = AXWindow()
         window.makeKeyAndOrderFront(nil)
         // Insert code here to initialize your application
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
+//        window.sessionProperties.tabManager.profiles.forEach { profile in
+//            profile.saveAllTabGroups()
+//        }
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {

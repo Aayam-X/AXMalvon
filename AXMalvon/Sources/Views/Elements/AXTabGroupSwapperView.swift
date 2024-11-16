@@ -7,8 +7,6 @@
 
 import Cocoa
 
-import Cocoa
-
 class AXTabGroupSwapperView: NSView {
     private var hasDrawn: Bool = false
     

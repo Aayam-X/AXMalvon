@@ -68,17 +68,31 @@ class AXTabBarView: NSView, AXTabButtonDelegate {
     }
     
     func addTab(tab: AXTab) {
-        let button = AXTabButton(tabGroup: tabGroup)
+        let button = AXTabButton(tab: tab, tabGroup: tabGroup)
         button.translatesAutoresizingMaskIntoConstraints = false
+        button.delegate = self
         
         button.tag = tabGroup.tabs.count - 1
         tabGroup.currentTabIndex = button.tag
-        button.tabTitle = tabGroup.currentTab.webView.title ?? "Untitled"
         
         addButtonToStackView(button)
         
         button.startObserving()
+        
+        // appProperties.tabManager.switchTab(to: index)
+    }
+    
+    func addTab(tab: AXTab, index: Int) {
+        let button = AXTabButton(tab: tab, tabGroup: tabGroup)
+        button.translatesAutoresizingMaskIntoConstraints = false
         button.delegate = self
+        
+        button.tag = index
+        tabGroup.currentTabIndex = button.tag
+        
+        addButtonToStackView(button)
+        
+        button.startObserving()
         
         // appProperties.tabManager.switchTab(to: index)
     }

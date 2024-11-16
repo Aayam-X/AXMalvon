@@ -13,6 +13,7 @@ protocol AXTabButtonDelegate: AnyObject {
 }
 
 class AXTabButton: NSButton {
+    var tab: AXTab
     var tabGroup: AXTabGroup
     var delegate: AXTabButtonDelegate?
     
@@ -37,6 +38,9 @@ class AXTabButton: NSButton {
     var isSelected: Bool = false {
         didSet {
             self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .clear
+            if self.titleObserver == nil {
+                forcedStartObserving()
+            }
         }
     }
     
@@ -64,7 +68,8 @@ class AXTabButton: NSButton {
         //        urlObserver = nil
     }
     
-    init(tabGroup: AXTabGroup) {
+    init(tab: AXTab, tabGroup: AXTabGroup) {
+        self.tab = tab
         self.tabGroup = tabGroup
         super.init(frame: .zero)
         self.translatesAutoresizingMaskIntoConstraints = false
@@ -138,19 +143,34 @@ class AXTabButton: NSButton {
         titleObserver = nil
     }
     
-    public func startObserving() {
-        let webView = tabGroup.tabs[self.tag].webView
+    public func forcedStartObserving() {
+        let webView = tab.webView
         
         self.titleObserver = webView.observe(\.title, options: .new, changeHandler: { [weak self] _, _ in
             let title = webView.title ?? "Untitled"
-            self?.tabGroup.updateTitle(fromTab: self!.tag, to: title)
-            
-            self?.webTitle = title
-            
-            if self!.isSelected {
-                self!.tabGroup.activeTitleChanged(title)
-            }
+            self?.updateTitle(title)
         })
+    }
+    
+    public func startObserving() {
+        guard let webView = tab._webView else { return }
+                
+        let title0 = webView.title ?? "Untitled"
+        self.updateTitle(title0)
+        
+        self.titleObserver = webView.observe(\.title, options: .new, changeHandler: { [weak self] _, _ in
+            let title = webView.title ?? "Untitled"
+            self?.updateTitle(title)
+        })
+    }
+    
+    func updateTitle(_ to: String) {
+        self.webTitle = to
+        tab.title = to
+        
+        if self.isSelected {
+            self.tabGroup.activeTitleChanged(to)
+        }
     }
     
     // MARK: - Mouse Functions

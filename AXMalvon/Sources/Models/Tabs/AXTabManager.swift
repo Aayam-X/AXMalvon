@@ -13,8 +13,8 @@ class AXTabManager {
     
     // Profile Information
     var currentProfile: AXWebKitProfile { profiles[profileIndex] }
-    private var profiles: [AXWebKitProfile]
-    private var profileIndex: Int = 0 {
+    var profiles: [AXWebKitProfile]
+    var profileIndex: Int = 0 {
         didSet {
             currentProfile.isCurrent = true
         }
@@ -30,6 +30,24 @@ class AXTabManager {
             .init(name: "Primary", appProperties: appProperties),
             .init(name: "Secondary", appProperties: appProperties),
         ]
+    }
+}
+// MARK: Profile Functions
+extension AXTabManager {
+    func switchTabGroups(to index: Int) {
+        let newTabGroup = currentProfile.tabGroups[index]
+        
+        appProperties.tabManager.currentProfile.currentTabGroupIndex = index
+        appProperties.sidebarView.updateTabBarView(tabBar: newTabGroup.tabBarView)
+        appProperties.sidebarView.gestureView.updateTitles(title: newTabGroup.name, subtitle: currentProfile.name)
+        
+        appProperties.updateColor(newColor: newTabGroup.color)
+        
+        if let tab = newTabGroup.currentTab {
+            updateWebContainerView(tab: tab)
+        } else {
+            appProperties.containerView.currentWebView?.removeFromSuperview()
+        }
     }
 }
 
@@ -90,5 +108,12 @@ extension AXTabManager {
 extension AXTabManager {
     func switchProfile(to: Int) {
         profileIndex = to
+    }
+}
+
+extension Collection {
+    // Returns the element at the specified index if it is within bounds, otherwise nil.
+    subscript(safe index: Index) -> Element? {
+        return indices.contains(index) ? self[index] : nil
     }
 }

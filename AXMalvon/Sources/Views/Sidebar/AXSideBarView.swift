@@ -12,6 +12,8 @@ class AXSidebarView: NSView {
     private var hasDrawn: Bool = false
     
     lazy var gestureView = AXNavigationGestureView(appProperties: appProperties)
+    lazy var tabBarView: AXTabBarView! = appProperties.tabManager.currentProfile.currentTabGroup.tabBarView
+
     
     override var tag: Int {
         return 0x01
@@ -21,7 +23,7 @@ class AXSidebarView: NSView {
         if hasDrawn { return }
         defer { hasDrawn = true }
         
-        self.layer?.backgroundColor = NSColor.red.withAlphaComponent(0.3).cgColor
+        self.layer?.backgroundColor = appProperties.tabManager.currentTabGroup.color.cgColor
         
         gestureView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(gestureView)
@@ -30,7 +32,6 @@ class AXSidebarView: NSView {
         gestureView.leftAnchor.constraint(equalTo: leftAnchor).isActive = true
         gestureView.heightAnchor.constraint(equalToConstant: 40).isActive = true
         
-        let tabBarView = appProperties.tabManager.currentProfile.currentTabGroup.tabBarView
         addSubview(tabBarView)
         NSLayoutConstraint.activate([
             tabBarView.topAnchor.constraint(equalTo: gestureView.bottomAnchor, constant: 5),
@@ -66,5 +67,19 @@ class AXSidebarView: NSView {
     @objc private func tabGroupSelected(_ sender: NSMenuItem) {
         // Handle tab group selection
         print("Selected tab group: \(sender.title)")
+    }
+    
+    func updateTabBarView(tabBar: AXTabBarView) {
+        tabBarView.removeFromSuperview()
+        
+        self.tabBarView = tabBar
+        
+        addSubview(tabBarView)
+        NSLayoutConstraint.activate([
+            tabBarView.topAnchor.constraint(equalTo: gestureView.bottomAnchor, constant: 5),
+            tabBarView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            tabBarView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            tabBarView.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
     }
 }

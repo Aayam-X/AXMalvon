@@ -43,10 +43,10 @@ class AXWindow: NSWindow, NSWindowDelegate {
             context.allowsImplicitAnimation = true
             
             if splitView.subviews.count == 2 {
-                splitView.arrangedSubviews[0].removeFromSuperview()
+                splitView.removeArrangedSubview(sessionProperties.sidebarView)
                 trafficLightManager.hideTrafficLights(true)
             } else {
-                splitView.insertArrangedSubview(sessionProperties.sidebarView, at: 0)
+                splitView.addArrangedSubview(sessionProperties.sidebarView)
                 trafficLightManager.hideTrafficLights(false)
             }
             
