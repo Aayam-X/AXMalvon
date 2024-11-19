@@ -11,7 +11,7 @@
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
-        <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="AXMalvon" customModuleProvider="target"/>
+        <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Malvon" customModuleProvider="target"/>
         <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
         <menu title="Main Menu" systemMenu="main" id="Wvu-2r-zyW">
             <items>
@@ -68,7 +68,7 @@
                         <items>
                             <menuItem title="New Tab" keyEquivalent="t" id="sWJ-N2-Tie">
                                 <connections>
-                                    <action selector="createNewTab:" target="-1" id="8rB-63-dud"/>
+                                    <action selector="toggleSearchBarForNewTab:" target="-1" id="d3Q-mA-khC"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Restore Tab" keyEquivalent="T" id="tEG-GQ-Y5H"/>
@@ -89,7 +89,7 @@
                             <menuItem isSeparatorItem="YES" id="H8T-v7-OGG"/>
                             <menuItem title="Close Tab" keyEquivalent="w" id="gTe-Ws-oas">
                                 <connections>
-                                    <action selector="closeTab:" target="-1" id="h6j-NE-bGz"/>
+                                    <action selector="closeTab:" target="-1" id="CIm-lF-DPO"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Close Window" keyEquivalent="W" id="l4G-ai-0ZP">
@@ -124,7 +124,7 @@
                             </menuItem>
                             <menuItem title="Save…" keyEquivalent="s" id="d5i-4a-LU9">
                                 <connections>
-                                    <action selector="saveDocument:" target="-1" id="ylk-G4-LAG"/>
+                                    <action selector="downloadWebpage:" target="-1" id="gPK-pG-tdh"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Save As…" keyEquivalent="S" id="Zlc-hF-fJn">
@@ -373,17 +373,23 @@
                         <items>
                             <menuItem title="Show Search Field" keyEquivalent="l" id="zok-a6-1wB">
                                 <connections>
-                                    <action selector="toggleSearchField:" target="-1" id="gpt-QM-gkU"/>
+                                    <action selector="toggleSearchField:" target="-1" id="yhC-SR-y3N"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="tEW-jz-yui"/>
+                            <menuItem title="Show Reader View" keyEquivalent="r" id="CtI-Xn-fVt">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="showReaderView:" target="-1" id="WZ2-94-vhs"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Show History" keyEquivalent="y" id="Txt-we-5GE"/>
                             <menuItem title="Show Downloads" keyEquivalent="J" id="vQm-IY-C9B"/>
                             <menuItem isSeparatorItem="YES" id="8nx-Vr-Jq1"/>
                             <menuItem title="Toggle Sidebar" keyEquivalent="s" id="frp-Ij-3tT">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                 <connections>
-                                    <action selector="showSidebar:" target="-1" id="3ll-YA-1ic"/>
+                                    <action selector="toggleSidebar:" target="-1" id="YrK-BY-8qU"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Enter Full Screen" keyEquivalent="f" id="S7n-z9-xAq">
