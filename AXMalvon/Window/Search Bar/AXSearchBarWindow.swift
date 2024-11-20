@@ -22,6 +22,7 @@ class AXSearchBarWindow: NSPanel, NSWindowDelegate {
     weak var searchBarDelegate: AXSearchBarWindowDelegate?
 
     unowned var parentWindow1: AXWindow!
+    var isDisplayed = false
 
     lazy var searchBarView = AXSearchFieldPopoverView(searchBarWindow: self)
 
@@ -53,9 +54,8 @@ class AXSearchBarWindow: NSPanel, NSWindowDelegate {
     }
 
     func show() {
-        guard let childWindows = parentWindow1.childWindows,
-            childWindows.isEmpty
-        else { return }
+        guard !isDisplayed else { return }
+        isDisplayed = true
         searchBarDelegate?.searchBarDidAppear()
 
         self.setFrameOrigin(
@@ -96,6 +96,7 @@ class AXSearchBarWindow: NSPanel, NSWindowDelegate {
     }
 
     override func close() {
+        isDisplayed = false
         searchBarView.windowClosed()
 
         searchBarDelegate?.searchBarDidDisappear()

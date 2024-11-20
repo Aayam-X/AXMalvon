@@ -13,16 +13,22 @@ let html: String = "html"
 protocol AXWebContainerViewDelegate: AnyObject {
     func webViewProgressDidChange(to: Double, _ smooth: Bool)
     func webViewCreateWebView(config: WKWebViewConfiguration) -> WKWebView
+
+    func webContainerViewRequestsSidebar() -> AXSidebarView
 }
 
 class AXWebContainerView: NSView {
     weak var delegate: AXWebContainerViewDelegate?
+    weak var sidebar: AXSidebarView?
 
     private var hasDrawn: Bool = false
     weak var currentWebView: AXWebView?
 
     private lazy var splitView = AXWebContainerSplitView()
     var progressBarObserver: NSKeyValueObservation?
+
+    var sidebarTrackingArea: NSTrackingArea!
+    var isAnimating: Bool = false
 
     var websiteTitleLabel: NSTextField = {
         let title = NSTextField()
@@ -40,6 +46,7 @@ class AXWebContainerView: NSView {
         if hasDrawn { return }
         defer { hasDrawn = true }
 
+        updateTrackingArea()
         //self.layer?.backgroundColor = NSColor.systemIndigo.withAlphaComponent(0.3).cgColor
 
         addSubview(websiteTitleLabel)
@@ -113,6 +120,60 @@ class AXWebContainerView: NSView {
             delegate?.webViewProgressDidChange(to: newValue, true)
         }
     }
+
+    // MARK: - Collapsed Sidebar Methods
+    func ensureSidebarExists() {
+        if sidebar == nil {
+            sidebar = delegate?.webContainerViewRequestsSidebar()
+        }
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        guard let window = self.window as? AXWindow, window.hiddenSidebarView
+        else { return }
+        sidebarHover()
+    }
+
+    func sidebarHover() {
+        ensureSidebarExists()
+        guard let sidebar = sidebar else { return }
+        addSubview(sidebar)
+
+        if !isAnimating {
+            sidebar.layer?.backgroundColor = NSColor.systemGray.cgColor
+            NSAnimationContext.runAnimationGroup(
+                { context in
+                    context.duration = 0.1
+                    sidebar.animator().frame.origin.x = 0
+                },
+                completionHandler: {
+                    self.isAnimating = false
+                })
+        }
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        print("Mouse exited sidebar")
+    }
+
+    override func viewDidEndLiveResize() {
+        super.viewDidEndLiveResize()
+        updateTrackingArea()
+    }
+
+    func updateTrackingArea() {
+        if sidebarTrackingArea != nil {
+            removeTrackingArea(sidebarTrackingArea)
+        }
+        let trackingRect = NSRect(
+            x: bounds.origin.x - 100, y: bounds.origin.y, width: 101,
+            height: bounds.height)
+        sidebarTrackingArea = NSTrackingArea(
+            rect: trackingRect,
+            options: [.activeAlways, .mouseEnteredAndExited], owner: self)
+        addTrackingArea(sidebarTrackingArea)
+    }
+
 }
 
 // MARK: - Web Split View

@@ -10,6 +10,7 @@ import Cocoa
 protocol AXSideBarViewDelegate: AnyObject {
     func sidebarView(didSelectTabGroup tabGroupAt: Int)
     func sidebarViewactiveTitle(changed to: String)
+    func sidebarSwitchedTab(at: Int)
 }
 
 class AXSidebarView: NSView {
@@ -19,7 +20,18 @@ class AXSidebarView: NSView {
     var gestureView = AXGestureView()
     private weak var tabBarView: AXTabBarView?
 
+    private lazy var visualEffectView: NSVisualEffectView = {
+        let visualEffectView = NSVisualEffectView()
+        visualEffectView.blendingMode = .behindWindow
+        visualEffectView.material = .sidebar
+        visualEffectView.wantsLayer = true
+        visualEffectView.translatesAutoresizingMaskIntoConstraints = false
+        return visualEffectView
+    }()
+
     var currentTabGroup: AXTabGroup?
+
+    var mouseExitedTrackingArea: NSTrackingArea!
 
     override var tag: Int {
         return 0x01
@@ -28,6 +40,14 @@ class AXSidebarView: NSView {
     override func viewWillDraw() {
         if hasDrawn { return }
         defer { hasDrawn = true }
+        setUpVisualEffectView()
+
+        mouseExitedTrackingArea = NSTrackingArea(
+            rect: .init(
+                x: bounds.origin.x + 1, y: bounds.origin.y,
+                width: bounds.size.width + 100, height: bounds.size.height),
+            options: [.activeAlways, .mouseEnteredAndExited], owner: self)
+        addTrackingArea(mouseExitedTrackingArea)
 
         //self.layer?.backgroundColor = NSColor.systemIndigo.withAlphaComponent(0.3).cgColor
 
@@ -38,6 +58,40 @@ class AXSidebarView: NSView {
             gestureView.leftAnchor.constraint(equalTo: leftAnchor),
             gestureView.rightAnchor.constraint(equalTo: rightAnchor),
             gestureView.heightAnchor.constraint(equalToConstant: 39),
+        ])
+
+        if let window = self.window as? AXWindow {
+            self.changeShownTabBarGroup(window.currentTabGroup)
+        }
+    }
+
+    func setUpVisualEffectView() {
+        addSubview(visualEffectView)
+        NSLayoutConstraint.activate([
+            visualEffectView.topAnchor.constraint(
+                equalTo: topAnchor, constant: 39),
+            visualEffectView.leftAnchor.constraint(equalTo: leftAnchor),
+            visualEffectView.rightAnchor.constraint(equalTo: rightAnchor),
+            visualEffectView.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
+
+        // Add a tint overlay
+        let tintView = NSView()
+        tintView.translatesAutoresizingMaskIntoConstraints = false
+        tintView.wantsLayer = true
+        tintView.layer?.backgroundColor =
+            NSColor.systemRed.withAlphaComponent(0.2).cgColor  // Adjust alpha as needed
+
+        // Add tint view on top of the visual effect view
+        visualEffectView.addSubview(tintView)
+        NSLayoutConstraint.activate([
+            tintView.leadingAnchor.constraint(
+                equalTo: visualEffectView.leadingAnchor),
+            tintView.trailingAnchor.constraint(
+                equalTo: visualEffectView.trailingAnchor),
+            tintView.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
+            tintView.bottomAnchor.constraint(
+                equalTo: visualEffectView.bottomAnchor),
         ])
     }
 
@@ -81,24 +135,42 @@ class AXSidebarView: NSView {
             tabBarView!.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
+
+    override func mouseExited(with event: NSEvent) {
+        guard let window = self.window as? AXWindow, window.hiddenSidebarView
+        else { return }
+
+        NSAnimationContext.runAnimationGroup(
+            { context in
+                context.duration = 0.1
+                self.animator().frame.origin.x = -bounds.width
+            },
+            completionHandler: {
+                self.layer?.backgroundColor = .none
+                self.removeFromSuperview()
+            })
+
+        window.trafficLightManager.hideTrafficLights(true)
+    }
+
+    override func viewDidEndLiveResize() {
+        removeTrackingArea(mouseExitedTrackingArea)
+        mouseExitedTrackingArea = NSTrackingArea(
+            rect: .init(
+                x: bounds.origin.x - 100, y: bounds.origin.y,
+                width: bounds.size.width + 100, height: bounds.size.height),
+            options: [.activeAlways, .mouseEnteredAndExited], owner: self)
+        addTrackingArea(mouseExitedTrackingArea)
+    }
 }
 
 extension AXSidebarView: AXTabBarViewDelegate {
     func activeTabTitleChanged(to: String) {
         delegate?.sidebarViewactiveTitle(changed: to)
     }
-    
+
     func tabBarSwitchedTo(tabAt: Int) {
+        delegate?.sidebarSwitchedTab(at: tabAt)
         print("Switched to tab at \(tabAt).")
-
-        if let tabs = currentTabGroup?.tabs {
-            let window = self.window as! AXWindow
-
-            if tabAt == -1 {
-                window.containerView.removeAllWebViews()
-            } else {
-                window.containerView.updateView(webView: tabs[tabAt].webView)
-            }
-        }
     }
 }

@@ -15,6 +15,8 @@ class AXWindow: NSWindow, NSWindowDelegate {
     let containerView = AXWebContainerView()
     let sidebarView = AXSidebarView()
 
+    var hiddenSidebarView = false
+
     lazy var searchBar = AXSearchBarWindow(parentWindow1: self)
 
     var profiles: [AXProfile] = [.init(name: "Default"), .init(name: "School")]
@@ -78,7 +80,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
         sidebarView.frame.size.width = 180
 
         searchBar.searchBarDelegate = self
-        self.sidebarView(didSelectTabGroup: 0)
+        currentTabGroupIndex = 0
     }
 
     func windowDidEndLiveResize(_ notification: Notification) {
@@ -92,9 +94,11 @@ class AXWindow: NSWindow, NSWindowDelegate {
             context.allowsImplicitAnimation = true
 
             if splitView.subviews.count == 2 {
+                hiddenSidebarView = true
                 splitView.removeArrangedSubview(sidebarView)
                 trafficLightManager.hideTrafficLights(true)
             } else {
+                hiddenSidebarView = false
                 splitView.insertArrangedSubview(sidebarView, at: 0)
                 trafficLightManager.hideTrafficLights(false)
             }
@@ -173,14 +177,19 @@ class AXWindow: NSWindow, NSWindowDelegate {
 extension AXWindow {
     @IBAction func downloadWebpage(_ sender: Any) {
         Task { @MainActor in
-            if let webView = containerView.currentWebView, let url = webView.url {
+            if let webView = containerView.currentWebView, let url = webView.url
+            {
                 await webView.startDownload(using: URLRequest(url: url))
             }
         }
     }
-    
+
     @IBAction func toggleSearchField(_ sender: Any) {
-        searchBar.showCurrentURL()
+        if currentTabGroup.selectedIndex < 0 {
+            searchBar.show()
+        } else {
+            searchBar.showCurrentURL()
+        }
     }
 
     @IBAction func toggleSearchBarForNewTab(_ sender: Any) {
@@ -202,41 +211,46 @@ extension AXWindow {
     //        window.makeKeyAndOrderFront(nil)
     //    }
 
+    @IBAction func showHideSidebar(_ sender: Any) {
+        toggleTabSidebar()
+    }
+
     @IBAction func showReaderView(_ sender: Any) {
         // This code crashes the browser for some reason: toggleTabSidebar()
         guard let webView = containerView.currentWebView else { return }
-        
+
         let readerScript = """
-        (function() {
-            let article = document.querySelector('article') ||
-                          document.querySelector('main') ||
-                          document.querySelector('[role="main"]') ||
-                          document.body;
-            return article ? article.innerHTML : null;
-        })();
-        """
-        
+            (function() {
+                let article = document.querySelector('article') ||
+                              document.querySelector('main') ||
+                              document.querySelector('[role="main"]') ||
+                              document.body;
+                return article ? article.innerHTML : null;
+            })();
+            """
+
         let css = """
-        <style>
-            body {
-                font-family: -apple-system, Helvetica, Arial, sans-serif;
-                line-height: 1.6;
-                margin: 20px;
-                background-color: #f8f8f8;
-                color: #333;
-            }
-            img {
-                max-width: 100%;
-                height: auto;
-            }
-        </style>
-        """
+            <style>
+                body {
+                    font-family: -apple-system, Helvetica, Arial, sans-serif;
+                    line-height: 1.6;
+                    padding: 20vh 20vw;
+                    background-color: #f8f8f8;
+                    color: #333;
+                }
+
+                img {
+                    max-width: 100%;
+                    height: auto;
+                }
+            </style>
+            """
 
         webView.evaluateJavaScript(readerScript) { result, error in
             if let content = result as? String {
                 //self.showReaderView(content: content)
                 print("WebView reader content: \(content)")
-                
+
                 if let currentURL = webView.url {
                     webView.loadHTMLString(css + content, baseURL: currentURL)
                 }
@@ -320,6 +334,14 @@ extension AXWindow: AXSearchBarWindowDelegate {
 
 // MARK: - WebContainer View Delegate
 extension AXWindow: AXWebContainerViewDelegate {
+    func webContainerViewRequestsSidebar() -> AXSidebarView {
+        return sidebarView
+    }
+
+    func webViewContainerUserHoveredForSidebar() -> AXSidebarView {
+        return sidebarView
+    }
+
     func webViewCreateWebView(config: WKWebViewConfiguration) -> WKWebView {
         let newWebView = AXWebView(frame: .zero, configuration: config)
         let tab = AXTab(
@@ -344,10 +366,20 @@ extension AXWindow: AXWebContainerViewDelegate {
 // MARK: - Sidebar View Delegate
 // TODO: - Move this code to the popover view
 extension AXWindow: AXSideBarViewDelegate {
+    func sidebarSwitchedTab(at: Int) {
+        guard let tabs = sidebarView.currentTabGroup?.tabs else { return }
+
+        if at == -1 {
+            containerView.removeAllWebViews()
+        } else {
+            containerView.updateView(webView: tabs[at].webView)
+        }
+    }
+
     func sidebarViewactiveTitle(changed to: String) {
         containerView.websiteTitleLabel.stringValue = to
     }
-    
+
     func sidebarView(didSelectTabGroup tabGroupAt: Int) {
         self.currentTabGroupIndex = tabGroupAt
         sidebarView.changeShownTabBarGroup(currentTabGroup)
@@ -358,6 +390,12 @@ extension AXWindow: AXSideBarViewDelegate {
 
 // MARK: - Gesture View Delegate
 extension AXWindow: AXGestureViewDelegate {
+    func gestureViewMouseDown() {
+        if hiddenSidebarView {
+            toggleTabSidebar()
+        }
+    }
+
     func gestureView(didSwipe direction: AXGestureViewSwipeDirection!) {
         switch direction {
         case .backwards:

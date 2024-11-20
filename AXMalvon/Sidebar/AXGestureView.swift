@@ -10,6 +10,7 @@ import SwiftUI
 
 protocol AXGestureViewDelegate: AnyObject {
     func gestureView(didSwipe direction: AXGestureViewSwipeDirection!)
+    func gestureViewMouseDown()
 }
 
 enum AXGestureViewSwipeDirection {
@@ -46,21 +47,21 @@ class AXGestureView: NSView {
         return popover
     }()
 
-#if DEBUG
-    var backgroundColor: NSColor = .systemGray.withAlphaComponent(0.3) {
-        didSet {
-            self.layer?.backgroundColor = backgroundColor.cgColor
-            updateProgressLayer()
+    #if DEBUG
+        var backgroundColor: NSColor = .systemGray.withAlphaComponent(0.2) {
+            didSet {
+                self.layer?.backgroundColor = backgroundColor.cgColor
+                updateProgressLayer()
+            }
         }
-    }
-#else
-    var backgroundColor: NSColor = .systemRed.withAlphaComponent(0.3) {
-        didSet {
-            self.layer?.backgroundColor = backgroundColor.cgColor
-            updateProgressLayer()
+    #else
+        var backgroundColor: NSColor = .systemRed.withAlphaComponent(0.2) {
+            didSet {
+                self.layer?.backgroundColor = backgroundColor.cgColor
+                updateProgressLayer()
+            }
         }
-    }
-#endif
+    #endif
 
     private var progressLayer = CALayer()
 
@@ -75,17 +76,17 @@ class AXGestureView: NSView {
         if hasDrawn { return }
         defer { hasDrawn = true }
         setTrackingArea()
-        
-#if DEBUG
-        self.layer?.backgroundColor =
-        NSColor.systemGray.withAlphaComponent(0.3).cgColor
-#else
-        self.layer?.backgroundColor =
-        NSColor.systemRed.withAlphaComponent(0.3).cgColor
-#endif
+
+        #if DEBUG
+            self.layer?.backgroundColor =
+                NSColor.systemGray.withAlphaComponent(0.3).cgColor
+        #else
+            //self.layer?.backgroundColor =
+            //NSColor.systemRed.withAlphaComponent(0.3).cgColor
+        #endif
 
         progressLayer.backgroundColor =
-            NSColor.red.withAlphaComponent(0.3).cgColor
+            NSColor.systemRed.withAlphaComponent(0.3).cgColor
         progressLayer.frame = CGRect(
             x: 0, y: 0, width: 0, height: bounds.height)
         layer?.addSublayer(progressLayer)
@@ -110,7 +111,7 @@ class AXGestureView: NSView {
 
     private func updateProgressLayer() {
         let newWidth = bounds.width * progress
-        let newAlpha = 1.0 - 0.7 * progress  // Interpolate alpha from 1.0 to 0.3
+        let newAlpha = 1.0 - progress  // Interpolate alpha from 1.0 to 0.0
         let newColor = self.backgroundColor.withAlphaComponent(newAlpha).cgColor
 
         // Animate frame width change
@@ -221,5 +222,6 @@ class AXGestureView: NSView {
 
     override func mouseDown(with event: NSEvent) {
         popover.show(relativeTo: self.bounds, of: self, preferredEdge: .minY)
+        delegate?.gestureViewMouseDown()
     }
 }

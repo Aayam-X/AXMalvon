@@ -386,10 +386,10 @@
                             <menuItem title="Show History" keyEquivalent="y" id="Txt-we-5GE"/>
                             <menuItem title="Show Downloads" keyEquivalent="J" id="vQm-IY-C9B"/>
                             <menuItem isSeparatorItem="YES" id="8nx-Vr-Jq1"/>
-                            <menuItem title="Toggle Sidebar" keyEquivalent="s" id="frp-Ij-3tT">
+                            <menuItem title="Toggle Sidebar" keyEquivalent="s" id="eyB-Vj-1wk">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                 <connections>
-                                    <action selector="toggleSidebar:" target="-1" id="YrK-BY-8qU"/>
+                                    <action selector="showHideSidebar:" target="-1" id="ySK-4A-yzh"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Enter Full Screen" keyEquivalent="f" id="S7n-z9-xAq">

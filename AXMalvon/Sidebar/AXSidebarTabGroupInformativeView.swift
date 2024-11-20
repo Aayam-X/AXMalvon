@@ -25,6 +25,9 @@ class AXSidebarTabGroupInformativeView: NSView {
         let label = NSTextField(labelWithString: "Math")
         label.font = .titleBarFont(ofSize: 14)
         label.translatesAutoresizingMaskIntoConstraints = false
+        label.usesSingleLineMode = true
+        label.drawsBackground = false
+        label.lineBreakMode = .byTruncatingTail
         return label
     }()
 
@@ -59,7 +62,8 @@ class AXSidebarTabGroupInformativeView: NSView {
             tabGroupLabel.topAnchor.constraint(equalTo: topAnchor),
             tabGroupLabel.leftAnchor.constraint(
                 equalTo: imageView.rightAnchor, constant: 6),
-            tabGroupLabel.rightAnchor.constraint(equalTo: rightAnchor),
+            tabGroupLabel.rightAnchor.constraint(
+                equalTo: rightAnchor, constant: -5),
 
             // Profile label constraints
             profileLabel.topAnchor.constraint(
