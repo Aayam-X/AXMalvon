@@ -45,6 +45,11 @@ class AXProfile {
             self.configuration.websiteDataStore = .init(forIdentifier: newID)
         }
 
+        #if !DEBUG
+            self.currentTabGroupIndex = defaults.integer(
+                forKey: "\(name)-selectedTabGroup")
+        #endif
+
         addOtherConfigs()
 
         loadTabGroups()
@@ -77,6 +82,9 @@ class AXProfile {
     }
 
     func saveTabGroups() {
+        UserDefaults.standard.set(
+            currentTabGroupIndex, forKey: "\(name)-selectedTabGroup")
+
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
         do {
@@ -101,27 +109,25 @@ class AXProfile {
     }
 
     func addOtherConfigs() {
-        configuration.preferences.setValue(true, forKey: "fullScreenEnabled")
-        configuration.preferences.setValue(
-            true, forKey: "allowsPictureInPictureMediaPlayback")
-        configuration.preferences.setValue(
-            true, forKey: "acceleratedDrawingEnabled")
-        configuration.preferences.setValue(
-            true, forKey: "largeImageAsyncDecodingEnabled")
-        configuration.preferences.setValue(
-            true, forKey: "animatedImageAsyncDecodingEnabled")
-        configuration.preferences.setValue(
-            true, forKey: "developerExtrasEnabled")
-        configuration.preferences.setValue(
-            true, forKey: "loadsImagesAutomatically")
-        configuration.preferences.setValue(
-            true, forKey: "acceleratedCompositingEnabled")
-        configuration.preferences.setValue(
-            true, forKey: "canvasUsesAcceleratedDrawing")
-        configuration.preferences.setValue(
-            true, forKey: "localFileContentSniffingEnabled")
-        configuration.preferences.setValue(true, forKey: "appNapEnabled")
+        for config in AX_DEFAULT_WEBVIEW_CONFIGURATIONS {
+            configuration.preferences.setValue(true, forKey: config)
+        }
+
         configuration.preferences.setValue(
             false, forKey: "backspaceKeyNavigationEnabled")
     }
 }
+
+let AX_DEFAULT_WEBVIEW_CONFIGURATIONS = [
+    "fullScreenEnabled",
+    "allowsPictureInPictureMediaPlayback",
+    "acceleratedDrawingEnabled",
+    "largeImageAsyncDecodingEnabled",
+    "animatedImageAsyncDecodingEnabled",
+    "developerExtrasEnabled",
+    "loadsImagesAutomatically",
+    "acceleratedCompositingEnabled",
+    "canvasUsesAcceleratedDrawing",
+    "localFileContentSniffingEnabled",
+    "appNapEnabled",
+]

@@ -178,6 +178,15 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         }
     }
 
+    func controlTextDidChange(_ notification: Notification) {
+        if !skipSuggestions {
+            updateSuggestions()
+        } else {
+            skipSuggestions = false
+            suggestions.forEach { $0?.isHidden = true }
+        }
+    }
+
     func control(
         _ control: NSControl, textView: NSTextView,
         doCommandBy commandSelector: Selector
@@ -229,15 +238,6 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             length: suggestion.count)
         fieldEditor?.string = suggestion
         fieldEditor?.selectedRange = selection
-    }
-
-    func controlTextDidChange(_ notification: Notification) {
-        if !skipSuggestions {
-            updateSuggestions()
-        } else {
-            skipSuggestions = false
-            suggestions.forEach { $0?.isHidden = true }
-        }
     }
 
     func windowClosed() {

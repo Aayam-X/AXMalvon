@@ -162,6 +162,15 @@ class AXSidebarView: NSView {
             options: [.activeAlways, .mouseEnteredAndExited], owner: self)
         addTrackingArea(mouseExitedTrackingArea)
     }
+
+    func faviconDetected(image: NSImage?) {
+        guard
+            let button = tabBarView?.tabStackView.arrangedSubviews[
+                currentTabGroup!.selectedIndex] as? AXTabButton
+        else { return }
+
+        button.favicon = image
+    }
 }
 
 extension AXSidebarView: AXTabBarViewDelegate {

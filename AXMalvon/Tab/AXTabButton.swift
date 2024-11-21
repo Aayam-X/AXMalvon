@@ -7,6 +7,12 @@
 
 import AppKit
 
+let AX_DEFAULT_FAVICON = NSImage(
+    systemSymbolName: "square.fill", accessibilityDescription: nil)
+
+let AX_DEFAULT_FAVICON_SLEEP = NSImage(
+    systemSymbolName: "moon.fill", accessibilityDescription: nil)
+
 protocol AXTabButtonDelegate: AnyObject {
     func tabButtonDidSelect(_ tabButton: AXTabButton)
     func tabButtonWillClose(_ tabButton: AXTabButton)
@@ -21,6 +27,17 @@ class AXTabButton: NSButton {
     // Subviews
     var titleView: NSTextField! = NSTextField()
     var favIconImageView: NSImageView! = NSImageView()
+
+    var favicon: NSImage? {
+        set {
+            self.favIconImageView.image =
+                newValue == nil ? AX_DEFAULT_FAVICON : newValue
+        }
+        get {
+            self.favIconImageView.image
+        }
+    }
+
     var closeButton: AXSidebarTabCloseButton! = AXSidebarTabCloseButton()
 
     // Colors
@@ -77,8 +94,7 @@ class AXTabButton: NSButton {
 
         // Setup imageView
         favIconImageView.translatesAutoresizingMaskIntoConstraints = false
-        favIconImageView.image = NSImage(
-            systemSymbolName: "square.fill", accessibilityDescription: nil)
+        favIconImageView.image = AX_DEFAULT_FAVICON_SLEEP
         favIconImageView.contentTintColor = .textBackgroundColor
             .withAlphaComponent(0.2)
         addSubview(favIconImageView)
@@ -132,6 +148,10 @@ class AXTabButton: NSButton {
     deinit {
         titleObserver?.invalidate()
         titleObserver = nil
+    }
+
+    func faviconNotFound() {
+        favIconImageView.image = AX_DEFAULT_FAVICON
     }
 }
 

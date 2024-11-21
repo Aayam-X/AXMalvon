@@ -23,7 +23,8 @@ class AXWindow: NSWindow, NSWindowDelegate {
     var profileIndex = 0 {
         didSet {
             defaultProfile = profiles[profileIndex]
-            self.sidebarView(didSelectTabGroup: 0)
+            self.sidebarView(
+                didSelectTabGroup: defaultProfile.currentTabGroupIndex)
         }
     }
 
@@ -334,6 +335,10 @@ extension AXWindow: AXSearchBarWindowDelegate {
 
 // MARK: - WebContainer View Delegate
 extension AXWindow: AXWebContainerViewDelegate {
+    func webContainerFoundFavicon(image: NSImage?) {
+        sidebarView.faviconDetected(image: image)
+    }
+
     func webContainerViewRequestsSidebar() -> AXSidebarView {
         return sidebarView
     }

@@ -8,13 +8,39 @@
 import AppKit
 import WebKit
 
-let html: String = "html"
+let faviconJavaScript = """
+    ["icon", "shortcut icon", "apple-touch-icon"].map(r => document.head.querySelector(`link[rel="${r}"]`)).find(l => l)?.href || ""
+    """
+
+//let faviconJavaScript1 = """
+//(() => {
+//  const favicon = ["icon", "shortcut icon", "apple-touch-icon"]
+//    .map(r => document.head.querySelector(`link[rel="${r}"]`))
+//    .find(l => l)?.href ||
+//    document.head.querySelector('meta[property="og:image"]')?.content ||
+//    document.querySelector('link[rel="icon"]')?.href;
+//  return favicon || "";
+//})();
+//"""
+//
+//let faviconJavaScript = """
+//(() => {
+//  const favicon = ["icon", "shortcut icon", "apple-touch-icon"]
+//    .map(r => document.head.querySelector(`link[rel="${r}"]`))
+//    .find(l => l)?.href ||
+//    document.querySelector('meta[name="icon"]')?.content ||
+//    document.querySelector('link[rel="icon"]')?.href ||
+//    document.querySelector('meta[property="og:image"]')?.content;
+//  return favicon || "";
+//})();
+//"""
 
 protocol AXWebContainerViewDelegate: AnyObject {
     func webViewProgressDidChange(to: Double, _ smooth: Bool)
     func webViewCreateWebView(config: WKWebViewConfiguration) -> WKWebView
 
     func webContainerViewRequestsSidebar() -> AXSidebarView
+    func webContainerFoundFavicon(image: NSImage?)
 }
 
 class AXWebContainerView: NSView {
@@ -216,10 +242,34 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
     WKDownloadDelegate
 {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        //        if let themeColor = webView.themeColor {
-        //            appProperties.updateColor(newColor: themeColor)
-        //        }
         print("Webview finished loading")
+
+        webView.evaluateJavaScript(faviconJavaScript) { (result, error) in
+            if let faviconURLString = result as? String,
+                let faviconURL = URL(string: faviconURLString)
+            {
+                self.downloadFavicon(from: faviconURL)
+            } else {
+                print("No favicon found or error: \(String(describing: error))")
+                self.delegate?.webContainerFoundFavicon(image: nil)
+            }
+        }
+    }
+
+    func downloadFavicon(from url: URL) {
+        let task = URLSession.shared.dataTask(with: url) {
+            (data, response, error) in
+            guard let data = data, error == nil, let image = NSImage(data: data)
+            else {
+                print(
+                    "Failed to download favicon: \(String(describing: error))")
+                return
+            }
+            DispatchQueue.main.async {
+                self.delegate?.webContainerFoundFavicon(image: image)
+            }
+        }
+        task.resume()
     }
 
     func webView(

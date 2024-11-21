@@ -134,7 +134,7 @@ class AXTabBarView: NSView {
             button.leadingAnchor.constraint(
                 equalTo: tabStackView.leadingAnchor, constant: 5),
             button.trailingAnchor.constraint(
-                equalTo: tabStackView.trailingAnchor, constant: -4),
+                equalTo: tabStackView.trailingAnchor, constant: -5),
         ])
     }
 
