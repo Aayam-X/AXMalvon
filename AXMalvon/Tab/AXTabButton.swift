@@ -18,6 +18,8 @@ protocol AXTabButtonDelegate: AnyObject {
     func tabButtonWillClose(_ tabButton: AXTabButton)
     func tabButtonActiveTitleChanged(
         _ newTitle: String, for tabButton: AXTabButton)
+
+    func tabButtonDeactivatedWebView(_ tabButton: AXTabButton)
 }
 
 class AXTabButton: NSButton {
@@ -72,6 +74,20 @@ class AXTabButton: NSButton {
             }
         }
     }
+
+    private lazy var contextMenu: NSMenu = {
+        let menu = NSMenu()
+
+        // Add items to the context menu
+        let item = NSMenuItem(
+            title: "Deactivate Tab", action: #selector(deactiveTab),
+            keyEquivalent: "")
+        item.target = self
+
+        menu.addItem(item)
+
+        return menu
+    }()
 
     init(tab: AXTab) {
         self.tab = tab
@@ -159,6 +175,13 @@ class AXTabButton: NSButton {
 extension AXTabButton {
     @objc func closeTab() {
         delegate?.tabButtonWillClose(self)
+    }
+
+    @objc func deactiveTab() {
+        titleObserver?.invalidate()
+        titleObserver = nil
+        favicon = AX_DEFAULT_FAVICON_SLEEP
+        delegate?.tabButtonDeactivatedWebView(self)
     }
 
     func updateTitle(_ to: String) {
@@ -263,6 +286,16 @@ extension AXTabButton {
         //            titleView.isEditable = false
         //            userDoubleClicked = false
         //        }
+    }
+
+    override func rightMouseDown(with event: NSEvent) {
+        super.rightMouseDown(with: event)
+
+        // Show the context menu at the mouse location
+        let locationInButton = self.convert(event.locationInWindow, from: nil)
+
+        // Show the context menu at the converted location relative to the button
+        contextMenu.popUp(positioning: nil, at: locationInButton, in: self)
     }
 }
 

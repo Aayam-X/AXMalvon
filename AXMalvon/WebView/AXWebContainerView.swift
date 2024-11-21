@@ -36,7 +36,7 @@ let faviconJavaScript = """
 //"""
 
 protocol AXWebContainerViewDelegate: AnyObject {
-    func webViewProgressDidChange(to: Double, _ smooth: Bool)
+    func webViewProgressDidChange(to: Double)
     func webViewCreateWebView(config: WKWebViewConfiguration) -> WKWebView
 
     func webContainerViewRequestsSidebar() -> AXSidebarView
@@ -139,12 +139,7 @@ class AXWebContainerView: NSView {
     }
 
     func updateProgress(_ newValue: CGFloat) {
-        if newValue >= 0.93 {
-            // Go very fast to 100!
-            delegate?.webViewProgressDidChange(to: newValue, false)
-        } else {
-            delegate?.webViewProgressDidChange(to: newValue, true)
-        }
+        delegate?.webViewProgressDidChange(to: newValue)
     }
 
     // MARK: - Collapsed Sidebar Methods

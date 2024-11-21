@@ -156,6 +156,18 @@ class AXTabBarView: NSView {
 
 // MARK: - Tab Button Delegate
 extension AXTabBarView: AXTabButtonDelegate {
+    func tabButtonDeactivatedWebView(_ tabButton: AXTabButton) {
+        let tab = tabGroup.tabs[tabButton.tag]
+
+        if tab.webConfiguration == nil {
+            // FIXME: Get the profile's web configuration
+            // This doesn't work if the tab was created locally; works only when tab is created by JSON tab group file
+        }
+
+        tab._webView?.removeFromSuperview()
+        tab._webView = nil
+    }
+
     func tabButtonActiveTitleChanged(
         _ newTitle: String, for tabButton: AXTabButton
     ) {

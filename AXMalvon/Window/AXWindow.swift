@@ -357,14 +357,9 @@ extension AXWindow: AXWebContainerViewDelegate {
         return newWebView
     }
 
-    func webViewProgressDidChange(to: Double, _ smooth: Bool) {
+    func webViewProgressDidChange(to: Double) {
         sidebarView.gestureView.progress = to
-
-        if smooth {
-            splitView.smoothProgress(to)
-        } else {
-            splitView.updateProgress(to)
-        }
+        splitView.updateProgress(value: to)
     }
 }
 

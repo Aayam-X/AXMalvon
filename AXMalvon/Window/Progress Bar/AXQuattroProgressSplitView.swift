@@ -11,53 +11,33 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
     CAAnimationDelegate
 {
     private var progress: CGFloat = 0.0
+    private var realProgress: CGFloat = 0.0
+    private var previousProgress: CGFloat = 0.0
 
-    var topBorderLayer: CAShapeLayer! = CAShapeLayer()
-    var topPointPath: NSBezierPath! = NSBezierPath()
-    var topAnimation: CABasicAnimation! = CABasicAnimation(keyPath: "strokeEnd")
+    private var isAnimating: Bool = false  // Flag to check if animation is ongoing
 
-    var rightBorderLayer: CAShapeLayer! = CAShapeLayer()
-    var rightPointPath: NSBezierPath! = NSBezierPath()
-    var rightAnimation: CABasicAnimation! = CABasicAnimation(
-        keyPath: "strokeEnd")
-
-    var bottomBorderLayer: CAShapeLayer! = CAShapeLayer()
-    var bottomPointPath: NSBezierPath! = NSBezierPath()
-    var bottomAnimation: CABasicAnimation! = CABasicAnimation(
-        keyPath: "strokeEnd")
-
-    var leftBorderLayer: CAShapeLayer! = CAShapeLayer()
-    var leftPointPath: NSBezierPath! = NSBezierPath()
-    var leftAnimation: CABasicAnimation! = CABasicAnimation(
-        keyPath: "strokeEnd")
+    private var topBorderLayer = CAShapeLayer()
+    private var rightBorderLayer = CAShapeLayer()
+    private var bottomBorderLayer = CAShapeLayer()
+    private var leftBorderLayer = CAShapeLayer()
 
     init() {
         super.init(frame: .zero)
 
         wantsLayer = true
+        setupLayers()
 
-#if DEBUG
-        self.layer?.backgroundColor =
-        NSColor.systemGray.withAlphaComponent(0.3).cgColor
-#else
-        self.layer?.backgroundColor =
-        NSColor.systemRed.withAlphaComponent(0.3).cgColor
-#endif
-        
+        #if DEBUG
+            self.layer?.backgroundColor =
+                NSColor.systemGray.withAlphaComponent(0.3).cgColor
+        #else
+            self.layer?.backgroundColor =
+                NSColor.systemRed.withAlphaComponent(0.3).cgColor
+        #endif
+
         delegate = self
         isVertical = true
         dividerStyle = .thin
-
-        topBorderLayer.lineWidth = 9
-        rightBorderLayer.lineWidth = 9
-        bottomBorderLayer.lineWidth = 9
-        leftBorderLayer.lineWidth = 9
-
-        leftAnimation.delegate = self
-        leftAnimation.isRemovedOnCompletion = true
-        rightAnimation.isRemovedOnCompletion = true
-        bottomAnimation.isRemovedOnCompletion = true
-        topAnimation.isRemovedOnCompletion = true
     }
 
     required init?(coder: NSCoder) {
@@ -83,7 +63,6 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
     func splitView(
         _ splitView: NSSplitView, shouldAdjustSizeOfSubview view: NSView
     ) -> Bool {
-        //        removeLayers()
         return view.tag == 0x01 ? false : true
     }
 
@@ -93,119 +72,126 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         return false
     }
 
-    func smoothProgress(_ newValue: CGFloat, increment by: CGFloat = 0.3) {
-        if newValue - progress >= by {
-            updateProgress(newValue, 0.3)
+    private func setupLayers() {
+        let borderWidth: CGFloat = 6.0
+
+        // Configure each layer
+        topBorderLayer.lineWidth = borderWidth
+        topBorderLayer.strokeColor = NSColor.systemRed.cgColor
+        topBorderLayer.isHidden = false
+        layer?.addSublayer(topBorderLayer)
+
+        rightBorderLayer.lineWidth = borderWidth
+        rightBorderLayer.strokeColor = NSColor.systemGreen.cgColor
+        rightBorderLayer.isHidden = false
+        layer?.addSublayer(rightBorderLayer)
+
+        bottomBorderLayer.lineWidth = borderWidth
+        bottomBorderLayer.strokeColor = NSColor.systemBlue.cgColor
+        bottomBorderLayer.isHidden = false
+        layer?.addSublayer(bottomBorderLayer)
+
+        leftBorderLayer.lineWidth = borderWidth
+        leftBorderLayer.strokeColor = NSColor.systemYellow.cgColor
+        leftBorderLayer.isHidden = false
+        layer?.addSublayer(leftBorderLayer)
+    }
+
+    // Function to update the progress value smoothly
+    func updateProgress(value: CGFloat) {
+        realProgress = value
+
+        // Only update progress if the value has changed and animation is not ongoing
+        if value > previousProgress && !isAnimating {
+            previousProgress += 0.1
+
+            progress = value
+            startProgressAnimation()
         }
     }
 
-    func updateProgress(_ newValue: CGFloat, _ duration: CGFloat = 0.2) {
-        let color = NSColor.textColor.withAlphaComponent(
-            CGFloat.random(in: 0.5..<1.0)
-        ).cgColor
+    private func startProgressAnimation() {
+        // Set the animation flag to true
+        isAnimating = true
 
-        // Top Point
-        topPointPath.move(to: .init(x: 0, y: bounds.height))
-        topPointPath.line(
-            to: .init(x: bounds.width * newValue, y: self.bounds.height))
+        // Define the animation duration and timing
+        let animationDuration: CFTimeInterval = 0.5  // Adjust duration for smoothness
+        let animation = CABasicAnimation(keyPath: "strokeEnd")
+        animation.fromValue = progress
+        animation.toValue = 1.0  // Dynamically set the toValue
+        animation.duration = animationDuration
+        animation.timingFunction = CAMediaTimingFunction(name: .linear)
+        animation.delegate = self
 
-        // Right Point
-        rightPointPath.move(to: .init(x: bounds.width, y: bounds.height))
-        rightPointPath.line(
-            to: .init(
-                x: bounds.width, y: (bounds.height - (newValue) * bounds.height)
-            ))
+        // Apply the animation to all borders
+        animateTopBorder(animation: animation)
+        animateRightBorder(animation: animation)
+        animateBottomBorder(animation: animation)
+        animateLeftBorder(animation: animation)
+    }
 
-        // Bottom Point
-        bottomPointPath.move(to: .init(x: bounds.width, y: 0))
-        bottomPointPath.line(
-            to: .init(x: (bounds.width - (bounds.width * newValue)), y: 0))
+    private func animateTopBorder(animation: CABasicAnimation) {
+        let path = NSBezierPath()
+        path.move(to: CGPoint(x: 0, y: bounds.height))
+        path.line(to: CGPoint(x: bounds.width, y: bounds.height))
 
-        // Left Point
-        leftPointPath.move(to: .zero)
-        leftPointPath.line(to: .init(x: 0, y: bounds.height * newValue))
+        topBorderLayer.path = path.cgPath
+        topBorderLayer.zPosition = 1  // Bring it above subviews
+        topBorderLayer.add(animation, forKey: nil)
+    }
 
-        topBorderLayer.path = topPointPath.cgPath
-        topBorderLayer.strokeColor = color
+    private func animateRightBorder(animation: CABasicAnimation) {
+        let path = NSBezierPath()
+        path.move(to: CGPoint(x: bounds.width, y: bounds.height))
+        path.line(to: CGPoint(x: bounds.width, y: 0))
 
-        rightBorderLayer.path = rightPointPath.cgPath
-        rightBorderLayer.strokeColor = color
+        rightBorderLayer.path = path.cgPath
+        rightBorderLayer.zPosition = 1  // Bring it above subviews
+        rightBorderLayer.add(animation, forKey: nil)
+    }
 
-        bottomBorderLayer.path = bottomPointPath.cgPath
-        bottomBorderLayer.strokeColor = color
+    private func animateBottomBorder(animation: CABasicAnimation) {
+        let path = NSBezierPath()
+        path.move(to: CGPoint(x: bounds.width, y: 0))
+        path.line(to: CGPoint(x: 0, y: 0))
 
-        leftBorderLayer.path = leftPointPath.cgPath
-        leftBorderLayer.strokeColor = color
+        bottomBorderLayer.path = path.cgPath
+        bottomBorderLayer.zPosition = 1  // Set zPosition to bring the bottom border above subviews
+        bottomBorderLayer.add(animation, forKey: nil)
+    }
 
-        layer?.addSublayer(topBorderLayer)
-        layer?.addSublayer(rightBorderLayer)
-        layer?.addSublayer(bottomBorderLayer)
-        layer?.addSublayer(leftBorderLayer)
+    private func animateLeftBorder(animation: CABasicAnimation) {
+        let path = NSBezierPath()
+        path.move(to: CGPoint(x: 0, y: 0))
+        path.line(to: CGPoint(x: 0, y: bounds.height))
 
-        topAnimation.fromValue = progress
-        topAnimation.toValue = newValue
-        topAnimation.duration = duration
-        topBorderLayer.add(topAnimation, forKey: "ANIMATION:Progress:top")
-
-        rightAnimation.fromValue = progress
-        rightAnimation.toValue = newValue
-        rightAnimation.duration = duration
-        rightBorderLayer.add(rightAnimation, forKey: "ANIMATION:Progress:right")
-
-        bottomAnimation.fromValue = progress
-        bottomAnimation.toValue = newValue
-        bottomAnimation.duration = duration
-        bottomBorderLayer.add(
-            bottomAnimation, forKey: "ANIMATION:Progress:bottom")
-
-        leftAnimation.fromValue = progress
-        leftAnimation.toValue = newValue
-        leftAnimation.duration = duration
-        leftBorderLayer.add(leftAnimation, forKey: "ANIMATION:Progress:left")
-
-        progress = newValue
+        leftBorderLayer.path = path.cgPath
+        leftBorderLayer.zPosition = 1  // Set zPosition to bring the left border above subviews
+        leftBorderLayer.add(animation, forKey: nil)
     }
 
     func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
-        if progress >= 0.93 {
-            close()
+        // Only hide borders if animation finished and progress is complete
+        if flag, realProgress >= 0.936 {
+            topBorderLayer.isHidden = true
+            bottomBorderLayer.isHidden = true
+            leftBorderLayer.isHidden = true
+            rightBorderLayer.isHidden = true
+
+            previousProgress = 0.0
+            progress = 0.0
+            print("PROGRESS ENDED")
         }
+
+        // Reset animation flag
+        isAnimating = false
     }
 
-    override func removeFromSuperview() {
-        topBorderLayer = nil
-        topPointPath = nil
-        topAnimation = nil
-        rightBorderLayer = nil
-        rightPointPath = nil
-        rightAnimation = nil
-        bottomBorderLayer = nil
-        bottomPointPath = nil
-        bottomAnimation = nil
-        leftBorderLayer = nil
-        leftPointPath = nil
-        leftAnimation = nil
-
-        super.removeFromSuperview()
-    }
-
-    override func viewDidEndLiveResize() {
-        topPointPath.removeAllPoints()
-        rightPointPath.removeAllPoints()
-        bottomPointPath.removeAllPoints()
-        leftPointPath.removeAllPoints()
-    }
-
-    func close() {
-        progress = 0.0
-        topBorderLayer?.removeFromSuperlayer()
-        rightBorderLayer?.removeFromSuperlayer()
-        bottomBorderLayer?.removeFromSuperlayer()
-        leftBorderLayer?.removeFromSuperlayer()
-
-        topPointPath.removeAllPoints()
-        rightPointPath.removeAllPoints()
-        bottomPointPath.removeAllPoints()
-        leftPointPath.removeAllPoints()
+    func animationDidStart(_ anim: CAAnimation) {
+        // Ensure borders are visible when animation starts
+        topBorderLayer.isHidden = false
+        bottomBorderLayer.isHidden = false
+        leftBorderLayer.isHidden = false
+        rightBorderLayer.isHidden = false
     }
 }
