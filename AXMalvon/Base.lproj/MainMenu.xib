@@ -376,6 +376,12 @@
                                     <action selector="toggleSearchField:" target="-1" id="yhC-SR-y3N"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Enable Content Blockers" id="k7n-zh-4QQ">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="enableContentBlockers:" target="-1" id="xAH-Uh-xY2"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="tEW-jz-yui"/>
                             <menuItem title="Show Reader View" keyEquivalent="r" id="CtI-Xn-fVt">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>

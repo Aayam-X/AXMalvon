@@ -37,7 +37,8 @@ let faviconJavaScript = """
 
 protocol AXWebContainerViewDelegate: AnyObject {
     func webViewDidFinishLoading()
-    func webViewDidStartLoading()
+    func webViewStartedLoading(with progress: Double)
+    
     func webViewCreateWebView(config: WKWebViewConfiguration) -> WKWebView
 
     func webContainerViewRequestsSidebar() -> AXSidebarView
@@ -55,6 +56,7 @@ class AXWebContainerView: NSView {
 
     var sidebarTrackingArea: NSTrackingArea!
     var isAnimating: Bool = false
+    var progressBarObserver: NSKeyValueObservation?
 
     var websiteTitleLabel: NSTextField = {
         let title = NSTextField()
@@ -94,9 +96,15 @@ class AXWebContainerView: NSView {
         splitView.rightAnchor.constraint(equalTo: rightAnchor, constant: -14)
             .isActive = true
     }
+    
+    deinit {
+        progressBarObserver = nil
+    }
 
     func updateView(webView: AXWebView) {
         currentWebView?.removeFromSuperview()
+        currentWebView?.uiDelegate = nil
+        currentWebView?.navigationDelegate = nil
 
         self.currentWebView = webView
         self.websiteTitleLabel.stringValue = webView.title ?? "Untitled Page"
@@ -108,6 +116,21 @@ class AXWebContainerView: NSView {
         webView.autoresizingMask = [.height, .width]
 
         self.window?.makeFirstResponder(currentWebView)
+        
+        progressBarObserver = webView.observe(
+            \.estimatedProgress, options: [.new]
+        ) { [weak self] _, change in
+            if let newProgress = change.newValue {
+                
+                self?.updateProgress(newProgress)
+            } else {
+                print("Progress change has no new value.")
+            }
+        }
+    }
+    
+    func updateProgress(_ value: Double) {
+        delegate?.webViewStartedLoading(with: value)
     }
 
     func createEmptyView() {
@@ -177,42 +200,6 @@ class AXWebContainerView: NSView {
         addTrackingArea(sidebarTrackingArea)
     }
 
-}
-
-// MARK: - Web Split View
-private class AXWebContainerSplitView: NSSplitView, NSSplitViewDelegate {
-    init() {
-        super.init(frame: .zero)
-        delegate = self
-        isVertical = true
-        dividerStyle = .thin
-    }
-
-    func splitView(
-        _ splitView: NSSplitView,
-        constrainMinCoordinate proposedMinimumPosition: CGFloat,
-        ofSubviewAt dividerIndex: Int
-    ) -> CGFloat {
-        return 50
-    }
-
-    func splitView(_ splitView: NSSplitView, canCollapseSubview subview: NSView)
-        -> Bool
-    {
-        return false
-    }
-
-    override func drawDivider(in rect: NSRect) {
-        // Make divider invisble
-    }
-
-    override func viewWillDraw() {
-        self.layer?.cornerRadius = 5.0
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
 }
 
 extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
@@ -324,19 +311,85 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
     func downloadDidFinish(_ download: WKDownload) {
         print("Download finished!")
     }
-
-    // FIXME: Find the difference
-    //    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-    //        delegate?.webViewDidStartLoading()
-    //    }
-
-    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        delegate?.webViewDidStartLoading()
+    
+    func enableContentBlockers() {
+        // Ensure the blocker list file exists
+        guard let blockerListURL = Bundle.main.url(forResource: "blockerList", withExtension: "json") else {
+            print("Blocker list file not found.")
+            return
+        }
+        
+        // Load the content of the blocker list JSON efficiently
+        guard let blockerListData = try? Data(contentsOf: blockerListURL),
+              let blockerListString = String(data: blockerListData, encoding: .utf8) else {
+            print("Failed to load or decode blocker list.")
+            return
+        }
+        
+        // Compile the content rule list
+        WKContentRuleListStore.default().compileContentRuleList(
+            forIdentifier: "ContentBlockingRules",
+            encodedContentRuleList: blockerListString
+        ) { [weak self] contentRuleList, error in
+            // Handle any compilation errors
+            if let error = error {
+                print("Failed to compile content rule list: \(error.localizedDescription)")
+                return
+            }
+            
+            // Safely unwrap the content rule list
+            guard let contentRuleList = contentRuleList, let self = self else { return }
+            
+            // Apply the content rule list to the web view configuration
+            let configuration = self.currentWebView?.configuration
+            configuration?.userContentController.add(contentRuleList)
+            
+            // Reload the web view efficiently
+            self.currentWebView?.reload()
+        }
     }
+
 }
 
 private func insetWebView(_ bounds: NSRect) -> NSRect {
     return NSRect(
         x: bounds.origin.x + 1, y: bounds.origin.y + 14,
         width: bounds.size.width - 15, height: bounds.size.height - 28)
+}
+
+
+// MARK: - Web Split View
+private class AXWebContainerSplitView: NSSplitView, NSSplitViewDelegate {
+    init() {
+        super.init(frame: .zero)
+        delegate = self
+        isVertical = true
+        dividerStyle = .thin
+    }
+
+    func splitView(
+        _ splitView: NSSplitView,
+        constrainMinCoordinate proposedMinimumPosition: CGFloat,
+        ofSubviewAt dividerIndex: Int
+    ) -> CGFloat {
+        return 50
+    }
+
+    func splitView(_ splitView: NSSplitView, canCollapseSubview subview: NSView)
+        -> Bool
+    {
+        return false
+    }
+
+    override func drawDivider(in rect: NSRect) {
+        // Make divider invisble
+    }
+
+    override func viewWillDraw() {
+        self.layer?.cornerRadius = 5.0
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }

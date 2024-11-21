@@ -185,6 +185,29 @@ extension AXWindow {
         }
     }
 
+    @IBAction func enableContentBlockers(_ sender: Any) {
+        //containerView.enableContentBlockers()
+
+        let view = AXExtensionsLoader.testBundle()
+
+        guard let view else { return }
+        // Step 2: Create an NSViewController to manage the view
+        let contentViewController = NSViewController()
+        contentViewController.view = view
+
+        // Step 3: Create a new window (sheet) to present
+        let sheetWindow = NSWindow(contentViewController: contentViewController)
+
+        // Optionally, configure the sheet window (e.g., size, style)
+        sheetWindow.setContentSize(NSSize(width: 400, height: 300))  // Set the size of the sheet
+
+        // Step 4: Present the sheet on the current window
+        beginSheet(sheetWindow) { response in
+            // Handle sheet dismissal if needed (e.g., after a button press)
+            print("Sheet was closed with response: \(response)")
+        }
+    }
+
     @IBAction func toggleSearchField(_ sender: Any) {
         if currentTabGroup.selectedIndex < 0 {
             searchBar.show()
@@ -272,12 +295,16 @@ extension AXWindow {
                 switchToTab(index: 2)
             case 21:  // '4' key
                 switchToTab(index: 3)
-            case 22:  // '5' key
+            case 23:  // '5' key
                 switchToTab(index: 4)
-            case 23:  // '6' key
+            case 22:  // '6' key
                 switchToTab(index: 5)
             case 26:  // '7' key
                 switchToTab(index: 6)
+            case 28:  // '8' key
+                switchToTab(index: 7)
+            case 25:  // '9' key
+                switchToTab(index: 7)
             default:
                 break
             }
@@ -287,16 +314,16 @@ extension AXWindow {
     }
 
     func switchToTab(index: Int) {
-        print("TAB GROUP COUNT: \(tabGroups.count)")
+        let count = currentTabGroup.tabs.count
 
         // Check if the tab index is valid
-        if index < currentTabGroup.tabs.count {
+        if index < count {
             // Hide all tabs
             currentTabGroup.switchTab(to: index)
         } else {
-            guard currentTabGroup.tabs.count > 0 else { return }
+            guard count > 0 else { return }
             // Switch to the last tab if the index is out of range
-            currentTabGroup.switchTab(to: currentTabGroup.tabs.count - 1)
+            currentTabGroup.switchTab(to: count - 1)
         }
     }
 }
@@ -357,8 +384,8 @@ extension AXWindow: AXWebContainerViewDelegate {
         return newWebView
     }
 
-    func webViewDidStartLoading() {
-        splitView.beginAnimation()
+    func webViewStartedLoading(with progress: Double) {
+        splitView.beginAnimation(with: progress)
     }
 
     func webViewDidFinishLoading() {

@@ -37,7 +37,6 @@ class AXTabGroup: Codable {
 
     func addTab(_ tab: AXTab) {
         tabs.append(tab)
-
         tabBarView?.addTabButton(for: tab)  // Add button to tab bar view
     }
 
