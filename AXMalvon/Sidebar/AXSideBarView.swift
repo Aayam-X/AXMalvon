@@ -19,6 +19,7 @@ class AXSidebarView: NSView {
 
     var gestureView = AXGestureView()
     private weak var tabBarView: AXTabBarView?
+    private var visualEffectViewTopAnchor: NSLayoutConstraint?
 
     private lazy var visualEffectView: NSVisualEffectView = {
         let visualEffectView = NSVisualEffectView()
@@ -67,9 +68,11 @@ class AXSidebarView: NSView {
 
     func setUpVisualEffectView() {
         addSubview(visualEffectView)
+        self.visualEffectViewTopAnchor = visualEffectView.topAnchor.constraint(
+            equalTo: topAnchor, constant: 39)
+        self.visualEffectViewTopAnchor!.isActive = true
+
         NSLayoutConstraint.activate([
-            visualEffectView.topAnchor.constraint(
-                equalTo: topAnchor, constant: 39),
             visualEffectView.leftAnchor.constraint(equalTo: leftAnchor),
             visualEffectView.rightAnchor.constraint(equalTo: rightAnchor),
             visualEffectView.bottomAnchor.constraint(equalTo: bottomAnchor),
@@ -150,6 +153,8 @@ class AXSidebarView: NSView {
                 self.removeFromSuperview()
             })
 
+        visualEffectViewTopAnchor?.constant = 39
+
         window.trafficLightManager.hideTrafficLights(true)
     }
 
@@ -161,6 +166,13 @@ class AXSidebarView: NSView {
                 width: bounds.size.width + 100, height: bounds.size.height),
             options: [.activeAlways, .mouseEnteredAndExited], owner: self)
         addTrackingArea(mouseExitedTrackingArea)
+    }
+
+    func extendVisualEffectView() {
+        visualEffectViewTopAnchor?.constant = 0
+
+        guard let window = self.window as? AXWindow else { return }
+        window.trafficLightManager.hideTrafficLights(false)
     }
 
     func faviconDetected(image: NSImage?) {

@@ -51,26 +51,15 @@ class AXGestureView: NSView {
         var backgroundColor: NSColor = .systemGray.withAlphaComponent(0.2) {
             didSet {
                 self.layer?.backgroundColor = backgroundColor.cgColor
-                updateProgressLayer()
             }
         }
     #else
         var backgroundColor: NSColor = .systemRed.withAlphaComponent(0.2) {
             didSet {
                 self.layer?.backgroundColor = backgroundColor.cgColor
-                updateProgressLayer()
             }
         }
     #endif
-
-    private var progressLayer = CALayer()
-
-    // Progress property
-    var progress: CGFloat = 0.0 {
-        didSet {
-            updateProgressLayer()
-        }
-    }
 
     override func viewWillDraw() {
         if hasDrawn { return }
@@ -84,12 +73,6 @@ class AXGestureView: NSView {
             //self.layer?.backgroundColor =
             //NSColor.systemRed.withAlphaComponent(0.3).cgColor
         #endif
-
-        progressLayer.backgroundColor =
-            NSColor.systemRed.withAlphaComponent(0.3).cgColor
-        progressLayer.frame = CGRect(
-            x: 0, y: 0, width: 0, height: bounds.height)
-        layer?.addSublayer(progressLayer)
 
         tabGroupInformationView.translatesAutoresizingMaskIntoConstraints =
             false
@@ -109,34 +92,6 @@ class AXGestureView: NSView {
         tabGroupInformationView.profileLabel.stringValue = subtitle
     }
 
-    private func updateProgressLayer() {
-        let newWidth = bounds.width * progress
-        let newAlpha = 1.0 - progress  // Interpolate alpha from 1.0 to 0.0
-        let newColor = self.backgroundColor.withAlphaComponent(newAlpha).cgColor
-
-        // Animate frame width change
-        let frameAnimation = CABasicAnimation(keyPath: "frame.size.width")
-        frameAnimation.fromValue = progressLayer.frame.size.width
-        frameAnimation.toValue = newWidth
-        frameAnimation.duration = 0.3
-        frameAnimation.timingFunction = CAMediaTimingFunction(
-            name: .easeInEaseOut)
-
-        // Update the frame and add animation
-        progressLayer.frame.size.width = newWidth
-        progressLayer.add(frameAnimation, forKey: "frameAnimation")
-
-        // Animate color change
-        let colorAnimation = CABasicAnimation(keyPath: "backgroundColor")
-        colorAnimation.fromValue = progressLayer.backgroundColor
-        colorAnimation.toValue = newColor
-        colorAnimation.duration = 0.3
-
-        // Update the color and add animation
-        progressLayer.backgroundColor = newColor
-        progressLayer.add(colorAnimation, forKey: "colorAnimation")
-    }
-
     func setTrackingArea() {
         let options: NSTrackingArea.Options = [
             .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
@@ -144,11 +99,6 @@ class AXGestureView: NSView {
         trackingArea = NSTrackingArea.init(
             rect: self.bounds, options: options, owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
-    }
-
-    override func layout() {
-        super.layout()
-        updateProgressLayer()
     }
 
     override func scrollWheel(with event: NSEvent) {

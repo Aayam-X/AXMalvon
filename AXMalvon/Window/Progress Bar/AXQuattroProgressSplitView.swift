@@ -10,10 +10,6 @@ import AppKit
 class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
     CAAnimationDelegate
 {
-    private var progress: CGFloat = 0.0
-    private var realProgress: CGFloat = 0.0
-    private var previousProgress: CGFloat = 0.0
-
     private var isAnimating: Bool = false  // Flag to check if animation is ongoing
 
     private var topBorderLayer = CAShapeLayer()
@@ -73,7 +69,7 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
     }
 
     private func setupLayers() {
-        let borderWidth: CGFloat = 6.0
+        let borderWidth: CGFloat = 9.0
 
         // Configure each layer
         topBorderLayer.lineWidth = borderWidth
@@ -97,30 +93,30 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         layer?.addSublayer(leftBorderLayer)
     }
 
-    // Function to update the progress value smoothly
-    func updateProgress(value: CGFloat) {
-        realProgress = value
-
-        // Only update progress if the value has changed and animation is not ongoing
-        if value > previousProgress && !isAnimating {
-            previousProgress += 0.1
-
-            progress = value
-            startProgressAnimation()
-        }
+    func beginAnimation() {
+        animateProgress(from: 0.0, to: 0.8, duration: 3.9)  // Slow animation to 80%
     }
 
-    private func startProgressAnimation() {
-        // Set the animation flag to true
+    func finishAnimation() {
+        // Immediately stop any ongoing animations
+        cancelOngoingAnimations()
+
+        // Override current progress and animate quickly to 100%
+        animateProgress(from: 0.8, to: 1.0, duration: 0.69)  // Quick animation to 100%
+    }
+
+    private func animateProgress(
+        from start: CGFloat, to end: CGFloat, duration: CFTimeInterval
+    ) {
+        // Avoid starting a new animation if one is already running (unless overridden)
+        guard !isAnimating else { return }
         isAnimating = true
 
-        // Define the animation duration and timing
-        let animationDuration: CFTimeInterval = 0.5  // Adjust duration for smoothness
         let animation = CABasicAnimation(keyPath: "strokeEnd")
-        animation.fromValue = progress
-        animation.toValue = 1.0  // Dynamically set the toValue
-        animation.duration = animationDuration
-        animation.timingFunction = CAMediaTimingFunction(name: .linear)
+        animation.fromValue = start
+        animation.toValue = end
+        animation.duration = duration
+        animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
         animation.delegate = self
 
         // Apply the animation to all borders
@@ -130,13 +126,24 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         animateLeftBorder(animation: animation)
     }
 
+    private func cancelOngoingAnimations() {
+        // Remove all animations from each layer
+        topBorderLayer.removeAllAnimations()
+        rightBorderLayer.removeAllAnimations()
+        bottomBorderLayer.removeAllAnimations()
+        leftBorderLayer.removeAllAnimations()
+
+        // Reset animation flag
+        isAnimating = false
+    }
+
     private func animateTopBorder(animation: CABasicAnimation) {
         let path = NSBezierPath()
         path.move(to: CGPoint(x: 0, y: bounds.height))
         path.line(to: CGPoint(x: bounds.width, y: bounds.height))
 
         topBorderLayer.path = path.cgPath
-        topBorderLayer.zPosition = 1  // Bring it above subviews
+        topBorderLayer.zPosition = 1
         topBorderLayer.add(animation, forKey: nil)
     }
 
@@ -146,7 +153,7 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         path.line(to: CGPoint(x: bounds.width, y: 0))
 
         rightBorderLayer.path = path.cgPath
-        rightBorderLayer.zPosition = 1  // Bring it above subviews
+        rightBorderLayer.zPosition = 1
         rightBorderLayer.add(animation, forKey: nil)
     }
 
@@ -156,7 +163,7 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         path.line(to: CGPoint(x: 0, y: 0))
 
         bottomBorderLayer.path = path.cgPath
-        bottomBorderLayer.zPosition = 1  // Set zPosition to bring the bottom border above subviews
+        bottomBorderLayer.zPosition = 1
         bottomBorderLayer.add(animation, forKey: nil)
     }
 
@@ -166,32 +173,32 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         path.line(to: CGPoint(x: 0, y: bounds.height))
 
         leftBorderLayer.path = path.cgPath
-        leftBorderLayer.zPosition = 1  // Set zPosition to bring the left border above subviews
+        leftBorderLayer.zPosition = 1
         leftBorderLayer.add(animation, forKey: nil)
     }
 
     func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
-        // Only hide borders if animation finished and progress is complete
-        if flag, realProgress >= 0.936 {
-            topBorderLayer.isHidden = true
-            bottomBorderLayer.isHidden = true
-            leftBorderLayer.isHidden = true
-            rightBorderLayer.isHidden = true
+        guard flag, !isAnimating else { return }  // Ensure the animation completed
 
-            previousProgress = 0.0
-            progress = 0.0
-            print("PROGRESS ENDED")
+        [
+            self.topBorderLayer, self.rightBorderLayer, self.bottomBorderLayer,
+            self.leftBorderLayer,
+        ].forEach { layer in
+            layer.opacity = 0.0
+            layer.isHidden = true
         }
 
-        // Reset animation flag
-        isAnimating = false
+        self.isAnimating = false
     }
 
     func animationDidStart(_ anim: CAAnimation) {
-        // Ensure borders are visible when animation starts
-        topBorderLayer.isHidden = false
-        bottomBorderLayer.isHidden = false
-        leftBorderLayer.isHidden = false
-        rightBorderLayer.isHidden = false
+        [
+            self.topBorderLayer, self.rightBorderLayer, self.bottomBorderLayer,
+            self.leftBorderLayer,
+        ].forEach { layer in
+            layer.opacity = 1.0
+            layer.isHidden = false
+            self.isAnimating = false
+        }
     }
 }

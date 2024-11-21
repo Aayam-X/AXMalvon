@@ -36,7 +36,8 @@ let faviconJavaScript = """
 //"""
 
 protocol AXWebContainerViewDelegate: AnyObject {
-    func webViewProgressDidChange(to: Double)
+    func webViewDidFinishLoading()
+    func webViewDidStartLoading()
     func webViewCreateWebView(config: WKWebViewConfiguration) -> WKWebView
 
     func webContainerViewRequestsSidebar() -> AXSidebarView
@@ -51,7 +52,6 @@ class AXWebContainerView: NSView {
     weak var currentWebView: AXWebView?
 
     private lazy var splitView = AXWebContainerSplitView()
-    var progressBarObserver: NSKeyValueObservation?
 
     var sidebarTrackingArea: NSTrackingArea!
     var isAnimating: Bool = false
@@ -95,10 +95,6 @@ class AXWebContainerView: NSView {
             .isActive = true
     }
 
-    deinit {
-        progressBarObserver = nil
-    }
-
     func updateView(webView: AXWebView) {
         currentWebView?.removeFromSuperview()
 
@@ -112,16 +108,6 @@ class AXWebContainerView: NSView {
         webView.autoresizingMask = [.height, .width]
 
         self.window?.makeFirstResponder(currentWebView)
-
-        progressBarObserver = webView.observe(
-            \.estimatedProgress, options: [.new]
-        ) { [weak self] _, change in
-            if let newProgress = change.newValue {
-                self?.updateProgress(newProgress)
-            } else {
-                print("Progress change has no new value.")
-            }
-        }
     }
 
     func createEmptyView() {
@@ -134,12 +120,6 @@ class AXWebContainerView: NSView {
         currentWebView?.removeFromSuperview()
         self.currentWebView = nil
         self.websiteTitleLabel.stringValue = "Empty Window"
-
-        progressBarObserver = nil
-    }
-
-    func updateProgress(_ newValue: CGFloat) {
-        delegate?.webViewProgressDidChange(to: newValue)
     }
 
     // MARK: - Collapsed Sidebar Methods
@@ -161,7 +141,9 @@ class AXWebContainerView: NSView {
         addSubview(sidebar)
 
         if !isAnimating {
-            sidebar.layer?.backgroundColor = NSColor.systemGray.cgColor
+            sidebar.layer?.backgroundColor =
+                NSColor.red.withAlphaComponent(0.3).cgColor
+            sidebar.extendVisualEffectView()
             NSAnimationContext.runAnimationGroup(
                 { context in
                     context.duration = 0.1
@@ -238,6 +220,7 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
 {
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         print("Webview finished loading")
+        delegate?.webViewDidFinishLoading()
 
         webView.evaluateJavaScript(faviconJavaScript) { (result, error) in
             if let faviconURLString = result as? String,
@@ -340,6 +323,15 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
 
     func downloadDidFinish(_ download: WKDownload) {
         print("Download finished!")
+    }
+
+    // FIXME: Find the difference
+    //    func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+    //        delegate?.webViewDidStartLoading()
+    //    }
+
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        delegate?.webViewDidStartLoading()
     }
 }
 
