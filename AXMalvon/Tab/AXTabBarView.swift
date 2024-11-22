@@ -3,6 +3,7 @@
 //  AXTabSystem
 //
 //  Created by Ashwin Paudel on 2024-11-14.
+//  Copyright © 2022-2024 Aayam(X). All rights reserved.
 //
 
 import AppKit
@@ -16,11 +17,21 @@ class AXTabBarView: NSView {
     var tabGroup: AXTabGroup
     weak var delegate: AXTabBarViewDelegate?
     private var hasDrawn = false
+    private var dragTargetIndex: Int?
 
     // Views
     var tabStackView = NSStackView()
     var scrollView: NSScrollView!
     let clipView = AXFlippedClipView()
+
+    lazy var divider: NSBox = {
+        let box = NSBox()
+        box.boxType = .custom
+        box.translatesAutoresizingMaskIntoConstraints = false
+        box.heightAnchor.constraint(equalToConstant: 35).isActive = true
+        box.fillColor = NSColor.controlAccentColor
+        return box
+    }()
 
     init(tabGroup: AXTabGroup) {
         self.tabGroup = tabGroup
@@ -36,7 +47,7 @@ class AXTabBarView: NSView {
         tabStackView.translatesAutoresizingMaskIntoConstraints = false
         tabStackView.orientation = .vertical
         tabStackView.spacing = 1.08
-        tabStackView.detachesHiddenViews = false
+        tabStackView.detachesHiddenViews = true
 
         // Create scrollView
         scrollView = NSScrollView()
@@ -67,6 +78,8 @@ class AXTabBarView: NSView {
             tabStackView.leftAnchor.constraint(equalTo: clipView.leftAnchor),
             tabStackView.rightAnchor.constraint(equalTo: clipView.rightAnchor),
         ])
+
+        registerForDraggedTypes(self.registeredDraggedTypes)
     }
 
     required init?(coder: NSCoder) {
@@ -152,6 +165,92 @@ class AXTabBarView: NSView {
             button.trailingAnchor.constraint(
                 equalTo: tabStackView.trailingAnchor, constant: -5),
         ])
+    }
+
+    private func reorderTabs(from: Int, to: Int) {
+        print("Reordering tabs from \(from) to \(to)")
+
+        let firstButton = tabStackView.arrangedSubviews[from] as! AXTabButton
+        let secondButton = tabStackView.arrangedSubviews[to] as! AXTabButton
+
+        firstButton.tag = to
+        secondButton.tag = from
+
+        tabStackView.removeArrangedSubview(firstButton)
+        tabStackView.insertArrangedSubview(firstButton, at: to)
+        tabStackView.insertArrangedSubview(secondButton, at: from)
+
+        firstButton.isHidden = false
+
+        self.tabGroup.tabs.swapAt(from, to)
+        tabGroup.selectedIndex = to
+        self.updateIndicies(after: min(from, to))
+    }
+}
+
+// MARK: - Dragging Destination
+extension AXTabBarView {
+    override var registeredDraggedTypes: [NSPasteboard.PasteboardType] {
+        [.axTabButton]
+    }
+
+    override func draggingEntered(_ sender: any NSDraggingInfo)
+        -> NSDragOperation
+    {
+        let pasteboard = sender.draggingPasteboard
+
+        if pasteboard.types!.contains(.axTabButton) {
+            return .generic
+        }
+
+        return []
+    }
+
+    override func draggingUpdated(_ sender: any NSDraggingInfo)
+        -> NSDragOperation
+    {
+        let location = sender.draggingLocation
+        let stackViewLocation = convert(location, to: tabStackView)
+
+        // Remove the divider if it already exists in the stack view
+        divider.removeFromSuperview()
+
+        // Calculate the insertion index based on cursor's location
+        let index =
+            tabStackView.arrangedSubviews.firstIndex {
+                stackViewLocation.y > $0.frame.minY
+            } ?? tabStackView.arrangedSubviews.count - 1
+
+        // Insert the divider at the calculated index
+        tabStackView.insertArrangedSubview(divider, at: index)
+
+        // Adjust the frame of the divider to align with the cursor
+        divider.frame.origin.y = stackViewLocation.y - divider.frame.height / 2
+
+        dragTargetIndex = index
+        return .generic
+    }
+
+    override func performDragOperation(_ sender: any NSDraggingInfo) -> Bool {
+        divider.removeFromSuperview()
+        guard
+            let pasteboard = sender.draggingPasteboard.propertyList(
+                forType: .axTabButton) as? String, let tag = Int(pasteboard),
+            let dragTargetIndex
+        else {
+            return false
+        }
+
+        reorderTabs(from: tag, to: dragTargetIndex)
+        print("Not concluded")
+        return true
+    }
+
+    override func concludeDragOperation(_ sender: (any NSDraggingInfo)?) {
+        // Remove the divider after the drag operation is concluded
+        //divider.removeFromSuperview()
+        dragTargetIndex = nil
+        print("Drag operation concluded")
     }
 }
 

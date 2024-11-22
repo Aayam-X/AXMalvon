@@ -3,6 +3,7 @@
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2024-11-06.
+//  Copyright © 2022-2024 Aayam(X). All rights reserved.
 //
 
 import AppKit
@@ -29,6 +30,9 @@ class AXTabButton: NSButton {
     // Subviews
     var titleView: NSTextField! = NSTextField()
     var favIconImageView: NSImageView! = NSImageView()
+
+    // Drag & Drop
+    private var initialMouseDownLocation: NSPoint?
 
     var favicon: NSImage? {
         set {
@@ -237,7 +241,6 @@ extension AXTabButton {
     func setTrackingArea() {
         let options: NSTrackingArea.Options = [
             .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
-            .enabledDuringMouseDrag,
         ]
         trackingArea = NSTrackingArea.init(
             rect: self.bounds, options: options, owner: self, userInfo: nil)
@@ -245,6 +248,8 @@ extension AXTabButton {
     }
 
     override func mouseDown(with event: NSEvent) {
+        initialMouseDownLocation = event.locationInWindow
+
         if event.clickCount == 1 {
             self.switchTab()
             self.isSelected = true
@@ -279,6 +284,79 @@ extension AXTabButton {
         // Show the context menu at the converted location relative to the button
         contextMenu.popUp(positioning: nil, at: locationInButton, in: self)
     }
+}
+
+// MARK: - Drag and Drop
+extension AXTabButton: NSDraggingSource, NSPasteboardWriting {
+    // Define drag operations
+    func draggingSession(
+        _ session: NSDraggingSession,
+        sourceOperationMaskFor context: NSDraggingContext
+    ) -> NSDragOperation {
+        return .move
+    }
+
+    // Provide writable types for the pasteboard
+    func writableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard
+        .PasteboardType]
+    {
+        return [.axTabButton]
+    }
+
+    // Provide the pasteboard property list (button.tag)
+    func pasteboardPropertyList(forType type: NSPasteboard.PasteboardType)
+        -> Any?
+    {
+        guard type == .axTabButton else { return nil }
+        return "\(self.tag)"  // Send tag as a string
+    }
+
+    // Start a dragging session when the mouse is dragged
+    override func mouseDragged(with event: NSEvent) {
+        guard let initialLocation = initialMouseDownLocation else { return }
+
+        // Calculate the distance moved
+        let currentLocation = event.locationInWindow
+        let distance = hypot(
+            currentLocation.x - initialLocation.x,
+            currentLocation.y - initialLocation.y)
+
+        guard distance > 5.0 else { return }
+
+        let draggingItem = NSDraggingItem(pasteboardWriter: self)
+
+        // Define the item's image for the drag session
+        let draggingFrame = self.bounds
+        draggingItem.setDraggingFrame(draggingFrame, contents: self.toImage())
+
+        // Start the dragging session
+        self.beginDraggingSession(
+            with: [draggingItem], event: event, source: self)
+
+        self.isHidden = true
+    }
+
+    // Helper: Create a snapshot of the button for the dragging image
+    func toImage() -> NSImage? {
+        guard
+            let bitmapImageRepresentation =
+                self.bitmapImageRepForCachingDisplay(in: bounds)
+        else {
+            return nil
+        }
+        bitmapImageRepresentation.size = bounds.size
+        self.cacheDisplay(in: bounds, to: bitmapImageRepresentation)
+
+        let image = NSImage(size: bounds.size)
+        image.addRepresentation(bitmapImageRepresentation)
+
+        return image
+    }
+}
+
+extension NSPasteboard.PasteboardType {
+    static let axTabButton = NSPasteboard.PasteboardType(
+        "com.ayaamx.AXMalvon.tab")
 }
 
 // MARK: - Close Button

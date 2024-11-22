@@ -45,7 +45,7 @@
 /* Begin PBXFileReference section */
 		ED39076D2CF0235C005D791F /* wBlock.mlx */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = wBlock.mlx; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED3AEFE22CDAED2F002AE6CC /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		ED3BA1482CE11E480094F6E9 /* 1TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = 1TODO.md; sourceTree = "<group>"; };
+		ED3BA1482CE11E480094F6E9 /* Log.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Log.md; sourceTree = "<group>"; };
 		ED78ED092CEFFCB300B12142 /* WebExtensionKit.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = WebExtensionKit.xpc; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -157,7 +157,7 @@
 			children = (
 				ED3907712CF02376005D791F /* wBlock */,
 				ED3907262CEFFF86005D791F /* Common */,
-				ED3BA1482CE11E480094F6E9 /* 1TODO.md */,
+				ED3BA1482CE11E480094F6E9 /* Log.md */,
 				ED3AEFE42CDAED2F002AE6CC /* AXMalvon */,
 				ED78ED0A2CEFFCB300B12142 /* WebExtensionKit */,
 				ED3AEFE32CDAED2F002AE6CC /* Products */,

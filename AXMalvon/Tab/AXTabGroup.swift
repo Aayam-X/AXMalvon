@@ -3,6 +3,7 @@
 //  AXTabSystem
 //
 //  Created by Ashwin Paudel on 2024-11-14.
+//  Copyright © 2022-2024 Aayam(X). All rights reserved.
 //
 
 import AppKit

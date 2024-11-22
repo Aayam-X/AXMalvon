@@ -3,6 +3,7 @@
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2024-11-05.
+//  Copyright © 2022-2024 Aayam(X). All rights reserved.
 //
 
 import AppKit
@@ -83,8 +84,6 @@ class AXWebContainerView: NSView {
 
     func updateView(webView: AXWebView) {
         currentWebView?.removeFromSuperview()
-        currentWebView?.uiDelegate = nil
-        currentWebView?.navigationDelegate = nil
 
         self.currentWebView = webView
         self.websiteTitleLabel.stringValue = webView.title ?? "Untitled Page"

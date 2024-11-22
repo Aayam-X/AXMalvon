@@ -3,6 +3,7 @@
 //  AXMalvon
 //
 //  Created by Baba Paudel on 2024-11-10.
+//  Copyright © 2022-2024 Aayam(X). All rights reserved.
 //
 
 import Cocoa
@@ -92,9 +93,6 @@ class AXGestureView: NSView {
     override func scrollWheel(with event: NSEvent) {
         let x = event.deltaX
         let y = event.deltaY
-
-        // Early return for small delta values or if the scroll event is finished
-        guard abs(x) > 0.5 || abs(y) > 0.5, !scrollEventFinished else { return }
 
         // Update scroll event phase state
         switch event.phase {
