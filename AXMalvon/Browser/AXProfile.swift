@@ -63,7 +63,7 @@ class AXProfile {
     }
 
     func enableContentBlockers() {
-        let extensionLoader = AXExtensionsLoader.shared
+        let extensionLoader = AX_wBlockExtension()
 
         // Simple Filter
         extensionLoader.getContentBlockerURLPath { blockerListURL in

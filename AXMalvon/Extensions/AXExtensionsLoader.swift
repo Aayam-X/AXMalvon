@@ -11,16 +11,8 @@ import SwiftUI
 private let serviceName = "com.ayaamx.AXMalvon.WebExtensionKit"
 
 class AXExtensionsLoader {
-    private var extensionBundlePath: String
-    private var service: WebExtensionKitProtocol?
-
-    // FIXME: Avoid using a `shared` variable
-    // Try creating an ExtensionsManager class
-    static let shared = AXExtensionsLoader(
-        extensionBundlePath: Bundle.main.resourceURL!.appendingPathComponent(
-            "wBlock.mlx"
-        ).absoluteString.replacingOccurrences(of: "file://", with: "")
-    )
+    internal var extensionBundlePath: String
+    internal var service: WebExtensionKitProtocol?
 
     init(extensionBundlePath: String) {
         self.extensionBundlePath = extensionBundlePath
@@ -104,4 +96,53 @@ class AXExtensionsLoader {
     //            reply(nil)
     //        }
     //    }
+}
+
+// Try creating an ExtensionsManager class as a bonus :)
+class AX_wBlockExtension: AXExtensionsLoader {
+    init() {
+        let fileURL = AX_wBlockExtension.fileURL
+
+        // Check if bundle hasn't moved
+        // FIXME: Instead download it from a repository rather than copying to bundle.
+        if !FileManager.default.fileExists(atPath: fileURL.absoluteString) {
+            let wBlockBundle = Bundle.main.resourceURL!.appendingPathComponent(
+                "wBlock.mlx")
+
+            try? FileManager.default.moveItem(at: wBlockBundle, to: fileURL)
+            try? FileManager.default.removeItem(at: wBlockBundle)
+        }
+
+        super.init(extensionBundlePath: fileURL.path(percentEncoded: false))
+    }
+
+    override func getContentBlockerURLPath(completion: @escaping (URL?) -> Void)
+    {
+        print("PATH: \(extensionBundlePath)")
+        service?.loadContentBlocker(
+            at: extensionBundlePath,
+            with: { contentBlockerJSONPath in
+                completion(contentBlockerJSONPath)
+            })
+    }
+
+    class var fileURL: URL {
+        let fileManager = FileManager.default
+        let appSupportDirectory = fileManager.urls(
+            for: .applicationSupportDirectory, in: .userDomainMask
+        ).first!
+
+        let directoryURL = appSupportDirectory.appendingPathComponent(
+            "Malvon", isDirectory: true)
+
+        // Ensure the directory exists
+        if !fileManager.fileExists(atPath: directoryURL.path) {
+            try? fileManager.createDirectory(
+                at: directoryURL, withIntermediateDirectories: true,
+                attributes: nil)
+        }
+
+        return directoryURL.appending(path: "wBlock.mlx")
+    }
+
 }
