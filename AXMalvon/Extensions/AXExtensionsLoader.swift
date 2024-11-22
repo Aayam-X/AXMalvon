@@ -12,7 +12,7 @@ class AXExtensionsLoader {
     static let shared = AXExtensionsLoader(
         extensionBundlePath: Bundle.main.resourceURL!.appendingPathComponent(
             "wBlock.mlx"
-        ).absoluteString
+        ).absoluteString.replacingOccurrences(of: "file://", with: "")
     )
 
     private var service: WebExtensionKitProtocol?
