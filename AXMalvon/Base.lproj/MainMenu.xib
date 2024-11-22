@@ -199,7 +199,11 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Find" id="G7O-yw-Q3l">
                                     <items>
-                                        <menuItem title="Find…" tag="1" keyEquivalent="f" id="bQl-nq-gFH"/>
+                                        <menuItem title="Find…" tag="1" keyEquivalent="f" id="bQl-nq-gFH">
+                                            <connections>
+                                                <action selector="find:" target="-1" id="UQm-X2-87T"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="Find and Replace…" tag="12" keyEquivalent="f" id="inA-M0-j7r">
                                             <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
                                             <connections>

@@ -91,7 +91,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
 
     // MARK: Window Events
     func windowWillEnterFullScreen(_ notification: Notification) {
-        sidebarView.gestureView.tabGroupInfoViewLeftConstraint?.constant = 0
+        sidebarView.gestureView.tabGroupInfoViewLeftConstraint?.constant = 5
     }
 
     func windowWillExitFullScreen(_ notification: Notification) {
@@ -325,6 +325,10 @@ extension AXWindow: AXSidebarPopoverViewDelegate {
 
 // MARK: - Menu Bar Item Actions
 extension AXWindow {
+    @IBAction func find(_ sender: Any) {
+        containerView.webViewPerformSearch()
+    }
+
     @IBAction func backWebpage(_ sender: Any) {
         containerView.currentWebView?.goBack()
     }

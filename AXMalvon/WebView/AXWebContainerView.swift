@@ -34,7 +34,7 @@ class AXWebContainerView: NSView {
     var websiteTitleLabel: NSTextField = {
         let title = NSTextField()
         title.isEditable = false
-        title.alignment = .left
+        title.alignment = .center
         title.isBordered = false
         title.usesSingleLineMode = true
         title.drawsBackground = false
@@ -54,9 +54,16 @@ class AXWebContainerView: NSView {
         websiteTitleLabel.topAnchor.constraint(
             equalTo: topAnchor, constant: -0.5
         ).isActive = true
-        websiteTitleLabel.centerXAnchor.constraint(equalTo: centerXAnchor)
-            .isActive = true
+        websiteTitleLabel.leftAnchor.constraint(
+            equalTo: leftAnchor, constant: 15
+        )
+        .isActive = true
+        websiteTitleLabel.rightAnchor.constraint(
+            equalTo: rightAnchor, constant: -15
+        )
+        .isActive = true
         websiteTitleLabel.stringValue = "Empty Window"
+        websiteTitleLabel.delegate = self
 
         splitView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(splitView)
@@ -157,6 +164,49 @@ class AXWebContainerView: NSView {
         addTrackingArea(sidebarTrackingArea)
     }
 
+}
+
+// MARK: - Page Find Functions
+extension AXWebContainerView: NSTextFieldDelegate {
+    func webViewPerformSearch() {
+        self.websiteTitleLabel.stringValue = "Find in Page..."
+        self.websiteTitleLabel.placeholderString = "Find in Page..."
+        self.websiteTitleLabel.isEditable = true
+        websiteTitleLabel.alphaValue = 0.8
+
+        window?.makeFirstResponder(websiteTitleLabel)
+    }
+
+    func webPageFindTextFieldDidLoseFocus() {
+        self.websiteTitleLabel.isEditable = false
+        websiteTitleLabel.alphaValue = 0.3
+        self.websiteTitleLabel.stringValue =
+            currentWebView?.title ?? "Empty Window"
+    }
+
+    func controlTextDidEndEditing(_ obj: Notification) {
+        guard let currentWebView else { return }
+
+        Task {
+            let _ = try? await currentWebView.find(
+                websiteTitleLabel.stringValue)
+        }
+    }
+
+    func control(
+        _ control: NSControl, textShouldBeginEditing fieldEditor: NSText
+    ) -> Bool {
+        // To detect when the text field loses focus
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) {
+            [self] timer in
+            if websiteTitleLabel.currentEditor() == nil {
+                timer.invalidate()
+                webPageFindTextFieldDidLoseFocus()
+            }
+        }
+
+        return true
+    }
 }
 
 // MARK: - Web View Functions
