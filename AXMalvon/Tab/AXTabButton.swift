@@ -199,7 +199,7 @@ extension AXTabButton {
     }
 }
 
-// MARK: WebView Functions
+// MARK: Web View Functions
 extension AXTabButton {
     public func stopObserving() {
         titleObserver?.invalidate()
@@ -249,14 +249,9 @@ extension AXTabButton {
             self.switchTab()
             self.isSelected = true
         } else if event.clickCount == 2 {
-            // Edit the title.
-            print("Double click")
-            //
-            //            userDoubleClicked = true
-            //            titleView.isEditable = true
-            //            titleView.placeholderString = titleView.stringValue
-            //            window?.makeFirstResponder(titleView)
+            // Double click: Allow User to Edit the Title
         }
+
         self.layer?.backgroundColor = selectedColor.cgColor
     }
 
@@ -273,19 +268,6 @@ extension AXTabButton {
         titleViewRightAnchor?.constant = 20
         closeButton.isHidden = true
         self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
-
-        //        if userDoubleClicked {
-        //            if titleView.stringValue.isEmpty || titleView.stringValue == titleView.placeholderString {
-        //                hasCustomTitle = false
-        //                titleView.stringValue = webTitle
-        //            } else {
-        //                hasCustomTitle = true
-        //            }
-        //
-        //            titleView.currentEditor()?.selectedRange = .init(location: -1, length: 0)
-        //            titleView.isEditable = false
-        //            userDoubleClicked = false
-        //        }
     }
 
     override func rightMouseDown(with event: NSEvent) {

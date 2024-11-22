@@ -35,19 +35,21 @@ struct wBlockView: View {
     }
 
     @objc public func blockerListPath() -> URL? {
-        guard let bundle = Bundle(identifier: "com.ayaamx.AXMalvon.wBlock") else { return nil }
-        
-        let blockerList = bundle.url(forResource: "blockerList", withExtension: "json")
-        
+        guard let bundle = Bundle(identifier: "com.ayaamx.AXMalvon.wBlock")
+        else { return nil }
+
+        let blockerList = bundle.url(
+            forResource: "blockerList", withExtension: "json")
+
         return blockerList
-// Download if bundle doesn't exist
-//        if let bundleURL = Bundle(identifier: "com.ayaamx.AXMalvon.wBlock")?
-//            .url(forResource: "blockerList", withExtension: "json")
-//        {
-//            return bundleURL
-//        }
-//        // FIXME: Download the file from https://raw.githubusercontent.com/ashp0/AdBlockList/refs/heads/main/blockerList.json
-//
-//        return nil
+        // Download if bundle doesn't exist
+        //        if let bundleURL = Bundle(identifier: "com.ayaamx.AXMalvon.wBlock")?
+        //            .url(forResource: "blockerList", withExtension: "json")
+        //        {
+        //            return bundleURL
+        //        }
+        //        // FIXME: Download the file from https://raw.githubusercontent.com/ashp0/AdBlockList/refs/heads/main/blockerList.json
+        //
+        //        return nil
     }
 }

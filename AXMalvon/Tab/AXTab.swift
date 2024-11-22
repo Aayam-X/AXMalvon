@@ -16,13 +16,12 @@ class AXTab: Codable {
     weak var _webView: AXWebView?
 
     var webView: AXWebView {
-        // Return the existing `_webView` if it's already initialized
         if let existingWebView = _webView {
             return existingWebView
         } else {
             // `_webView` is nil, so create a new instance
-            // When the user deactivates a tab, a new webview needs to be created
-            //let newWebView = AXWebView(frame: .zero, configuration: webConfiguration!)
+            // FIXME: When the user deactivates a tab, a new webview needs to be created
+            // The configuration must be set when deactivating a tab.
             let newWebView = AXWebView(
                 frame: .zero, configuration: webConfiguration!)
             if let url = url {

@@ -7,35 +7,6 @@
 
 import Cocoa
 
-class OverlayView: NSView {
-    init(frame: NSRect, color: NSColor = .lightGray) {
-        super.init(frame: frame)
-
-        self.wantsLayer = true
-        if let layer = self.layer {
-            layer.backgroundColor = color.cgColor
-            layer.cornerRadius = frame.width / 2
-            layer.masksToBounds = true
-            layer.borderColor = NSColor.darkGray.cgColor
-            layer.borderWidth = 1.0
-        }
-        self.alphaValue = 1.0  // Initially hidden
-
-        let trackingArea = NSTrackingArea(
-            rect: self.bounds,
-            options: [.mouseEnteredAndExited, .activeInKeyWindow],
-            owner: self,
-            userInfo: nil
-        )
-
-        self.addTrackingArea(trackingArea)
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-
 class AXTrafficLightOverlayManager {
     var window: AXWindow
     private var overlays: [OverlayView] = []
@@ -96,5 +67,34 @@ class AXTrafficLightOverlayManager {
             button.addSubview(
                 overlays[index], positioned: .above, relativeTo: nil)
         }
+    }
+}
+
+private class OverlayView: NSView {
+    init(frame: NSRect, color: NSColor = .lightGray) {
+        super.init(frame: frame)
+
+        self.wantsLayer = true
+        if let layer = self.layer {
+            layer.backgroundColor = color.cgColor
+            layer.cornerRadius = frame.width / 2
+            layer.masksToBounds = true
+            layer.borderColor = NSColor.darkGray.cgColor
+            layer.borderWidth = 1.0
+        }
+        self.alphaValue = 1.0  // Initially hidden
+
+        let trackingArea = NSTrackingArea(
+            rect: self.bounds,
+            options: [.mouseEnteredAndExited, .activeInKeyWindow],
+            owner: self,
+            userInfo: nil
+        )
+
+        self.addTrackingArea(trackingArea)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }

@@ -12,6 +12,7 @@ import Carbon.HIToolbox
 class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     private var hasDrawn = false
     unowned var searchBarWindow: AXSearchBarWindow
+
     var newTabMode = true
     private var skipSuggestions = false
 
@@ -48,10 +49,6 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     private var suggestions: [AXSearchFieldSuggestItem?] = Array(
         repeating: nil, count: 5)
 
-    deinit {
-        suggestions.removeAll()
-    }
-
     init(searchBarWindow: AXSearchBarWindow) {
         self.searchBarWindow = searchBarWindow
         super.init(frame: .zero)
@@ -59,6 +56,10 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    deinit {
+        suggestions.removeAll()
     }
 
     override func viewWillDraw() {
@@ -114,6 +115,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         highlightedSuggestion = 0
     }
 
+    // MARK: Search Actions
     private func searchEnter(_ url: URL) {
         if newTabMode {
             searchBarWindow.searchBarDelegate?.searchBarCreatesNewTab(with: url)
@@ -135,6 +137,42 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             )!)
         searchEnter(url)
         searchBarWindow.close()
+    }
+
+    func searchFieldAction() {
+        searchBarWindow.searchBarDelegate?.searchBarDidDisappear()
+
+        guard !searchField.stringValue.isEmpty else {
+            searchBarWindow.close()
+            return
+        }
+
+        let value = searchField.stringValue
+
+        // Section 1: Handle File URLs
+        if value.starts(with: "malvon?") {
+            searchActionMalvonURL(value)
+        } else if value.starts(with: "file:///") {
+            searchActionFileURL(value)
+
+            /* Section 2: Handle Regular Search Terms */
+        } else if value.isValidURL() && !value.hasWhitespace() {
+            searchActionURL(value)
+        } else {
+            searchActionSearchTerm(value)
+        }
+
+        searchBarWindow.close()
+    }
+
+    // MARK: Suggestion Action
+    func controlTextDidChange(_ notification: Notification) {
+        if !skipSuggestions {
+            updateSuggestions()
+        } else {
+            skipSuggestions = false
+            suggestions.forEach { $0?.isHidden = true }
+        }
     }
 
     private func updateSuggestions() {
@@ -178,13 +216,14 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         }
     }
 
-    func controlTextDidChange(_ notification: Notification) {
-        if !skipSuggestions {
-            updateSuggestions()
-        } else {
-            skipSuggestions = false
-            suggestions.forEach { $0?.isHidden = true }
-        }
+    private func updateFieldEditor(
+        _ fieldEditor: NSText?, withSuggestion suggestion: String
+    ) {
+        let selection = NSRange(
+            location: fieldEditor?.selectedRange.location ?? 0,
+            length: suggestion.count)
+        fieldEditor?.string = suggestion
+        fieldEditor?.selectedRange = selection
     }
 
     func control(
@@ -230,56 +269,22 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         }
     }
 
-    private func updateFieldEditor(
-        _ fieldEditor: NSText?, withSuggestion suggestion: String
-    ) {
-        let selection = NSRange(
-            location: fieldEditor?.selectedRange.location ?? 0,
-            length: suggestion.count)
-        fieldEditor?.string = suggestion
-        fieldEditor?.selectedRange = selection
-    }
-
     func windowClosed() {
         searchField.stringValue = ""
         newTabMode = true
         suggestions.forEach { $0?.isHidden = true }
     }
 
-    func searchFieldAction() {
-        searchBarWindow.searchBarDelegate?.searchBarDidDisappear()
-
-        guard !searchField.stringValue.isEmpty else {
-            searchBarWindow.close()
-            return
-        }
-
-        let value = searchField.stringValue
-
-        // Section 1: Handle File URLs
-        if value.starts(with: "malvon?") {
-            searchActionMalvonURL(value)
-        } else if value.starts(with: "file:///") {
-            searchActionFileURL(value)
-
-            /* Section 2: Handle Regular Search Terms */
-        } else if value.isValidURL() && !value.hasWhitespace() {
-            searchActionURL(value)
-        } else {
-            searchActionSearchTerm(value)
-        }
-
-        searchBarWindow.close()
-    }
-
     /// URL: malvon?
     func searchActionMalvonURL(_ value: String) {
         // FIXME: File URL Implementation
+        /*
         if let resourceURL = Bundle.main.url(
             forResource: value.string(after: 7), withExtension: "html")
         {
             // appProperties.tabManager.createNewTab(fileURL: resourceURL)
         }
+         */
     }
 
     /// URL: file:///
@@ -314,6 +319,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     }
 }
 
+// MARK: Extensions
 private func fixURL(_ url: URL) -> URL {
     var newURL = ""
 

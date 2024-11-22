@@ -73,6 +73,7 @@ class AXTabBarView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: - Tab Functions
     func addTabButton(for tab: AXTab) {
         let button = AXTabButton(tab: tab)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -91,6 +92,15 @@ class AXTabBarView: NSView {
         delegate?.tabBarSwitchedTo(tabAt: newIndex)
     }
 
+    func removeTab(at: Int) {
+        let button = tabStackView.arrangedSubviews[at] as! AXTabButton
+
+        button.stopObserving()
+        button.removeFromSuperview()
+
+        updateIndicies(after: at)
+    }
+
     func addTabButton(for tab: AXTab, index: Int) {
         let button = AXTabButton(tab: tab)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -106,15 +116,6 @@ class AXTabBarView: NSView {
         button.startObserving()
     }
 
-    func removeTab(at: Int) {
-        let button = tabStackView.arrangedSubviews[at] as! AXTabButton
-
-        button.stopObserving()
-        button.removeFromSuperview()
-
-        updateIndicies(after: at)
-    }
-
     func updateIndicies(after: Int) {
         for (index, button) in tabStackView.arrangedSubviews.enumerated()
             .dropFirst(after)
@@ -125,17 +126,6 @@ class AXTabBarView: NSView {
         }
 
         updateSelectedItemIndex(after: after)
-    }
-
-    private func addButtonToTabView(_ button: NSView) {
-        tabStackView.addArrangedSubview(button)
-
-        NSLayoutConstraint.activate([
-            button.leadingAnchor.constraint(
-                equalTo: tabStackView.leadingAnchor, constant: 5),
-            button.trailingAnchor.constraint(
-                equalTo: tabStackView.trailingAnchor, constant: -5),
-        ])
     }
 
     func updateTabSelection(from: Int, to: Int) {
@@ -151,6 +141,17 @@ class AXTabBarView: NSView {
         newButton.isSelected = true
 
         delegate?.tabBarSwitchedTo(tabAt: to)
+    }
+
+    private func addButtonToTabView(_ button: NSView) {
+        tabStackView.addArrangedSubview(button)
+
+        NSLayoutConstraint.activate([
+            button.leadingAnchor.constraint(
+                equalTo: tabStackView.leadingAnchor, constant: 5),
+            button.trailingAnchor.constraint(
+                equalTo: tabStackView.trailingAnchor, constant: -5),
+        ])
     }
 }
 

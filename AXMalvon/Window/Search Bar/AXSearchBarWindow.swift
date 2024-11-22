@@ -53,6 +53,7 @@ class AXSearchBarWindow: NSPanel, NSWindowDelegate {
         removeMouseEventMonitor()
     }
 
+    // MARK: - Show/Hide Functions
     func show() {
         guard !isDisplayed else { return }
         isDisplayed = true
@@ -106,6 +107,7 @@ class AXSearchBarWindow: NSPanel, NSWindowDelegate {
         super.close()
     }
 
+    // MARK: - Mouse Monitor
     private func observer() {
         localMouseDownEventMonitor = NSEvent.addLocalMonitorForEvents(
             matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]) {

@@ -14,25 +14,20 @@ class AXProfile {
     var tabGroups: [AXTabGroup] = []
     var currentTabGroup: AXTabGroup
 
-    // Tab Group related functions
     var currentTabGroupIndex = 0 {
         didSet {
             currentTabGroup = tabGroups[currentTabGroupIndex]
         }
     }
 
-    private let fileName: String
-
     init(name: String) {
         self.name = name
-        fileName = "TabGroups-\(name).json"
         self.currentTabGroup = .init(name: "Default")
 
         // WebView configuration
-        self.configuration = WKWebViewConfiguration()
-
         let defaults = UserDefaults.standard
 
+        // Search for config in UserDefaults; if not create a new one.
         if let configID = defaults.string(forKey: "configurationID-\(name)") {
             let uuid = UUID(uuidString: configID)!
             self.configuration = WKWebViewConfiguration()
@@ -46,6 +41,8 @@ class AXProfile {
         }
 
         #if !DEBUG
+            // Debug and Release have different tabs
+            // This would cause a crash
             self.currentTabGroupIndex = defaults.integer(
                 forKey: "\(name)-selectedTabGroup")
         #endif
@@ -53,7 +50,16 @@ class AXProfile {
         addOtherConfigs()
 
         loadTabGroups()
-        print(fileURL)
+    }
+
+    // MARK: - Configuration Features
+    func addOtherConfigs() {
+        for config in AX_DEFAULT_WEBVIEW_CONFIGURATIONS {
+            configuration.preferences.setValue(true, forKey: config)
+        }
+
+        configuration.preferences.setValue(
+            false, forKey: "backspaceKeyNavigationEnabled")
     }
 
     func enableContentBlockers() {
@@ -70,9 +76,9 @@ class AXProfile {
     }
 
     func enableYouTubeAdBlocker() {
-
         let userScript = WKUserScript(
-            source: script, injectionTime: .atDocumentStart,
+            source: AX_DEFAULT_YOUTUBE_BLOCKER_SCRIPT,
+            injectionTime: .atDocumentStart,
             forMainFrameOnly: true)
         configuration.userContentController.addUserScript(userScript)
     }
@@ -94,24 +100,12 @@ class AXProfile {
         WKContentRuleListStore.default().compileContentRuleList(
             forIdentifier: "ContentBlocker",
             encodedContentRuleList: blockerListString
-        ) { [weak self] contentRuleList, error in
+        ) { contentRuleList, error in
+            guard let contentRuleList else { return }
             // Switch back to the main thread for UI updates
-            DispatchQueue.main.async {
-                if let error = error {
-                    print(
-                        "Failed to compile content rule list: \(error)"
-                    )
-                    return
-                }
-
-                guard let contentRuleList = contentRuleList,
-                    let self = self
-                else { return }
-
-                // Apply the content rule list to the web view configuration
-                self.configuration.userContentController.add(
-                    contentRuleList)
-            }
+            // Apply the content rule list to the web view configuration
+            self.configuration.userContentController.add(
+                contentRuleList)
         }
     }
 
@@ -137,12 +131,14 @@ class AXProfile {
                 attributes: nil)
         }
 
-        return directoryURL.appendingPathComponent(fileName)
+        return directoryURL.appendingPathComponent("TabGroups-\(name).json")
     }
 
     func saveTabGroups() {
-        UserDefaults.standard.set(
-            currentTabGroupIndex, forKey: "\(name)-selectedTabGroup")
+        #if !DEBUG
+            UserDefaults.standard.set(
+                currentTabGroupIndex, forKey: "\(name)-selectedTabGroup")
+        #endif
 
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
@@ -166,15 +162,6 @@ class AXProfile {
             tabGroups = [AXTabGroup(name: "Untitled Tab Group")]
         }
     }
-
-    func addOtherConfigs() {
-        for config in AX_DEFAULT_WEBVIEW_CONFIGURATIONS {
-            configuration.preferences.setValue(true, forKey: config)
-        }
-
-        configuration.preferences.setValue(
-            false, forKey: "backspaceKeyNavigationEnabled")
-    }
 }
 
 let AX_DEFAULT_WEBVIEW_CONFIGURATIONS = [
@@ -191,6 +178,6 @@ let AX_DEFAULT_WEBVIEW_CONFIGURATIONS = [
     "appNapEnabled",
 ]
 
-let script = """
+let AX_DEFAULT_YOUTUBE_BLOCKER_SCRIPT = """
     (function(){let ytInitialPlayerResponse=null;Object.defineProperty(window,"ytInitialPlayerResponse",{get:()=>ytInitialPlayerResponse,set:(data)=>{if(data)data.adPlacements=[];ytInitialPlayerResponse=data},configurable:true})})();(function(){const originalFetch=window.fetch;window.fetch=async(...args)=>{const response=await originalFetch(...args);if(response.url.includes("/youtubei/v1/player")){const originalText=response.text.bind(response);response.text=()=>originalText().then((data)=>data.replace(/"adPlacements"/g,'"odPlacements"'))}return response}})();(function(){const skipAds=()=>{const skipButton=document.querySelector(".videoAdUiSkipButton, .ytp-ad-skip-button");if(skipButton)skipButton.click();const adOverlay=document.querySelector(".ad-showing");if(adOverlay){const video=document.querySelector("video");if(video)video.playbackRate=10}};const removeInlineAds=()=>{const adContainer=document.querySelector("#player-ads");if(adContainer)adContainer.remove()};const adBlockerInterval=setInterval(()=>{skipAds();removeInlineAds()},300);window.addEventListener("unload",()=>clearInterval(adBlockerInterval))})();
     """

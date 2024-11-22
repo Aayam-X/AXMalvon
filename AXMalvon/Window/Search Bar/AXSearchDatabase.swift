@@ -8,6 +8,7 @@
 import Foundation
 import SQLite3
 
+// FIXME: Convert this to Core Data rather than SQLite
 class AXSearchDatabase {
     private var db: OpaquePointer?
     static var shared = AXSearchDatabase()

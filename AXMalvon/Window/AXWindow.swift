@@ -11,15 +11,16 @@ import WebKit
 
 class AXWindow: NSWindow, NSWindowDelegate {
     lazy var trafficLightManager = AXTrafficLightOverlayManager(window: self)
+    lazy var searchBar = AXSearchBarWindow(parentWindow1: self)
     let splitView = AXQuattroProgressSplitView()
     let containerView = AXWebContainerView()
     let sidebarView = AXSidebarView()
 
     var hiddenSidebarView = false
 
-    lazy var searchBar = AXSearchBarWindow(parentWindow1: self)
-
     var profiles: [AXProfile] = [.init(name: "Default"), .init(name: "School")]
+
+    var defaultProfile: AXProfile
     var profileIndex = 0 {
         didSet {
             defaultProfile = profiles[profileIndex]
@@ -27,8 +28,6 @@ class AXWindow: NSWindow, NSWindowDelegate {
                 didSelectTabGroup: defaultProfile.currentTabGroupIndex)
         }
     }
-
-    var defaultProfile: AXProfile
 
     var currentConfiguration: WKWebViewConfiguration {
         defaultProfile.configuration
@@ -62,53 +61,41 @@ class AXWindow: NSWindow, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        self.animationBehavior = .documentWindow
-        // Window Configurations
-        self.titlebarAppearsTransparent = true
-        trafficLightManager.updateTrafficLights()
-        self.delegate = self
-        backgroundColor = .textBackgroundColor  // NSWindow has hidden NSVisualEffectView, to remove we must use this code
 
-        // Other Configurations
+        configureWindow()
+        setupComponents()
+    }
+
+    private func configureWindow() {
+        self.animationBehavior = .documentWindow
+        self.titlebarAppearsTransparent = true
+        self.backgroundColor = .textBackgroundColor
+        self.delegate = self
+    }
+
+    private func setupComponents() {
         splitView.addArrangedSubview(sidebarView)
         splitView.addArrangedSubview(containerView)
-        sidebarView.delegate = self
-        sidebarView.gestureView.delegate = self
-        sidebarView.gestureView.popoverView.delegate = self
-        containerView.delegate = self
-
         self.contentView = splitView
         sidebarView.frame.size.width = 180
 
+        sidebarView.delegate = self
+        containerView.delegate = self
         searchBar.searchBarDelegate = self
+
+        trafficLightManager.updateTrafficLights()
         currentTabGroupIndex = 0
     }
 
-    func windowDidEndLiveResize(_ notification: Notification) {
-        let frameAsString = NSStringFromRect(self.frame)
-        UserDefaults.standard.set(frameAsString, forKey: "windowFrame")
-    }
-
-    func toggleTabSidebar() {
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.25  // Adjust duration as needed
-            context.allowsImplicitAnimation = true
-
-            if splitView.subviews.count == 2 {
-                hiddenSidebarView = true
-                splitView.removeArrangedSubview(sidebarView)
-                trafficLightManager.hideTrafficLights(true)
-            } else {
-                hiddenSidebarView = false
-                splitView.insertArrangedSubview(sidebarView, at: 0)
-                trafficLightManager.hideTrafficLights(false)
-            }
-
-            splitView.layoutSubtreeIfNeeded()
-        }
-    }
-
     // MARK: Window Events
+    func windowWillEnterFullScreen(_ notification: Notification) {
+        sidebarView.gestureView.tabGroupInfoViewLeftConstraint?.constant = 0
+    }
+
+    func windowWillExitFullScreen(_ notification: Notification) {
+        sidebarView.gestureView.tabGroupInfoViewLeftConstraint?.constant = 80
+    }
+
     func windowWillClose(_ notification: Notification) {
         defaultProfile.saveTabGroups()
 
@@ -122,6 +109,11 @@ class AXWindow: NSWindow, NSWindowDelegate {
 
     func windowDidResize(_ notification: Notification) {
         trafficLightManager.updateTrafficLights()
+    }
+
+    func windowDidEndLiveResize(_ notification: Notification) {
+        let frameAsString = NSStringFromRect(self.frame)
+        UserDefaults.standard.set(frameAsString, forKey: "windowFrame")
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -171,6 +163,161 @@ class AXWindow: NSWindow, NSWindowDelegate {
             return NSMakeRect(
                 100, 100, screenFrame.width / 2, screenFrame.height / 2)
         }
+    }
+}
+
+// MARK: - Search Bar Delegate
+extension AXWindow: AXSearchBarWindowDelegate {
+    func searchBarDidAppear() {
+        // Change contentView alpha value to 0.5
+        splitView.alphaValue = 0.5
+    }
+
+    func searchBarDidDisappear() {
+        // Change contentView alpha value to 1.0
+        splitView.alphaValue = 1.0
+    }
+
+    func searchBarCreatesNewTab(with url: URL) {
+        let webView = AXWebView(
+            frame: .zero, configuration: currentConfiguration)
+        webView.load(URLRequest(url: url))
+
+        currentTabGroup.addTab(.init(title: "Google", webView: webView))
+    }
+
+    func searchBarUpdatesCurrentTab(with url: URL) {
+        // Change current webview's url to new url
+        currentTabGroup.tabs[currentTabGroup.selectedIndex].webView.load(
+            URLRequest(url: url))
+    }
+
+    func searchBarCurrentWebsiteURL() -> String {
+        // Returns the current web view's url
+        self.containerView.currentWebView?.url?.absoluteString ?? ""
+    }
+}
+
+// MARK: - WebContainer View Delegate
+extension AXWindow: AXWebContainerViewDelegate {
+    func webContainerFoundFavicon(image: NSImage?) {
+        sidebarView.faviconDetected(image: image)
+    }
+
+    func webContainerViewRequestsSidebar() -> AXSidebarView {
+        return sidebarView
+    }
+
+    func webViewContainerUserHoveredForSidebar() -> AXSidebarView {
+        return sidebarView
+    }
+
+    func webViewCreateWebView(config: WKWebViewConfiguration) -> WKWebView {
+        let newWebView = AXWebView(frame: .zero, configuration: config)
+        let tab = AXTab(
+            title: newWebView.title ?? "Untitled Popup", webView: newWebView)
+
+        currentTabGroup.addTab(tab)
+
+        return newWebView
+    }
+
+    func webViewStartedLoading(with progress: Double) {
+        splitView.beginAnimation(with: progress)
+    }
+
+    func webViewDidFinishLoading() {
+        splitView.finishAnimation()
+    }
+}
+
+// MARK: - Sidebar View Delegate
+// TODO: - Move this code to the popover view
+extension AXWindow: AXSideBarViewDelegate {
+    func sidebarSwitchedTab(at: Int) {
+        guard let tabs = sidebarView.currentTabGroup?.tabs else { return }
+
+        if at == -1 {
+            containerView.removeAllWebViews()
+        } else {
+            containerView.updateView(webView: tabs[at].webView)
+        }
+    }
+
+    func sidebarViewactiveTitle(changed to: String) {
+        containerView.websiteTitleLabel.stringValue = to
+    }
+
+    func sidebarView(didSelectTabGroup tabGroupAt: Int) {
+        self.currentTabGroupIndex = tabGroupAt
+        sidebarView.changeShownTabBarGroup(currentTabGroup)
+
+        print("SELECTED NEW TAB GROUP AT \(tabGroupAt)")
+    }
+
+    func toggleTabSidebar() {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.25  // Adjust duration as needed
+            context.allowsImplicitAnimation = true
+
+            if splitView.subviews.count == 2 {
+                hiddenSidebarView = true
+                splitView.removeArrangedSubview(sidebarView)
+                trafficLightManager.hideTrafficLights(true)
+            } else {
+                hiddenSidebarView = false
+                splitView.insertArrangedSubview(sidebarView, at: 0)
+                trafficLightManager.hideTrafficLights(false)
+            }
+
+            splitView.layoutSubtreeIfNeeded()
+        }
+    }
+}
+
+// MARK: - Gesture View Delegate
+extension AXWindow: AXGestureViewDelegate {
+    func gestureViewMouseDown() {
+        if hiddenSidebarView {
+            toggleTabSidebar()
+        }
+    }
+
+    func gestureView(didSwipe direction: AXGestureViewSwipeDirection!) {
+        switch direction {
+        case .backwards:
+            containerView.currentWebView?.goBack()
+        case .forwards:
+            containerView.currentWebView?.goForward()
+        case .reload:
+            containerView.currentWebView?.reload()
+        case .nothing, nil:
+            break
+        }
+    }
+}
+
+// MARK: - Popover View Delegate
+extension AXWindow: AXSidebarPopoverViewDelegate {
+    func didSwitchProfile(to index: Int) {
+        profileIndex = profileIndex == 1 ? 0 : 1
+    }
+
+    func popoverViewTabGroups() -> [AXTabGroup] {
+        return self.defaultProfile.tabGroups
+    }
+
+    func updatedTabGroupName(at: Int, to: String) {
+        tabGroups[at].name = to
+    }
+
+    func didSwitchTabGroup(to index: Int) {
+        self.sidebarView(didSelectTabGroup: index)
+    }
+
+    func didAddTabGroup(_ newGroup: AXTabGroup) {
+        // Switch to the new tab group
+        self.defaultProfile.tabGroups.append(newGroup)
     }
 }
 
@@ -314,141 +461,5 @@ extension AXWindow {
             // Switch to the last tab if the index is out of range
             currentTabGroup.switchTab(to: count - 1)
         }
-    }
-}
-
-// MARK: - Search Bar Delegate
-extension AXWindow: AXSearchBarWindowDelegate {
-    func searchBarDidAppear() {
-        // Change contentView alpha value to 0.5
-        splitView.alphaValue = 0.5
-    }
-
-    func searchBarDidDisappear() {
-        // Change contentView alpha value to 1.0
-        splitView.alphaValue = 1.0
-    }
-
-    func searchBarCreatesNewTab(with url: URL) {
-        let webView = AXWebView(
-            frame: .zero, configuration: currentConfiguration)
-        webView.load(URLRequest(url: url))
-
-        currentTabGroup.addTab(.init(title: "Google", webView: webView))
-    }
-
-    func searchBarUpdatesCurrentTab(with url: URL) {
-        // Change current webview's url to new url
-        currentTabGroup.tabs[currentTabGroup.selectedIndex].webView.load(
-            URLRequest(url: url))
-    }
-
-    func searchBarCurrentWebsiteURL() -> String {
-        // Returns the current web view's url
-        self.containerView.currentWebView?.url?.absoluteString ?? ""
-    }
-}
-
-// MARK: - WebContainer View Delegate
-extension AXWindow: AXWebContainerViewDelegate {
-    func webContainerFoundFavicon(image: NSImage?) {
-        sidebarView.faviconDetected(image: image)
-    }
-
-    func webContainerViewRequestsSidebar() -> AXSidebarView {
-        return sidebarView
-    }
-
-    func webViewContainerUserHoveredForSidebar() -> AXSidebarView {
-        return sidebarView
-    }
-
-    func webViewCreateWebView(config: WKWebViewConfiguration) -> WKWebView {
-        let newWebView = AXWebView(frame: .zero, configuration: config)
-        let tab = AXTab(
-            title: newWebView.title ?? "Untitled Popup", webView: newWebView)
-
-        currentTabGroup.addTab(tab)
-
-        return newWebView
-    }
-
-    func webViewStartedLoading(with progress: Double) {
-        splitView.beginAnimation(with: progress)
-    }
-
-    func webViewDidFinishLoading() {
-        splitView.finishAnimation()
-    }
-}
-
-// MARK: - Sidebar View Delegate
-// TODO: - Move this code to the popover view
-extension AXWindow: AXSideBarViewDelegate {
-    func sidebarSwitchedTab(at: Int) {
-        guard let tabs = sidebarView.currentTabGroup?.tabs else { return }
-
-        if at == -1 {
-            containerView.removeAllWebViews()
-        } else {
-            containerView.updateView(webView: tabs[at].webView)
-        }
-    }
-
-    func sidebarViewactiveTitle(changed to: String) {
-        containerView.websiteTitleLabel.stringValue = to
-    }
-
-    func sidebarView(didSelectTabGroup tabGroupAt: Int) {
-        self.currentTabGroupIndex = tabGroupAt
-        sidebarView.changeShownTabBarGroup(currentTabGroup)
-
-        print("SELECTED NEW TAB GROUP AT \(tabGroupAt)")
-    }
-}
-
-// MARK: - Gesture View Delegate
-extension AXWindow: AXGestureViewDelegate {
-    func gestureViewMouseDown() {
-        if hiddenSidebarView {
-            toggleTabSidebar()
-        }
-    }
-
-    func gestureView(didSwipe direction: AXGestureViewSwipeDirection!) {
-        switch direction {
-        case .backwards:
-            containerView.currentWebView?.goBack()
-        case .forwards:
-            containerView.currentWebView?.goForward()
-        case .reload:
-            containerView.currentWebView?.reload()
-        case .nothing, nil:
-            break
-        }
-    }
-}
-
-// MARK: - Popover View Delegate
-extension AXWindow: AXSidebarPopoverViewDelegate {
-    func didSwitchProfile(to index: Int) {
-        profileIndex = profileIndex == 1 ? 0 : 1
-    }
-
-    func popoverViewTabGroups() -> [AXTabGroup] {
-        return self.defaultProfile.tabGroups
-    }
-
-    func updatedTabGroupName(at: Int, to: String) {
-        tabGroups[at].name = to
-    }
-
-    func didSwitchTabGroup(to index: Int) {
-        self.sidebarView(didSelectTabGroup: index)
-    }
-
-    func didAddTabGroup(_ newGroup: AXTabGroup) {
-        // Switch to the new tab group
-        self.defaultProfile.tabGroups.append(newGroup)
     }
 }

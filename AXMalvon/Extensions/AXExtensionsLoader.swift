@@ -8,27 +8,31 @@
 import AppKit
 import SwiftUI
 
+private let serviceName = "com.ayaamx.AXMalvon.WebExtensionKit"
+
 class AXExtensionsLoader {
+    private var extensionBundlePath: String
+    private var service: WebExtensionKitProtocol?
+
+    // FIXME: Avoid using a `shared` variable
+    // Try creating an ExtensionsManager class
     static let shared = AXExtensionsLoader(
         extensionBundlePath: Bundle.main.resourceURL!.appendingPathComponent(
             "wBlock.mlx"
         ).absoluteString.replacingOccurrences(of: "file://", with: "")
     )
 
-    private var service: WebExtensionKitProtocol?
-    private var extensionBundlePath: String
-
     init(extensionBundlePath: String) {
         self.extensionBundlePath = extensionBundlePath
 
-        let serviceName = "com.ayaamx.AXMalvon.WebExtensionKit"
-
+        // Establish an XPC connection
         let connection = NSXPCConnection(serviceName: serviceName)
         connection.remoteObjectInterface = NSXPCInterface(
             with: WebExtensionKitProtocol.self)
 
         connection.resume()
 
+        // Create the proxy
         service =
             connection.remoteObjectProxyWithErrorHandler { error in
                 print("XPC Service Error: \(error.localizedDescription)")
@@ -36,6 +40,7 @@ class AXExtensionsLoader {
     }
 
     func getContentBlockerURLPath(completion: @escaping (URL?) -> Void) {
+        // Wrapper for the XPC proxy. Maybe this is not needed?
         service?.loadContentBlocker(
             at: extensionBundlePath,
             with: { contentBlockerJSONPath in
@@ -99,30 +104,4 @@ class AXExtensionsLoader {
     //            reply(nil)
     //        }
     //    }
-
-    func createXPCConnection() {
-        service?.performCalculation(
-            firstNumber: 20, secondNumber: 10,
-            with: { num in
-                print("XPC Number Result: \(num)")
-            })
-    }
-
-    func performCalculation(with message: XPCReceivedMessage) -> Encodable? {
-        guard let request = try? message.decode(as: CalculationRequest.self)
-        else { return nil }
-        return CalcuationResponse(
-            result: request.firstNumber + request.secondNumber)
-    }
-}
-
-// A codable type that contains two numbers to add together.
-struct CalculationRequest: Codable {
-    let firstNumber: Int
-    let secondNumber: Int
-}
-
-// A codable type that contains the result of the calculation.
-struct CalcuationResponse: Codable {
-    let result: Int
 }

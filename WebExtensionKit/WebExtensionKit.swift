@@ -41,14 +41,6 @@ class WebExtensionKit: NSObject, WebExtensionKitProtocol {
         reply(result)
     }
 
-    /// This implements the example protocol. Replace the body of this class with the implementation of this service's protocol.
-    @objc func performCalculation(
-        firstNumber: Int, secondNumber: Int, with reply: @escaping (Int) -> Void
-    ) {
-        let response = firstNumber + secondNumber
-        reply(response)
-    }
-
     private func logAndReply(_ message: String, reply: @escaping (URL?) -> Void)
     {
         print(message)
@@ -90,8 +82,4 @@ class WebExtensionKit: NSObject, WebExtensionKitProtocol {
     //
     //        reply(nil)
     //    }
-}
-
-@objc public protocol ProviderClassProtocol {
-    func createView() -> NSView
 }

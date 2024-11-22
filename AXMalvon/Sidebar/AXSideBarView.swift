@@ -16,10 +16,12 @@ protocol AXSideBarViewDelegate: AnyObject {
 class AXSidebarView: NSView {
     private var hasDrawn: Bool = false
     weak var delegate: AXSideBarViewDelegate?
+    var currentTabGroup: AXTabGroup?
 
     var gestureView = AXGestureView()
     private weak var tabBarView: AXTabBarView?
     private var visualEffectViewTopAnchor: NSLayoutConstraint?
+    var mouseExitedTrackingArea: NSTrackingArea!
 
     private lazy var visualEffectView: NSVisualEffectView = {
         let visualEffectView = NSVisualEffectView()
@@ -29,10 +31,6 @@ class AXSidebarView: NSView {
         visualEffectView.translatesAutoresizingMaskIntoConstraints = false
         return visualEffectView
     }()
-
-    var currentTabGroup: AXTabGroup?
-
-    var mouseExitedTrackingArea: NSTrackingArea!
 
     override var tag: Int {
         return 0x01
@@ -50,8 +48,6 @@ class AXSidebarView: NSView {
             options: [.activeAlways, .mouseEnteredAndExited], owner: self)
         addTrackingArea(mouseExitedTrackingArea)
 
-        //self.layer?.backgroundColor = NSColor.systemIndigo.withAlphaComponent(0.3).cgColor
-
         gestureView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(gestureView)
         NSLayoutConstraint.activate([
@@ -66,38 +62,7 @@ class AXSidebarView: NSView {
         }
     }
 
-    func setUpVisualEffectView() {
-        addSubview(visualEffectView)
-        self.visualEffectViewTopAnchor = visualEffectView.topAnchor.constraint(
-            equalTo: topAnchor, constant: 39)
-        self.visualEffectViewTopAnchor!.isActive = true
-
-        NSLayoutConstraint.activate([
-            visualEffectView.leftAnchor.constraint(equalTo: leftAnchor),
-            visualEffectView.rightAnchor.constraint(equalTo: rightAnchor),
-            visualEffectView.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
-
-        // Add a tint overlay
-        let tintView = NSView()
-        tintView.translatesAutoresizingMaskIntoConstraints = false
-        tintView.wantsLayer = true
-        tintView.layer?.backgroundColor =
-            NSColor.systemRed.withAlphaComponent(0.2).cgColor  // Adjust alpha as needed
-
-        // Add tint view on top of the visual effect view
-        visualEffectView.addSubview(tintView)
-        NSLayoutConstraint.activate([
-            tintView.leadingAnchor.constraint(
-                equalTo: visualEffectView.leadingAnchor),
-            tintView.trailingAnchor.constraint(
-                equalTo: visualEffectView.trailingAnchor),
-            tintView.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
-            tintView.bottomAnchor.constraint(
-                equalTo: visualEffectView.bottomAnchor),
-        ])
-    }
-
+    // MARK: - Tab Bar Functions
     func changeShownTabBarGroup(_ tabGroup: AXTabGroup) {
         currentTabGroup = tabGroup
 
@@ -139,6 +104,7 @@ class AXSidebarView: NSView {
         ])
     }
 
+    // MARK: - Mouse Functions
     override func mouseExited(with event: NSEvent) {
         guard let window = self.window as? AXWindow, window.hiddenSidebarView
         else { return }
@@ -168,6 +134,38 @@ class AXSidebarView: NSView {
         addTrackingArea(mouseExitedTrackingArea)
     }
 
+    func setUpVisualEffectView() {
+        addSubview(visualEffectView)
+        self.visualEffectViewTopAnchor = visualEffectView.topAnchor.constraint(
+            equalTo: topAnchor, constant: 39)
+        self.visualEffectViewTopAnchor!.isActive = true
+
+        NSLayoutConstraint.activate([
+            visualEffectView.leftAnchor.constraint(equalTo: leftAnchor),
+            visualEffectView.rightAnchor.constraint(equalTo: rightAnchor),
+            visualEffectView.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
+
+        // Add a tint overlay
+        let tintView = NSView()
+        tintView.translatesAutoresizingMaskIntoConstraints = false
+        tintView.wantsLayer = true
+        tintView.layer?.backgroundColor =
+            NSColor.systemRed.withAlphaComponent(0.2).cgColor
+
+        // Add tint view on top of the visual effect view
+        visualEffectView.addSubview(tintView)
+        NSLayoutConstraint.activate([
+            tintView.leadingAnchor.constraint(
+                equalTo: visualEffectView.leadingAnchor),
+            tintView.trailingAnchor.constraint(
+                equalTo: visualEffectView.trailingAnchor),
+            tintView.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
+            tintView.bottomAnchor.constraint(
+                equalTo: visualEffectView.bottomAnchor),
+        ])
+    }
+
     func extendVisualEffectView() {
         visualEffectViewTopAnchor?.constant = 0
 
@@ -185,6 +183,7 @@ class AXSidebarView: NSView {
     }
 }
 
+// MARK: - Tab Bar Delegate
 extension AXSidebarView: AXTabBarViewDelegate {
     func activeTabTitleChanged(to: String) {
         delegate?.sidebarViewactiveTitle(changed: to)

@@ -8,33 +8,6 @@
 import AppKit
 import WebKit
 
-let faviconJavaScript = """
-    ["icon", "shortcut icon", "apple-touch-icon"].map(r => document.head.querySelector(`link[rel="${r}"]`)).find(l => l)?.href || ""
-    """
-
-//let faviconJavaScript1 = """
-//(() => {
-//  const favicon = ["icon", "shortcut icon", "apple-touch-icon"]
-//    .map(r => document.head.querySelector(`link[rel="${r}"]`))
-//    .find(l => l)?.href ||
-//    document.head.querySelector('meta[property="og:image"]')?.content ||
-//    document.querySelector('link[rel="icon"]')?.href;
-//  return favicon || "";
-//})();
-//"""
-//
-//let faviconJavaScript = """
-//(() => {
-//  const favicon = ["icon", "shortcut icon", "apple-touch-icon"]
-//    .map(r => document.head.querySelector(`link[rel="${r}"]`))
-//    .find(l => l)?.href ||
-//    document.querySelector('meta[name="icon"]')?.content ||
-//    document.querySelector('link[rel="icon"]')?.href ||
-//    document.querySelector('meta[property="og:image"]')?.content;
-//  return favicon || "";
-//})();
-//"""
-
 protocol AXWebContainerViewDelegate: AnyObject {
     func webViewDidFinishLoading()
     func webViewStartedLoading(with progress: Double)
@@ -47,7 +20,7 @@ protocol AXWebContainerViewDelegate: AnyObject {
 
 class AXWebContainerView: NSView {
     weak var delegate: AXWebContainerViewDelegate?
-    weak var sidebar: AXSidebarView?
+    weak var sidebar: AXSidebarView?  // You could use NSView to make it more dynamic
 
     private var hasDrawn: Bool = false
     weak var currentWebView: AXWebView?
@@ -129,22 +102,6 @@ class AXWebContainerView: NSView {
         }
     }
 
-    func updateProgress(_ value: Double) {
-        delegate?.webViewStartedLoading(with: value)
-    }
-
-    func createEmptyView() {
-        currentWebView?.removeFromSuperview()
-        self.websiteTitleLabel.stringValue = "Empty Window"
-    }
-
-    func removeAllWebViews() {
-        currentWebView?.loadHTMLString("", baseURL: nil)
-        currentWebView?.removeFromSuperview()
-        self.currentWebView = nil
-        self.websiteTitleLabel.stringValue = "Empty Window"
-    }
-
     // MARK: - Collapsed Sidebar Methods
     func ensureSidebarExists() {
         if sidebar == nil {
@@ -202,14 +159,33 @@ class AXWebContainerView: NSView {
 
 }
 
+// MARK: - Web View Functions
 extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
     WKDownloadDelegate
 {
+
+    func updateProgress(_ value: Double) {
+        delegate?.webViewStartedLoading(with: value)
+    }
+
+    func createEmptyView() {
+        currentWebView?.removeFromSuperview()
+        self.websiteTitleLabel.stringValue = "Empty Window"
+    }
+
+    func removeAllWebViews() {
+        currentWebView?.loadHTMLString("", baseURL: nil)
+        currentWebView?.removeFromSuperview()
+        self.currentWebView = nil
+        self.websiteTitleLabel.stringValue = "Empty Window"
+    }
+
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         print("Webview finished loading")
         delegate?.webViewDidFinishLoading()
 
-        webView.evaluateJavaScript(faviconJavaScript) { (result, error) in
+        webView.evaluateJavaScript(AX_DEFAULT_FAVICON_SCRIPT) {
+            (result, error) in
             if let faviconURLString = result as? String,
                 let faviconURL = URL(string: faviconURLString)
             {
@@ -313,12 +289,6 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
     }
 }
 
-private func insetWebView(_ bounds: NSRect) -> NSRect {
-    return NSRect(
-        x: bounds.origin.x + 1, y: bounds.origin.y + 14,
-        width: bounds.size.width - 15, height: bounds.size.height - 28)
-}
-
 // MARK: - Web Split View
 private class AXWebContainerSplitView: NSSplitView, NSSplitViewDelegate {
     init() {
@@ -354,3 +324,30 @@ private class AXWebContainerSplitView: NSSplitView, NSSplitViewDelegate {
         fatalError("init(coder:) has not been implemented")
     }
 }
+
+let AX_DEFAULT_FAVICON_SCRIPT = """
+    ["icon", "shortcut icon", "apple-touch-icon"].map(r => document.head.querySelector(`link[rel="${r}"]`)).find(l => l)?.href || ""
+    """
+
+//let faviconJavaScript1 = """
+//(() => {
+//  const favicon = ["icon", "shortcut icon", "apple-touch-icon"]
+//    .map(r => document.head.querySelector(`link[rel="${r}"]`))
+//    .find(l => l)?.href ||
+//    document.head.querySelector('meta[property="og:image"]')?.content ||
+//    document.querySelector('link[rel="icon"]')?.href;
+//  return favicon || "";
+//})();
+//"""
+//
+//let faviconJavaScript = """
+//(() => {
+//  const favicon = ["icon", "shortcut icon", "apple-touch-icon"]
+//    .map(r => document.head.querySelector(`link[rel="${r}"]`))
+//    .find(l => l)?.href ||
+//    document.querySelector('meta[name="icon"]')?.content ||
+//    document.querySelector('link[rel="icon"]')?.href ||
+//    document.querySelector('meta[property="og:image"]')?.content;
+//  return favicon || "";
+//})();
+//"""
