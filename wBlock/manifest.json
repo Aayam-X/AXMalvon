@@ -1,0 +1,6 @@
+{
+  "name": "wBlock",
+  "version": "1.0.0",
+  "description": "Port of https://github.com/0xCUB3/wBlock",
+  "type": "content-blocker"
+}

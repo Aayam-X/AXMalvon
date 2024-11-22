@@ -6,12 +6,75 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		ED39077A2CF023AF005D791F /* wBlock.mlx in Resources */ = {isa = PBXBuildFile; fileRef = ED39076D2CF0235C005D791F /* wBlock.mlx */; };
+		ED78ED152CEFFCB300B12142 /* WebExtensionKit.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = ED78ED092CEFFCB300B12142 /* WebExtensionKit.xpc */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		ED39077B2CF023C4005D791F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ED3AEFDA2CDAED2F002AE6CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = ED39076C2CF0235C005D791F;
+			remoteInfo = wBlock;
+		};
+		ED78ED132CEFFCB300B12142 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ED3AEFDA2CDAED2F002AE6CC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = ED78ED082CEFFCB300B12142;
+			remoteInfo = WebExtensionKit;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		ED78ECFE2CEFF28900B12142 /* Embed XPC Services */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/XPCServices";
+			dstSubfolderSpec = 16;
+			files = (
+				ED78ED152CEFFCB300B12142 /* WebExtensionKit.xpc in Embed XPC Services */,
+			);
+			name = "Embed XPC Services";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		ED39076D2CF0235C005D791F /* wBlock.mlx */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = wBlock.mlx; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED3AEFE22CDAED2F002AE6CC /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED3BA1482CE11E480094F6E9 /* 1TODO.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = 1TODO.md; sourceTree = "<group>"; };
+		ED78ED092CEFFCB300B12142 /* WebExtensionKit.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = WebExtensionKit.xpc; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		ED3907282CEFFF8C005D791F /* Exceptions for "Common" folder in "WebExtensionKit" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				WebExtensionKitProtocol.swift,
+			);
+			target = ED78ED082CEFFCB300B12142 /* WebExtensionKit */;
+		};
+		ED3907782CF02390005D791F /* Exceptions for "wBlock" folder in "Malvon" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				blockerList.json,
+				manifest.json,
+				wBlock.swift,
+			);
+			target = ED3AEFE12CDAED2F002AE6CC /* Malvon */;
+		};
+		ED3907792CF02390005D791F /* Exceptions for "wBlock" folder in "wBlock" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				blockerList.json,
+				manifest.json,
+				wBlock.swift,
+			);
+			target = ED39076C2CF0235C005D791F /* wBlock */;
+		};
 		ED3BA1422CE1074A0094F6E9 /* Exceptions for "AXMalvon" folder in "Malvon" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -19,9 +82,33 @@
 			);
 			target = ED3AEFE12CDAED2F002AE6CC /* Malvon */;
 		};
+		ED78ED192CEFFCB300B12142 /* Exceptions for "WebExtensionKit" folder in "WebExtensionKit" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = ED78ED082CEFFCB300B12142 /* WebExtensionKit */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		ED3907262CEFFF86005D791F /* Common */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				ED3907282CEFFF8C005D791F /* Exceptions for "Common" folder in "WebExtensionKit" target */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		ED3907712CF02376005D791F /* wBlock */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				ED3907782CF02390005D791F /* Exceptions for "wBlock" folder in "Malvon" target */,
+				ED3907792CF02390005D791F /* Exceptions for "wBlock" folder in "wBlock" target */,
+			);
+			path = wBlock;
+			sourceTree = "<group>";
+		};
 		ED3AEFE42CDAED2F002AE6CC /* AXMalvon */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -30,10 +117,32 @@
 			path = AXMalvon;
 			sourceTree = "<group>";
 		};
+		ED78ED0A2CEFFCB300B12142 /* WebExtensionKit */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				ED78ED192CEFFCB300B12142 /* Exceptions for "WebExtensionKit" folder in "WebExtensionKit" target */,
+			);
+			path = WebExtensionKit;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		ED39076A2CF0235C005D791F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		ED3AEFDF2CDAED2F002AE6CC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ED78ED062CEFFCB300B12142 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -46,8 +155,11 @@
 		ED3AEFD92CDAED2F002AE6CC = {
 			isa = PBXGroup;
 			children = (
+				ED3907712CF02376005D791F /* wBlock */,
+				ED3907262CEFFF86005D791F /* Common */,
 				ED3BA1482CE11E480094F6E9 /* 1TODO.md */,
 				ED3AEFE42CDAED2F002AE6CC /* AXMalvon */,
+				ED78ED0A2CEFFCB300B12142 /* WebExtensionKit */,
 				ED3AEFE32CDAED2F002AE6CC /* Products */,
 			);
 			sourceTree = "<group>";
@@ -56,6 +168,8 @@
 			isa = PBXGroup;
 			children = (
 				ED3AEFE22CDAED2F002AE6CC /* Malvon.app */,
+				ED78ED092CEFFCB300B12142 /* WebExtensionKit.xpc */,
+				ED39076D2CF0235C005D791F /* wBlock.mlx */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -63,6 +177,25 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		ED39076C2CF0235C005D791F /* wBlock */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ED39076E2CF0235C005D791F /* Build configuration list for PBXNativeTarget "wBlock" */;
+			buildPhases = (
+				ED3907692CF0235C005D791F /* Sources */,
+				ED39076A2CF0235C005D791F /* Frameworks */,
+				ED39076B2CF0235C005D791F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = wBlock;
+			packageProductDependencies = (
+			);
+			productName = wBlock;
+			productReference = ED39076D2CF0235C005D791F /* wBlock.mlx */;
+			productType = "com.apple.product-type.bundle";
+		};
 		ED3AEFE12CDAED2F002AE6CC /* Malvon */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = ED3AEFEF2CDAED30002AE6CC /* Build configuration list for PBXNativeTarget "Malvon" */;
@@ -70,12 +203,17 @@
 				ED3AEFDE2CDAED2F002AE6CC /* Sources */,
 				ED3AEFDF2CDAED2F002AE6CC /* Frameworks */,
 				ED3AEFE02CDAED2F002AE6CC /* Resources */,
+				ED78ECFE2CEFF28900B12142 /* Embed XPC Services */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				ED39077C2CF023C4005D791F /* PBXTargetDependency */,
+				ED78ED142CEFFCB300B12142 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
+				ED3907262CEFFF86005D791F /* Common */,
+				ED3907712CF02376005D791F /* wBlock */,
 				ED3AEFE42CDAED2F002AE6CC /* AXMalvon */,
 			);
 			name = Malvon;
@@ -84,6 +222,28 @@
 			productName = AXMalvon;
 			productReference = ED3AEFE22CDAED2F002AE6CC /* Malvon.app */;
 			productType = "com.apple.product-type.application";
+		};
+		ED78ED082CEFFCB300B12142 /* WebExtensionKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ED78ED162CEFFCB300B12142 /* Build configuration list for PBXNativeTarget "WebExtensionKit" */;
+			buildPhases = (
+				ED78ED052CEFFCB300B12142 /* Sources */,
+				ED78ED062CEFFCB300B12142 /* Frameworks */,
+				ED78ED072CEFFCB300B12142 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				ED78ED0A2CEFFCB300B12142 /* WebExtensionKit */,
+			);
+			name = WebExtensionKit;
+			packageProductDependencies = (
+			);
+			productName = WebExtensionKit;
+			productReference = ED78ED092CEFFCB300B12142 /* WebExtensionKit.xpc */;
+			productType = "com.apple.product-type.xpc-service";
 		};
 /* End PBXNativeTarget section */
 
@@ -96,9 +256,16 @@
 				LastSwiftUpdateCheck = 1610;
 				LastUpgradeCheck = 1610;
 				TargetAttributes = {
+					ED39076C2CF0235C005D791F = {
+						CreatedOnToolsVersion = 16.1;
+						LastSwiftMigration = 1610;
+					};
 					ED3AEFE12CDAED2F002AE6CC = {
 						CreatedOnToolsVersion = 16.1;
 						LastSwiftMigration = 1610;
+					};
+					ED78ED082CEFFCB300B12142 = {
+						CreatedOnToolsVersion = 16.1;
 					};
 				};
 			};
@@ -119,12 +286,29 @@
 			projectRoot = "";
 			targets = (
 				ED3AEFE12CDAED2F002AE6CC /* Malvon */,
+				ED78ED082CEFFCB300B12142 /* WebExtensionKit */,
+				ED39076C2CF0235C005D791F /* wBlock */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		ED39076B2CF0235C005D791F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		ED3AEFE02CDAED2F002AE6CC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ED39077A2CF023AF005D791F /* wBlock.mlx in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ED78ED072CEFFCB300B12142 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -134,7 +318,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		ED3907692CF0235C005D791F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		ED3AEFDE2CDAED2F002AE6CC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ED78ED052CEFFCB300B12142 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -143,7 +341,65 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		ED39077C2CF023C4005D791F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = ED39076C2CF0235C005D791F /* wBlock */;
+			targetProxy = ED39077B2CF023C4005D791F /* PBXContainerItemProxy */;
+		};
+		ED78ED142CEFFCB300B12142 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = ED78ED082CEFFCB300B12142 /* WebExtensionKit */;
+			targetProxy = ED78ED132CEFFCB300B12142 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		ED39076F2CF0235C005D791F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3TJDS4N2C3;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSPrincipalClass = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ayaamx.AXMalvon.wBlock;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				WRAPPER_EXTENSION = mlx;
+			};
+			name = Debug;
+		};
+		ED3907702CF0235C005D791F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3TJDS4N2C3;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSPrincipalClass = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ayaamx.AXMalvon.wBlock;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 6.0;
+				WRAPPER_EXTENSION = mlx;
+			};
+			name = Release;
+		};
 		ED3AEFED2CDAED30002AE6CC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -331,9 +587,64 @@
 			};
 			name = Release;
 		};
+		ED78ED172CEFFCB300B12142 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = WebExtensionKit/WebExtensionKit.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3TJDS4N2C3;
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WebExtensionKit/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = WebExtensionKit;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ayaamx.AXMalvon.WebExtensionKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		ED78ED182CEFFCB300B12142 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = WebExtensionKit/WebExtensionKit.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3TJDS4N2C3;
+				ENABLE_HARDENED_RUNTIME = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = WebExtensionKit/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = WebExtensionKit;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ayaamx.AXMalvon.WebExtensionKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		ED39076E2CF0235C005D791F /* Build configuration list for PBXNativeTarget "wBlock" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ED39076F2CF0235C005D791F /* Debug */,
+				ED3907702CF0235C005D791F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		ED3AEFDD2CDAED2F002AE6CC /* Build configuration list for PBXProject "AXMalvon" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -348,6 +659,15 @@
 			buildConfigurations = (
 				ED3AEFF02CDAED30002AE6CC /* Debug */,
 				ED3AEFF12CDAED30002AE6CC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ED78ED162CEFFCB300B12142 /* Build configuration list for PBXNativeTarget "WebExtensionKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ED78ED172CEFFCB300B12142 /* Debug */,
+				ED78ED182CEFFCB300B12142 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

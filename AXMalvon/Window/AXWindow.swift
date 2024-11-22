@@ -186,26 +186,7 @@ extension AXWindow {
     }
 
     @IBAction func enableContentBlockers(_ sender: Any) {
-        //containerView.enableContentBlockers()
-
-        let view = AXExtensionsLoader.testBundle()
-
-        guard let view else { return }
-        // Step 2: Create an NSViewController to manage the view
-        let contentViewController = NSViewController()
-        contentViewController.view = view
-
-        // Step 3: Create a new window (sheet) to present
-        let sheetWindow = NSWindow(contentViewController: contentViewController)
-
-        // Optionally, configure the sheet window (e.g., size, style)
-        sheetWindow.setContentSize(NSSize(width: 400, height: 300))  // Set the size of the sheet
-
-        // Step 4: Present the sheet on the current window
-        beginSheet(sheetWindow) { response in
-            // Handle sheet dismissal if needed (e.g., after a button press)
-            print("Sheet was closed with response: \(response)")
-        }
+        defaultProfile.enableContentBlockers()
     }
 
     @IBAction func toggleSearchField(_ sender: Any) {

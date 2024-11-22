@@ -56,6 +56,59 @@ class AXProfile {
         print(fileURL)
     }
 
+    func enableContentBlockers() {
+        let extensionLoader = AXExtensionsLoader.shared
+
+        extensionLoader.getContentBlockerURLPath { blockerListURL in
+            guard let blockerListURL else { return }
+
+            // Read the file asynchronously to avoid blocking the main thread
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    // Load the data from the URL
+                    let blockerListData = try Data(contentsOf: blockerListURL)
+
+                    // Convert the data to a string (UTF-8 decoding)
+                    guard
+                        let blockerListString = String(
+                            data: blockerListData, encoding: .utf8)
+                    else {
+                        print("Failed to decode blocker list data.")
+                        return
+                    }
+
+                    // Compile the content rule list on the same background thread
+                    WKContentRuleListStore.default().compileContentRuleList(
+                        forIdentifier: "ContentBlockingRules",
+                        encodedContentRuleList: blockerListString
+                    ) { [weak self] contentRuleList, error in
+                        // Switch back to the main thread for UI updates
+                        DispatchQueue.main.async {
+                            if let error = error {
+                                print(
+                                    "Failed to compile content rule list: \(error.localizedDescription)"
+                                )
+                                return
+                            }
+
+                            guard let contentRuleList = contentRuleList,
+                                let self = self
+                            else { return }
+
+                            // Apply the content rule list to the web view configuration
+                            self.configuration.userContentController.add(
+                                contentRuleList)
+                        }
+                    }
+                } catch {
+                    print(
+                        "Failed to load blocker list: \(error.localizedDescription)"
+                    )
+                }
+            }
+        }
+    }
+
     // MARK: - User Defaults
     private var fileURL: URL {
         let fileManager = FileManager.default

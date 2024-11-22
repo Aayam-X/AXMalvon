@@ -38,7 +38,7 @@ let faviconJavaScript = """
 protocol AXWebContainerViewDelegate: AnyObject {
     func webViewDidFinishLoading()
     func webViewStartedLoading(with progress: Double)
-    
+
     func webViewCreateWebView(config: WKWebViewConfiguration) -> WKWebView
 
     func webContainerViewRequestsSidebar() -> AXSidebarView
@@ -96,7 +96,7 @@ class AXWebContainerView: NSView {
         splitView.rightAnchor.constraint(equalTo: rightAnchor, constant: -14)
             .isActive = true
     }
-    
+
     deinit {
         progressBarObserver = nil
     }
@@ -116,19 +116,19 @@ class AXWebContainerView: NSView {
         webView.autoresizingMask = [.height, .width]
 
         self.window?.makeFirstResponder(currentWebView)
-        
+
         progressBarObserver = webView.observe(
             \.estimatedProgress, options: [.new]
         ) { [weak self] _, change in
             if let newProgress = change.newValue {
-                
+
                 self?.updateProgress(newProgress)
             } else {
                 print("Progress change has no new value.")
             }
         }
     }
-    
+
     func updateProgress(_ value: Double) {
         delegate?.webViewStartedLoading(with: value)
     }
@@ -311,44 +311,6 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
     func downloadDidFinish(_ download: WKDownload) {
         print("Download finished!")
     }
-    
-    func enableContentBlockers() {
-        // Ensure the blocker list file exists
-        guard let blockerListURL = Bundle.main.url(forResource: "blockerList", withExtension: "json") else {
-            print("Blocker list file not found.")
-            return
-        }
-        
-        // Load the content of the blocker list JSON efficiently
-        guard let blockerListData = try? Data(contentsOf: blockerListURL),
-              let blockerListString = String(data: blockerListData, encoding: .utf8) else {
-            print("Failed to load or decode blocker list.")
-            return
-        }
-        
-        // Compile the content rule list
-        WKContentRuleListStore.default().compileContentRuleList(
-            forIdentifier: "ContentBlockingRules",
-            encodedContentRuleList: blockerListString
-        ) { [weak self] contentRuleList, error in
-            // Handle any compilation errors
-            if let error = error {
-                print("Failed to compile content rule list: \(error.localizedDescription)")
-                return
-            }
-            
-            // Safely unwrap the content rule list
-            guard let contentRuleList = contentRuleList, let self = self else { return }
-            
-            // Apply the content rule list to the web view configuration
-            let configuration = self.currentWebView?.configuration
-            configuration?.userContentController.add(contentRuleList)
-            
-            // Reload the web view efficiently
-            self.currentWebView?.reload()
-        }
-    }
-
 }
 
 private func insetWebView(_ bounds: NSRect) -> NSRect {
@@ -356,7 +318,6 @@ private func insetWebView(_ bounds: NSRect) -> NSRect {
         x: bounds.origin.x + 1, y: bounds.origin.y + 14,
         width: bounds.size.width - 15, height: bounds.size.height - 28)
 }
-
 
 // MARK: - Web Split View
 private class AXWebContainerSplitView: NSSplitView, NSSplitViewDelegate {
