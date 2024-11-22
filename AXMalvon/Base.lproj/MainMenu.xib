@@ -382,6 +382,12 @@
                                     <action selector="enableContentBlockers:" target="-1" id="xAH-Uh-xY2"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Enable YouTube AdBlocker" id="fb6-Er-BSN">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="enableYouTubeAdBlocker:" target="-1" id="8UT-TM-5JB"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="tEW-jz-yui"/>
                             <menuItem title="Show Reader View" keyEquivalent="r" id="CtI-Xn-fVt">
                                 <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>

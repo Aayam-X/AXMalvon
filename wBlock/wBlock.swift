@@ -35,9 +35,12 @@ struct wBlockView: View {
     }
 
     @objc public func blockerListPath() -> URL? {
-        Bundle(identifier: "com.ayaamx.AXMalvon.wBlock")!
-            .url(forResource: "blockerList", withExtension: "json")!
-        // Download if bundle doesn't exist
+        guard let bundle = Bundle(identifier: "com.ayaamx.AXMalvon.wBlock") else { return nil }
+        
+        let blockerList = bundle.url(forResource: "blockerList", withExtension: "json")
+        
+        return blockerList
+// Download if bundle doesn't exist
 //        if let bundleURL = Bundle(identifier: "com.ayaamx.AXMalvon.wBlock")?
 //            .url(forResource: "blockerList", withExtension: "json")
 //        {

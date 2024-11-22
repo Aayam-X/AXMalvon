@@ -189,6 +189,14 @@ extension AXWindow {
         defaultProfile.enableContentBlockers()
     }
 
+    @IBAction func enableYouTubeAdBlocker(_ sender: Any) {
+        if let sender = sender as? NSMenuItem {
+            sender.title = "Disable YouTube Ad Blocker"
+        }
+
+        defaultProfile.enableYouTubeAdBlocker()
+    }
+
     @IBAction func toggleSearchField(_ sender: Any) {
         if currentTabGroup.selectedIndex < 0 {
             searchBar.show()

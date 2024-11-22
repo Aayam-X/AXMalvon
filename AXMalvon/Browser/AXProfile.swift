@@ -59,52 +59,58 @@ class AXProfile {
     func enableContentBlockers() {
         let extensionLoader = AXExtensionsLoader.shared
 
+        // Simple Filter
         extensionLoader.getContentBlockerURLPath { blockerListURL in
             guard let blockerListURL else { return }
 
-            // Read the file asynchronously to avoid blocking the main thread
             DispatchQueue.global(qos: .userInitiated).async {
-                do {
-                    // Load the data from the URL
-                    let blockerListData = try Data(contentsOf: blockerListURL)
+                try? self.loadContentBlocker(at: blockerListURL)
+            }
+        }
+    }
 
-                    // Convert the data to a string (UTF-8 decoding)
-                    guard
-                        let blockerListString = String(
-                            data: blockerListData, encoding: .utf8)
-                    else {
-                        print("Failed to decode blocker list data.")
-                        return
-                    }
+    func enableYouTubeAdBlocker() {
 
-                    // Compile the content rule list on the same background thread
-                    WKContentRuleListStore.default().compileContentRuleList(
-                        forIdentifier: "ContentBlockingRules",
-                        encodedContentRuleList: blockerListString
-                    ) { [weak self] contentRuleList, error in
-                        // Switch back to the main thread for UI updates
-                        DispatchQueue.main.async {
-                            if let error = error {
-                                print(
-                                    "Failed to compile content rule list: \(error.localizedDescription)"
-                                )
-                                return
-                            }
+        let userScript = WKUserScript(
+            source: script, injectionTime: .atDocumentStart,
+            forMainFrameOnly: true)
+        configuration.userContentController.addUserScript(userScript)
+    }
 
-                            guard let contentRuleList = contentRuleList,
-                                let self = self
-                            else { return }
+    func loadContentBlocker(at url: URL) throws {
+        // Load the data from the URL
+        let blockerListData = try Data(contentsOf: url)
 
-                            // Apply the content rule list to the web view configuration
-                            self.configuration.userContentController.add(
-                                contentRuleList)
-                        }
-                    }
-                } catch {
+        // Convert the data to a string (UTF-8 decoding)
+        guard
+            let blockerListString = String(
+                data: blockerListData, encoding: .utf8)
+        else {
+            print("Failed to decode blocker list data.")
+            return
+        }
+
+        // Compile the content rule list on the same background thread
+        WKContentRuleListStore.default().compileContentRuleList(
+            forIdentifier: "ContentBlocker",
+            encodedContentRuleList: blockerListString
+        ) { [weak self] contentRuleList, error in
+            // Switch back to the main thread for UI updates
+            DispatchQueue.main.async {
+                if let error = error {
                     print(
-                        "Failed to load blocker list: \(error.localizedDescription)"
+                        "Failed to compile content rule list: \(error)"
                     )
+                    return
                 }
+
+                guard let contentRuleList = contentRuleList,
+                    let self = self
+                else { return }
+
+                // Apply the content rule list to the web view configuration
+                self.configuration.userContentController.add(
+                    contentRuleList)
             }
         }
     }
@@ -184,3 +190,7 @@ let AX_DEFAULT_WEBVIEW_CONFIGURATIONS = [
     "localFileContentSniffingEnabled",
     "appNapEnabled",
 ]
+
+let script = """
+    (function(){let ytInitialPlayerResponse=null;Object.defineProperty(window,"ytInitialPlayerResponse",{get:()=>ytInitialPlayerResponse,set:(data)=>{if(data)data.adPlacements=[];ytInitialPlayerResponse=data},configurable:true})})();(function(){const originalFetch=window.fetch;window.fetch=async(...args)=>{const response=await originalFetch(...args);if(response.url.includes("/youtubei/v1/player")){const originalText=response.text.bind(response);response.text=()=>originalText().then((data)=>data.replace(/"adPlacements"/g,'"odPlacements"'))}return response}})();(function(){const skipAds=()=>{const skipButton=document.querySelector(".videoAdUiSkipButton, .ytp-ad-skip-button");if(skipButton)skipButton.click();const adOverlay=document.querySelector(".ad-showing");if(adOverlay){const video=document.querySelector("video");if(video)video.playbackRate=10}};const removeInlineAds=()=>{const adContainer=document.querySelector("#player-ads");if(adContainer)adContainer.remove()};const adBlockerInterval=setInterval(()=>{skipAds();removeInlineAds()},300);window.addEventListener("unload",()=>clearInterval(adBlockerInterval))})();
+    """
