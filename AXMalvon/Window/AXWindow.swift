@@ -80,6 +80,8 @@ class AXWindow: NSWindow, NSWindowDelegate {
         sidebarView.frame.size.width = 180
 
         sidebarView.delegate = self
+        sidebarView.gestureView.delegate = self
+        sidebarView.gestureView.popoverView.delegate = self
         containerView.delegate = self
         searchBar.searchBarDelegate = self
 
@@ -323,6 +325,18 @@ extension AXWindow: AXSidebarPopoverViewDelegate {
 
 // MARK: - Menu Bar Item Actions
 extension AXWindow {
+    @IBAction func backWebpage(_ sender: Any) {
+        containerView.currentWebView?.goBack()
+    }
+
+    @IBAction func forwardWebpage(_ sender: Any) {
+        containerView.currentWebView?.goForward()
+    }
+
+    @IBAction func reloadWebpage(_ sender: Any) {
+        containerView.currentWebView?.reload()
+    }
+
     @IBAction func downloadWebpage(_ sender: Any) {
         Task { @MainActor in
             if let webView = containerView.currentWebView, let url = webView.url
@@ -338,7 +352,7 @@ extension AXWindow {
 
     @IBAction func enableYouTubeAdBlocker(_ sender: Any) {
         if let sender = sender as? NSMenuItem {
-            sender.title = "Disable YouTube Ad Blocker"
+            sender.title = "Disable YouTube Ad Blocker (Restart App)"
         }
 
         defaultProfile.enableYouTubeAdBlocker()

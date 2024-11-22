@@ -132,11 +132,6 @@
                                     <action selector="saveDocumentAs:" target="-1" id="BEH-Hq-wTs"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Revert to Saved" keyEquivalent="r" id="AIH-Mv-sfv">
-                                <connections>
-                                    <action selector="revertDocumentToSaved:" target="-1" id="0po-4D-BT9"/>
-                                </connections>
-                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="Njh-ep-n58"/>
                             <menuItem title="Page Setup…" keyEquivalent="P" id="oxx-k7-Ywb">
                                 <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
@@ -371,6 +366,22 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="View" id="ZdR-mQ-XQT">
                         <items>
+                            <menuItem title="Reload Page" keyEquivalent="r" id="T4W-cy-Vi2">
+                                <connections>
+                                    <action selector="reloadWebpage:" target="-1" id="STs-v9-WeA"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Back" keyEquivalent="[" id="Owf-PI-xGa">
+                                <connections>
+                                    <action selector="backWebpage:" target="-1" id="h5M-R6-Uv4"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Forward" keyEquivalent="]" id="lWj-LZ-wt9">
+                                <connections>
+                                    <action selector="forwardWebpage:" target="-1" id="7v5-gS-Vrs"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="xQU-xf-5la"/>
                             <menuItem title="Show Search Field" keyEquivalent="l" id="zok-a6-1wB">
                                 <connections>
                                     <action selector="toggleSearchField:" target="-1" id="yhC-SR-y3N"/>
