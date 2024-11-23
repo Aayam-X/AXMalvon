@@ -1,6 +1,7 @@
 # Log
 
 ## Implement Soon
+- [ ] PRIVATE MODE DISABLE SQLITE
 - [ ] Search Bar Window Looks empty, create something similar to Safari's favourites page 
 
 #### Predecessor Features
@@ -14,6 +15,7 @@
 ## 0.1.1
 - [x] Private Browsing
 - [x] Single-window implementation
+- [x] Move favicons to AXTabButton; maybe run the script when the title updates?
 
 ## 0.1
 - [x] COMPLETE RE-WRITE FROM SCRATCH 🥳🎉

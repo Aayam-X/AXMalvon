@@ -14,6 +14,10 @@ let AX_DEFAULT_FAVICON = NSImage(
 let AX_DEFAULT_FAVICON_SLEEP = NSImage(
     systemSymbolName: "moon.fill", accessibilityDescription: nil)
 
+private let AX_DEFAULT_FAVICON_SCRIPT = """
+    ["icon", "shortcut icon", "apple-touch-icon"].map(r => document.head.querySelector(`link[rel="${r}"]`)).find(l => l)?.href || ""
+    """
+
 protocol AXTabButtonDelegate: AnyObject {
     func tabButtonDidSelect(_ tabButton: AXTabButton)
     func tabButtonWillClose(_ tabButton: AXTabButton)
@@ -218,7 +222,38 @@ extension AXTabButton {
             changeHandler: { [weak self] _, _ in
                 let title = webView.title ?? "Untitled"
                 self?.updateTitle(title)
+
+                // Find favicon
+                webView.evaluateJavaScript(AX_DEFAULT_FAVICON_SCRIPT) {
+                    (result, error) in
+                    if let faviconURLString = result as? String,
+                        let faviconURL = URL(string: faviconURLString)
+                    {
+                        self?.downloadFavicon(from: faviconURL)
+                    } else {
+                        print(
+                            "No favicon found or error: \(String(describing: error))"
+                        )
+                        self?.favicon = nil
+                    }
+                }
             })
+    }
+
+    func downloadFavicon(from url: URL) {
+        let task = URLSession.shared.dataTask(with: url) {
+            (data, response, error) in
+            guard let data = data, error == nil, let image = NSImage(data: data)
+            else {
+                print(
+                    "Failed to download favicon: \(String(describing: error))")
+                return
+            }
+            DispatchQueue.main.async {
+                self.favicon = image
+            }
+        }
+        task.resume()
     }
 
     public func startObserving() {

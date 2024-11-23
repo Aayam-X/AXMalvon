@@ -16,7 +16,6 @@ protocol AXWebContainerViewDelegate: AnyObject {
     func webViewCreateWebView(config: WKWebViewConfiguration) -> WKWebView
 
     func webContainerViewRequestsSidebar() -> AXSidebarView
-    func webContainerFoundFavicon(image: NSImage?)
 }
 
 class AXWebContainerView: NSView {
@@ -232,34 +231,6 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         print("Webview finished loading")
         delegate?.webViewDidFinishLoading()
-
-        webView.evaluateJavaScript(AX_DEFAULT_FAVICON_SCRIPT) {
-            (result, error) in
-            if let faviconURLString = result as? String,
-                let faviconURL = URL(string: faviconURLString)
-            {
-                self.downloadFavicon(from: faviconURL)
-            } else {
-                print("No favicon found or error: \(String(describing: error))")
-                self.delegate?.webContainerFoundFavicon(image: nil)
-            }
-        }
-    }
-
-    func downloadFavicon(from url: URL) {
-        let task = URLSession.shared.dataTask(with: url) {
-            (data, response, error) in
-            guard let data = data, error == nil, let image = NSImage(data: data)
-            else {
-                print(
-                    "Failed to download favicon: \(String(describing: error))")
-                return
-            }
-            DispatchQueue.main.async {
-                self.delegate?.webContainerFoundFavicon(image: image)
-            }
-        }
-        task.resume()
     }
 
     func webView(
@@ -373,10 +344,6 @@ private class AXWebContainerSplitView: NSSplitView, NSSplitViewDelegate {
         fatalError("init(coder:) has not been implemented")
     }
 }
-
-let AX_DEFAULT_FAVICON_SCRIPT = """
-    ["icon", "shortcut icon", "apple-touch-icon"].map(r => document.head.querySelector(`link[rel="${r}"]`)).find(l => l)?.href || ""
-    """
 
 //let faviconJavaScript1 = """
 //(() => {

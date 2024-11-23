@@ -173,15 +173,6 @@ class AXSidebarView: NSView {
         guard let window = self.window as? AXWindow else { return }
         window.trafficLightManager.hideTrafficLights(false)
     }
-
-    func faviconDetected(image: NSImage?) {
-        guard
-            let button = tabBarView?.tabStackView.arrangedSubviews[
-                currentTabGroup!.selectedIndex] as? AXTabButton
-        else { return }
-
-        button.favicon = image
-    }
 }
 
 // MARK: - Tab Bar Delegate

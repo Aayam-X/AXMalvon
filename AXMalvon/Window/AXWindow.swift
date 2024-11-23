@@ -206,10 +206,6 @@ extension AXWindow: AXSearchBarWindowDelegate {
 
 // MARK: - WebContainer View Delegate
 extension AXWindow: AXWebContainerViewDelegate {
-    func webContainerFoundFavicon(image: NSImage?) {
-        sidebarView.faviconDetected(image: image)
-    }
-
     func webContainerViewRequestsSidebar() -> AXSidebarView {
         return sidebarView
     }
