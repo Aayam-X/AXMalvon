@@ -5,8 +5,7 @@ Copyright (c) 2022-2024 Ashwin Paudel, Aayam(X)
 THE CONTENTS OF THIS PROJECT ARE PROPRIETARY AND CONFIDENTIAL.
 UNAUTHORIZED COPYING, TRANSFERRING OR REPRODUCTION OF THE CONTENTS OF THIS PROJECT, VIA ANY MEDIUM IS STRICTLY PROHIBITED.
 
-The receipt or possession of the source code and/or any parts thereof does not convey or imply any right to use them
-for any purpose. 
+The receipt or possession of the source code and/or any parts thereof does not convey or imply any right to use them for any purpose.
 
 The software is provided "AS IS", without warranty of any kind, express or implied, including but not limited to
 the warranties of merchantability, fitness for a particular purpose and non infringement.

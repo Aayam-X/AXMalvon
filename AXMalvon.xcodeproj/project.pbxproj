@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		ED39077A2CF023AF005D791F /* wBlock.mlx in Resources */ = {isa = PBXBuildFile; fileRef = ED39076D2CF0235C005D791F /* wBlock.mlx */; };
 		ED78ED152CEFFCB300B12142 /* WebExtensionKit.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = ED78ED092CEFFCB300B12142 /* WebExtensionKit.xpc */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		ED9D55AE2CF155A1000E6319 /* license.txt in Resources */ = {isa = PBXBuildFile; fileRef = ED9D55AD2CF155A1000E6319 /* license.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +48,7 @@
 		ED3AEFE22CDAED2F002AE6CC /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED3BA1482CE11E480094F6E9 /* Log.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Log.md; sourceTree = "<group>"; };
 		ED78ED092CEFFCB300B12142 /* WebExtensionKit.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = WebExtensionKit.xpc; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED9D55AD2CF155A1000E6319 /* license.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = license.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -158,6 +160,7 @@
 				ED3907712CF02376005D791F /* wBlock */,
 				ED3907262CEFFF86005D791F /* Common */,
 				ED3BA1482CE11E480094F6E9 /* Log.md */,
+				ED9D55AD2CF155A1000E6319 /* license.txt */,
 				ED3AEFE42CDAED2F002AE6CC /* AXMalvon */,
 				ED78ED0A2CEFFCB300B12142 /* WebExtensionKit */,
 				ED3AEFE32CDAED2F002AE6CC /* Products */,
@@ -304,6 +307,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED9D55AE2CF155A1000E6319 /* license.txt in Resources */,
 				ED39077A2CF023AF005D791F /* wBlock.mlx in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -526,7 +530,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = AXMalvon/AXMalvon.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -561,7 +564,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_ENTITLEMENTS = AXMalvon/AXMalvon.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;

@@ -75,15 +75,12 @@
                             <menuItem isSeparatorItem="YES" id="g8Y-e9-Dai"/>
                             <menuItem title="New Window" keyEquivalent="n" id="BWw-o2-3aq">
                                 <connections>
-                                    <action selector="createNewWindow:" target="-1" id="cxR-zE-D6C"/>
+                                    <action selector="newWindow:" target="-1" id="MT1-o1-HxI"/>
                                 </connections>
-                            </menuItem>
-                            <menuItem title="New Empty Window" keyEquivalent="N" id="uKZ-4s-ytA">
-                                <modifierMask key="keyEquivalentModifierMask" control="YES"/>
                             </menuItem>
                             <menuItem title="New Private Window" keyEquivalent="N" id="nzp-zI-bcE">
                                 <connections>
-                                    <action selector="createNewPrivateWindow:" target="-1" id="T12-hC-Q5c"/>
+                                    <action selector="newPrivateWindow:" target="-1" id="cxD-oR-l3U"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="H8T-v7-OGG"/>

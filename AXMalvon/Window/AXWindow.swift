@@ -18,7 +18,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
 
     var hiddenSidebarView = false
 
-    var profiles: [AXProfile] = [.init(name: "Default"), .init(name: "School")]
+    var profiles: [AXProfile]
 
     var defaultProfile: AXProfile
     var profileIndex = 0 {
@@ -50,8 +50,10 @@ class AXWindow: NSWindow, NSWindowDelegate {
         defaultProfile.currentTabGroup
     }
 
-    init() {
-        defaultProfile = profiles[profileIndex]
+    init(with profiles: [AXProfile]) {
+        self.profiles = profiles
+        defaultProfile = profiles[profileIndex]  // 0
+
         super.init(
             contentRect: AXWindow.updateWindowFrame(),
             styleMask: [
@@ -70,6 +72,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
         self.animationBehavior = .documentWindow
         self.titlebarAppearsTransparent = true
         self.backgroundColor = .textBackgroundColor
+        self.isReleasedWhenClosed = true
         self.delegate = self
     }
 
@@ -99,13 +102,14 @@ class AXWindow: NSWindow, NSWindowDelegate {
     }
 
     func windowWillClose(_ notification: Notification) {
-        defaultProfile.saveTabGroups()
+        for profile in profiles {
+            profile.saveTabGroups()
 
-        // Close all tabs
-        tabGroups.forEach {
-            $0.tabs.removeAll()
-            $0.tabBarView?.removeFromSuperview()
-            $0.tabBarView = nil
+            for tabGroup in profile.tabGroups {
+                tabGroup.tabs.removeAll()
+                tabGroup.tabBarView?.removeFromSuperview()
+                tabGroup.tabBarView = nil
+            }
         }
     }
 
@@ -323,7 +327,7 @@ extension AXWindow: AXSidebarPopoverViewDelegate {
     }
 }
 
-// MARK: - Menu Bar Item Actions
+// MARK: - Menu Bar Actions
 extension AXWindow {
     @IBAction func find(_ sender: Any) {
         containerView.webViewPerformSearch()

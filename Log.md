@@ -11,6 +11,10 @@
 
 ---
 
+## 0.1.1
+- [x] Private Browsing
+- [x] Single-window implementation
+
 ## 0.1
 - [x] COMPLETE RE-WRITE FROM SCRATCH 🥳🎉
 

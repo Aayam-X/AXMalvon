@@ -6,12 +6,12 @@
 //  Copyright © 2022-2024 Aayam(X). All rights reserved.
 //
 
+import Foundation
 import WebKit
 
 class AXProfile {
-    var name: String
+    let name: String
     var configuration: WKWebViewConfiguration
-
     var tabGroups: [AXTabGroup] = []
     var currentTabGroup: AXTabGroup
 
@@ -21,40 +21,59 @@ class AXProfile {
         }
     }
 
-    init(name: String) {
+    init(name: String, config: WKWebViewConfiguration, loadsDefaultData: Bool) {
         self.name = name
-        self.currentTabGroup = .init(name: "Default")
-
-        // WebView configuration
-        let defaults = UserDefaults.standard
-
-        // Search for config in UserDefaults; if not create a new one.
-        if let configID = defaults.string(forKey: "configurationID-\(name)") {
-            let uuid = UUID(uuidString: configID)!
-            self.configuration = WKWebViewConfiguration()
-            self.configuration.websiteDataStore = .init(forIdentifier: uuid)
-        } else {
-            let newID = UUID()
-            defaults.set(newID.uuidString, forKey: "configurationID-\(name)")
-
-            self.configuration = WKWebViewConfiguration()
-            self.configuration.websiteDataStore = .init(forIdentifier: newID)
-        }
-
-        #if !DEBUG
-            // Debug and Release have different tabs
-            // This would cause a crash
-            self.currentTabGroupIndex = defaults.integer(
-                forKey: "\(name)-selectedTabGroup")
-        #endif
+        self.configuration = config
+        self.tabGroups = [.init(name: "Untitled Tab Group")]
+        currentTabGroup = tabGroups[0]
 
         addOtherConfigs()
 
-        loadTabGroups()
+        if loadsDefaultData {
+            loadTabGroups()
+        }
+    }
+
+    convenience init(name: String) {
+        let defaults = UserDefaults.standard
+        let config: WKWebViewConfiguration
+
+        if let configID = defaults.string(forKey: "configurationID-\(name)"),
+            let uuid = UUID(uuidString: configID)
+        {
+            config = WKWebViewConfiguration()
+            config.websiteDataStore = WKWebsiteDataStore(forIdentifier: uuid)
+        } else {
+            let newID = UUID()
+            defaults.set(newID.uuidString, forKey: "configurationID-\(name)")
+            config = WKWebViewConfiguration()
+            config.websiteDataStore = WKWebsiteDataStore(forIdentifier: newID)
+        }
+
+        self.init(name: name, config: config, loadsDefaultData: true)
+
+        #if !DEBUG
+            self.currentTabGroupIndex = defaults.integer(
+                forKey: "\(name)-selectedTabGroup")
+        #endif
     }
 
     // MARK: - Configuration Features
     func addOtherConfigs() {
+        let AX_DEFAULT_WEBVIEW_CONFIGURATIONS = [
+            "fullScreenEnabled",
+            "allowsPictureInPictureMediaPlayback",
+            "acceleratedDrawingEnabled",
+            "largeImageAsyncDecodingEnabled",
+            "animatedImageAsyncDecodingEnabled",
+            "developerExtrasEnabled",
+            "loadsImagesAutomatically",
+            "acceleratedCompositingEnabled",
+            "canvasUsesAcceleratedDrawing",
+            "localFileContentSniffingEnabled",
+            "appNapEnabled",
+        ]
+
         for config in AX_DEFAULT_WEBVIEW_CONFIGURATIONS {
             configuration.preferences.setValue(true, forKey: config)
         }
@@ -66,7 +85,6 @@ class AXProfile {
     func enableContentBlockers() {
         let extensionLoader = AX_wBlockExtension()
 
-        // Simple Filter
         extensionLoader.getContentBlockerURLPath { blockerListURL in
             guard let blockerListURL else { return }
 
@@ -80,15 +98,13 @@ class AXProfile {
         let userScript = WKUserScript(
             source: AX_DEFAULT_YOUTUBE_BLOCKER_SCRIPT,
             injectionTime: .atDocumentStart,
-            forMainFrameOnly: true)
+            forMainFrameOnly: true
+        )
         configuration.userContentController.addUserScript(userScript)
     }
 
     func loadContentBlocker(at url: URL) throws {
-        // Load the data from the URL
         let blockerListData = try Data(contentsOf: url)
-
-        // Convert the data to a string (UTF-8 decoding)
         guard
             let blockerListString = String(
                 data: blockerListData, encoding: .utf8)
@@ -97,16 +113,12 @@ class AXProfile {
             return
         }
 
-        // Compile the content rule list on the same background thread
         WKContentRuleListStore.default().compileContentRuleList(
             forIdentifier: "ContentBlocker",
             encodedContentRuleList: blockerListString
         ) { contentRuleList, error in
             guard let contentRuleList else { return }
-            // Switch back to the main thread for UI updates
-            // Apply the content rule list to the web view configuration
-            self.configuration.userContentController.add(
-                contentRuleList)
+            self.configuration.userContentController.add(contentRuleList)
         }
     }
 
@@ -125,7 +137,6 @@ class AXProfile {
                 "Malvon", isDirectory: true)
         #endif
 
-        // Ensure the directory exists
         if !fileManager.fileExists(atPath: directoryURL.path) {
             try? fileManager.createDirectory(
                 at: directoryURL, withIntermediateDirectories: true,
@@ -142,7 +153,6 @@ class AXProfile {
         #endif
 
         let encoder = JSONEncoder()
-        encoder.outputFormatting = .prettyPrinted
         do {
             let data = try encoder.encode(tabGroups)
             try data.write(to: fileURL)
@@ -165,19 +175,21 @@ class AXProfile {
     }
 }
 
-let AX_DEFAULT_WEBVIEW_CONFIGURATIONS = [
-    "fullScreenEnabled",
-    "allowsPictureInPictureMediaPlayback",
-    "acceleratedDrawingEnabled",
-    "largeImageAsyncDecodingEnabled",
-    "animatedImageAsyncDecodingEnabled",
-    "developerExtrasEnabled",
-    "loadsImagesAutomatically",
-    "acceleratedCompositingEnabled",
-    "canvasUsesAcceleratedDrawing",
-    "localFileContentSniffingEnabled",
-    "appNapEnabled",
-]
+class AXPrivateProfile: AXProfile {
+    init() {
+        let config = WKWebViewConfiguration()
+        config.websiteDataStore = .nonPersistent()
+        super.init(name: "Private", config: config, loadsDefaultData: false)
+    }
+
+    override func saveTabGroups() {
+        // Do nothing
+    }
+
+    override func loadTabGroups() {
+        // Do nothing
+    }
+}
 
 let AX_DEFAULT_YOUTUBE_BLOCKER_SCRIPT = """
     (function(){let ytInitialPlayerResponse=null;Object.defineProperty(window,"ytInitialPlayerResponse",{get:()=>ytInitialPlayerResponse,set:(data)=>{if(data)data.adPlacements=[];ytInitialPlayerResponse=data},configurable:true})})();(function(){const originalFetch=window.fetch;window.fetch=async(...args)=>{const response=await originalFetch(...args);if(response.url.includes("/youtubei/v1/player")){const originalText=response.text.bind(response);response.text=()=>originalText().then((data)=>data.replace(/"adPlacements"/g,'"odPlacements"'))}return response}})();(function(){const skipAds=()=>{const skipButton=document.querySelector(".videoAdUiSkipButton, .ytp-ad-skip-button");if(skipButton)skipButton.click();const adOverlay=document.querySelector(".ad-showing");if(adOverlay){const video=document.querySelector("video");if(video){video.playbackRate=10;video.isMuted=1}}};const removeInlineAds=()=>{const adContainer=document.querySelector("#player-ads");if(adContainer)adContainer.remove()};const adBlockerInterval=setInterval(()=>{skipAds();removeInlineAds()},300);window.addEventListener("unload",()=>clearInterval(adBlockerInterval))})();
