@@ -5,10 +5,10 @@
 - [ ] Search Bar Window Looks empty, create something similar to Safari's favourites page 
 
 #### Predecessor Features
-- [ ] Beautiful Looking About View ❤️
+- [ ] Beautiful Looking Malvon -> About View ❤️
 - [ ] Preference Panel
 - [ ] Browsing History
-- [ ] Downloads Panel + Sidebar View
+- [ ] Downloads Panel + Mini-view
 
 ---
 
