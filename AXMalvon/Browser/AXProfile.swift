@@ -10,14 +10,12 @@ import Foundation
 import WebKit
 
 struct AXProfileData: Codable {
-    var name: String
     var configID: String
     var selectedTabGroupIndex: Int
 
     // Convert to dictionary for UserDefaults storage
     func toDictionary() -> [String: Any] {
         return [
-            "name": name,
             "id": configID,
             "i": selectedTabGroupIndex,
         ]
@@ -25,16 +23,13 @@ struct AXProfileData: Codable {
 
     // Create from a dictionary loaded from UserDefaults
     static func fromDictionary(_ dictionary: [String: Any]) -> AXProfileData? {
-        guard let name = dictionary["name"] as? String,
-            let configID = dictionary["id"] as? String,
-            let selectedTabGroupIndex = dictionary["i"]
-                as? Int
+        guard let configID = dictionary["id"] as? String,
+            let selectedTabGroupIndex = dictionary["i"] as? Int
         else {
             return nil
         }
         return AXProfileData(
-            name: name, configID: configID,
-            selectedTabGroupIndex: selectedTabGroupIndex)
+            configID: configID, selectedTabGroupIndex: selectedTabGroupIndex)
     }
 }
 
@@ -58,6 +53,8 @@ class AXProfile {
             let config = AXProfile.createConfig(with: profileData.configID)
 
             self.init(name: name, config: config, loadsDefaultData: true)
+            print(
+                "Current Tab Group Index: \(profileData.selectedTabGroupIndex)")
             self.currentTabGroupIndex = profileData.selectedTabGroupIndex
         } else {
             let config = AXProfile.createNewProfile(name: name)
@@ -88,7 +85,7 @@ class AXProfile {
 
         // Create new profile data
         let newProfileData = AXProfileData(
-            name: name, configID: UUID().uuidString, selectedTabGroupIndex: -1)
+            configID: UUID().uuidString, selectedTabGroupIndex: 0)
 
         // Save the new profile data as a dictionary
         profiles[name] = newProfileData.toDictionary()
