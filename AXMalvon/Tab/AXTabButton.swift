@@ -70,7 +70,7 @@ class AXTabButton: NSButton {
             self.layer?.backgroundColor =
                 isSelected ? selectedColor.cgColor : .clear
             if self.titleObserver == nil {
-                forcedStartObserving()
+                forceCreateWebview()
             }
         }
     }
@@ -214,61 +214,83 @@ extension AXTabButton {
         titleObserver = nil
     }
 
-    public func forcedStartObserving() {
-        let webView = tab.webView
-
-        self.titleObserver = webView.observe(
-            \.title, options: .new,
-            changeHandler: { [weak self] _, _ in
-                let title = webView.title ?? "Untitled"
-                self?.updateTitle(title)
-
-                // Find favicon
-                webView.evaluateJavaScript(AX_DEFAULT_FAVICON_SCRIPT) {
-                    (result, error) in
-                    if let faviconURLString = result as? String,
-                        let faviconURL = URL(string: faviconURLString)
-                    {
-                        self?.downloadFavicon(from: faviconURL)
-                    } else {
-                        print(
-                            "No favicon found or error: \(String(describing: error))"
-                        )
-                        self?.favicon = nil
-                    }
+    func findFavicon(for webView: AXWebView) {
+        Task {
+            do {
+                guard
+                    let faviconURLString = try await webView.evaluateJavaScript(
+                        AX_DEFAULT_FAVICON_SCRIPT) as? String,
+                    let faviconURL = URL(string: faviconURLString)
+                else {
+                    self.favicon = nil
+                    return
                 }
-            })
-    }
 
-    func downloadFavicon(from url: URL) {
-        let task = URLSession.shared.dataTask(with: url) {
-            (data, response, error) in
-            guard let data = data, error == nil, let image = NSImage(data: data)
-            else {
-                print(
-                    "Failed to download favicon: \(String(describing: error))")
-                return
-            }
-            DispatchQueue.main.async {
-                self.favicon = image
+                // Download the favicon asynchronously
+                self.favicon = try await downloadFavicon(from: faviconURL)
+            } catch {
+                // Handle errors gracefully
+                print("Error fetching or downloading favicon: \(error)")
+                self.favicon = nil
             }
         }
-        task.resume()
+    }
+
+    func downloadFavicon(from url: URL) async throws -> NSImage? {
+        // Use `URLSession` with async API
+        let (data, _) = try await URLSession.shared.data(from: url)
+        guard let image = NSImage(data: data) else {
+            throw NSError(
+                domain: "DownloadFaviconError", code: 0,
+                userInfo: [NSLocalizedDescriptionKey: "Invalid image data"])
+        }
+        return image
     }
 
     public func startObserving() {
         guard let webView = tab._webView else { return }
 
-        let title0 = webView.title ?? "Untitled"
-        self.updateTitle(title0)
+        createObserver(webView)
+    }
+
+    func forceCreateWebview() {
+        let webView = tab.webView
+        createObserver(webView)
+    }
+
+    func createObserver(_ webView: AXWebView) {
+        Task {
+            try await Task.sleep(for: .seconds(2.22))
+            findFavicon(for: webView)
+        }
 
         self.titleObserver = webView.observe(
             \.title, options: .new,
             changeHandler: { [weak self] _, _ in
                 let title = webView.title ?? "Untitled"
                 self?.updateTitle(title)
+
+                // Ensure we have a valid URL and host
+                guard let newURL = webView.url,
+                    let newHost = newURL.host
+                else { return }
+
+                // Extract characters after the first 3 in the host
+                let newHostSubstring = newHost.dropFirst(3).prefix(3)
+                if let currentHost = self?.tab.url?.host {
+                    let currentHostSubstring = currentHost.dropFirst(3).prefix(
+                        3)
+
+                    // Compare the substrings
+                    if newHostSubstring != currentHostSubstring {
+                        // If the substrings are different, find a new favicon
+                        self?.tab.url = webView.url
+                        self?.findFavicon(for: webView)
+                    }
+                }
             })
     }
+
 }
 
 // MARK: Mouse Functions
@@ -321,7 +343,7 @@ extension AXTabButton {
     }
 }
 
-// MARK: - Drag and Drop
+// MARK: - Draging Source
 extension AXTabButton: NSDraggingSource, NSPasteboardWriting {
     // Define drag operations
     func draggingSession(
@@ -369,6 +391,18 @@ extension AXTabButton: NSDraggingSource, NSPasteboardWriting {
             with: [draggingItem], event: event, source: self)
 
         self.isHidden = true
+    }
+
+    override func draggingExited(_ sender: (any NSDraggingInfo)?) {
+        self.isHidden = false
+    }
+
+    override func draggingEnded(_ sender: any NSDraggingInfo) {
+        self.isHidden = false
+    }
+
+    override func concludeDragOperation(_ sender: (any NSDraggingInfo)?) {
+        self.isHidden = false
     }
 
     // Helper: Create a snapshot of the button for the dragging image

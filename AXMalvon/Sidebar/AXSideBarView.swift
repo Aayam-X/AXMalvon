@@ -80,7 +80,8 @@ class AXSidebarView: NSView {
 
             let tabAt = tabGroup.selectedIndex
 
-            if tabAt == -1 {
+            if tabAt == -1 || tabGroup.tabs.count <= tabAt {
+                tabGroup.selectedIndex = -1
                 window.containerView.createEmptyView()
             } else {
                 window.containerView.updateView(webView: tabs[tabAt].webView)

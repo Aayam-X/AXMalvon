@@ -1,11 +1,10 @@
 # Log
 
 ## Implement Soon
-- [ ] PRIVATE MODE DISABLE SQLITE
+- [x] PRIVATE MODE DISABLE SQLITE
 - [ ] Search Bar Window Looks empty, create something similar to Safari's favourites page 
 
 #### Predecessor Features
-- [ ] Beautiful Looking Malvon -> About View ❤️
 - [ ] Preference Panel
 - [ ] Browsing History
 - [ ] Downloads Panel + Mini-view
@@ -16,6 +15,7 @@
 - [x] Private Browsing
 - [x] Single-window implementation
 - [x] Move favicons to AXTabButton; maybe run the script when the title updates?
+- [x] Beautiful Looking Malvon -> About View
 
 ## 0.1
 - [x] COMPLETE RE-WRITE FROM SCRATCH 🥳🎉

@@ -540,7 +540,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Malvon needs access to your camera";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2024 Ashwin Paudel. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2024 Ashwin Paudel, Aayam(X). All rights reserved.";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Malvon needs access to your microphone";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -574,7 +574,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Malvon needs access to your camera";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2024 Ashwin Paudel. All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2024 Ashwin Paudel, Aayam(X). All rights reserved.";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Malvon needs access to your microphone";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;

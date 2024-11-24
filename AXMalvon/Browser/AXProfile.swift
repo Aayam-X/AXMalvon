@@ -9,15 +9,59 @@
 import Foundation
 import WebKit
 
+struct AXProfileData: Codable {
+    var name: String
+    var configID: String
+    var selectedTabGroupIndex: Int
+
+    // Convert to dictionary for UserDefaults storage
+    func toDictionary() -> [String: Any] {
+        return [
+            "name": name,
+            "id": configID,
+            "i": selectedTabGroupIndex,
+        ]
+    }
+
+    // Create from a dictionary loaded from UserDefaults
+    static func fromDictionary(_ dictionary: [String: Any]) -> AXProfileData? {
+        guard let name = dictionary["name"] as? String,
+            let configID = dictionary["id"] as? String,
+            let selectedTabGroupIndex = dictionary["i"]
+                as? Int
+        else {
+            return nil
+        }
+        return AXProfileData(
+            name: name, configID: configID,
+            selectedTabGroupIndex: selectedTabGroupIndex)
+    }
+}
+
 class AXProfile {
     let name: String
     var configuration: WKWebViewConfiguration
     var tabGroups: [AXTabGroup] = []
     var currentTabGroup: AXTabGroup
 
+    var hasLoadedTabs: Bool = false
+
     var currentTabGroupIndex = 0 {
         didSet {
             currentTabGroup = tabGroups[currentTabGroupIndex]
+        }
+    }
+
+    convenience init(name: String) {
+        // Check if the profile already exists
+        if let profileData = AXProfile.loadProfile(name: name) {
+            let config = AXProfile.createConfig(with: profileData.configID)
+
+            self.init(name: name, config: config, loadsDefaultData: true)
+            self.currentTabGroupIndex = profileData.selectedTabGroupIndex
+        } else {
+            let config = AXProfile.createNewProfile(name: name)
+            self.init(name: name, config: config, loadsDefaultData: true)
         }
     }
 
@@ -34,28 +78,110 @@ class AXProfile {
         }
     }
 
-    convenience init(name: String) {
+    // MARK: - Profile Defaults
+    class private func createNewProfile(name: String) -> WKWebViewConfiguration
+    {
         let defaults = UserDefaults.standard
-        let config: WKWebViewConfiguration
+        var profiles =
+            defaults.dictionary(forKey: "Profiles") as? [String: [String: Any]]
+            ?? [:]
 
-        if let configID = defaults.string(forKey: "configurationID-\(name)"),
-            let uuid = UUID(uuidString: configID)
-        {
-            config = WKWebViewConfiguration()
-            config.websiteDataStore = WKWebsiteDataStore(forIdentifier: uuid)
-        } else {
-            let newID = UUID()
-            defaults.set(newID.uuidString, forKey: "configurationID-\(name)")
-            config = WKWebViewConfiguration()
-            config.websiteDataStore = WKWebsiteDataStore(forIdentifier: newID)
+        // Create new profile data
+        let newProfileData = AXProfileData(
+            name: name, configID: UUID().uuidString, selectedTabGroupIndex: -1)
+
+        // Save the new profile data as a dictionary
+        profiles[name] = newProfileData.toDictionary()
+        defaults.set(profiles, forKey: "Profiles")
+
+        // Create a new WKWebView configuration
+        let config = WKWebViewConfiguration()
+        config.websiteDataStore = WKWebsiteDataStore(forIdentifier: UUID())
+        return config
+    }
+
+    class private func loadProfile(name: String) -> AXProfileData? {
+        let defaults = UserDefaults.standard
+        let profiles =
+            defaults.dictionary(forKey: "Profiles") as? [String: [String: Any]]
+            ?? [:]
+
+        // Load and convert back to AXProfileData
+        if let profileDict = profiles[name] {
+            return AXProfileData.fromDictionary(profileDict)
         }
 
-        self.init(name: name, config: config, loadsDefaultData: true)
+        return nil
+    }
+
+    private class func createConfig(with id: String) -> WKWebViewConfiguration {
+        let config = WKWebViewConfiguration()
+        if let uuid = UUID(uuidString: id) {
+            config.websiteDataStore = WKWebsiteDataStore(forIdentifier: uuid)
+        }
+        return config
+    }
+
+    // MARK: - Tab Groups JSON
+    private var fileURL: URL {
+        let fileManager = FileManager.default
+        let appSupportDirectory = fileManager.urls(
+            for: .applicationSupportDirectory, in: .userDomainMask
+        ).first!
+
+        #if DEBUG
+            let directoryURL = appSupportDirectory.appendingPathComponent(
+                "AXMalvon", isDirectory: true)
+        #else
+            let directoryURL = appSupportDirectory.appendingPathComponent(
+                "Malvon", isDirectory: true)
+        #endif
+
+        if !fileManager.fileExists(atPath: directoryURL.path) {
+            try? fileManager.createDirectory(
+                at: directoryURL, withIntermediateDirectories: true,
+                attributes: nil)
+        }
+
+        return directoryURL.appendingPathComponent("\(name)-TabGroups.json")
+    }
+
+    func saveTabGroups() {
+        guard hasLoadedTabs else { return }
+        hasLoadedTabs = false
 
         #if !DEBUG
-            self.currentTabGroupIndex = defaults.integer(
-                forKey: "\(name)-selectedTabGroup")
+            let defaults = UserDefaults.standard
+
+            var profiles =
+                defaults.dictionary(forKey: "Profiles")
+                as? [String: [String: Any]] ?? [:]
+            profiles[name, default: [:]]["i"] = currentTabGroupIndex
+            defaults.set(profiles, forKey: "Profiles")
         #endif
+
+        let encoder = JSONEncoder()
+        do {
+            let data = try encoder.encode(tabGroups)
+            try data.write(to: fileURL)
+        } catch {
+            print("Failed to save tab groups: \(error)")
+        }
+    }
+
+    func loadTabGroups() {
+        hasLoadedTabs = true
+
+        let decoder = JSONDecoder()
+        decoder.userInfo[.webConfiguration] = self.configuration
+
+        do {
+            let data = try Data(contentsOf: fileURL)
+            tabGroups = try decoder.decode([AXTabGroup].self, from: data)
+        } catch {
+            print("Failed to load tab groups or file does not exist: \(error)")
+            tabGroups = [AXTabGroup(name: "Untitled Tab Group")]
+        }
     }
 
     // MARK: - Configuration Features
@@ -88,7 +214,7 @@ class AXProfile {
         extensionLoader.getContentBlockerURLPath { blockerListURL in
             guard let blockerListURL else { return }
 
-            DispatchQueue.global(qos: .userInitiated).async {
+            Task(priority: .background) {
                 try? self.loadContentBlocker(at: blockerListURL)
             }
         }
@@ -122,57 +248,6 @@ class AXProfile {
         }
     }
 
-    // MARK: - User Defaults
-    private var fileURL: URL {
-        let fileManager = FileManager.default
-        let appSupportDirectory = fileManager.urls(
-            for: .applicationSupportDirectory, in: .userDomainMask
-        ).first!
-
-        #if DEBUG
-            let directoryURL = appSupportDirectory.appendingPathComponent(
-                "AXMalvon", isDirectory: true)
-        #else
-            let directoryURL = appSupportDirectory.appendingPathComponent(
-                "Malvon", isDirectory: true)
-        #endif
-
-        if !fileManager.fileExists(atPath: directoryURL.path) {
-            try? fileManager.createDirectory(
-                at: directoryURL, withIntermediateDirectories: true,
-                attributes: nil)
-        }
-
-        return directoryURL.appendingPathComponent("TabGroups-\(name).json")
-    }
-
-    func saveTabGroups() {
-        #if !DEBUG
-            UserDefaults.standard.set(
-                currentTabGroupIndex, forKey: "\(name)-selectedTabGroup")
-        #endif
-
-        let encoder = JSONEncoder()
-        do {
-            let data = try encoder.encode(tabGroups)
-            try data.write(to: fileURL)
-        } catch {
-            print("Failed to save tab groups: \(error)")
-        }
-    }
-
-    func loadTabGroups() {
-        let decoder = JSONDecoder()
-        decoder.userInfo[.webConfiguration] = self.configuration
-
-        do {
-            let data = try Data(contentsOf: fileURL)
-            tabGroups = try decoder.decode([AXTabGroup].self, from: data)
-        } catch {
-            print("Failed to load tab groups or file does not exist: \(error)")
-            tabGroups = [AXTabGroup(name: "Untitled Tab Group")]
-        }
-    }
 }
 
 class AXPrivateProfile: AXProfile {

@@ -133,6 +133,7 @@ class AXTabBarView: NSView {
         for (index, button) in tabStackView.arrangedSubviews.enumerated()
             .dropFirst(after)
         {
+            print("NEW DELETATION INDEX = \(index)")
             if let button = button as? AXTabButton {
                 button.tag = index
             }
@@ -188,6 +189,78 @@ class AXTabBarView: NSView {
     }
 }
 
+// MARK: - Tab Button Delegate
+extension AXTabBarView: AXTabButtonDelegate {
+    func tabButtonDeactivatedWebView(_ tabButton: AXTabButton) {
+        let tab = tabGroup.tabs[tabButton.tag]
+
+        if tab.webConfiguration == nil {
+            // FIXME: Get the profile's web configuration
+            // This doesn't work if the tab was created locally; works only when tab is created by JSON tab group file
+        }
+
+        tab._webView?.removeFromSuperview()
+        tab._webView = nil
+    }
+
+    func tabButtonActiveTitleChanged(
+        _ newTitle: String, for tabButton: AXTabButton
+    ) {
+        delegate?.activeTabTitleChanged(to: newTitle)
+    }
+
+    func tabButtonDidSelect(_ tabButton: AXTabButton) {
+        let previousTag = tabGroup.selectedIndex
+
+        let newTag = tabButton.tag
+        tabGroup.selectedIndex = newTag
+
+        // Update the active tab
+        updateTabSelection(from: previousTag, to: newTag)
+    }
+
+    func tabButtonWillClose(_ tabButton: AXTabButton) {
+        let index = tabButton.tag
+
+        // Remove the tab from the group
+        tabGroup.tabs.remove(at: index)
+        tabButton.stopObserving()
+        tabButton.removeFromSuperview()
+
+        print("DELETED TAB COUNT", tabGroup.tabs.count)
+
+        // Update indices of tabs after the removed one
+        updateIndicies(after: index)
+    }
+
+    private func updateSelectedItemIndex(after index: Int) {
+        // Handle when there are no more tabs left
+        if tabGroup.tabs.isEmpty {
+            print("No tabs left")
+            tabGroup.selectedIndex = -1
+            delegate?.tabBarSwitchedTo(tabAt: -1)
+            return
+        }
+
+        // If index is out of bounds, select the last tab
+        let tabCount = tabGroup.tabs.count
+        let tabCountIndex = tabGroup.tabs.count - 1
+
+        if index >= tabCount || tabGroup.selectedIndex >= tabCountIndex {
+            tabGroup.selectedIndex = tabCountIndex
+        } else /* if tabGroup.selectedIndex < index */
+        {
+            // Do nothing
+        }
+
+        print("Updated Tab Index: \(tabGroup.selectedIndex)")
+        (tabStackView.arrangedSubviews[tabGroup.selectedIndex] as! AXTabButton)
+            .isSelected = true
+
+        delegate?.tabBarSwitchedTo(tabAt: tabGroup.selectedIndex)
+    }
+}
+
 // MARK: - Dragging Destination
 extension AXTabBarView {
     override var registeredDraggedTypes: [NSPasteboard.PasteboardType] {
@@ -238,12 +311,17 @@ extension AXTabBarView {
                 forType: .axTabButton) as? String, let tag = Int(pasteboard),
             let dragTargetIndex
         else {
+            print("Not concluded")
             return false
         }
 
         reorderTabs(from: tag, to: dragTargetIndex)
-        print("Not concluded")
         return true
+    }
+
+    override func draggingExited(_ sender: (any NSDraggingInfo)?) {
+        guard let sender else { return }
+        _ = performDragOperation(sender)
     }
 
     override func concludeDragOperation(_ sender: (any NSDraggingInfo)?) {
@@ -251,75 +329,6 @@ extension AXTabBarView {
         //divider.removeFromSuperview()
         dragTargetIndex = nil
         print("Drag operation concluded")
-    }
-}
-
-// MARK: - Tab Button Delegate
-extension AXTabBarView: AXTabButtonDelegate {
-    func tabButtonDeactivatedWebView(_ tabButton: AXTabButton) {
-        let tab = tabGroup.tabs[tabButton.tag]
-
-        if tab.webConfiguration == nil {
-            // FIXME: Get the profile's web configuration
-            // This doesn't work if the tab was created locally; works only when tab is created by JSON tab group file
-        }
-
-        tab._webView?.removeFromSuperview()
-        tab._webView = nil
-    }
-
-    func tabButtonActiveTitleChanged(
-        _ newTitle: String, for tabButton: AXTabButton
-    ) {
-        delegate?.activeTabTitleChanged(to: newTitle)
-    }
-
-    func tabButtonDidSelect(_ tabButton: AXTabButton) {
-        let previousTag = tabGroup.selectedIndex
-        let newTag = tabButton.tag
-        tabGroup.selectedIndex = newTag
-
-        // Update the active tab
-        updateTabSelection(from: previousTag, to: newTag)
-    }
-
-    func tabButtonWillClose(_ tabButton: AXTabButton) {
-        let index = tabButton.tag
-
-        // Remove the tab from the group
-        tabGroup.tabs.remove(at: index)
-        tabButton.stopObserving()
-        tabButton.removeFromSuperview()
-
-        print("DELETED TAB COUNT", tabGroup.tabs.count)
-
-        // Update indices of tabs after the removed one
-        updateIndicies(after: index)
-    }
-
-    private func updateSelectedItemIndex(after index: Int) {
-        // Handle when there are no more tabs left
-        if tabGroup.tabs.isEmpty {
-            print("No tabs left")
-            tabGroup.selectedIndex = -1
-            delegate?.tabBarSwitchedTo(tabAt: -1)
-            return
-        }
-
-        // If index is out of bounds, select the last tab
-        if index >= tabGroup.tabs.count
-            && tabGroup.selectedIndex >= tabGroup.tabs.count
-        {
-            tabGroup.selectedIndex = tabGroup.tabs.count - 1
-        } else /* if tabGroup.selectedIndex < index */
-        {
-            // Do nothing
-        }
-
-        (tabStackView.arrangedSubviews[tabGroup.selectedIndex] as! AXTabButton)
-            .isSelected = true
-
-        delegate?.tabBarSwitchedTo(tabAt: tabGroup.selectedIndex)
     }
 }
 

@@ -21,6 +21,9 @@
                         <items>
                             <menuItem title="About AXMalvon" id="OyB-Wd-BX4">
                                 <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="showAboutView:" target="-1" id="5Jb-QF-SnZ"/>
+                                </connections>
                             </menuItem>
                             <menuItem title="Set as default browser" id="ell-nM-3hH">
                                 <modifierMask key="keyEquivalentModifierMask"/>

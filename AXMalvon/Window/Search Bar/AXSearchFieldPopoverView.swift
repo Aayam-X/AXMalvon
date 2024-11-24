@@ -300,8 +300,12 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
 
         searchEnter(fixURL(url))
 
-        DispatchQueue.global(qos: .background).async {
-            AXSearchDatabase.shared.incrementOccurrence(for: value)
+        guard let parentWindow = searchBarWindow.parentWindow1 else { return }
+
+        Task(priority: .background) {
+            if parentWindow.profiles[0].name != "Private" {
+                AXSearchDatabase.shared.incrementOccurrence(for: value)
+            }
         }
     }
 

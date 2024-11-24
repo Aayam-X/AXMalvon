@@ -118,6 +118,7 @@ class AXSidebarPopoverView: NSView, NSTableViewDelegate, NSTableViewDataSource,
     }
 
     @objc private func switchProfile() {
+        // FIXME: Don't use tableView.selectedRow here
         delegate?.didSwitchProfile(to: tableView.selectedRow)
         tableView.reloadData()
     }

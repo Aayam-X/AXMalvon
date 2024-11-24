@@ -7,6 +7,7 @@
 //
 
 import Cocoa
+import SwiftUI
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
@@ -64,5 +65,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBAction func newPrivateWindow(_ sender: Any?) {
         let window = AXWindow(with: [AXPrivateProfile()])
         window.makeKeyAndOrderFront(nil)
+    }
+
+    @IBAction func showAboutView(_ sender: Any?) {
+        // Create the SwiftUI view
+        let aboutView = AXAboutView()
+        let hostingView = NSHostingView(rootView: aboutView)
+
+        // Define the window size
+        let windowWidth: CGFloat = 450
+        let windowHeight: CGFloat = 250
+
+        // Initialize the window
+        let myWindow = NSWindow(
+            contentRect: NSRect(
+                x: 0, y: 0, width: windowWidth, height: windowHeight),
+            styleMask: [.closable, .titled, .fullSizeContentView],
+            backing: .buffered,
+            defer: true
+        )
+
+        // Set window properties
+        myWindow.titlebarAppearsTransparent = true
+        myWindow.contentView = hostingView
+        myWindow.center()
+        myWindow.makeKeyAndOrderFront(nil)
+        myWindow.isReleasedWhenClosed = false
     }
 }
