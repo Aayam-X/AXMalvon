@@ -50,20 +50,17 @@ class AXGestureView: NSView {
         return popover
     }()
 
-    var backgroundColor: NSColor = {
-        #if DEBUG
-            return .systemGray.withAlphaComponent(0.2)
-        #else
-            return .systemRed.withAlphaComponent(0.2)
-        #endif
+    private lazy var bottomLine: NSBox = {
+        let line = NSBox()
+        line.boxType = .separator
+        line.translatesAutoresizingMaskIntoConstraints = false
+        return line
     }()
 
     override func viewWillDraw() {
         if hasDrawn { return }
         defer { hasDrawn = true }
         setTrackingArea()
-
-        self.layer?.backgroundColor = backgroundColor.cgColor
 
         // Constraints for the Tab Group Information View
         tabGroupInformationView.translatesAutoresizingMaskIntoConstraints =
@@ -81,6 +78,15 @@ class AXGestureView: NSView {
             tabGroupInformationView.topAnchor.constraint(
                 equalTo: topAnchor, constant: 4),
             tabGroupInfoViewLeftConstraint!,
+        ])
+
+        addSubview(bottomLine)
+        NSLayoutConstraint.activate([
+            bottomLine.bottomAnchor.constraint(equalTo: bottomAnchor),
+            bottomLine.leftAnchor.constraint(equalTo: leftAnchor, constant: 12),
+            bottomLine.rightAnchor.constraint(
+                equalTo: rightAnchor, constant: -12),
+            bottomLine.heightAnchor.constraint(equalToConstant: 1),
         ])
     }
 

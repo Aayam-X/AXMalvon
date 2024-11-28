@@ -50,6 +50,33 @@ class AXWindow: NSWindow, NSWindowDelegate {
         defaultProfile.currentTabGroup
     }
 
+    private lazy var visualEffectView: NSVisualEffectView = {
+        let visualEffectView = NSVisualEffectView()
+        visualEffectView.blendingMode = .behindWindow
+        visualEffectView.material = .sidebar
+        visualEffectView.wantsLayer = true
+
+        let tintView = NSView()
+        tintView.translatesAutoresizingMaskIntoConstraints = false
+        tintView.wantsLayer = true
+        tintView.layer?.backgroundColor =
+            NSColor.systemPink.withAlphaComponent(0.2).cgColor
+
+        // Add tint view on top of the visual effect view
+        visualEffectView.addSubview(tintView)
+        NSLayoutConstraint.activate([
+            tintView.leadingAnchor.constraint(
+                equalTo: visualEffectView.leadingAnchor),
+            tintView.trailingAnchor.constraint(
+                equalTo: visualEffectView.trailingAnchor),
+            tintView.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
+            tintView.bottomAnchor.constraint(
+                equalTo: visualEffectView.bottomAnchor),
+        ])
+
+        return visualEffectView
+    }()
+
     init(with profiles: [AXProfile]) {
         self.profiles = profiles
         defaultProfile = profiles[profileIndex]  // 0
@@ -77,9 +104,14 @@ class AXWindow: NSWindow, NSWindowDelegate {
     }
 
     private func setupComponents() {
+        self.contentView = visualEffectView
+        splitView.frame = visualEffectView.bounds
+        visualEffectView.addSubview(splitView)
+        splitView.autoresizingMask = [.height, .width]
+
         splitView.addArrangedSubview(sidebarView)
         splitView.addArrangedSubview(containerView)
-        self.contentView = splitView
+
         sidebarView.frame.size.width = 180
 
         sidebarView.delegate = self
@@ -266,10 +298,14 @@ extension AXWindow: AXSideBarViewDelegate {
                 hiddenSidebarView = true
                 splitView.removeArrangedSubview(sidebarView)
                 trafficLightManager.hideTrafficLights(true)
+
+                containerView.splitViewLeftAnchorConstraint?.constant = 9
             } else {
                 hiddenSidebarView = false
                 splitView.insertArrangedSubview(sidebarView, at: 0)
                 trafficLightManager.hideTrafficLights(false)
+
+                containerView.splitViewLeftAnchorConstraint?.constant = 0
             }
 
             splitView.layoutSubtreeIfNeeded()
@@ -381,13 +417,6 @@ extension AXWindow {
     @IBAction func closeWindow(_ sender: Any) {
         self.close()
     }
-
-    /// When creating a new window, a new tab group must be created. But the option to switch tab groups is always there. In addition, I believe that the [profiles] must be a static/singleton variable for the entire app. (not just local to the window).
-    ///  We'll work on this later
-    //    @IBAction func createNewWindow(_ sender: Any) {
-    //        let window = AXWindow()
-    //        window.makeKeyAndOrderFront(nil)
-    //    }
 
     @IBAction func showHideSidebar(_ sender: Any) {
         toggleTabSidebar()

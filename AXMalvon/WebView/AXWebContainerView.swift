@@ -20,7 +20,7 @@ protocol AXWebContainerViewDelegate: AnyObject {
 
 class AXWebContainerView: NSView {
     weak var delegate: AXWebContainerViewDelegate?
-    weak var sidebar: AXSidebarView?  // You could use NSView to make it more dynamic
+    weak var sidebar: NSView?
 
     private var hasDrawn: Bool = false
     weak var currentWebView: AXWebView?
@@ -30,6 +30,7 @@ class AXWebContainerView: NSView {
     var sidebarTrackingArea: NSTrackingArea!
     var isAnimating: Bool = false
     var progressBarObserver: NSKeyValueObservation?
+    var splitViewLeftAnchorConstraint: NSLayoutConstraint?
 
     var websiteTitleLabel: NSTextField = {
         let title = NSTextField()
@@ -39,6 +40,7 @@ class AXWebContainerView: NSView {
         title.usesSingleLineMode = true
         title.drawsBackground = false
         title.alphaValue = 0.3
+        title.font = .boldSystemFont(ofSize: 9)
         title.translatesAutoresizingMaskIntoConstraints = false
         return title
     }()
@@ -52,7 +54,7 @@ class AXWebContainerView: NSView {
 
         addSubview(websiteTitleLabel)
         websiteTitleLabel.topAnchor.constraint(
-            equalTo: topAnchor, constant: -0.5
+            equalTo: topAnchor, constant: -1.2
         ).isActive = true
         websiteTitleLabel.leftAnchor.constraint(
             equalTo: leftAnchor, constant: 15
@@ -67,13 +69,14 @@ class AXWebContainerView: NSView {
 
         splitView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(splitView)
-        splitView.topAnchor.constraint(equalTo: topAnchor, constant: 14)
+        splitView.topAnchor.constraint(equalTo: topAnchor, constant: 9.0)
             .isActive = true
-        splitView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -14)
+        splitView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -9.0)
             .isActive = true
-        splitView.leftAnchor.constraint(equalTo: leftAnchor, constant: 14)
-            .isActive = true
-        splitView.rightAnchor.constraint(equalTo: rightAnchor, constant: -14)
+        splitViewLeftAnchorConstraint = splitView.leftAnchor.constraint(
+            equalTo: leftAnchor, constant: 1)
+        splitViewLeftAnchorConstraint!.isActive = true
+        splitView.rightAnchor.constraint(equalTo: rightAnchor, constant: -9.0)
             .isActive = true
     }
 
@@ -126,9 +129,7 @@ class AXWebContainerView: NSView {
         addSubview(sidebar)
 
         if !isAnimating {
-            sidebar.layer?.backgroundColor =
-                NSColor.red.withAlphaComponent(0.3).cgColor
-            sidebar.extendVisualEffectView()
+            sidebar.layer?.backgroundColor = NSColor.systemGray.cgColor
             NSAnimationContext.runAnimationGroup(
                 { context in
                     context.duration = 0.1
@@ -137,6 +138,9 @@ class AXWebContainerView: NSView {
                 completionHandler: {
                     self.isAnimating = false
                 })
+
+            guard let window = self.window as? AXWindow else { return }
+            window.trafficLightManager.hideTrafficLights(false)
         }
     }
 

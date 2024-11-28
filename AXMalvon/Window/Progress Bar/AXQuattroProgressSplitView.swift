@@ -24,14 +24,6 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         wantsLayer = true
         setupLayers()
 
-        #if DEBUG
-            self.layer?.backgroundColor =
-                NSColor.systemGray.withAlphaComponent(0.3).cgColor
-        #else
-            self.layer?.backgroundColor =
-                NSColor.systemRed.withAlphaComponent(0.3).cgColor
-        #endif
-
         delegate = self
         isVertical = true
         dividerStyle = .thin
@@ -67,6 +59,10 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         -> Bool
     {
         return false
+    }
+
+    override func drawDivider(in rect: NSRect) {
+        // Empty Divider
     }
 
     private func setupLayers() {

@@ -16,6 +16,8 @@
 - [x] Single-window implementation
 - [x] Move favicons to AXTabButton; maybe run the script when the title updates?
 - [x] Beautiful Looking Malvon -> About View
+- [x] Updated UI to use one single visual effect view; rather than just the sidebar
+- [x] Slimmed Down the bezels
 
 ## 0.1
 - [x] COMPLETE RE-WRITE FROM SCRATCH 🥳🎉

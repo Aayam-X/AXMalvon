@@ -21,17 +21,7 @@ class AXSidebarView: NSView {
 
     var gestureView = AXGestureView()
     private weak var tabBarView: AXTabBarView?
-    private var visualEffectViewTopAnchor: NSLayoutConstraint?
     var mouseExitedTrackingArea: NSTrackingArea!
-
-    private lazy var visualEffectView: NSVisualEffectView = {
-        let visualEffectView = NSVisualEffectView()
-        visualEffectView.blendingMode = .behindWindow
-        visualEffectView.material = .sidebar
-        visualEffectView.wantsLayer = true
-        visualEffectView.translatesAutoresizingMaskIntoConstraints = false
-        return visualEffectView
-    }()
 
     override var tag: Int {
         return 0x01
@@ -40,7 +30,6 @@ class AXSidebarView: NSView {
     override func viewWillDraw() {
         if hasDrawn { return }
         defer { hasDrawn = true }
-        setUpVisualEffectView()
 
         mouseExitedTrackingArea = NSTrackingArea(
             rect: .init(
@@ -54,7 +43,8 @@ class AXSidebarView: NSView {
         NSLayoutConstraint.activate([
             gestureView.topAnchor.constraint(equalTo: topAnchor),
             gestureView.leftAnchor.constraint(equalTo: leftAnchor),
-            gestureView.rightAnchor.constraint(equalTo: rightAnchor),
+            gestureView.rightAnchor.constraint(
+                equalTo: rightAnchor, constant: 3),
             gestureView.heightAnchor.constraint(equalToConstant: 39),
         ])
 
@@ -121,8 +111,6 @@ class AXSidebarView: NSView {
                 self.removeFromSuperview()
             })
 
-        visualEffectViewTopAnchor?.constant = 39
-
         window.trafficLightManager.hideTrafficLights(true)
     }
 
@@ -134,45 +122,6 @@ class AXSidebarView: NSView {
                 width: bounds.size.width + 100, height: bounds.size.height),
             options: [.activeAlways, .mouseEnteredAndExited], owner: self)
         addTrackingArea(mouseExitedTrackingArea)
-    }
-
-    func setUpVisualEffectView() {
-        addSubview(visualEffectView)
-        self.visualEffectViewTopAnchor = visualEffectView.topAnchor.constraint(
-            equalTo: topAnchor, constant: 39)
-        self.visualEffectViewTopAnchor!.isActive = true
-
-        NSLayoutConstraint.activate([
-            visualEffectView.leftAnchor.constraint(equalTo: leftAnchor),
-            visualEffectView.rightAnchor.constraint(equalTo: rightAnchor),
-            visualEffectView.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
-
-        // Add a tint overlay
-        let tintView = NSView()
-        tintView.translatesAutoresizingMaskIntoConstraints = false
-        tintView.wantsLayer = true
-        tintView.layer?.backgroundColor =
-            NSColor.systemRed.withAlphaComponent(0.2).cgColor
-
-        // Add tint view on top of the visual effect view
-        visualEffectView.addSubview(tintView)
-        NSLayoutConstraint.activate([
-            tintView.leadingAnchor.constraint(
-                equalTo: visualEffectView.leadingAnchor),
-            tintView.trailingAnchor.constraint(
-                equalTo: visualEffectView.trailingAnchor),
-            tintView.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
-            tintView.bottomAnchor.constraint(
-                equalTo: visualEffectView.bottomAnchor),
-        ])
-    }
-
-    func extendVisualEffectView() {
-        visualEffectViewTopAnchor?.constant = 0
-
-        guard let window = self.window as? AXWindow else { return }
-        window.trafficLightManager.hideTrafficLights(false)
     }
 }
 
