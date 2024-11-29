@@ -116,7 +116,7 @@ class AXTabButton: NSButton {
         self.layer?.cornerRadius = 10
         layer?.masksToBounds = false
 
-        layer?.shadowColor = NSColor.black.cgColor
+        layer?.shadowColor = NSColor.textColor.cgColor
         layer?.shadowOpacity = 0.0  // Adjust shadow visibility
         layer?.shadowRadius = 1.0  // Adjust softness
         layer?.shadowOffset = CGSize(width: 0, height: 2)  // Shadow below the button

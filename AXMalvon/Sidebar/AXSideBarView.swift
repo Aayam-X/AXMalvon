@@ -7,11 +7,14 @@
 //
 
 import Cocoa
+import WebKit
 
 protocol AXSideBarViewDelegate: AnyObject {
     func sidebarView(didSelectTabGroup tabGroupAt: Int)
     func sidebarViewactiveTitle(changed to: String)
     func sidebarSwitchedTab(at: Int)
+
+    func deactivatedTab() -> WKWebViewConfiguration?
 }
 
 class AXSidebarView: NSView {
@@ -127,6 +130,10 @@ class AXSidebarView: NSView {
 
 // MARK: - Tab Bar Delegate
 extension AXSidebarView: AXTabBarViewDelegate {
+    func deactivatedTab() -> WKWebViewConfiguration? {
+        delegate?.deactivatedTab()
+    }
+
     func activeTabTitleChanged(to: String) {
         delegate?.sidebarViewactiveTitle(changed: to)
     }

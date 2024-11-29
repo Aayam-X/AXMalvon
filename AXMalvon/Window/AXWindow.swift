@@ -221,7 +221,8 @@ extension AXWindow: AXSearchBarWindowDelegate {
             frame: .zero, configuration: currentConfiguration)
         webView.load(URLRequest(url: url))
 
-        currentTabGroup.addTab(.init(title: "Google", webView: webView))
+        currentTabGroup.addTab(
+            .init(title: webView.title ?? "Untitled Tab", webView: webView))
     }
 
     func searchBarUpdatesCurrentTab(with url: URL) {
@@ -268,6 +269,10 @@ extension AXWindow: AXWebContainerViewDelegate {
 // MARK: - Sidebar View Delegate
 // TODO: - Move this code to the popover view
 extension AXWindow: AXSideBarViewDelegate {
+    func deactivatedTab() -> WKWebViewConfiguration? {
+        return defaultProfile.configuration
+    }
+
     func sidebarSwitchedTab(at: Int) {
         guard let tabs = sidebarView.currentTabGroup?.tabs else { return }
 

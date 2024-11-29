@@ -7,10 +7,14 @@
 //
 
 import AppKit
+import WebKit
 
 protocol AXTabBarViewDelegate: AnyObject {
     func tabBarSwitchedTo(tabAt: Int)
     func activeTabTitleChanged(to: String)
+
+    /// Return a WKWebViewConfiguration when the user deactivates a self-created web view
+    func deactivatedTab() -> WKWebViewConfiguration?
 }
 
 class AXTabBarView: NSView {
@@ -195,8 +199,7 @@ extension AXTabBarView: AXTabButtonDelegate {
         let tab = tabGroup.tabs[tabButton.tag]
 
         if tab.webConfiguration == nil {
-            // FIXME: Get the profile's web configuration
-            // This doesn't work if the tab was created locally; works only when tab is created by JSON tab group file
+            tab.webConfiguration = delegate?.deactivatedTab()
         }
 
         tab._webView?.removeFromSuperview()

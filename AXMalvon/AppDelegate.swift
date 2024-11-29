@@ -25,6 +25,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window!.makeKeyAndOrderFront(nil)
     }
 
+    // https://github.com/Lord-Kamina/SwiftDefaultApps#usage-notes
+    func application(_ application: NSApplication, open urls: [URL]) {
+        if let window = window {
+            for url in urls {
+                window.searchBarCreatesNewTab(with: url)
+            }
+        } else {
+            window = AXWindow(with: profiles)
+            window!.makeKeyAndOrderFront(nil)
+
+            for url in urls {
+                window!.searchBarCreatesNewTab(with: url)
+            }
+        }
+    }
+
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
         for profile in profiles {
