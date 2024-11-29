@@ -1,8 +1,8 @@
 # Log
 
 ## Implement Soon
-- [x] PRIVATE MODE DISABLE SQLITE
-- [ ] Search Bar Window Looks empty, create something similar to Safari's favourites page 
+- [ ] Search Bar Window Looks empty, create something similar to Safari's favourites page
+- [ ] Favicon not working; fix it 
 
 #### Predecessor Features
 - [ ] Preference Panel
@@ -18,6 +18,9 @@
 - [x] Beautiful Looking Malvon -> About View
 - [x] Updated UI to use one single visual effect view; rather than just the sidebar
 - [x] Slimmed Down the bezels
+- [x] PRIVATE MODE DISABLE SQLITE
+- [x] Browser looks cleaner. Updated UI again
+- [x] Fixed some memory leaks with the observers
 
 ## 0.1
 - [x] COMPLETE RE-WRITE FROM SCRATCH 🥳🎉

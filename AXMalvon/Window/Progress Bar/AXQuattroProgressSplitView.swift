@@ -91,16 +91,18 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
     }
 
     func beginAnimation(with value: Double) {
-        if value >= 93 {
-            finishAnimation()
-        } else if value >= 0.75 {
-            animateProgress(from: 0.75, to: 0.80, duration: 9)
-        } else if value >= 0.50 {
-            animateProgress(from: 0.50, to: 0.75, duration: 1.2)
-        } else if value >= 0.25 {
-            animateProgress(from: 0.25, to: 0.50, duration: 0.9)
-        } else {
-            animateProgress(from: 0.0, to: 0.25, duration: 0.6)
+        DispatchQueue.main.async { [self] in
+            if value >= 93 {
+                finishAnimation()
+            } else if value >= 0.75 {
+                animateProgress(from: 0.75, to: 0.80, duration: 9)
+            } else if value >= 0.50 {
+                animateProgress(from: 0.50, to: 0.75, duration: 1.2)
+            } else if value >= 0.25 {
+                animateProgress(from: 0.25, to: 0.50, duration: 0.9)
+            } else {
+                animateProgress(from: 0.0, to: 0.25, duration: 0.6)
+            }
         }
     }
 

@@ -28,7 +28,7 @@ class AXTabBarView: NSView {
         let box = NSBox()
         box.boxType = .custom
         box.translatesAutoresizingMaskIntoConstraints = false
-        box.heightAnchor.constraint(equalToConstant: 35).isActive = true
+        box.heightAnchor.constraint(equalToConstant: 36).isActive = true
         box.fillColor = NSColor.controlAccentColor
         return box
     }()
@@ -46,7 +46,7 @@ class AXTabBarView: NSView {
 
         tabStackView.translatesAutoresizingMaskIntoConstraints = false
         tabStackView.orientation = .vertical
-        tabStackView.spacing = 1.08
+        tabStackView.spacing = 5
         tabStackView.detachesHiddenViews = true
 
         // Create scrollView

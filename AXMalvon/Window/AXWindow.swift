@@ -294,20 +294,20 @@ extension AXWindow: AXSideBarViewDelegate {
             context.duration = 0.25  // Adjust duration as needed
             context.allowsImplicitAnimation = true
 
-            if splitView.subviews.count == 2 {
+            let sideBarWillCollapsed = splitView.subviews.count == 2
+            if sideBarWillCollapsed {
                 hiddenSidebarView = true
                 splitView.removeArrangedSubview(sidebarView)
                 trafficLightManager.hideTrafficLights(true)
-
-                containerView.splitViewLeftAnchorConstraint?.constant = 9
             } else {
                 hiddenSidebarView = false
                 splitView.insertArrangedSubview(sidebarView, at: 0)
                 trafficLightManager.hideTrafficLights(false)
-
-                containerView.splitViewLeftAnchorConstraint?.constant = 0
             }
 
+            containerView.sidebarCollapsed(
+                sideBarWillCollapsed,
+                isFullScreen: self.styleMask.contains(.fullScreen))
             splitView.layoutSubtreeIfNeeded()
         }
     }

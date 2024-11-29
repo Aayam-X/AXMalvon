@@ -7,19 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		ED39077A2CF023AF005D791F /* wBlock.mlx in Resources */ = {isa = PBXBuildFile; fileRef = ED39076D2CF0235C005D791F /* wBlock.mlx */; };
 		ED78ED152CEFFCB300B12142 /* WebExtensionKit.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = ED78ED092CEFFCB300B12142 /* WebExtensionKit.xpc */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		ED9D55AE2CF155A1000E6319 /* license.txt in Resources */ = {isa = PBXBuildFile; fileRef = ED9D55AD2CF155A1000E6319 /* license.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		ED39077B2CF023C4005D791F /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = ED3AEFDA2CDAED2F002AE6CC /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = ED39076C2CF0235C005D791F;
-			remoteInfo = wBlock;
-		};
 		ED78ED132CEFFCB300B12142 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = ED3AEFDA2CDAED2F002AE6CC /* Project object */;
@@ -211,7 +203,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				ED39077C2CF023C4005D791F /* PBXTargetDependency */,
 				ED78ED142CEFFCB300B12142 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
@@ -308,7 +299,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				ED9D55AE2CF155A1000E6319 /* license.txt in Resources */,
-				ED39077A2CF023AF005D791F /* wBlock.mlx in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -346,11 +336,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		ED39077C2CF023C4005D791F /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = ED39076C2CF0235C005D791F /* wBlock */;
-			targetProxy = ED39077B2CF023C4005D791F /* PBXContainerItemProxy */;
-		};
 		ED78ED142CEFFCB300B12142 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = ED78ED082CEFFCB300B12142 /* WebExtensionKit */;
@@ -530,6 +515,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
@@ -564,6 +550,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;

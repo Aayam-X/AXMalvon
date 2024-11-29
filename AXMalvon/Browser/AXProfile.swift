@@ -206,15 +206,15 @@ class AXProfile {
     }
 
     func enableContentBlockers() {
-        let extensionLoader = AX_wBlockExtension()
-
-        extensionLoader.getContentBlockerURLPath { blockerListURL in
-            guard let blockerListURL else { return }
-
-            Task(priority: .background) {
-                try? self.loadContentBlocker(at: blockerListURL)
-            }
-        }
+        //        let extensionLoader = AX_wBlockExtension()
+        //
+        //        extensionLoader.getContentBlockerURLPath { blockerListURL in
+        //            guard let blockerListURL else { return }
+        //
+        //            Task(priority: .background) {
+        //                try? self.loadContentBlocker(at: blockerListURL)
+        //            }
+        //        }
     }
 
     func enableYouTubeAdBlocker() {

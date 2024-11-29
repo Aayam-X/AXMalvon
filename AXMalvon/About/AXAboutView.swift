@@ -77,7 +77,7 @@ struct AXAboutView: View {
             Spacer()
         }
         .padding([.horizontal, .bottom], 20)
-        .background(.white)
+        .background(.windowBackground)
     }
 }
 

@@ -38,6 +38,10 @@ class AXTabButton: NSButton {
     // Drag & Drop
     private var initialMouseDownLocation: NSPoint?
 
+    // Animations
+    private let shrinkScale: CGFloat = 0.9  // Factor to shrink the button by
+    private let animationDuration: CFTimeInterval = 0.2
+
     var favicon: NSImage? {
         set {
             self.favIconImageView.image =
@@ -51,8 +55,8 @@ class AXTabButton: NSButton {
     var closeButton: AXSidebarTabCloseButton! = AXSidebarTabCloseButton()
 
     // Colors
-    var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
-    var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
+    var hoverColor: NSColor = NSColor.systemGray.withAlphaComponent(0.3)
+    var selectedColor: NSColor = .textBackgroundColor
 
     // Observers
     var titleObserver: NSKeyValueObservation?
@@ -69,6 +73,7 @@ class AXTabButton: NSButton {
         didSet {
             self.layer?.backgroundColor =
                 isSelected ? selectedColor.cgColor : .clear
+            layer?.shadowOpacity = isSelected ? 0.3 : 0.0
             if self.titleObserver == nil {
                 forceCreateWebview()
             }
@@ -101,13 +106,20 @@ class AXTabButton: NSButton {
         self.tab = tab
         super.init(frame: .zero)
         self.translatesAutoresizingMaskIntoConstraints = false
-        self.wantsLayer = true
-        self.layer?.cornerRadius = 5
         self.isBordered = false
         self.bezelStyle = .shadowlessSquare
         title = ""
-        self.heightConstraint = heightAnchor.constraint(equalToConstant: 30)
+        self.heightConstraint = heightAnchor.constraint(equalToConstant: 36)
         heightConstraint!.isActive = true
+
+        self.wantsLayer = true
+        self.layer?.cornerRadius = 10
+        layer?.masksToBounds = false
+
+        layer?.shadowColor = NSColor.black.cgColor
+        layer?.shadowOpacity = 0.0  // Adjust shadow visibility
+        layer?.shadowRadius = 1.0  // Adjust softness
+        layer?.shadowOffset = CGSize(width: 0, height: 2)  // Shadow below the button
     }
 
     override func viewWillDraw() {
@@ -124,8 +136,10 @@ class AXTabButton: NSButton {
         addSubview(favIconImageView)
         favIconImageView.centerYAnchor.constraint(equalTo: centerYAnchor)
             .isActive = true
-        favIconImageView.leftAnchor.constraint(equalTo: leftAnchor, constant: 5)
-            .isActive = true
+        favIconImageView.leftAnchor.constraint(
+            equalTo: leftAnchor, constant: 10
+        )
+        .isActive = true
         favIconImageView.widthAnchor.constraint(equalToConstant: 16).isActive =
             true
         favIconImageView.heightAnchor.constraint(equalToConstant: 16).isActive =
@@ -140,7 +154,7 @@ class AXTabButton: NSButton {
             systemSymbolName: "xmark", accessibilityDescription: nil)
         closeButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
         closeButton.heightAnchor.constraint(equalToConstant: 16).isActive = true
-        closeButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -5)
+        closeButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -7)
             .isActive = true
         closeButton.centerYAnchor.constraint(equalTo: centerYAnchor).isActive =
             true
@@ -154,6 +168,7 @@ class AXTabButton: NSButton {
         titleView.usesSingleLineMode = true
         titleView.drawsBackground = false
         titleView.lineBreakMode = .byTruncatingTail
+        titleView.textColor = .textColor
         addSubview(titleView)
         titleView.leftAnchor.constraint(
             equalTo: favIconImageView.rightAnchor, constant: 5
@@ -161,7 +176,7 @@ class AXTabButton: NSButton {
         titleView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive =
             true
         titleViewRightAnchor = titleView.rightAnchor.constraint(
-            equalTo: closeButton.leftAnchor, constant: 5)
+            equalTo: closeButton.leftAnchor, constant: 7)
         titleViewRightAnchor?.isActive = true
     }
 
@@ -169,9 +184,11 @@ class AXTabButton: NSButton {
         fatalError("init(coder:) has not been implemented")
     }
 
-    deinit {
+    override func removeFromSuperview() {
         titleObserver?.invalidate()
         titleObserver = nil
+
+        super.removeFromSuperview()
     }
 
     func faviconNotFound() {
@@ -259,36 +276,48 @@ extension AXTabButton {
     }
 
     func createObserver(_ webView: AXWebView) {
+        // Initial favicon fetching with delay
         Task {
             try await Task.sleep(for: .seconds(2.22))
             findFavicon(for: webView)
         }
 
+        // Observe changes to the webView's title
         self.titleObserver = webView.observe(
             \.title, options: .new,
             changeHandler: { [weak self] _, _ in
-                let title = webView.title ?? "Untitled"
-                self?.updateTitle(title)
+                guard let self = self else { return }
 
-                // Ensure we have a valid URL and host
+                // Update the tab title
+                let title = webView.title ?? "Untitled"
+                self.updateTitle(title)
+
+                // Ensure new URL and its host are valid
                 guard let newURL = webView.url,
                     let newHost = newURL.host
                 else { return }
 
-                // Extract characters after the first 3 in the host
+                // Extract host substring for comparison
                 let newHostSubstring = newHost.dropFirst(3).prefix(3)
-                if let currentHost = self?.tab.url?.host {
+
+                if let currentURL = self.tab.url,
+                    let currentHost = currentURL.host
+                {
                     let currentHostSubstring = currentHost.dropFirst(3).prefix(
                         3)
 
-                    // Compare the substrings
+                    // Compare hosts and update if different
                     if newHostSubstring != currentHostSubstring {
-                        // If the substrings are different, find a new favicon
-                        self?.tab.url = webView.url
-                        self?.findFavicon(for: webView)
+                        self.tab.url = newURL
+                        self.findFavicon(for: webView)
                     }
+                } else {
+                    // No previous URL, so set the tab's URL and update the favicon
+                    self.tab.url = newURL
+                    self.findFavicon(for: webView)
                 }
-            })
+            }
+        )
     }
 
 }
@@ -307,6 +336,12 @@ extension AXTabButton {
     override func mouseDown(with event: NSEvent) {
         initialMouseDownLocation = event.locationInWindow
 
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.1
+            self.animator().layer?.setAffineTransform(
+                CGAffineTransform(scaleX: 1, y: 0.95))
+        }
+
         if event.clickCount == 1 {
             self.switchTab()
             self.isSelected = true
@@ -317,8 +352,15 @@ extension AXTabButton {
         self.layer?.backgroundColor = selectedColor.cgColor
     }
 
+    override func mouseUp(with event: NSEvent) {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.1
+            self.animator().layer?.setAffineTransform(.identity)
+        }
+    }
+
     override func mouseEntered(with event: NSEvent) {
-        titleViewRightAnchor?.constant = 0
+        titleViewRightAnchor?.constant = -6
         closeButton.isHidden = false
 
         if !isSelected {

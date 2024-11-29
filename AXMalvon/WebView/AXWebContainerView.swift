@@ -25,12 +25,18 @@ class AXWebContainerView: NSView {
     private var hasDrawn: Bool = false
     weak var currentWebView: AXWebView?
 
+    let splitViewContainer = NSView()
     private lazy var splitView = AXWebContainerSplitView()
 
     var sidebarTrackingArea: NSTrackingArea!
     var isAnimating: Bool = false
     var progressBarObserver: NSKeyValueObservation?
-    var splitViewLeftAnchorConstraint: NSLayoutConstraint?
+
+    // Constraints
+    private var splitViewLeftAnchorConstraint: NSLayoutConstraint?
+    private var splitViewTopAnchorConstraint: NSLayoutConstraint?
+    private var splitViewBottomAnchorConstraint: NSLayoutConstraint?
+    private var splitViewRightAnchorConstraint: NSLayoutConstraint?
 
     var websiteTitleLabel: NSTextField = {
         let title = NSTextField()
@@ -50,7 +56,6 @@ class AXWebContainerView: NSView {
         defer { hasDrawn = true }
 
         updateTrackingArea()
-        //self.layer?.backgroundColor = NSColor.systemIndigo.withAlphaComponent(0.3).cgColor
 
         addSubview(websiteTitleLabel)
         websiteTitleLabel.topAnchor.constraint(
@@ -67,25 +72,81 @@ class AXWebContainerView: NSView {
         websiteTitleLabel.stringValue = "Empty Window"
         websiteTitleLabel.delegate = self
 
+        splitViewContainer.translatesAutoresizingMaskIntoConstraints = false
+        splitViewContainer.wantsLayer = true
+        splitViewContainer.layer?.masksToBounds = false
+
+        // Add splitView to the container view
+        let shadow = NSShadow()
+        shadow.shadowColor = .textColor.withAlphaComponent(0.6)
+        shadow.shadowBlurRadius = 2.0
+        shadow.shadowOffset = NSMakeSize(0.0, 0.0)
+        splitViewContainer.shadow = shadow
+
+        addSubview(splitViewContainer)
+        createSplitViewContainerConstraints()
+
+        splitView.wantsLayer = true
+        splitView.layer?.cornerRadius = 5.0
         splitView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(splitView)
-        splitView.topAnchor.constraint(equalTo: topAnchor, constant: 9.0)
-            .isActive = true
-        splitView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -9.0)
-            .isActive = true
-        splitViewLeftAnchorConstraint = splitView.leftAnchor.constraint(
-            equalTo: leftAnchor, constant: 1)
-        splitViewLeftAnchorConstraint!.isActive = true
-        splitView.rightAnchor.constraint(equalTo: rightAnchor, constant: -9.0)
-            .isActive = true
+
+        splitViewContainer.addSubview(splitView)
+        NSLayoutConstraint.activate([
+            splitView.topAnchor.constraint(
+                equalTo: splitViewContainer.topAnchor),
+            splitView.leftAnchor.constraint(
+                equalTo: splitViewContainer.leftAnchor),
+            splitView.rightAnchor.constraint(
+                equalTo: splitViewContainer.rightAnchor),
+            splitView.bottomAnchor.constraint(
+                equalTo: splitViewContainer.bottomAnchor),
+        ])
     }
 
-    deinit {
+    override func removeFromSuperview() {
+        progressBarObserver?.invalidate()
         progressBarObserver = nil
+
+        super.removeFromSuperview()
+    }
+
+    func createSplitViewContainerConstraints() {
+        splitViewTopAnchorConstraint = splitViewContainer.topAnchor.constraint(
+            equalTo: topAnchor, constant: 9.0)
+        splitViewLeftAnchorConstraint = splitViewContainer.leftAnchor
+            .constraint(equalTo: leftAnchor, constant: 2.0)
+        splitViewRightAnchorConstraint = splitViewContainer.rightAnchor
+            .constraint(equalTo: rightAnchor, constant: -9.0)
+        splitViewBottomAnchorConstraint = splitViewContainer.bottomAnchor
+            .constraint(equalTo: bottomAnchor, constant: -9.0)
+
+        splitViewTopAnchorConstraint!.isActive = true
+        splitViewLeftAnchorConstraint!.isActive = true
+        splitViewRightAnchorConstraint!.isActive = true
+        splitViewBottomAnchorConstraint!.isActive = true
+    }
+
+    func sidebarCollapsed(_ collapsed: Bool, isFullScreen: Bool) {
+        // If it is fullScreen
+        if isFullScreen && collapsed {
+            splitViewTopAnchorConstraint?.constant = 0
+            splitViewLeftAnchorConstraint?.constant = 0
+            splitViewRightAnchorConstraint?.constant = 0
+            splitViewBottomAnchorConstraint?.constant = 0
+            splitView.layer?.cornerRadius = 0.0
+        } else {
+            splitViewLeftAnchorConstraint?.constant = collapsed ? 9 : 2
+            splitViewTopAnchorConstraint?.constant = 9
+            splitViewRightAnchorConstraint?.constant = -9
+            splitViewBottomAnchorConstraint?.constant = -9
+            splitView.layer?.cornerRadius = 5.0
+        }
     }
 
     func updateView(webView: AXWebView) {
-        currentWebView?.removeFromSuperview()
+        splitView.arrangedSubviews.forEach { view in
+            splitView.removeArrangedSubview(view)
+        }
 
         self.currentWebView = webView
         self.websiteTitleLabel.stringValue = webView.title ?? "Untitled Page"
@@ -338,10 +399,6 @@ private class AXWebContainerSplitView: NSSplitView, NSSplitViewDelegate {
 
     override func drawDivider(in rect: NSRect) {
         // Make divider invisble
-    }
-
-    override func viewWillDraw() {
-        self.layer?.cornerRadius = 5.0
     }
 
     required init?(coder: NSCoder) {
