@@ -109,13 +109,29 @@ class AXTabBarView: NSView {
         delegate?.tabBarSwitchedTo(tabAt: newIndex)
     }
 
-    func removeTab(at: Int) {
-        let button = tabStackView.arrangedSubviews[at] as! AXTabButton
+    func removeTab(at index: Int) {
+        let button = tabStackView.arrangedSubviews[index] as! AXTabButton
 
-        button.stopObserving()
-        button.removeFromSuperview()
+        // Calculate the off-screen position for the slide animation
+        let finalPosition = button.frame.offsetBy(
+            dx: 0, dy: +button.frame.height)
 
-        updateIndicies(after: at)
+        // Create the slide animation
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.05
+            context.timingFunction = CAMediaTimingFunction(name: .easeIn)
+
+            // Slide the button down underneath the stack view
+            button.animator().setFrameOrigin(finalPosition.origin)
+            button.animator().alphaValue = 0  // Fade out as it slides
+        } completionHandler: {
+            // Remove the button after the animation completes
+            button.removeFromSuperview()
+
+            // Update indices and layout the stack view
+            self.updateIndicies(after: index)
+            self.tabStackView.layoutSubtreeIfNeeded()
+        }
     }
 
     func addTabButton(for tab: AXTab, index: Int) {
@@ -162,6 +178,8 @@ class AXTabBarView: NSView {
     }
 
     private func addButtonToTabView(_ button: NSView) {
+        // Add the button off-screen by modifying its frame
+        button.translatesAutoresizingMaskIntoConstraints = false
         tabStackView.addArrangedSubview(button)
 
         NSLayoutConstraint.activate([
@@ -170,6 +188,26 @@ class AXTabBarView: NSView {
             button.trailingAnchor.constraint(
                 equalTo: tabStackView.trailingAnchor, constant: -3),
         ])
+
+        // Layout the stack view to update frames
+        layoutSubtreeIfNeeded()
+
+        guard let lastSubview = tabStackView.arrangedSubviews.last else {
+            return
+        }
+
+        // Set the initial off-screen position for the animation
+        button.frame.origin.y = lastSubview.frame.maxY
+        button.alphaValue = 0.0  // Optional: Start fully transparent
+
+        // Perform the animation
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.05  // Animation duration
+            context.timingFunction = CAMediaTimingFunction(name: .easeIn)
+
+            button.animator().frame.origin.y = 0  // Slide to its final position
+            button.animator().alphaValue = 1.0  // Optional: Fade in
+        }
     }
 
     private func reorderTabs(from: Int, to: Int) {

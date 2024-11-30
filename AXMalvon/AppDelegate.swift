@@ -38,18 +38,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // https://github.com/Lord-Kamina/SwiftDefaultApps#usage-notes
     func application(_ application: NSApplication, open urls: [URL]) {
-        if let window = window {
+        // Reuse the existing window if it's already created.
+        if let firstWindow = application.keyWindow as? AXWindow {
             for url in urls {
-                window.searchBarCreatesNewTab(with: url)
-            }
-        } else {
-            window = AXWindow(with: profiles)
-            window!.makeKeyAndOrderFront(nil)
-
-            for url in urls {
-                window!.searchBarCreatesNewTab(with: url)
+                firstWindow.searchBarCreatesNewTab(with: url)
             }
         }
+
+        //        else {
+        //            window = AXWindow(with: profiles)
+        //            window!.makeKeyAndOrderFront(nil)
+        //
+        //            for url in urls {
+        //                window!.searchBarCreatesNewTab(with: url)
+        //            }
+        //        }
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
@@ -176,9 +179,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
     }
 
+    // MARK: - Other Functions
+
+    /// Check if email address is valid:
     @MainActor
     private func ev() {
-        Task {  // This ensures the function itself runs asynchronously
+        Task {
             guard
                 let emailAddress = UserDefaults.standard.string(
                     forKey: "emailAddress")
@@ -246,6 +252,102 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    @IBAction func checkForUpdates(_ sender: Any?) {
+        ensureUpdaterExists()
+        launchUpdater()
+    }
+
+    // Ensures that the Malvon directory and the updater app exist in the Application Support directory
+    private func ensureUpdaterExists() {
+        let fileManager = FileManager.default
+        let appSupportDirectory = fileManager.urls(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask
+        ).first!
+        let malvonDirectory = appSupportDirectory.appendingPathComponent(
+            "Malvon",
+            isDirectory: true
+        )
+
+        // Ensure the Malvon directory exists
+        if !fileManager.fileExists(atPath: malvonDirectory.path) {
+            try? fileManager.createDirectory(
+                at: malvonDirectory,
+                withIntermediateDirectories: true,
+                attributes: nil
+            )
+        }
+
+        let updaterDestination = malvonDirectory.appendingPathComponent(
+            "Malvon-Updater.app",
+            isDirectory: true
+        )
+
+        guard
+            let bundleUpdaterPath = Bundle.main.url(
+                forAuxiliaryExecutable: "Malvon-Updater.app")
+        else {
+            print("Updater.app not found in bundle.")
+            return
+        }
+
+        do {
+            if !fileManager.fileExists(atPath: updaterDestination.path) {
+                // Copy updater app if it doesn't exist in Application Support
+                try fileManager.copyItem(
+                    at: bundleUpdaterPath, to: updaterDestination)
+                print("Updater.app copied to Application Support.")
+            } else {
+                // Replace existing updater app
+                _ = try fileManager.replaceItemAt(
+                    updaterDestination, withItemAt: bundleUpdaterPath)
+                print("Updater.app replaced in Application Support.")
+            }
+
+            // Remove original updater app from bundle
+            try fileManager.removeItem(at: bundleUpdaterPath)
+        } catch {
+            print("Failed to manage Updater.app: \(error.localizedDescription)")
+        }
+    }
+
+    // Launches the updater app from the Application Support directory
+    private func launchUpdater() {
+        let fileManager = FileManager.default
+        let appSupportDirectory = fileManager.urls(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask
+        ).first!
+        let malvonDirectory = appSupportDirectory.appendingPathComponent(
+            "Malvon",
+            isDirectory: true
+        )
+        let updaterAppURL = malvonDirectory.appendingPathComponent(
+            "Malvon-Updater.app")
+
+        guard fileManager.fileExists(atPath: updaterAppURL.path) else {
+            print("Updater.app not found in Application Support.")
+            return
+        }
+
+        let workspace = NSWorkspace.shared
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = true
+
+        workspace.openApplication(
+            at: updaterAppURL, configuration: configuration
+        ) { success, error in
+            if success != nil {
+                print("Updater.app launched successfully.")
+            } else if let error = error {
+                print(
+                    "Failed to launch Updater.app: \(error.localizedDescription)"
+                )
+            }
+        }
+    }
+
+    // Relaunch Malvon
     static func relaunchApplication() {
         guard let executablePath = Bundle.main.executablePath else {
             print("Could not find the executable path")
@@ -266,74 +368,4 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Terminate the current instance
         exit(1)
     }
-
-    @IBAction func checkForUpdates(_ sender: Any?) {
-        let fileManager = FileManager.default
-
-        // Define the Application Support directory for Malvon
-        let appSupportDirectory = fileManager.urls(
-            for: .applicationSupportDirectory, in: .userDomainMask
-        ).first!
-        let malvonDirectory = appSupportDirectory.appendingPathComponent(
-            "Malvon", isDirectory: true)
-
-        // Ensure the Malvon directory exists
-        if !fileManager.fileExists(atPath: malvonDirectory.path) {
-            try? fileManager.createDirectory(
-                at: malvonDirectory, withIntermediateDirectories: true,
-                attributes: nil)
-        }
-
-        // Define the destination path for Updater.app in the Application Support directory
-        let updaterDestination = malvonDirectory.appendingPathComponent(
-            "Malvon-Updater.app", isDirectory: true)
-
-        guard
-            let bundleUpdaterPath = Bundle.main.url(
-                forAuxiliaryExecutable: "Malvon-Updater.app")
-        else {
-            print("Updater.app not found in the bundle's XPC folder.")
-            return
-        }
-
-        // Check if the Updater.app exists in Application Support
-        if !fileManager.fileExists(atPath: updaterDestination.path) {
-            // If it doesn't exist, copy it from the bundle's XPC folder
-            do {
-                try fileManager.copyItem(
-                    at: bundleUpdaterPath, to: updaterDestination)
-                try fileManager.removeItem(at: bundleUpdaterPath)
-                print("Updater.app copied to Application Support.")
-            } catch {
-                print(
-                    "Failed to copy Malvon-Updater.app: \(error.localizedDescription)"
-                )
-                return
-            }
-        } else {
-            do {
-                _ = try fileManager.replaceItemAt(
-                    updaterDestination, withItemAt: bundleUpdaterPath)
-                try fileManager.removeItem(at: bundleUpdaterPath)
-            } catch {
-                print(
-                    "Problem with replacing updater service: \(error.localizedDescription)"
-                )
-            }
-        }
-
-        let workspace = NSWorkspace.shared
-        let updaterAppURL = updaterDestination
-
-        let configuration = NSWorkspace.OpenConfiguration()
-        configuration.activates = true
-
-        workspace.openApplication(
-            at: updaterAppURL, configuration: configuration
-        ) { _, _ in
-
-        }
-        print("Updater.app deleted from Application Support.")
-    }
-
 }
