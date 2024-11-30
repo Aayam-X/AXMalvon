@@ -55,7 +55,10 @@ class AXProfile {
             self.init(name: name, config: config, loadsDefaultData: true)
             print(
                 "Current Tab Group Index: \(profileData.selectedTabGroupIndex)")
-            self.currentTabGroupIndex = profileData.selectedTabGroupIndex
+
+            #if !DEBUG
+                self.currentTabGroupIndex = profileData.selectedTabGroupIndex
+            #endif
         } else {
             let config = AXProfile.createNewProfile(name: name)
             self.init(name: name, config: config, loadsDefaultData: true)

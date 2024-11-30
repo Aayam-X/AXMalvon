@@ -25,10 +25,10 @@
                                     <action selector="showAboutView:" target="-1" id="5Jb-QF-SnZ"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Set as default browser" id="ell-nM-3hH">
+                            <menuItem title="Check for Updates..." id="bqW-Oq-62i">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="setAsDefaultBrowser:" target="-1" id="bhp-F7-UEa"/>
+                                    <action selector="checkForUpdates:" target="-1" id="Icd-EJ-PbF"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="Li6-Qx-teW"/>
@@ -461,6 +461,12 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Help" systemMenu="help" id="X7z-9b-Qxu">
                         <items>
+                            <menuItem title="Report Feedback" id="Fs3-BV-Zrx">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="reportFeedback:" target="-1" id="bCn-Vo-nsa"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="AXMalvon Help" keyEquivalent="?" id="Brw-rp-Qz4">
                                 <connections>
                                     <action selector="showHelp:" target="-1" id="WBv-Ch-sbj"/>

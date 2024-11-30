@@ -7,35 +7,42 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		ED78ED152CEFFCB300B12142 /* WebExtensionKit.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = ED78ED092CEFFCB300B12142 /* WebExtensionKit.xpc */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		ED1522C62CFAC29C00941684 /* Malvon-Updater.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = ED1522C12CFABCFE00941684 /* Malvon-Updater.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		ED9D55AE2CF155A1000E6319 /* license.txt in Resources */ = {isa = PBXBuildFile; fileRef = ED9D55AD2CF155A1000E6319 /* license.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		ED78ED132CEFFCB300B12142 /* PBXContainerItemProxy */ = {
+		ED1522C02CFABCFE00941684 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = ED3AEFDA2CDAED2F002AE6CC /* Project object */;
+			containerPortal = ED1522BC2CFABCFD00941684 /* Malvon-Updater.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = ED1522AA2CFABCFC00941684;
+			remoteInfo = "Malvon-Updater";
+		};
+		ED1522C22CFABF8B00941684 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ED1522BC2CFABCFD00941684 /* Malvon-Updater.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = ED78ED082CEFFCB300B12142;
-			remoteInfo = WebExtensionKit;
+			remoteGlobalIDString = ED1522A92CFABCFC00941684;
+			remoteInfo = "Malvon-Updater";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		ED78ECFE2CEFF28900B12142 /* Embed XPC Services */ = {
+		ED1522C52CFAC29600941684 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/XPCServices";
-			dstSubfolderSpec = 16;
+			dstPath = "";
+			dstSubfolderSpec = 6;
 			files = (
-				ED78ED152CEFFCB300B12142 /* WebExtensionKit.xpc in Embed XPC Services */,
+				ED1522C62CFAC29C00941684 /* Malvon-Updater.app in CopyFiles */,
 			);
-			name = "Embed XPC Services";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		ED1522BC2CFABCFD00941684 /* Malvon-Updater.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Malvon-Updater.xcodeproj"; path = "Malvon-Updater/Malvon-Updater.xcodeproj"; sourceTree = "<group>"; };
 		ED39076D2CF0235C005D791F /* wBlock.mlx */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = wBlock.mlx; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED3AEFE22CDAED2F002AE6CC /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED3BA1482CE11E480094F6E9 /* Log.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Log.md; sourceTree = "<group>"; };
@@ -146,9 +153,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		ED1522BD2CFABCFD00941684 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				ED1522C12CFABCFE00941684 /* Malvon-Updater.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		ED3AEFD92CDAED2F002AE6CC = {
 			isa = PBXGroup;
 			children = (
+				ED1522BC2CFABCFD00941684 /* Malvon-Updater.xcodeproj */,
 				ED3907712CF02376005D791F /* wBlock */,
 				ED3907262CEFFF86005D791F /* Common */,
 				ED3BA1482CE11E480094F6E9 /* Log.md */,
@@ -198,12 +214,12 @@
 				ED3AEFDE2CDAED2F002AE6CC /* Sources */,
 				ED3AEFDF2CDAED2F002AE6CC /* Frameworks */,
 				ED3AEFE02CDAED2F002AE6CC /* Resources */,
-				ED78ECFE2CEFF28900B12142 /* Embed XPC Services */,
+				ED1522C52CFAC29600941684 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				ED78ED142CEFFCB300B12142 /* PBXTargetDependency */,
+				ED1522C32CFABF8B00941684 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				ED3907262CEFFF86005D791F /* Common */,
@@ -277,6 +293,12 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = ED3AEFE32CDAED2F002AE6CC /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = ED1522BD2CFABCFD00941684 /* Products */;
+					ProjectRef = ED1522BC2CFABCFD00941684 /* Malvon-Updater.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				ED3AEFE12CDAED2F002AE6CC /* Malvon */,
@@ -285,6 +307,16 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		ED1522C12CFABCFE00941684 /* Malvon-Updater.app */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.application;
+			path = "Malvon-Updater.app";
+			remoteRef = ED1522C02CFABCFE00941684 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		ED39076B2CF0235C005D791F /* Resources */ = {
@@ -336,10 +368,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		ED78ED142CEFFCB300B12142 /* PBXTargetDependency */ = {
+		ED1522C32CFABF8B00941684 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = ED78ED082CEFFCB300B12142 /* WebExtensionKit */;
-			targetProxy = ED78ED132CEFFCB300B12142 /* PBXContainerItemProxy */;
+			name = "Malvon-Updater";
+			targetProxy = ED1522C22CFABF8B00941684 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -518,7 +550,7 @@
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 0.1;
 				DEVELOPMENT_TEAM = 3TJDS4N2C3;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -535,7 +567,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ayaamx.AXMalvon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -553,7 +585,7 @@
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 0.1;
 				DEVELOPMENT_TEAM = 3TJDS4N2C3;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -570,7 +602,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ayaamx.AXMalvon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

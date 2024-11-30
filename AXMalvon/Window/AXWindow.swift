@@ -59,8 +59,14 @@ class AXWindow: NSWindow, NSWindowDelegate {
         let tintView = NSView()
         tintView.translatesAutoresizingMaskIntoConstraints = false
         tintView.wantsLayer = true
-        tintView.layer?.backgroundColor =
-            NSColor.systemPink.withAlphaComponent(0.2).cgColor
+
+        #if DEBUG
+            tintView.layer?.backgroundColor =
+                NSColor.systemGray.withAlphaComponent(0.2).cgColor
+        #else
+            tintView.layer?.backgroundColor =
+                NSColor.systemPink.withAlphaComponent(0.2).cgColor
+        #endif
 
         // Add tint view on top of the visual effect view
         visualEffectView.addSubview(tintView)
