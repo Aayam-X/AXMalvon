@@ -111,6 +111,7 @@ class AXTabBarView: NSView {
 
     func removeTab(at index: Int) {
         let button = tabStackView.arrangedSubviews[index] as! AXTabButton
+        button.stopObserving()
 
         // Calculate the off-screen position for the slide animation
         let finalPosition = button.frame.offsetBy(
