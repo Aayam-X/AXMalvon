@@ -28,7 +28,7 @@ class AXSearchBarWindow: NSPanel, NSWindowDelegate {
 
     private var localMouseDownEventMonitor: Any?
 
-    init(parentWindow1: AXWindow) {
+    init() {
         super.init(
             contentRect: .init(x: 0, y: 0, width: 600, height: 274),
             styleMask: [.titled, .fullSizeContentView],
@@ -37,7 +37,6 @@ class AXSearchBarWindow: NSPanel, NSWindowDelegate {
         )
 
         self.delegate = self
-        self.parentWindow1 = parentWindow1
         level = .mainMenu
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         titleVisibility = .hidden
@@ -57,12 +56,25 @@ class AXSearchBarWindow: NSPanel, NSWindowDelegate {
     func show() {
         guard !isDisplayed else { return }
         isDisplayed = true
-        searchBarDelegate?.searchBarDidAppear()
 
-        self.setFrameOrigin(
-            .init(
+        show(
+            at: .init(
                 x: parentWindow1.frame.midX - 300,
                 y: parentWindow1.frame.midY - 137))
+    }
+
+    func showCurrentURL() {
+        showCurrentURL(
+            at:
+                .init(
+                    x: parentWindow1.frame.midX - 300,
+                    y: parentWindow1.frame.midY - 137))
+    }
+
+    func show(at point: NSPoint) {
+        searchBarDelegate?.searchBarDidAppear()
+
+        self.setFrameOrigin(point)
         parentWindow1.addChildWindow(self, ordered: .above)
         self.makeKeyAndOrderFront(nil)
 
@@ -71,14 +83,11 @@ class AXSearchBarWindow: NSPanel, NSWindowDelegate {
         _ = searchBarView.searchField.becomeFirstResponder()
     }
 
-    func showCurrentURL() {
-        // Implement this
+    func showCurrentURL(at point: NSPoint) {
         searchBarDelegate?.searchBarDidAppear()
 
-        self.setFrameOrigin(
-            .init(
-                x: parentWindow1.frame.midX - 300,
-                y: parentWindow1.frame.midY - 137))
+        // Position the panel using the screen coordinate
+        self.setFrameOrigin(point)
         parentWindow1.addChildWindow(self, ordered: .above)
         self.makeKeyAndOrderFront(nil)
 
@@ -86,13 +95,16 @@ class AXSearchBarWindow: NSPanel, NSWindowDelegate {
         searchBarView.searchField.stringValue =
             searchBarDelegate?.searchBarCurrentWebsiteURL() ?? ""
 
+        // Select the entire text in the search field
         let range = NSRange(
             location: 0, length: searchBarView.searchField.stringValue.count)
         let editor = searchBarView.searchField.currentEditor()
         editor?.selectedRange = range
 
+        // Set up observers if required
         observer()
 
+        // Make the search field the first responder
         _ = searchBarView.searchField.becomeFirstResponder()
     }
 

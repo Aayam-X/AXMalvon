@@ -19,6 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     ]
 
     weak var window: AXWindow?
+    static var searchBar = AXSearchBarWindow()
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         let launchedBefore = UserDefaults.standard.bool(
@@ -78,6 +79,30 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         window!.makeKeyAndOrderFront(nil)
         return true
+    }
+
+    @IBAction func toggleSearchField(_ sender: Any) {
+        guard let keyWindow = NSApplication.shared.keyWindow as? AXWindow else {
+            return
+        }
+        AppDelegate.searchBar.parentWindow1 = keyWindow
+        AppDelegate.searchBar.searchBarDelegate = keyWindow
+
+        if keyWindow.currentTabGroup.selectedIndex < 0 {
+            AppDelegate.searchBar.show()
+        } else {
+            AppDelegate.searchBar.showCurrentURL()
+        }
+    }
+
+    @IBAction func toggleSearchBarForNewTab(_ sender: Any) {
+        guard let keyWindow = NSApplication.shared.keyWindow as? AXWindow else {
+            return
+        }
+        AppDelegate.searchBar.parentWindow1 = keyWindow
+        AppDelegate.searchBar.searchBarDelegate = keyWindow
+
+        AppDelegate.searchBar.show()
     }
 
     @IBAction func reportFeedback(_ sender: Any?) {
@@ -214,6 +239,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let startTime = Date()
 
             do {
+                try await Task.sleep(for: .seconds(2))
+
                 // Perform the checking process asynchronously
                 while true {
                     let result = try await webView.evaluateJavaScript(

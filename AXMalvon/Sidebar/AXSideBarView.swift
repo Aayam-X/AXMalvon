@@ -30,17 +30,18 @@ class AXSidebarView: NSView {
         return 0x01
     }
 
+    private lazy var bottomLine: NSBox = {
+        let line = NSBox()
+        line.boxType = .separator
+        line.translatesAutoresizingMaskIntoConstraints = false
+        return line
+    }()
+
     override func viewWillDraw() {
         if hasDrawn { return }
         defer { hasDrawn = true }
 
-        mouseExitedTrackingArea = NSTrackingArea(
-            rect: .init(
-                x: bounds.origin.x + 1, y: bounds.origin.y,
-                width: bounds.size.width + 100, height: bounds.size.height),
-            options: [.activeAlways, .mouseEnteredAndExited], owner: self)
-        addTrackingArea(mouseExitedTrackingArea)
-
+        // Gesture View
         gestureView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(gestureView)
         NSLayoutConstraint.activate([
@@ -48,9 +49,29 @@ class AXSidebarView: NSView {
             gestureView.leftAnchor.constraint(equalTo: leftAnchor),
             gestureView.rightAnchor.constraint(
                 equalTo: rightAnchor, constant: 3),
-            gestureView.heightAnchor.constraint(equalToConstant: 39),
+            gestureView.heightAnchor.constraint(equalToConstant: 80),
         ])
 
+        // Divider between Search Bar and Tab
+        addSubview(bottomLine)
+        NSLayoutConstraint.activate([
+            bottomLine.topAnchor.constraint(
+                equalTo: gestureView.bottomAnchor, constant: 5),
+            bottomLine.leftAnchor.constraint(equalTo: leftAnchor, constant: 12),
+            bottomLine.rightAnchor.constraint(
+                equalTo: rightAnchor, constant: -10),
+            bottomLine.heightAnchor.constraint(equalToConstant: 1),
+        ])
+
+        // Mouse Tracking Area
+        mouseExitedTrackingArea = NSTrackingArea(
+            rect: .init(
+                x: bounds.origin.x + 1, y: bounds.origin.y,
+                width: bounds.size.width + 100, height: bounds.size.height),
+            options: [.activeAlways, .mouseEnteredAndExited], owner: self)
+        addTrackingArea(mouseExitedTrackingArea)
+
+        // Update tab bar
         if let window = self.window as? AXWindow {
             self.changeShownTabBarGroup(window.currentTabGroup)
         }
@@ -92,7 +113,8 @@ class AXSidebarView: NSView {
         addSubview(tabBarView!)
 
         NSLayoutConstraint.activate([
-            tabBarView!.topAnchor.constraint(equalTo: topAnchor, constant: 44),
+            tabBarView!.topAnchor.constraint(
+                equalTo: bottomLine.bottomAnchor, constant: 5),
             tabBarView!.leadingAnchor.constraint(equalTo: leadingAnchor),
             tabBarView!.trailingAnchor.constraint(equalTo: trailingAnchor),
             tabBarView!.bottomAnchor.constraint(equalTo: bottomAnchor),
@@ -113,8 +135,6 @@ class AXSidebarView: NSView {
                 self.layer?.backgroundColor = .none
                 self.removeFromSuperview()
             })
-
-        window.trafficLightManager.hideTrafficLights(true)
     }
 
     override func viewDidEndLiveResize() {

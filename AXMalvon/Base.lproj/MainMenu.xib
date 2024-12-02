@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="23504" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
+        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23504"/>
     </dependencies>
     <objects>
@@ -137,6 +138,12 @@
                                 <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
                                 <connections>
                                     <action selector="runPageLayout:" target="-1" id="HQu-QY-dNR"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Import from Chrome" id="Ejp-0H-S0e">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="importCookiesFromChrome:" target="-1" id="EaV-iw-ta1"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Print…" keyEquivalent="p" id="9L9-Zq-bJd">

@@ -27,6 +27,8 @@ struct wBlockView: View {
 }
 
 @objc public class wBlock: NSObject {
+    
+    // FIXME: XPC Services does not sandbox views
     @MainActor @objc public func createView() -> NSView {
         // Ensure UI code runs on the main thread
         let swiftUIView = wBlockView()

@@ -12,8 +12,10 @@ import WebKit
 protocol AXWebContainerViewDelegate: AnyObject {
     func webViewDidFinishLoading()
     func webViewStartedLoading(with progress: Double)
+    func webViewRequestsToClose()
 
     func webViewCreateWebView(config: WKWebViewConfiguration) -> WKWebView
+    func webViewOpenLinkInNewTab(request: URLRequest)
 
     func webContainerViewRequestsSidebar() -> AXSidebarView
 }
@@ -163,7 +165,6 @@ class AXWebContainerView: NSView {
             \.estimatedProgress, options: [.new]
         ) { [weak self] _, change in
             if let newProgress = change.newValue {
-
                 self?.updateProgress(newProgress)
             } else {
                 print("Progress change has no new value.")
@@ -199,9 +200,6 @@ class AXWebContainerView: NSView {
                 completionHandler: {
                     self.isAnimating = false
                 })
-
-            guard let window = self.window as? AXWindow else { return }
-            window.trafficLightManager.hideTrafficLights(false)
         }
     }
 
@@ -307,6 +305,10 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
         delegate?.webViewCreateWebView(config: configuration)
     }
 
+    func webViewDidClose(_ webView: WKWebView) {
+        delegate?.webViewRequestsToClose()
+    }
+
     func webView(
         _ webView: WKWebView,
         runOpenPanelWith parameters: WKOpenPanelParameters,
@@ -329,6 +331,22 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
         didBecome download: WKDownload
     ) {
         print("DONWLOAD DOWNLAOD")
+    }
+
+    func webView(
+        _ webView: WKWebView,
+        decidePolicyFor navigationAction: WKNavigationAction
+    ) async -> WKNavigationActionPolicy {
+        if navigationAction.navigationType == .linkActivated,
+            navigationAction.modifierFlags.contains(.command)
+        {
+            let request = navigationAction.request
+
+            return delegate?.webViewOpenLinkInNewTab(request: request) != nil
+                ? .cancel : .allow
+        }
+
+        return .allow
     }
 
     func webView(
@@ -371,6 +389,20 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
 
     func downloadDidFinish(_ download: WKDownload) {
         print("Download finished!")
+    }
+
+    func webView(
+        _ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: @escaping (
+            URLSession.AuthChallengeDisposition, URLCredential?
+        ) -> Void
+    ) {
+        guard let serverTrust = challenge.protectionSpace.serverTrust else {
+            return completionHandler(.useCredential, nil)
+        }
+        let exceptions = SecTrustCopyExceptions(serverTrust)
+        SecTrustSetExceptions(serverTrust, exceptions)
+        completionHandler(.useCredential, URLCredential(trust: serverTrust))
     }
 }
 

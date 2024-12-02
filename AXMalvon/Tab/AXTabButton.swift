@@ -109,8 +109,6 @@ class AXTabButton: NSButton {
         self.isBordered = false
         self.bezelStyle = .shadowlessSquare
         title = ""
-        self.heightConstraint = heightAnchor.constraint(equalToConstant: 36)
-        heightConstraint!.isActive = true
 
         self.wantsLayer = true
         self.layer?.cornerRadius = 10
@@ -127,6 +125,8 @@ class AXTabButton: NSButton {
         defer { hasDrawn = true }
         // Setup trackingArea
         self.setTrackingArea()
+
+        self.heightAnchor.constraint(equalToConstant: 36).isActive = true
 
         // Setup imageView
         favIconImageView.translatesAutoresizingMaskIntoConstraints = false

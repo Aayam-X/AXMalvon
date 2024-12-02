@@ -7,11 +7,12 @@
 //
 
 import AppKit
+import SQLite3
+import SecurityInterface
 import WebKit
 
 class AXWindow: NSWindow, NSWindowDelegate {
     lazy var trafficLightManager = AXTrafficLightOverlayManager(window: self)
-    lazy var searchBar = AXSearchBarWindow(parentWindow1: self)
     let splitView = AXQuattroProgressSplitView()
     let containerView = AXWebContainerView()
     let sidebarView = AXSidebarView()
@@ -120,25 +121,21 @@ class AXWindow: NSWindow, NSWindowDelegate {
 
         sidebarView.frame.size.width = 180
 
-        sidebarView.delegate = self
-        sidebarView.gestureView.delegate = self
-        sidebarView.gestureView.popoverView.delegate = self
-        containerView.delegate = self
-        searchBar.searchBarDelegate = self
+        DispatchQueue.main.async { [self] in
+            sidebarView.delegate = self
+            containerView.delegate = self
 
-        trafficLightManager.updateTrafficLights()
+            sidebarView.gestureView.delegate = self
+            sidebarView.gestureView.popoverView.delegate = self
+            sidebarView.gestureView.searchButton.delegate = self
+
+            trafficLightManager.updateTrafficLights()
+        }
+
         currentTabGroupIndex = 0
     }
 
     // MARK: Window Events
-    func windowWillEnterFullScreen(_ notification: Notification) {
-        sidebarView.gestureView.tabGroupInfoViewLeftConstraint?.constant = 5
-    }
-
-    func windowWillExitFullScreen(_ notification: Notification) {
-        sidebarView.gestureView.tabGroupInfoViewLeftConstraint?.constant = 80
-    }
-
     func windowWillClose(_ notification: Notification) {
         for profile in profiles {
             profile.saveTabGroups()
@@ -233,8 +230,7 @@ extension AXWindow: AXSearchBarWindowDelegate {
 
     func searchBarUpdatesCurrentTab(with url: URL) {
         // Change current webview's url to new url
-        currentTabGroup.tabs[currentTabGroup.selectedIndex].webView.load(
-            URLRequest(url: url))
+        self.containerView.currentWebView?.load(URLRequest(url: url))
     }
 
     func searchBarCurrentWebsiteURL() -> String {
@@ -245,6 +241,21 @@ extension AXWindow: AXSearchBarWindowDelegate {
 
 // MARK: - WebContainer View Delegate
 extension AXWindow: AXWebContainerViewDelegate {
+    func webViewRequestsToClose() {
+        currentTabGroup.removeCurrentTab()
+    }
+
+    func webViewOpenLinkInNewTab(request: URLRequest) {
+        let newWebView = AXWebView(
+            frame: .zero, configuration: currentConfiguration)
+        newWebView.load(request)
+
+        let tab = AXTab(
+            title: newWebView.title ?? "Untitled Popup", webView: newWebView)
+
+        currentTabGroup.addTab(tab)
+    }
+
     func webContainerViewRequestsSidebar() -> AXSidebarView {
         return sidebarView
     }
@@ -269,6 +280,8 @@ extension AXWindow: AXWebContainerViewDelegate {
 
     func webViewDidFinishLoading() {
         splitView.finishAnimation()
+        sidebarView.gestureView.searchButton.url =
+            containerView.currentWebView?.url
     }
 }
 
@@ -285,8 +298,12 @@ extension AXWindow: AXSideBarViewDelegate {
         if at == -1 {
             containerView.removeAllWebViews()
         } else {
+            splitView.cancelAnimations()
             containerView.updateView(webView: tabs[at].webView)
         }
+
+        sidebarView.gestureView.searchButton.url =
+            containerView.currentWebView?.url
     }
 
     func sidebarViewactiveTitle(changed to: String) {
@@ -309,11 +326,9 @@ extension AXWindow: AXSideBarViewDelegate {
             if sideBarWillCollapsed {
                 hiddenSidebarView = true
                 splitView.removeArrangedSubview(sidebarView)
-                trafficLightManager.hideTrafficLights(true)
             } else {
                 hiddenSidebarView = false
                 splitView.insertArrangedSubview(sidebarView, at: 0)
-                trafficLightManager.hideTrafficLights(false)
             }
 
             containerView.sidebarCollapsed(
@@ -324,11 +339,25 @@ extension AXWindow: AXSideBarViewDelegate {
     }
 }
 
+// MARK: Sidebar Search Button Delegate
+extension AXWindow: AXSidebarSearchButtonDelegate {
+    func lockClicked() {
+        guard let webView = containerView.currentWebView,
+            let serverTrust = webView.serverTrust
+        else { return }
+
+        SFCertificateTrustPanel.shared().beginSheet(
+            for: self, modalDelegate: nil, didEnd: nil, contextInfo: nil,
+            trust: serverTrust, message: "TLS Certificate Details")
+    }
+}
+
 // MARK: - Gesture View Delegate
 extension AXWindow: AXGestureViewDelegate {
     func gestureViewMouseDown() {
         if hiddenSidebarView {
             toggleTabSidebar()
+            sidebarView.layer?.backgroundColor = nil
         }
     }
 
@@ -409,18 +438,6 @@ extension AXWindow {
         defaultProfile.enableYouTubeAdBlocker()
     }
 
-    @IBAction func toggleSearchField(_ sender: Any) {
-        if currentTabGroup.selectedIndex < 0 {
-            searchBar.show()
-        } else {
-            searchBar.showCurrentURL()
-        }
-    }
-
-    @IBAction func toggleSearchBarForNewTab(_ sender: Any) {
-        searchBar.show()
-    }
-
     @IBAction func closeTab(_ sender: Any) {
         currentTabGroup.removeCurrentTab()
     }
@@ -432,6 +449,14 @@ extension AXWindow {
     @IBAction func showHideSidebar(_ sender: Any) {
         toggleTabSidebar()
     }
+
+    //    @IBAction func importCookiesFromChrome(_ sender: Any) {
+    //        guard let webView = containerView.currentWebView else { return }
+    //
+    //        ChromeCookieImporter.importChromeCookes(into: webView) { result in
+    //            print("Chrome Import Cookie Result, Successful cookies: \(result)")
+    //        }
+    //    }
 
     @IBAction func showReaderView(_ sender: Any) {
         // This code crashes the browser for some reason: toggleTabSidebar()

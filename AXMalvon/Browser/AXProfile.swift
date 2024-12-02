@@ -100,7 +100,7 @@ class AXProfile {
         return config
     }
 
-    class private func loadProfile(name: String) -> AXProfileData? {
+    class func loadProfile(name: String) -> AXProfileData? {
         let defaults = UserDefaults.standard
         let profiles =
             defaults.dictionary(forKey: "Profiles") as? [String: [String: Any]]
@@ -114,7 +114,7 @@ class AXProfile {
         return nil
     }
 
-    private class func createConfig(with id: String) -> WKWebViewConfiguration {
+    class func createConfig(with id: String) -> WKWebViewConfiguration {
         let config = WKWebViewConfiguration()
         if let uuid = UUID(uuidString: id) {
             config.websiteDataStore = WKWebsiteDataStore(forIdentifier: uuid)
@@ -229,6 +229,9 @@ class AXProfile {
         configuration.userContentController.addUserScript(userScript)
     }
 
+    /// Inserts Content Blocking rules within Profile's Web Configurations
+    /// - Parameters:
+    ///   - url: The location of the content JSON rules
     func loadContentBlocker(at url: URL) throws {
         let blockerListData = try Data(contentsOf: url)
         guard

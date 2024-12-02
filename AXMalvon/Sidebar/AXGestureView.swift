@@ -34,6 +34,8 @@ class AXGestureView: NSView {
     var trackingArea: NSTrackingArea!
     var scrollWithMice: Bool = false
 
+    var searchButton = AXSidebarSearchButton()
+
     // This standalone view is needed for the NSWindow to access its delegate
     lazy var popoverView: AXSidebarPopoverView = {
         return AXSidebarPopoverView()
@@ -50,13 +52,6 @@ class AXGestureView: NSView {
         return popover
     }()
 
-    private lazy var bottomLine: NSBox = {
-        let line = NSBox()
-        line.boxType = .separator
-        line.translatesAutoresizingMaskIntoConstraints = false
-        return line
-    }()
-
     override func viewWillDraw() {
         if hasDrawn { return }
         defer { hasDrawn = true }
@@ -70,7 +65,7 @@ class AXGestureView: NSView {
 
         tabGroupInfoViewLeftConstraint = tabGroupInformationView.leftAnchor
             .constraint(
-                equalTo: leftAnchor, constant: 80
+                equalTo: leftAnchor, constant: 8
             )
         NSLayoutConstraint.activate([
             tabGroupInformationView.rightAnchor.constraint(
@@ -80,19 +75,48 @@ class AXGestureView: NSView {
             tabGroupInfoViewLeftConstraint!,
         ])
 
-        addSubview(bottomLine)
+        // Search Bar
+        searchButton.translatesAutoresizingMaskIntoConstraints = false
+        searchButton.title = "Hello"
+        searchButton.target = self
+        searchButton.action = #selector(searchButtonTapped)
+        addSubview(searchButton)
         NSLayoutConstraint.activate([
-            bottomLine.bottomAnchor.constraint(equalTo: bottomAnchor),
-            bottomLine.leftAnchor.constraint(equalTo: leftAnchor, constant: 12),
-            bottomLine.rightAnchor.constraint(
-                equalTo: rightAnchor, constant: -12),
-            bottomLine.heightAnchor.constraint(equalToConstant: 1),
+            searchButton.bottomAnchor.constraint(
+                equalTo: bottomAnchor),
+            searchButton.leftAnchor.constraint(
+                equalTo: leftAnchor, constant: 5),
+            searchButton.rightAnchor.constraint(
+                equalTo: rightAnchor, constant: -7),
         ])
     }
 
     func updateTitles(title: String, subtitle: String) {
         tabGroupInformationView.tabGroupLabel.stringValue = title
         tabGroupInformationView.profileLabel.stringValue = subtitle
+    }
+
+    @objc func searchButtonTapped() {
+        guard let window = self.window as? AXWindow else { return }
+        let searchBar = AppDelegate.searchBar
+
+        searchBar.parentWindow1 = window
+        searchBar.searchBarDelegate = window
+
+        // Convert the button's frame to the screen coordinate system
+        if let buttonSuperview = searchButton.superview {
+            let buttonFrameInWindow = buttonSuperview.convert(
+                searchButton.frame, to: nil)
+            let buttonFrameInScreen = window.convertToScreen(
+                buttonFrameInWindow)
+
+            // Calculate the point just below the search button
+            let pointBelowButton = NSPoint(
+                x: buttonFrameInScreen.origin.x,
+                y: buttonFrameInScreen.origin.y - searchBar.frame.height)  // Adjust height of search bar
+
+            searchBar.showCurrentURL(at: pointBelowButton)
+        }
     }
 
     // MARK: - Gesture/Mouse Functions
@@ -127,8 +151,16 @@ class AXGestureView: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        if let window = event.window as? AXWindow {
-            window.trafficLightManager.hideButtons()
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.25  // Set the animation duration
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+
+            tabGroupInformationView.imageView.isHidden = true
+            tabGroupInfoViewLeftConstraint?.animator().constant = 70
+
+            if let window = event.window as? AXWindow {
+                window.trafficLightManager.hideButtons()
+            }
         }
     }
 
@@ -138,8 +170,16 @@ class AXGestureView: NSView {
             scrollEventFinished = false
         }
 
-        if let window = event.window as? AXWindow {
-            window.trafficLightManager.showButtons()
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.25  // Set the animation duration
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+
+            tabGroupInformationView.imageView.isHidden = false
+            tabGroupInfoViewLeftConstraint?.animator().constant = 8
+
+            if let window = event.window as? AXWindow {
+                window.trafficLightManager.showButtons()
+            }
         }
     }
 
@@ -155,6 +195,15 @@ class AXGestureView: NSView {
         trackingArea = NSTrackingArea.init(
             rect: self.bounds, options: options, owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
+    }
+
+    override func removeFromSuperview() {
+        super.removeFromSuperview()
+
+        if let trackingArea {
+            self.removeTrackingArea(trackingArea)
+        }
+        trackingArea = nil
     }
 
     func handleScrollEnd() {

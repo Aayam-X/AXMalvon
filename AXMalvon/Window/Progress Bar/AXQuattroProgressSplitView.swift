@@ -193,6 +193,24 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         isAnimating = false
     }
 
+    func cancelAnimations() {
+        // Remove all animations from each layer
+        topBorderLayer.removeAllAnimations()
+        rightBorderLayer.removeAllAnimations()
+        bottomBorderLayer.removeAllAnimations()
+        leftBorderLayer.removeAllAnimations()
+
+        [
+            self.topBorderLayer, self.rightBorderLayer, self.bottomBorderLayer,
+            self.leftBorderLayer,
+        ].forEach { layer in
+            layer.opacity = 0.0
+            layer.isHidden = true
+        }
+
+        isAnimating = false
+    }
+
     func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
         guard flag, !isAnimating else { return }  // Ensure the animation completed
 

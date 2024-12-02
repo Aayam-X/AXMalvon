@@ -13,34 +13,45 @@ struct AXWelcomeView: View {
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
     @State private var buttonText: String = "Continue"
+    @State private var navigateToImportView = false  // State to control navigation
 
     var body: some View {
-        VStack {
-            Text("Welcome to Malvon!")
-                .font(.largeTitle)
-                .bold()
+        if !navigateToImportView {
+            VStack {
+                Text("Welcome to Malvon!")
+                    .font(.largeTitle)
+                    .bold()
 
-            Text(
-                "Those who have been accepted into the Malvon waitlist will automatically possess a valid email address needed to use this application. If you are not on the waitlist, please sign up for the waitlist by clicking the following link: https://ashp0.github.io/malvon-website/waitlist"
-            )
-            .fixedSize(horizontal: false, vertical: true)
-            .lineLimit(10)
+                Text(
+                    "Those who have been accepted into the Malvon waitlist will automatically possess a valid email address needed to use this application. If you are not on the waitlist, please sign up for the waitlist by clicking the following link: https://ashp0.github.io/malvon-website/waitlist"
+                )
+                .fixedSize(horizontal: false, vertical: true)
+                .lineLimit(10)
 
-            TextField("Waitlist Email Address", text: $emailAddress)
-                .textFieldStyle(.roundedBorder)
-                .autocorrectionDisabled()
-                .padding()
+                TextField("Waitlist Email Address", text: $emailAddress)
+                    .textFieldStyle(.roundedBorder)
+                    .autocorrectionDisabled()
+                    .padding()
 
-            Button(buttonText) {
-                buttonText = "Loading (Takes a maximum of 30 seconds)"
-                verifyEmailAddress()
+                Button(buttonText) {
+                    buttonText = "Loading (Takes a maximum of 30 seconds)"
+                    verifyEmailAddress()
+                }
             }
-        }
-        .padding()
-        .alert(isPresented: $showAlert) {
-            Alert(
-                title: Text("Verification"), message: Text(alertMessage),
-                dismissButton: .default(Text("OK")))
+            .padding()
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("Verification"), message: Text(alertMessage),
+                    dismissButton: .default(Text("OK")) {
+                        if alertMessage == "Email verified successfully!" {
+                            //navigateToImportView = true
+                            showAlert = true
+                            AppDelegate.relaunchApplication()
+                        }
+                    })
+            }
+        } else {
+            //AXImportCookieView()
         }
     }
 
@@ -72,7 +83,8 @@ struct AXWelcomeView: View {
                     if result.lowercased() == "yes" {
                         self.alertMessage = "Email verified."
                         self.showAlert = true
-                        AppDelegate.relaunchApplication()
+                        navigateToImportView = true
+
                         break
                     }
                 } else {

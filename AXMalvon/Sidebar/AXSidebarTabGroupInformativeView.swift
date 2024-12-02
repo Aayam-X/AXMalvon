@@ -40,38 +40,43 @@ class AXSidebarTabGroupInformativeView: NSView {
         return label
     }()
 
+    lazy var labelsStackView: NSStackView = {
+        let stackView = NSStackView(views: [tabGroupLabel, profileLabel])
+        stackView.orientation = .vertical
+        stackView.alignment = .leading
+        stackView.spacing = 2
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+
+    lazy var contentStackView: NSStackView = {
+        let stackView = NSStackView(views: [imageView, labelsStackView])
+        stackView.orientation = .horizontal
+        stackView.alignment = .centerY
+        stackView.spacing = 5
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        return stackView
+    }()
+
     override func viewWillDraw() {
         guard !hasDrawn else { return }
         defer { hasDrawn = true }
 
-        self.layer?.backgroundColor = .black
+        // Add content stack view
+        addSubview(contentStackView)
 
-        // Add subviews
-        addSubview(imageView)
-        addSubview(tabGroupLabel)
-        addSubview(profileLabel)
-
-        // Set up constraints
+        // Set up constraints for the content stack view
         NSLayoutConstraint.activate([
-            // Image view constraints
-            imageView.leftAnchor.constraint(equalTo: leftAnchor),
-            imageView.topAnchor.constraint(equalTo: topAnchor, constant: 4),
-            imageView.widthAnchor.constraint(equalToConstant: 24),  // Set the width of the image view
-            imageView.heightAnchor.constraint(equalToConstant: 24),  // Set the height of the image view
-
-            // Tab group label constraints
-            tabGroupLabel.topAnchor.constraint(equalTo: topAnchor),
-            tabGroupLabel.leftAnchor.constraint(
-                equalTo: imageView.rightAnchor, constant: 6),
-            tabGroupLabel.rightAnchor.constraint(
-                equalTo: rightAnchor, constant: -5),
-
-            // Profile label constraints
-            profileLabel.topAnchor.constraint(
-                equalTo: tabGroupLabel.bottomAnchor),
-            profileLabel.leftAnchor.constraint(
-                equalTo: imageView.rightAnchor, constant: 6),
-            profileLabel.rightAnchor.constraint(equalTo: rightAnchor),
+            contentStackView.leadingAnchor.constraint(
+                equalTo: leadingAnchor, constant: 5),
+            contentStackView.trailingAnchor.constraint(
+                equalTo: trailingAnchor, constant: -5),
+            contentStackView.topAnchor.constraint(
+                equalTo: topAnchor, constant: 2),
+            contentStackView.bottomAnchor.constraint(
+                lessThanOrEqualTo: bottomAnchor, constant: 4),
+            imageView.widthAnchor.constraint(equalToConstant: 24),
+            imageView.heightAnchor.constraint(equalToConstant: 24),
         ])
     }
 }
