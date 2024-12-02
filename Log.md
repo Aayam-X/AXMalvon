@@ -1,3 +1,0 @@
-# Log
-
-Just a simple journal for me...

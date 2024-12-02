@@ -152,11 +152,12 @@ class AXGestureView: NSView {
 
     override func mouseEntered(with event: NSEvent) {
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.25  // Set the animation duration
+            context.duration = 0.15  // Set the animation duration
             context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
             tabGroupInformationView.imageView.isHidden = true
             tabGroupInfoViewLeftConstraint?.animator().constant = 70
+            tabGroupInformationView.contentStackView.layoutSubtreeIfNeeded()
 
             if let window = event.window as? AXWindow {
                 window.trafficLightManager.hideButtons()
@@ -171,11 +172,12 @@ class AXGestureView: NSView {
         }
 
         NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.25  // Set the animation duration
+            context.duration = 0.18  // Set the animation duration
             context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
             tabGroupInformationView.imageView.isHidden = false
             tabGroupInfoViewLeftConstraint?.animator().constant = 8
+            tabGroupInformationView.contentStackView.layoutSubtreeIfNeeded()
 
             if let window = event.window as? AXWindow {
                 window.trafficLightManager.showButtons()

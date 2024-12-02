@@ -20,16 +20,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     weak var window: AXWindow?
     static var searchBar = AXSearchBarWindow()
+    let launchedBefore = UserDefaults.standard.bool(
+        forKey: "launchedBefore")
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        let launchedBefore = UserDefaults.standard.bool(
-            forKey: "launchedBefore")
-
         if launchedBefore {
             window = AXWindow(with: profiles)
             window!.makeKeyAndOrderFront(nil)
 
             ev()
+            bgU_Check()
         } else {
             // First Launch
             showWelcomeView()
@@ -39,6 +39,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // https://github.com/Lord-Kamina/SwiftDefaultApps#usage-notes
     func application(_ application: NSApplication, open urls: [URL]) {
+        guard launchedBefore else { return }
+        ev()
+
         // Reuse the existing window if it's already created.
         if let firstWindow = application.keyWindow as? AXWindow {
             for url in urls {
@@ -71,6 +74,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldHandleReopen(
         _ sender: NSApplication, hasVisibleWindows: Bool
     ) -> Bool {
+        guard launchedBefore else { return false }
         if window == nil {
             newWindow(nil)
 
@@ -134,6 +138,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func newWindow(_ sender: Any?) {
+        guard launchedBefore else { return }
+        ev()
+
         if window == nil {
             for profile in profiles {
                 profile.loadTabGroups()
@@ -146,6 +153,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func newPrivateWindow(_ sender: Any?) {
+        guard launchedBefore else { return }
+        ev()
+
         let window = AXWindow(with: [AXPrivateProfile()])
         window.makeKeyAndOrderFront(nil)
     }
@@ -214,7 +224,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 let emailAddress = UserDefaults.standard.string(
                     forKey: "emailAddress")
             else {
-                await ev_err()
+                ev_err()
                 return
             }
 
@@ -225,7 +235,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 )
             else {
                 print("Invalid URL")
-                await ev_err()
+                ev_err()
                 return
             }
 
@@ -257,7 +267,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
                     if Date().timeIntervalSince(startTime) > timeout {
                         print("Email Verification Process Timed Out.")
-                        await ev_err()
+                        ev_err()
                         return
                     }
 
@@ -266,14 +276,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             } catch {
                 print("Error during JavaScript evaluation: \(error)")
-                await ev_err()
+                ev_err()
             }
         }
     }
 
     // Helper function to handle the email validation failure
-    private func ev_err() async {
-        await MainActor.run {
+    private func ev_err() {
+        DispatchQueue.main.async {
             UserDefaults.standard.set(false, forKey: "launchedBefore")
             AppDelegate.relaunchApplication()
         }
@@ -282,6 +292,110 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     @IBAction func checkForUpdates(_ sender: Any?) {
         ensureUpdaterExists()
         launchUpdater()
+    }
+}
+
+extension AppDelegate {
+    // Relaunch Malvon
+    static func relaunchApplication() {
+        guard let executablePath = Bundle.main.executablePath else {
+            print("Could not find the executable path")
+            exit(1)
+        }
+
+        // Launch a new instance of the app
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: executablePath)
+
+        do {
+            try process.run()  // Start the new instance
+        } catch {
+            print("Failed to relaunch the application: \(error)")
+            return
+        }
+
+        // Terminate the current instance
+        exit(1)
+    }
+
+    /// Background Update Check
+    private func bgU_Check() {
+        DispatchQueue.global(qos: .background).async {
+            guard
+                let bgURL = URL(
+                    string:
+                        "https://raw.githubusercontent.com/ashp0/malvon-website/refs/heads/main/.github/workflows/version.txt"
+                )
+            else { return }
+
+            let content = try? String(contentsOf: bgURL, encoding: .utf8)
+
+            guard
+                let currentVersion = Bundle.main.infoDictionary?[
+                    "CFBundleShortVersionString"] as? String,
+                let latestVersion = content
+            else { return }
+
+            if currentVersion.trimmingCharacters(in: .whitespacesAndNewlines) != latestVersion.trimmingCharacters(in: .whitespacesAndNewlines) {
+                DispatchQueue.main.async {
+                    self.bgU_alert()
+                }
+            }
+        }
+    }
+
+    /// Shows an alert asking the user if they would like to update.
+    func bgU_alert() {
+        let alert = NSAlert()
+        alert.messageText = "New Version Available"
+        alert.addButton(withTitle: "Update Now")  // Index 0
+        alert.addButton(withTitle: "Cancel")  // Index 1
+        alert.informativeText =
+            "A new version of Malvon is available. Would you like to update now?"
+
+        let response = alert.runModal()
+
+        if response == .alertFirstButtonReturn {  // First button is "Update Now"
+            launchUpdater()
+        }
+    }
+
+    // Launches the updater app from the Application Support directory
+    private func launchUpdater() {
+        let fileManager = FileManager.default
+        let appSupportDirectory = fileManager.urls(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask
+        ).first!
+        let malvonDirectory = appSupportDirectory.appendingPathComponent(
+            "Malvon",
+            isDirectory: true
+        )
+        let updaterAppURL = malvonDirectory.appendingPathComponent(
+            "Malvon-Updater.app")
+
+        guard fileManager.fileExists(atPath: updaterAppURL.path) else {
+            print("Updater.app not found in Application Support.")
+            return
+        }
+
+        let workspace = NSWorkspace.shared
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.activates = true
+
+        workspace.openApplication(
+            at: updaterAppURL, configuration: configuration
+        ) { success, error in
+            if success != nil {
+                print("Updater.app launched successfully.")
+            } else if let error = error {
+                print(
+                    "Failed to launch Updater.app: \(error.localizedDescription)"
+                )
+            }
+        }
+
+        NSApplication.shared.terminate(nil)
     }
 
     // Ensures that the Malvon directory and the updater app exist in the Application Support directory
@@ -336,63 +450,5 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } catch {
             print("Failed to manage Updater.app: \(error.localizedDescription)")
         }
-    }
-
-    // Launches the updater app from the Application Support directory
-    private func launchUpdater() {
-        let fileManager = FileManager.default
-        let appSupportDirectory = fileManager.urls(
-            for: .applicationSupportDirectory,
-            in: .userDomainMask
-        ).first!
-        let malvonDirectory = appSupportDirectory.appendingPathComponent(
-            "Malvon",
-            isDirectory: true
-        )
-        let updaterAppURL = malvonDirectory.appendingPathComponent(
-            "Malvon-Updater.app")
-
-        guard fileManager.fileExists(atPath: updaterAppURL.path) else {
-            print("Updater.app not found in Application Support.")
-            return
-        }
-
-        let workspace = NSWorkspace.shared
-        let configuration = NSWorkspace.OpenConfiguration()
-        configuration.activates = true
-
-        workspace.openApplication(
-            at: updaterAppURL, configuration: configuration
-        ) { success, error in
-            if success != nil {
-                print("Updater.app launched successfully.")
-            } else if let error = error {
-                print(
-                    "Failed to launch Updater.app: \(error.localizedDescription)"
-                )
-            }
-        }
-    }
-
-    // Relaunch Malvon
-    static func relaunchApplication() {
-        guard let executablePath = Bundle.main.executablePath else {
-            print("Could not find the executable path")
-            exit(1)
-        }
-
-        // Launch a new instance of the app
-        let process = Process()
-        process.executableURL = URL(fileURLWithPath: executablePath)
-
-        do {
-            try process.run()  // Start the new instance
-        } catch {
-            print("Failed to relaunch the application: \(error)")
-            return
-        }
-
-        // Terminate the current instance
-        exit(1)
     }
 }

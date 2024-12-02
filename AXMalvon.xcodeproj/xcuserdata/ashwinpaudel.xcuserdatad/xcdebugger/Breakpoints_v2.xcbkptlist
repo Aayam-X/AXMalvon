@@ -3,4 +3,52 @@
    uuid = "01385C26-34C0-4F12-A20D-6B1049B37CA2"
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "FAA258C4-BE97-4464-B00B-FD93D4F243AC"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "AXMalvon/AppDelegate.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "286"
+            endingLineNumber = "286"
+            landmarkName = "ev_err()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "FAA258C4-BE97-4464-B00B-FD93D4F243AC - 133be96b3a514e34"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 @Swift.MainActor () -&gt; () in Malvon.AppDelegate.ev_err() -&gt; ()"
+                  moduleName = "Malvon"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ashwinpaudel/Desktop/AXMalvon/AXMalvon/AppDelegate.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "287"
+                  endingLineNumber = "287">
+               </Location>
+               <Location
+                  uuid = "FAA258C4-BE97-4464-B00B-FD93D4F243AC - bf5084ae310f5827"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "function signature specialization &lt;Arg[0] = Dead&gt; of Malvon.AppDelegate.ev_err() -&gt; ()"
+                  moduleName = "Malvon"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/ashwinpaudel/Desktop/AXMalvon/AXMalvon/AppDelegate.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "286"
+                  endingLineNumber = "286">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

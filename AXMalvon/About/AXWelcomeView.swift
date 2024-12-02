@@ -47,6 +47,7 @@ struct AXWelcomeView: View {
                             //navigateToImportView = true
                             showAlert = true
                             AppDelegate.relaunchApplication()
+                            exit(1)
                         }
                     })
             }

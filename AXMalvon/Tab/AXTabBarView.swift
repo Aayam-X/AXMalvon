@@ -284,13 +284,13 @@ extension AXTabBarView: AXTabButtonDelegate {
         }
 
         // If index is out of bounds, select the last tab
-        let tabCount = tabGroup.tabs.count
         let tabCountIndex = tabGroup.tabs.count - 1
 
-        if index >= tabCount || tabGroup.selectedIndex >= tabCountIndex {
+        if index > tabCountIndex && (tabGroup.selectedIndex >= index) {
             tabGroup.selectedIndex = tabCountIndex
-        } else /* if tabGroup.selectedIndex < index */
-        {
+        } else if tabGroup.selectedIndex >= index {
+            tabGroup.selectedIndex = max(0, tabGroup.selectedIndex - 1)
+        } else { /* if tabGroup.selectedIndex < index */
             // Do nothing
         }
 

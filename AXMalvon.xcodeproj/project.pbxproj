@@ -45,7 +45,7 @@
 		ED1522BC2CFABCFD00941684 /* Malvon-Updater.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Malvon-Updater.xcodeproj"; path = "Malvon-Updater/Malvon-Updater.xcodeproj"; sourceTree = "<group>"; };
 		ED39076D2CF0235C005D791F /* wBlock.mlx */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = wBlock.mlx; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED3AEFE22CDAED2F002AE6CC /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		ED3BA1482CE11E480094F6E9 /* Log.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Log.md; sourceTree = "<group>"; };
+		ED3BA1482CE11E480094F6E9 /* Checklist.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Checklist.md; sourceTree = "<group>"; };
 		ED78ED092CEFFCB300B12142 /* WebExtensionKit.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = WebExtensionKit.xpc; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED9D55AD2CF155A1000E6319 /* license.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = license.txt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -167,7 +167,7 @@
 				ED1522BC2CFABCFD00941684 /* Malvon-Updater.xcodeproj */,
 				ED3907712CF02376005D791F /* wBlock */,
 				ED3907262CEFFF86005D791F /* Common */,
-				ED3BA1482CE11E480094F6E9 /* Log.md */,
+				ED3BA1482CE11E480094F6E9 /* Checklist.md */,
 				ED9D55AD2CF155A1000E6319 /* license.txt */,
 				ED3AEFE42CDAED2F002AE6CC /* AXMalvon */,
 				ED78ED0A2CEFFCB300B12142 /* WebExtensionKit */,
@@ -567,7 +567,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ayaamx.AXMalvon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -602,7 +602,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.11;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ayaamx.AXMalvon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

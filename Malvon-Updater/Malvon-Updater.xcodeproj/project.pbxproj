@@ -10,9 +10,22 @@
 		ED1522AA2CFABCFC00941684 /* Malvon-Updater.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Malvon-Updater.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		EDBF23932CFE674A00408C82 /* Exceptions for "Malvon-Updater" folder in "Malvon-Updater" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = ED1522A92CFABCFC00941684 /* Malvon-Updater */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		ED1522AC2CFABCFC00941684 /* Malvon-Updater */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EDBF23932CFE674A00408C82 /* Exceptions for "Malvon-Updater" folder in "Malvon-Updater" target */,
+			);
 			path = "Malvon-Updater";
 			sourceTree = "<group>";
 		};
@@ -257,13 +270,15 @@
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Malvon-Updater/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Malvon Updater";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.11;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ayaamx.AXMalvon.Malvon-Updater";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -285,13 +300,15 @@
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Malvon-Updater/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Malvon Updater";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1;
+				MARKETING_VERSION = 0.11;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.ayaamx.AXMalvon.Malvon-Updater";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
