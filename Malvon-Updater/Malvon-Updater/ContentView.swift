@@ -33,137 +33,100 @@ struct ContentView: View {
         "Finding the latest version..."
     @State var latestVersion: String = "1.0.0"
 
+    @State var runningApplication: NSRunningApplication?
+    @State var appIcon: NSImage?
+
     var body: some View {
         ZStack {
             VisualEffectView()  // Assume this is implemented elsewhere
-                .edgesIgnoringSafeArea(.all)
+                .ignoresSafeArea()
 
             if updateCompleted {
-                // Green Checkmark Animation
-                VStack {
-                    ZStack {
-                        Circle()
-                            .fill(Color.green)
-                            .scaleEffect(showCheckmark ? 1 : 0)
-                            .frame(width: 150, height: 150)
-                            .animation(
-                                .easeOut(duration: 0.5), value: showCheckmark)
-
-                        Image(systemName: "checkmark")
-                            .font(.system(size: 80, weight: .bold))
-                            .foregroundColor(.white)
-                            .scaleEffect(showCheckmark ? 1 : 0)
-                            .animation(
-                                .spring(response: 0.6, dampingFraction: 0.5),
-                                value: showCheckmark)
-                    }
-
-                    Text("Update Completed Successfully")
-                        .font(.title)
-                        .fontWeight(.bold)
-                }
-                .onAppear {
-                    showCheckmark = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        let appURL = URL(
-                            fileURLWithPath: "/Applications/Malvon.app")
-                        let workspaceConfig = NSWorkspace.OpenConfiguration()
-                        workspaceConfig.activates = true
-
-                        NSWorkspace.shared.openApplication(
-                            at: appURL, configuration: workspaceConfig)
-
-                        // Delay exit to ensure the application launch request is processed
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                            exit(0)
-                        }
-                    }
-                }
+                CheckmarkView()
             } else {
-                HStack {
-                    // Left Section: App Icon and Name
-                    VStack {
-                        if let image = NSImage(
-                            named: NSImage.applicationIconName)
-                        {
-                            Image(nsImage: image)  // Replace with actual app icon
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 180, height: 180)
-                                .shadow(radius: 5)
-                        } else {
-                            Image(systemName: "square.fill")  // Replace with actual app icon
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 80, height: 80)
-                                .shadow(radius: 5)
-                        }
-
-                        Text("Malvon \(latestVersion)")
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.primary)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.white.opacity(0.2))
-                    .cornerRadius(12)
-                    .shadow(
-                        color: Color.black.opacity(0.2), radius: 10, x: 0, y: 4)
-
-                    Divider()  // The divider between sections
-
-                    // Right Section: Update Information
-                    VStack(alignment: .leading, spacing: 20) {
-                        // Title
-                        Text("Update is Available")
+                VStack {
+                    HStack {
+                        Text("Release Notes")
                             .font(.title)
                             .fontWeight(.bold)
 
-                        // Update Description
-                        if isUpdateAvailable
-                        {
+                        Spacer()
+
+                        HStack {
+                            Text("Malvon Updater")
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.secondary)
+
+                            if let image = appIcon {
+                                Image(nsImage: image)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 36, height: 36)
+                                    .shadow(radius: 5)
+                            } else {
+                                Image(systemName: "square.fill")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 24, height: 24)
+                                    .shadow(radius: 5)
+                            }
+                        }
+                        .opacity(0.3)
+                    }
+
+                    // Left Section: Release Notes
+                    VStack(alignment: .leading, spacing: 16) {
+                        if isUpdateAvailable {
                             TextEditor(text: .constant(updateMessage))
                                 .font(.body)
-                                .foregroundColor(.primary)
-                                .padding()
-                                .background(Color.white)
                                 .cornerRadius(8)
                                 .shadow(
-                                    color: Color.black.opacity(0.1), radius: 5,
-                                    x: 0, y: 2)
+                                    color: Color.black.opacity(0.1),
+                                    radius: 5,
+                                    x: 0,
+                                    y: 2
+                                )
                         }
 
                         // Update Button
-                        VStack {
-                            Button(action: updateApplication) {
-                                Text(isUpdating ? "Updating..." : "Update Now")
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(
-                                        isUpdating ? Color.gray : Color.green
-                                    )
-                                    .foregroundColor(.white)
-                                    .cornerRadius(8)
-                                    .shadow(
-                                        color: Color.black.opacity(0.2),
-                                        radius: 5,
-                                        x: 0, y: 2)
-                            }
-                            .buttonStyle(.plain)
-                            .disabled(isUpdating)
-
-                            Text(statusMessage)
-                                .font(.caption)
-                                .fontWeight(.light)
-                                .foregroundStyle(.secondary)
+                        Button(action: updateApplication) {
+                            Text(
+                                isUpdating
+                                    ? "Updating..." : "Update and Relaunch"
+                            )
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        Color.blue, Color.purple,
+                                    ]),
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .foregroundColor(.white)
+                            .cornerRadius(12)
+                            .shadow(
+                                color: Color.black.opacity(0.4),
+                                radius: 8,
+                                x: 0,
+                                y: 4
+                            )
                         }
+                        .buttonStyle(.plain)
+                        .disabled(isUpdating)
+                        .scaleEffect(isUpdating ? 1.0 : 1.05)
+                        .animation(.easeInOut(duration: 0.2), value: isUpdating)
+
+                        Text(statusMessage)
+                            .font(.caption)
+                            .foregroundColor(.red.opacity(0.6))
                     }
-                    .padding()
-                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal)
                 }
                 .padding()
-                .frame(maxHeight: .infinity)
+                .cornerRadius(12)
                 .onAppear {
                     Task {
                         await checkForUpdates()
@@ -176,6 +139,13 @@ struct ContentView: View {
     // MARK: - Helper Functions
     func checkForUpdates() async {
         statusMessage = "Checking for updates..."
+
+        if let runningApp = NSRunningApplication.runningApplications(
+            withBundleIdentifier: "com.ayaamx.AXMalvon"
+        ).first {
+            // Activate the application and bring its window to the front
+            self.appIcon = runningApp.icon
+        }
 
         guard
             let versionURL = URL(
@@ -197,7 +167,8 @@ struct ContentView: View {
 
             if let localVersion = getAppVersion() {
                 if localVersion != latestVersion {
-                    statusMessage = "An update is available for Malvon"
+                    statusMessage =
+                        "v\(latestVersion.trimmingCharacters(in: .whitespacesAndNewlines))"
                     self.latestVersion = latestVersion
                     isUpdateAvailable = true
                 } else {
@@ -215,6 +186,7 @@ struct ContentView: View {
 
     func updateApplication() {
         statusMessage = "Starting update..."
+        quitMalvon()
 
         let updateURL = URL(
             string:
@@ -322,6 +294,69 @@ struct ContentView: View {
         }
         return text
     }
+
+    func quitMalvon() {
+        let runningApplications = NSWorkspace.shared.runningApplications
+
+        if let malvon = runningApplications.first(where: { (application) in
+            return application.bundleIdentifier == "com.ayaamx.AXMalvon"
+        }) {
+            malvon.terminate()
+        }
+    }
+}
+
+struct CheckmarkView: View {
+    @State private var showCheckmark = false
+
+    var body: some View {
+        VStack {
+            ZStack {
+                Circle()
+                    .fill(Color.green)
+                    .scaleEffect(showCheckmark ? 1 : 0)
+                    .frame(width: 150, height: 150)
+                    .animation(
+                        .easeOut(duration: 0.5), value: showCheckmark)
+
+                Image(systemName: "checkmark")
+                    .font(.system(size: 80, weight: .bold))
+                    .foregroundColor(.white)
+                    .scaleEffect(showCheckmark ? 1 : 0)
+                    .animation(
+                        .spring(response: 0.6, dampingFraction: 0.5),
+                        value: showCheckmark)
+            }
+
+            Text("Update Completed Successfully")
+                .font(.title)
+                .fontWeight(.bold)
+        }
+        .onAppear {
+            showCheckmark = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                let appURL = URL(
+                    fileURLWithPath: "/Applications/Malvon.app")
+                let workspaceConfig = NSWorkspace.OpenConfiguration()
+                workspaceConfig.activates = true
+
+                NSWorkspace.shared.openApplication(
+                    at: appURL, configuration: workspaceConfig)
+
+                if let runningApp = NSRunningApplication.runningApplications(
+                    withBundleIdentifier: "com.ayaamx.AXMalvon"
+                ).first {
+                    // Activate the application and bring its window to the front
+                    runningApp.activate(options: .activateAllWindows)
+                }
+
+                // Delay exit to ensure the application launch request is processed
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    exit(0)
+                }
+            }
+        }
+    }
 }
 
 // MARK: - VisualEffectView for macOS-like background
@@ -338,12 +373,11 @@ struct VisualEffectView: NSViewRepresentable {
 }
 
 extension NSTextView {
-    open override var frame: CGRect {
-        didSet {
-            backgroundColor = .clear  //<<here clear
-            drawsBackground = false
-        }
+    open override func viewWillDraw() {
+        super.viewWillDraw()
 
+        backgroundColor = .clear  //<<here clear
+        drawsBackground = false
     }
 }
 

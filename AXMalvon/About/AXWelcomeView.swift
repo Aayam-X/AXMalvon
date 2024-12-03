@@ -43,7 +43,7 @@ struct AXWelcomeView: View {
                 Alert(
                     title: Text("Verification"), message: Text(alertMessage),
                     dismissButton: .default(Text("OK")) {
-                        if alertMessage == "Email verified successfully!" {
+                        if alertMessage == "Email verified." {
                             //navigateToImportView = true
                             showAlert = true
                             AppDelegate.relaunchApplication()
@@ -53,6 +53,21 @@ struct AXWelcomeView: View {
             }
         } else {
             //AXImportCookieView()
+            VStack {
+                Text("Import from Other Browser")
+                Text("Feature not yet implemented. Wait for a future release.")
+            }
+            .padding()
+            .alert(isPresented: $showAlert) {
+                Alert(
+                    title: Text("Verification"), message: Text(alertMessage),
+                    dismissButton: .default(Text("OK")) {
+                        if alertMessage == "Email verified." {
+                            showAlert = true
+                            AppDelegate.relaunchApplication()
+                        }
+                    })
+            }
         }
     }
 

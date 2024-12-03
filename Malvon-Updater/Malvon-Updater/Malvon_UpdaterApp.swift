@@ -29,4 +29,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     ) -> Bool {
         return true
     }
+
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        // Ensure the main window is visible
+        for window in NSApplication.shared.windows {
+            window.makeKeyAndOrderFront(nil)
+        }
+    }
 }

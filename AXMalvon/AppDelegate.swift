@@ -336,7 +336,9 @@ extension AppDelegate {
                 let latestVersion = content
             else { return }
 
-            if currentVersion.trimmingCharacters(in: .whitespacesAndNewlines) != latestVersion.trimmingCharacters(in: .whitespacesAndNewlines) {
+            if currentVersion.trimmingCharacters(in: .whitespacesAndNewlines)
+                != latestVersion.trimmingCharacters(in: .whitespacesAndNewlines)
+            {
                 DispatchQueue.main.async {
                     self.bgU_alert()
                 }
@@ -394,8 +396,6 @@ extension AppDelegate {
                 )
             }
         }
-
-        NSApplication.shared.terminate(nil)
     }
 
     // Ensures that the Malvon directory and the updater app exist in the Application Support directory
