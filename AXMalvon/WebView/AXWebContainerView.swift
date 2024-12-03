@@ -333,21 +333,21 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
         print("DONWLOAD DOWNLAOD")
     }
 
-    func webView(
-        _ webView: WKWebView,
-        decidePolicyFor navigationAction: WKNavigationAction
-    ) async -> WKNavigationActionPolicy {
-        if navigationAction.navigationType == .linkActivated,
-            navigationAction.modifierFlags.contains(.command)
-        {
-            let request = navigationAction.request
-
-            return delegate?.webViewOpenLinkInNewTab(request: request) != nil
-                ? .cancel : .allow
-        }
-
-        return .allow
-    }
+//    func webView(
+//        _ webView: WKWebView,
+//        decidePolicyFor navigationAction: WKNavigationAction
+//    ) async -> WKNavigationActionPolicy {
+//        if navigationAction.navigationType == .linkActivated,
+//            navigationAction.modifierFlags.contains(.command)
+//        {
+//            let request = navigationAction.request
+//
+//            return delegate?.webViewOpenLinkInNewTab(request: request) != nil
+//                ? .cancel : .allow
+//        }
+//
+//        return .allow
+//    }
 
     func webView(
         _ webView: WKWebView,
@@ -391,19 +391,19 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
         print("Download finished!")
     }
 
-    func webView(
-        _ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
-        completionHandler: @escaping (
-            URLSession.AuthChallengeDisposition, URLCredential?
-        ) -> Void
-    ) {
-        guard let serverTrust = challenge.protectionSpace.serverTrust else {
-            return completionHandler(.useCredential, nil)
-        }
-        let exceptions = SecTrustCopyExceptions(serverTrust)
-        SecTrustSetExceptions(serverTrust, exceptions)
-        completionHandler(.useCredential, URLCredential(trust: serverTrust))
-    }
+//    func webView(
+//        _ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
+//        completionHandler: @escaping (
+//            URLSession.AuthChallengeDisposition, URLCredential?
+//        ) -> Void
+//    ) {
+//        guard let serverTrust = challenge.protectionSpace.serverTrust else {
+//            return completionHandler(.useCredential, nil)
+//        }
+//        let exceptions = SecTrustCopyExceptions(serverTrust)
+//        SecTrustSetExceptions(serverTrust, exceptions)
+//        completionHandler(.useCredential, URLCredential(trust: serverTrust))
+//    }
 }
 
 // MARK: - Web Split View
