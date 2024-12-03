@@ -189,15 +189,16 @@ class AXProfile {
         let AX_DEFAULT_WEBVIEW_CONFIGURATIONS = [
             "fullScreenEnabled",
             "allowsPictureInPictureMediaPlayback",
-            "acceleratedDrawingEnabled",
+            "appNapEnabled",
+            "acceleratedCompositingEnabled",
+            "webGLEnabled",
             "largeImageAsyncDecodingEnabled",
+            "requiresUserGestureForVideoPlayback",
+            "mediaSourceEnabled",
+            "acceleratedDrawingEnabled",
             "animatedImageAsyncDecodingEnabled",
             "developerExtrasEnabled",
-            "loadsImagesAutomatically",
-            "acceleratedCompositingEnabled",
             "canvasUsesAcceleratedDrawing",
-            "localFileContentSniffingEnabled",
-            "appNapEnabled",
         ]
 
         for config in AX_DEFAULT_WEBVIEW_CONFIGURATIONS {
