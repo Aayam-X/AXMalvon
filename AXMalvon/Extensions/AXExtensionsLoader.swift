@@ -28,7 +28,7 @@
 //        // Create the proxy
 //        service =
 //            connection.remoteObjectProxyWithErrorHandler { error in
-//                print("XPC Service Error: \(error.localizedDescription)")
+//                mxPrint("XPC Service Error: \(error.localizedDescription)")
 //            } as? WebExtensionKitProtocol
 //    }
 //
@@ -45,13 +45,13 @@
 //    //    func loadBundleAndCreateView(bundlePath: String) -> NSView? {
 //    //        // Load the bundle from the given path
 //    //        guard let bundle = Bundle(path: bundlePath) else {
-//    //            print("Failed to load bundle from path: \(bundlePath)")
+//    //            mxPrint("Failed to load bundle from path: \(bundlePath)")
 //    //            return nil
 //    //        }
 //    //
 //    //        // Retrieve the principal class from the bundle
 //    //        guard let providerClass = bundle.principalClass as? NSObject.Type else {
-//    //            print("Failed to find principal class in bundle.")
+//    //            mxPrint("Failed to find principal class in bundle.")
 //    //            return nil
 //    //        }
 //    //
@@ -73,7 +73,7 @@
 //    //
 //    //    static func testBundle() {
 //    //        AXExtensionsLoader.loadContentBlocker(bundlePath: "/Users/ashwinpaudel/Library/Developer/Xcode/DerivedData/MyExtension-gynaiylhtvzhxifwuecbhnjkotqo/Build/Products/Debug/MyExtension.bundle") { url in
-//    //            print("URL URL URL URL: \(url)")
+//    //            mxPrint("URL URL URL URL: \(url)")
 //    //        }
 //    //    }
 //    //
@@ -88,12 +88,12 @@
 //    //            let replyData = try session.sendSync(bundlePath)
 //    //
 //    //            if let response = try? replyData.decode(as: URL.self) {
-//    //                print("EXTENSION RESULT: \(response)")
+//    //                mxPrint("EXTENSION RESULT: \(response)")
 //    //                reply(response)
 //    //                return
 //    //            }
 //    //        } catch {
-//    //            print("Extension Error: \(error)")
+//    //            mxPrint("Extension Error: \(error)")
 //    //            reply(nil)
 //    //        }
 //    //    }
@@ -119,7 +119,7 @@
 //
 //    override func getContentBlockerURLPath(completion: @escaping (URL?) -> Void)
 //    {
-//        print("PATH: \(extensionBundlePath)")
+//        mxPrint("PATH: \(extensionBundlePath)")
 //        service?.loadContentBlocker(
 //            at: extensionBundlePath,
 //            with: { contentBlockerJSONPath in

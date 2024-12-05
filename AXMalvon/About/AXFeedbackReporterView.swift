@@ -56,9 +56,9 @@ struct AXFeedbackReporterView: View {
             string: "mailto:\(email)?subject=\(subject)&body=\(body)"),
             NSWorkspace.shared.open(url)
         {
-            print("Mailto link opened successfully.")
+            mxPrint("Mailto link opened successfully.")
         } else {
-            print("Failed to open mailto link.")
+            mxPrint("Failed to open mailto link.")
         }
     }
 }

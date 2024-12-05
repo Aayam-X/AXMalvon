@@ -314,7 +314,7 @@ extension AXWindow: AXSideBarViewDelegate {
         self.currentTabGroupIndex = tabGroupAt
         sidebarView.changeShownTabBarGroup(currentTabGroup)
 
-        print("SELECTED NEW TAB GROUP AT \(tabGroupAt)")
+        mxPrint("SELECTED NEW TAB GROUP AT \(tabGroupAt)")
     }
 
     func toggleTabSidebar() {
@@ -439,6 +439,11 @@ extension AXWindow {
     }
 
     @IBAction func closeTab(_ sender: Any) {
+        guard currentTabGroup.tabs.count != 0 else {
+            self.close()
+            return
+        }
+
         currentTabGroup.removeCurrentTab()
     }
 
@@ -454,7 +459,7 @@ extension AXWindow {
     //        guard let webView = containerView.currentWebView else { return }
     //
     //        ChromeCookieImporter.importChromeCookes(into: webView) { result in
-    //            print("Chrome Import Cookie Result, Successful cookies: \(result)")
+    //            mxPrint("Chrome Import Cookie Result, Successful cookies: \(result)")
     //        }
     //    }
 
@@ -492,13 +497,14 @@ extension AXWindow {
         webView.evaluateJavaScript(readerScript) { result, error in
             if let content = result as? String {
                 //self.showReaderView(content: content)
-                print("WebView reader content: \(content)")
+                mxPrint("WebView reader content: \(content)")
 
                 if let currentURL = webView.url {
                     webView.loadHTMLString(css + content, baseURL: currentURL)
                 }
             } else {
-                print("Error extracting content: \(String(describing: error))")
+                mxPrint(
+                    "Error extracting content: \(String(describing: error))")
             }
         }
     }

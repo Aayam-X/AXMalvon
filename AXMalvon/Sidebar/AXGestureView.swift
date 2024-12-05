@@ -132,7 +132,7 @@ class AXGestureView: NSView {
             return  // Cancelled, exit early
         case .ended where !scrollEventFinished,
             .ended where event.momentumPhase == .ended:
-            print("Scroll ended")
+            mxPrint("Scroll ended")
             handleScrollEnd()
             return
         default:

@@ -34,7 +34,7 @@ struct AXProfileData: Codable {
 }
 
 class AXProfile {
-    let name: String
+    var name: String
     var configuration: WKWebViewConfiguration
     var tabGroups: [AXTabGroup] = []
     var currentTabGroup: AXTabGroup
@@ -53,7 +53,7 @@ class AXProfile {
             let config = AXProfile.createConfig(with: profileData.configID)
 
             self.init(name: name, config: config, loadsDefaultData: true)
-            print(
+            mxPrint(
                 "Current Tab Group Index: \(profileData.selectedTabGroupIndex)")
 
             #if !DEBUG
@@ -165,7 +165,7 @@ class AXProfile {
             let data = try encoder.encode(tabGroups)
             try data.write(to: fileURL)
         } catch {
-            print("Failed to save tab groups: \(error)")
+            mxPrint("Failed to save tab groups: \(error)")
         }
     }
 
@@ -179,7 +179,8 @@ class AXProfile {
             let data = try Data(contentsOf: fileURL)
             tabGroups = try decoder.decode([AXTabGroup].self, from: data)
         } catch {
-            print("Failed to load tab groups or file does not exist: \(error)")
+            mxPrint(
+                "Failed to load tab groups or file does not exist: \(error)")
             tabGroups = [AXTabGroup(name: "Untitled Tab Group")]
         }
     }
@@ -239,7 +240,7 @@ class AXProfile {
             let blockerListString = String(
                 data: blockerListData, encoding: .utf8)
         else {
-            print("Failed to decode blocker list data.")
+            mxPrint("Failed to decode blocker list data.")
             return
         }
 

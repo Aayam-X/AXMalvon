@@ -98,9 +98,9 @@ class AXSidebarSearchButton: NSButton {
         var error: CFError?
         let isValid = SecTrustEvaluateWithError(serverTrust, &error)
         if isValid {
-            print("Certificate is valid and trusted.")
+            mxPrint("Certificate is valid and trusted.")
         } else {
-            print(
+            mxPrint(
                 "Certificate validation failed: \(error?.localizedDescription ?? "Unknown error")"
             )
         }

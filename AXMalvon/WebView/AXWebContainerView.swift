@@ -167,7 +167,7 @@ class AXWebContainerView: NSView {
             if let newProgress = change.newValue {
                 self?.updateProgress(newProgress)
             } else {
-                print("Progress change has no new value.")
+                mxPrint("Progress change has no new value.")
             }
         }
     }
@@ -204,7 +204,7 @@ class AXWebContainerView: NSView {
     }
 
     override func mouseExited(with event: NSEvent) {
-        print("Mouse exited sidebar")
+        mxPrint("Mouse exited sidebar")
     }
 
     override func viewDidEndLiveResize() {
@@ -292,7 +292,7 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        print("Webview finished loading")
+        mxPrint("Webview finished loading")
         delegate?.webViewDidFinishLoading()
     }
 
@@ -330,24 +330,24 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
         _ webView: WKWebView, navigationAction: WKNavigationAction,
         didBecome download: WKDownload
     ) {
-        print("DONWLOAD DOWNLAOD")
+        mxPrint("DONWLOAD DOWNLAOD")
     }
 
-//    func webView(
-//        _ webView: WKWebView,
-//        decidePolicyFor navigationAction: WKNavigationAction
-//    ) async -> WKNavigationActionPolicy {
-//        if navigationAction.navigationType == .linkActivated,
-//            navigationAction.modifierFlags.contains(.command)
-//        {
-//            let request = navigationAction.request
-//
-//            return delegate?.webViewOpenLinkInNewTab(request: request) != nil
-//                ? .cancel : .allow
-//        }
-//
-//        return .allow
-//    }
+    //    func webView(
+    //        _ webView: WKWebView,
+    //        decidePolicyFor navigationAction: WKNavigationAction
+    //    ) async -> WKNavigationActionPolicy {
+    //        if navigationAction.navigationType == .linkActivated,
+    //            navigationAction.modifierFlags.contains(.command)
+    //        {
+    //            let request = navigationAction.request
+    //
+    //            return delegate?.webViewOpenLinkInNewTab(request: request) != nil
+    //                ? .cancel : .allow
+    //        }
+    //
+    //        return .allow
+    //    }
 
     func webView(
         _ webView: WKWebView,
@@ -388,22 +388,22 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
     }
 
     func downloadDidFinish(_ download: WKDownload) {
-        print("Download finished!")
+        mxPrint("Download finished!")
     }
 
-//    func webView(
-//        _ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
-//        completionHandler: @escaping (
-//            URLSession.AuthChallengeDisposition, URLCredential?
-//        ) -> Void
-//    ) {
-//        guard let serverTrust = challenge.protectionSpace.serverTrust else {
-//            return completionHandler(.useCredential, nil)
-//        }
-//        let exceptions = SecTrustCopyExceptions(serverTrust)
-//        SecTrustSetExceptions(serverTrust, exceptions)
-//        completionHandler(.useCredential, URLCredential(trust: serverTrust))
-//    }
+    //    func webView(
+    //        _ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge,
+    //        completionHandler: @escaping (
+    //            URLSession.AuthChallengeDisposition, URLCredential?
+    //        ) -> Void
+    //    ) {
+    //        guard let serverTrust = challenge.protectionSpace.serverTrust else {
+    //            return completionHandler(.useCredential, nil)
+    //        }
+    //        let exceptions = SecTrustCopyExceptions(serverTrust)
+    //        SecTrustSetExceptions(serverTrust, exceptions)
+    //        completionHandler(.useCredential, URLCredential(trust: serverTrust))
+    //    }
 }
 
 // MARK: - Web Split View

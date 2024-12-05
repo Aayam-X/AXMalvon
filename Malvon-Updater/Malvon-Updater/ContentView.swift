@@ -37,100 +37,82 @@ struct ContentView: View {
     @State var appIcon: NSImage?
 
     var body: some View {
-        ZStack {
-            VisualEffectView()  // Assume this is implemented elsewhere
-                .ignoresSafeArea()
-
-            if updateCompleted {
-                CheckmarkView()
-            } else {
-                VStack {
-                    HStack {
-                        Text("Release Notes")
-                            .font(.title)
-                            .fontWeight(.bold)
-
-                        Spacer()
-
-                        HStack {
-                            Text("Malvon Updater")
-                                .fontWeight(.semibold)
-                                .foregroundStyle(.secondary)
-
-                            if let image = appIcon {
-                                Image(nsImage: image)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 36, height: 36)
-                                    .shadow(radius: 5)
-                            } else {
-                                Image(systemName: "square.fill")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 24, height: 24)
-                                    .shadow(radius: 5)
-                            }
-                        }
-                        .opacity(0.3)
+        if updateCompleted {
+            CheckmarkView()
+        } else {
+            VStack {
+                HStack {
+                    Text("Release Notes")
+                        .font(.title)
+                        .fontWeight(.bold)
+                    
+                    Spacer()
+                    
+                    if let image = appIcon {
+                        Image(nsImage: image)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 36, height: 36)
+                            .shadow(radius: 5)
+                            .opacity(0.3)
+                    } else {
+                        Image(systemName: "square.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 24, height: 24)
+                            .shadow(radius: 5)
+                            .opacity(0.3)
                     }
-
-                    // Left Section: Release Notes
-                    VStack(alignment: .leading, spacing: 16) {
-                        if isUpdateAvailable {
-                            TextEditor(text: .constant(updateMessage))
-                                .font(.body)
-                                .cornerRadius(8)
-                                .shadow(
-                                    color: Color.black.opacity(0.1),
-                                    radius: 5,
-                                    x: 0,
-                                    y: 2
-                                )
-                        }
-
-                        // Update Button
-                        Button(action: updateApplication) {
-                            Text(
-                                isUpdating
-                                    ? "Updating..." : "Update and Relaunch"
-                            )
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(
-                                LinearGradient(
-                                    gradient: Gradient(colors: [
-                                        Color.blue, Color.purple,
-                                    ]),
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .foregroundColor(.white)
-                            .cornerRadius(12)
-                            .shadow(
-                                color: Color.black.opacity(0.4),
-                                radius: 8,
-                                x: 0,
-                                y: 4
-                            )
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(isUpdating)
-                        .scaleEffect(isUpdating ? 1.0 : 1.05)
-                        .animation(.easeInOut(duration: 0.2), value: isUpdating)
-
-                        Text(statusMessage)
-                            .font(.caption)
-                            .foregroundColor(.red.opacity(0.6))
-                    }
-                    .padding(.horizontal)
                 }
-                .padding()
-                .cornerRadius(12)
-                .onAppear {
-                    Task {
-                        await checkForUpdates()
+                
+                // Left Section: Release Notes
+                VStack(alignment: .leading, spacing: 16) {
+                    if isUpdateAvailable {
+                        TextEditor(text: .constant(updateMessage))
+                            .font(.system(size: 16))
+                            .cornerRadius(8)
+                            .shadow(
+                                color: Color.black.opacity(0.1),
+                                radius: 5,
+                                x: 0,
+                                y: 2
+                            )
                     }
+                    
+                    // Update Button
+                    Button(action: updateApplication) {
+                        Text(
+                            isUpdating
+                            ? "Updating..." : "Update and Relaunch"
+                        )
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(12)
+                        .shadow(
+                            color: Color.black.opacity(0.4),
+                            radius: 8,
+                            x: 0,
+                            y: 4
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(isUpdating)
+                    .scaleEffect(isUpdating ? 1.0 : 1.05)
+                    .animation(.easeInOut(duration: 0.2), value: isUpdating)
+                    
+                    Text(statusMessage)
+                        .font(.caption)
+                        .foregroundColor(.red.opacity(0.6))
+                }
+                .padding(.horizontal)
+            }
+            .padding()
+            .cornerRadius(12)
+            .onAppear {
+                Task {
+                    await checkForUpdates()
                 }
             }
         }
@@ -331,6 +313,9 @@ struct CheckmarkView: View {
             Text("Update Completed Successfully")
                 .font(.title)
                 .fontWeight(.bold)
+            Text("Malvon will launch soon.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
         }
         .onAppear {
             showCheckmark = true
@@ -357,19 +342,6 @@ struct CheckmarkView: View {
             }
         }
     }
-}
-
-// MARK: - VisualEffectView for macOS-like background
-struct VisualEffectView: NSViewRepresentable {
-    func makeNSView(context: Context) -> NSVisualEffectView {
-        let view = NSVisualEffectView()
-        view.material = .popover
-        view.blendingMode = .behindWindow
-        view.state = .active
-        return view
-    }
-
-    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {}
 }
 
 extension NSTextView {

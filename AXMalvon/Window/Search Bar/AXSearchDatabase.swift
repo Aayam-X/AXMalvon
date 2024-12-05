@@ -30,10 +30,10 @@ class AXSearchDatabase {
         try? FileManager.default.createDirectory(
             at: directoryURL, withIntermediateDirectories: true)
         let fileURL = directoryURL.appendingPathComponent("searchData.sqlite")
-        print("Database file path: \(fileURL)")
+        mxPrint("Database file path: \(fileURL)")
 
         if sqlite3_open(fileURL.path, &db) != SQLITE_OK {
-            print(
+            mxPrint(
                 "Error opening database: \(String(cString: sqlite3_errmsg(db)))"
             )
             return
@@ -43,7 +43,7 @@ class AXSearchDatabase {
         let createTableQuery =
             "CREATE TABLE IF NOT EXISTS SearchOccurrences (url TEXT PRIMARY KEY, occurrences INTEGER)"
         if sqlite3_exec(db, createTableQuery, nil, nil, nil) != SQLITE_OK {
-            print(
+            mxPrint(
                 "Error creating table: \(String(cString: sqlite3_errmsg(db)))")
         }
     }
@@ -71,7 +71,7 @@ class AXSearchDatabase {
                     sqlite3_bind_text(
                         statement, 1, (url as NSString).utf8String, -1, nil)
                     if sqlite3_step(statement) != SQLITE_DONE {
-                        print(
+                        mxPrint(
                             "Error updating occurrence: \(String(cString: sqlite3_errmsg(db)))"
                         )
                     }
@@ -85,14 +85,14 @@ class AXSearchDatabase {
                     sqlite3_bind_text(
                         statement, 1, (url as NSString).utf8String, -1, nil)
                     if sqlite3_step(statement) != SQLITE_DONE {
-                        print(
+                        mxPrint(
                             "Error inserting new URL: \(String(cString: sqlite3_errmsg(db)))"
                         )
                     }
                 }
             }
         } else {
-            print(
+            mxPrint(
                 "Error preparing select statement: \(String(cString: sqlite3_errmsg(db)))"
             )
         }
@@ -125,7 +125,7 @@ class AXSearchDatabase {
                 }
             }
         } else {
-            print(
+            mxPrint(
                 "Error preparing query: \(String(cString: sqlite3_errmsg(db)))")
         }
         sqlite3_finalize(statement)

@@ -247,7 +247,7 @@ extension AXTabButton {
                 self.favicon = try await downloadFavicon(from: faviconURL)
             } catch {
                 // Handle errors gracefully
-                print("Error fetching or downloading favicon: \(error)")
+                mxPrint("Error fetching or downloading favicon: \(error)")
                 self.favicon = nil
             }
         }

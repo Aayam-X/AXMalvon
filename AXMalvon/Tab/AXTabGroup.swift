@@ -21,7 +21,7 @@ class AXTabGroup: Codable {
 
     func initializeTabBarView() {
         guard tabBarView == nil else {
-            print("Tab Bar View already exists.")
+            mxPrint("Tab Bar View already exists.")
             return
         }
         tabBarView = .init(tabGroup: self)
@@ -77,7 +77,7 @@ class AXTabGroup: Codable {
         self.selectedIndex = try container.decode(
             Int.self, forKey: .selectedIndex)
 
-        print("DECODED TAB VIEW WITH \(tabs.count)")
+        mxPrint("DECODED TAB VIEW WITH \(tabs.count)")
     }
 
     func encode(to encoder: any Encoder) throws {

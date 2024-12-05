@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="23504" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
-        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23504"/>
     </dependencies>
     <objects>
@@ -33,7 +32,11 @@
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="Li6-Qx-teW"/>
-                            <menuItem title="Preferences…" keyEquivalent="," id="2mv-Gn-24S"/>
+                            <menuItem title="Preferences…" keyEquivalent="," id="2mv-Gn-24S">
+                                <connections>
+                                    <action selector="showSettings:" target="-1" id="SaZ-SQ-ffO"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="M3j-hF-mfh"/>
                             <menuItem title="Services" id="y0J-v8-XSj">
                                 <modifierMask key="keyEquivalentModifierMask"/>
@@ -146,9 +149,9 @@
                                     <action selector="importCookiesFromChrome:" target="-1" id="EaV-iw-ta1"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Print…" keyEquivalent="p" id="9L9-Zq-bJd">
+                            <menuItem title="mxPrint…" keyEquivalent="p" id="9L9-Zq-bJd">
                                 <connections>
-                                    <action selector="print:" target="-1" id="rr5-MY-Fbi"/>
+                                    <action selector="mxPrint:" target="-1" id="rr5-MY-Fbi"/>
                                 </connections>
                             </menuItem>
                         </items>

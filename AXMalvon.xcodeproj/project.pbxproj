@@ -61,6 +61,7 @@
 		ED3907782CF02390005D791F /* Exceptions for "wBlock" folder in "Malvon" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				blockerList.json,
 				manifest.json,
 				wBlock.swift,
 			);

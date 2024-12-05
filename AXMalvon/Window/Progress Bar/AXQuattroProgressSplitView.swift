@@ -66,26 +66,27 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
     }
 
     private func setupLayers() {
-        let borderWidth: CGFloat = 9.0
+        let borderWidth: CGFloat = 6.0
+        let progressColor = NSColor.textColor.withAlphaComponent(0.3).cgColor
 
         // Configure each layer
         topBorderLayer.lineWidth = borderWidth
-        topBorderLayer.strokeColor = NSColor.systemRed.cgColor
+        topBorderLayer.strokeColor = progressColor
         topBorderLayer.isHidden = false
         layer?.addSublayer(topBorderLayer)
 
         rightBorderLayer.lineWidth = borderWidth
-        rightBorderLayer.strokeColor = NSColor.systemGreen.cgColor
+        rightBorderLayer.strokeColor = progressColor
         rightBorderLayer.isHidden = false
         layer?.addSublayer(rightBorderLayer)
 
         bottomBorderLayer.lineWidth = borderWidth
-        bottomBorderLayer.strokeColor = NSColor.systemBlue.cgColor
+        bottomBorderLayer.strokeColor = progressColor
         bottomBorderLayer.isHidden = false
         layer?.addSublayer(bottomBorderLayer)
 
         leftBorderLayer.lineWidth = borderWidth
-        leftBorderLayer.strokeColor = NSColor.systemYellow.cgColor
+        leftBorderLayer.strokeColor = progressColor
         leftBorderLayer.isHidden = false
         layer?.addSublayer(leftBorderLayer)
     }

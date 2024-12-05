@@ -10,10 +10,18 @@ import Cocoa
 import SwiftUI
 import WebKit
 
+func mxPrint(
+    _ items: Any..., separator: String = " ", terminator: String = "\n"
+) {
+    #if DEBUG
+        Swift.print(items, separator: separator, terminator: terminator)
+    #endif
+}
+
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
 
-    let profiles: [AXProfile] = [
+    static let profiles: [AXProfile] = [
         .init(name: "Default"),
         .init(name: "School"),
     ]
@@ -25,7 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         if launchedBefore {
-            window = AXWindow(with: profiles)
+            createNewWindowIfNeeded()
             window!.makeKeyAndOrderFront(nil)
 
             ev()
@@ -61,7 +69,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
-        for profile in profiles {
+        for profile in AppDelegate.profiles {
             profile.saveTabGroups()
         }
     }
@@ -75,11 +83,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         _ sender: NSApplication, hasVisibleWindows: Bool
     ) -> Bool {
         guard launchedBefore else { return false }
-        if window == nil {
-            newWindow(nil)
-
-            return true
-        }
+        createNewWindowIfNeeded()
 
         window!.makeKeyAndOrderFront(nil)
         return true
@@ -141,15 +145,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard launchedBefore else { return }
         ev()
 
-        if window == nil {
-            for profile in profiles {
-                profile.loadTabGroups()
-            }
-
-            self.window = AXWindow(with: profiles)
-
-            window!.makeKeyAndOrderFront(nil)
+        for profile in AppDelegate.profiles {
+            profile.loadTabGroups()
         }
+
+        createNewWindowIfNeeded()
+        window!.makeKeyAndOrderFront(nil)
     }
 
     @IBAction func newPrivateWindow(_ sender: Any?) {
@@ -160,61 +161,54 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
     }
 
+    @IBAction func showSettings(_ sender: Any?) {
+        #if DEBUG
+            createSwiftUIWindow(
+                with: AXSettingsView(), title: "Malvon Settings",
+                size: .init(width: 600, height: 500))
+        #endif
+    }
+
     @IBAction func showAboutView(_ sender: Any?) {
-        // Create the SwiftUI view
-        let aboutView = AXAboutView()
-        let hostingView = NSHostingView(rootView: aboutView)
-
-        // Define the window size
-        let windowWidth: CGFloat = 450
-        let windowHeight: CGFloat = 250
-
-        // Initialize the window
-        let myWindow = NSWindow(
-            contentRect: NSRect(
-                x: 0, y: 0, width: windowWidth, height: windowHeight),
-            styleMask: [.closable, .titled, .fullSizeContentView],
-            backing: .buffered,
-            defer: true
-        )
-
-        // Set window properties
-        myWindow.titlebarAppearsTransparent = true
-        myWindow.contentView = hostingView
-        myWindow.center()
-        myWindow.makeKeyAndOrderFront(nil)
-        myWindow.isReleasedWhenClosed = false
+        createSwiftUIWindow(
+            with: AXAboutView(), title: "About Malvon",
+            size: .init(width: 450, height: 250))
     }
 
     private func showWelcomeView() {
-        // Define the window size and position
-        let windowRect = NSRect(x: 100, y: 100, width: 600, height: 400)
+        createSwiftUIWindow(with: AXWelcomeView(), title: "Welcome to Malvon")
+    }
 
+    // MARK: - Other Functions
+    private func createNewWindowIfNeeded() {
+        if window == nil {
+            self.window = AXWindow(with: AppDelegate.profiles)
+        }
+    }
+
+    private func createSwiftUIWindow(
+        with view: some View, title: String,
+        size: CGSize = .init(width: 600, height: 400)
+    ) {
         // Create the NSWindow
         let window = NSWindow(
-            contentRect: windowRect,
+            contentRect: NSRect.init(origin: .zero, size: size),
             styleMask: [.titled, .closable, .resizable],
             backing: .buffered,
             defer: false
         )
+
         window.isReleasedWhenClosed = false
+        window.title = title
 
-        // Set the title of the window
-        window.title = "Welcome to Malvon"
-
-        // Create the SwiftUI feedback reporter view
-        let aXWelcomeView = AXWelcomeView()
-        let hostingView = NSHostingView(rootView: aXWelcomeView)
-
-        // Embed the SwiftUI view in the NSWindow
+        // Embed the SwiftUI View
+        let hostingView = NSHostingView(rootView: view)
         window.contentView = hostingView
 
         // Display the window
         window.center()
         window.makeKeyAndOrderFront(nil)
     }
-
-    // MARK: - Other Functions
 
     /// Check if email address is valid:
     @MainActor
@@ -234,12 +228,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         "https://malvon-beta.web.app/?user_exists=\(emailAddress)"
                 )
             else {
-                print("Invalid URL")
+                mxPrint("Invalid URL")
                 ev_err()
                 return
             }
 
-            print("User Email Address is: \(emailAddress)")
+            mxPrint("User Email Address is: \(emailAddress)")
 
             let webView = WKWebView()
             let request = URLRequest(url: url)
@@ -259,14 +253,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     if let result = result as? String,
                         result.lowercased() == "yes"
                     {
-                        print("Email is valid!!!")
+                        mxPrint("Email is valid!!!")
                         break
                     } else {
-                        print("Failed to verify email; try again.")
+                        mxPrint("Failed to verify email; try again.")
                     }
 
                     if Date().timeIntervalSince(startTime) > timeout {
-                        print("Email Verification Process Timed Out.")
+                        mxPrint("Email Verification Process Timed Out.")
                         ev_err()
                         return
                     }
@@ -275,7 +269,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     try await Task.sleep(for: .seconds(3))
                 }
             } catch {
-                print("Error during JavaScript evaluation: \(error)")
+                mxPrint("Error during JavaScript evaluation: \(error)")
                 ev_err()
             }
         }
@@ -299,7 +293,7 @@ extension AppDelegate {
     // Relaunch Malvon
     static func relaunchApplication() {
         guard let executablePath = Bundle.main.executablePath else {
-            print("Could not find the executable path")
+            mxPrint("Could not find the executable path")
             exit(1)
         }
 
@@ -310,7 +304,7 @@ extension AppDelegate {
         do {
             try process.run()  // Start the new instance
         } catch {
-            print("Failed to relaunch the application: \(error)")
+            mxPrint("Failed to relaunch the application: \(error)")
             return
         }
 
@@ -377,7 +371,7 @@ extension AppDelegate {
             "Malvon-Updater.app")
 
         guard fileManager.fileExists(atPath: updaterAppURL.path) else {
-            print("Updater.app not found in Application Support.")
+            mxPrint("Updater.app not found in Application Support.")
             return
         }
 
@@ -389,9 +383,9 @@ extension AppDelegate {
             at: updaterAppURL, configuration: configuration
         ) { success, error in
             if success != nil {
-                print("Updater.app launched successfully.")
+                mxPrint("Updater.app launched successfully.")
             } else if let error = error {
-                print(
+                mxPrint(
                     "Failed to launch Updater.app: \(error.localizedDescription)"
                 )
             }
@@ -428,7 +422,7 @@ extension AppDelegate {
             let bundleUpdaterPath = Bundle.main.url(
                 forAuxiliaryExecutable: "Malvon-Updater.app")
         else {
-            print("Updater.app not found in bundle.")
+            mxPrint("Updater.app not found in bundle.")
             return
         }
 
@@ -437,18 +431,19 @@ extension AppDelegate {
                 // Copy updater app if it doesn't exist in Application Support
                 try fileManager.copyItem(
                     at: bundleUpdaterPath, to: updaterDestination)
-                print("Updater.app copied to Application Support.")
+                mxPrint("Updater.app copied to Application Support.")
             } else {
                 // Replace existing updater app
                 _ = try fileManager.replaceItemAt(
                     updaterDestination, withItemAt: bundleUpdaterPath)
-                print("Updater.app replaced in Application Support.")
+                mxPrint("Updater.app replaced in Application Support.")
             }
 
             // Remove original updater app from bundle
             try fileManager.removeItem(at: bundleUpdaterPath)
         } catch {
-            print("Failed to manage Updater.app: \(error.localizedDescription)")
+            mxPrint(
+                "Failed to manage Updater.app: \(error.localizedDescription)")
         }
     }
 }

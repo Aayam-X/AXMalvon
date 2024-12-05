@@ -160,6 +160,6 @@ extension AXSidebarView: AXTabBarViewDelegate {
 
     func tabBarSwitchedTo(tabAt: Int) {
         delegate?.sidebarSwitchedTab(at: tabAt)
-        print("Switched to tab at \(tabAt).")
+        mxPrint("Switched to tab at \(tabAt).")
     }
 }

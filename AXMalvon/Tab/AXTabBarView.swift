@@ -25,7 +25,7 @@ class AXTabBarView: NSView {
 
     // Views
     var tabStackView = NSStackView()
-    var scrollView: NSScrollView!
+    var scrollView: AXScrollView!
     let clipView = AXFlippedClipView()
 
     lazy var divider: NSBox = {
@@ -54,7 +54,7 @@ class AXTabBarView: NSView {
         tabStackView.detachesHiddenViews = true
 
         // Create scrollView
-        scrollView = NSScrollView()
+        scrollView = AXScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(scrollView)
         scrollView.drawsBackground = false
@@ -154,7 +154,7 @@ class AXTabBarView: NSView {
         for (index, button) in tabStackView.arrangedSubviews.enumerated()
             .dropFirst(after)
         {
-            print("NEW DELETATION INDEX = \(index)")
+            mxPrint("NEW DELETATION INDEX = \(index)")
             if let button = button as? AXTabButton {
                 button.tag = index
             }
@@ -212,7 +212,7 @@ class AXTabBarView: NSView {
     }
 
     private func reorderTabs(from: Int, to: Int) {
-        print("Reordering tabs from \(from) to \(to)")
+        mxPrint("Reordering tabs from \(from) to \(to)")
 
         let firstButton = tabStackView.arrangedSubviews[from] as! AXTabButton
         let secondButton = tabStackView.arrangedSubviews[to] as! AXTabButton
@@ -269,7 +269,7 @@ extension AXTabBarView: AXTabButtonDelegate {
         tabButton.stopObserving()
         tabButton.removeFromSuperview()
 
-        print("DELETED TAB COUNT", tabGroup.tabs.count)
+        mxPrint("DELETED TAB COUNT", tabGroup.tabs.count)
 
         // Update indices of tabs after the removed one
         updateIndicies(after: index)
@@ -278,7 +278,7 @@ extension AXTabBarView: AXTabButtonDelegate {
     private func updateSelectedItemIndex(after index: Int) {
         // Handle when there are no more tabs left
         if tabGroup.tabs.isEmpty {
-            print("No tabs left")
+            mxPrint("No tabs left")
             tabGroup.selectedIndex = -1
             delegate?.tabBarSwitchedTo(tabAt: -1)
             return
@@ -295,11 +295,19 @@ extension AXTabBarView: AXTabButtonDelegate {
             // Do nothing
         }
 
-        print("Updated Tab Index: \(tabGroup.selectedIndex)")
+        mxPrint("Updated Tab Index: \(tabGroup.selectedIndex)")
         (tabStackView.arrangedSubviews[tabGroup.selectedIndex] as! AXTabButton)
             .isSelected = true
 
         delegate?.tabBarSwitchedTo(tabAt: tabGroup.selectedIndex)
+    }
+}
+
+// MARK: - Tab Group Swiping Functionality
+class AXScrollView: NSScrollView {
+    override func scrollWheel(with event: NSEvent) {
+        mxPrint("Scroll Wheeeeeeelelelelelele")
+        super.scrollWheel(with: event)
     }
 }
 
@@ -353,7 +361,7 @@ extension AXTabBarView {
                 forType: .axTabButton) as? String, let tag = Int(pasteboard),
             let dragTargetIndex
         else {
-            print("Not concluded")
+            mxPrint("Not concluded")
             return false
         }
 
@@ -370,7 +378,7 @@ extension AXTabBarView {
         // Remove the divider after the drag operation is concluded
         //divider.removeFromSuperview()
         dragTargetIndex = nil
-        print("Drag operation concluded")
+        mxPrint("Drag operation concluded")
     }
 }
 

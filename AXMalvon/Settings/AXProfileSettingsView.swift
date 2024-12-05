@@ -8,47 +8,79 @@
 import SwiftUI
 import WebKit
 
-struct AXProfileSettingsView: View {
-    var body: some View {
-        VStack {
-            Text("Profiles Settings")
-                .font(.largeTitle)
+#if DEBUG
+    class AXProfileManager: ObservableObject {
+        @Published var profiles: [AXProfile] = []
 
-            Button {
-                Task {
-                    await retrieveProfiles()
-                }
-            } label: {
-                Text("Hello?")
-            }
+        init() {
+            // Load profiles from UserDefaults or create a default profile
+            let names = ["Default", "School"]
+            profiles = names.map { AXProfile(name: $0) }
         }
-        .padding()
     }
 
-    func retrieveProfiles() async {
-        let identifiers = await WKWebsiteDataStore.allDataStoreIdentifiers
+    struct AXProfileSettingsView: View {
+        @ObservedObject var profileManager = AXProfileManager()
+        @State private var selectedIndex: Int? = nil
+        @State private var showsInspector: Bool = false
 
-        for identifier in identifiers {
-            if identifier.uuidString == "DB8CAB79-1235-4C26-A5B6-30B829446FE7" {
-                // Do nothing
-            } else if identifier.uuidString
-                == "E3B639AA-8015-45B0-BCDA-11811CBCF6D9"
-            {
-                // Do nothing
-            } else {
-                do {
-                    try await WKWebsiteDataStore.remove(
-                        forIdentifier: identifier)
-                } catch {
-                    print("Removing profile failed with error: \(error)")
+        var body: some View {
+            VStack {
+                Text("Profiles Settings")
+                    .font(.largeTitle)
+
+                List(
+                    profileManager.profiles.indices, id: \.self,
+                    selection: $selectedIndex
+                ) { index in
+                    Text(profileManager.profiles[index].name)
+                }
+                .onChange(of: selectedIndex) { _, newValue in
+                    showsInspector = newValue != nil
                 }
             }
+            .padding()
+            .inspector(
+                isPresented: $showsInspector,
+                content: {
+                    if let index = selectedIndex,
+                        profileManager.profiles.indices.contains(index)
+                    {
+                        AXProfileSettingsInspector(
+                            profile: $profileManager.profiles[index])
+                    }
+                })
+        }
+    }
+
+    struct AXProfileSettingsInspector: View {
+        @Binding var profile: AXProfile
+        @State private var profileName: String
+
+        init(profile: Binding<AXProfile>) {
+            self._profile = profile
+            self._profileName = State(initialValue: profile.wrappedValue.name)
         }
 
-        print(identifiers)
-    }
-}
+        var body: some View {
+            VStack {
+                Text("Edit Profile")
+                    .font(.headline)
+                    .padding()
 
-#Preview {
-    AXProfileSettingsView()
-}
+                TextField("Profile Name", text: $profileName)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+
+                Button("Save") {
+                    profile.name = profileName
+                }
+                .padding()
+            }
+        }
+    }
+
+    #Preview {
+        AXProfileSettingsView()
+    }
+#endif

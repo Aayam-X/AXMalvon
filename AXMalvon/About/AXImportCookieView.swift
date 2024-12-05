@@ -216,7 +216,7 @@
 //                webView.configuration.websiteDataStore.httpCookieStore.setCookie(httpOnlyCookie) {
 //                    group.leave()
 //                    successfulCookieCount += 1
-//                    print("Cookie imported: \(cookieProperties)")
+//                    mxPrint("Cookie imported: \(cookieProperties)")
 //                }
 //            } else {
 //                group.leave()
