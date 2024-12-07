@@ -69,7 +69,7 @@ class AXSidebarSearchButton: NSButton {
         // Add the lock button
         addSubview(lockView)
         NSLayoutConstraint.activate([
-            lockView.leftAnchor.constraint(equalTo: leftAnchor, constant: 8),
+            lockView.leftAnchor.constraint(equalTo: leftAnchor, constant: 10),
             lockView.centerYAnchor.constraint(equalTo: centerYAnchor),
             lockView.widthAnchor.constraint(equalToConstant: 16),
             lockView.heightAnchor.constraint(equalToConstant: 16),

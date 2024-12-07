@@ -7,7 +7,6 @@
 //
 
 import AppKit
-import Carbon.HIToolbox
 
 class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     private var hasDrawn = false
@@ -22,6 +21,16 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             suggestions[newValue]?.isSelected = true
         }
     }
+
+    private lazy var searchIcon: NSImageView = {
+        let imageView = NSImageView()
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.image = NSImage(
+            systemSymbolName: "magnifyingglass",
+            accessibilityDescription: "Search Icon")
+        imageView.imageScaling = .scaleProportionallyUpOrDown
+        return imageView
+    }()
 
     lazy var searchField: NSTextField = {
         let field = NSTextField()
@@ -41,7 +50,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     private lazy var suggestionsStackView: NSStackView = {
         let stack = NSStackView()
         stack.orientation = .vertical
-        stack.spacing = 1.08
+        stack.spacing = 10  // Increase spacing for better visibility
         stack.translatesAutoresizingMaskIntoConstraints = false
         return stack
     }()
@@ -70,11 +79,25 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     }
 
     private func setupUI() {
-        addSubview(searchField)
+        // Container for the search field and icon
+        let searchContainer = NSStackView()
+        searchContainer.orientation = .horizontal
+        searchContainer.alignment = .centerY
+        searchContainer.spacing = 10
+        searchContainer.translatesAutoresizingMaskIntoConstraints = false
+
+        addSubview(searchContainer)
+        searchContainer.addArrangedSubview(searchIcon)
+        searchContainer.addArrangedSubview(searchField)
+
         NSLayoutConstraint.activate([
-            searchField.widthAnchor.constraint(equalToConstant: 550),
-            searchField.centerXAnchor.constraint(equalTo: centerXAnchor),
-            searchField.topAnchor.constraint(equalTo: topAnchor, constant: 25),
+            searchContainer.leftAnchor.constraint(
+                equalTo: leftAnchor, constant: 25),
+            searchContainer.topAnchor.constraint(
+                equalTo: topAnchor, constant: 25),
+            searchIcon.widthAnchor.constraint(equalToConstant: 25),
+            searchIcon.heightAnchor.constraint(equalToConstant: 25),
+            searchField.widthAnchor.constraint(equalToConstant: 500),
         ])
 
         let separator = NSBox()
@@ -83,7 +106,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         addSubview(separator)
         NSLayoutConstraint.activate([
             separator.topAnchor.constraint(
-                equalTo: searchField.bottomAnchor, constant: 20),
+                equalTo: searchContainer.bottomAnchor, constant: 20),
             separator.leftAnchor.constraint(equalTo: leftAnchor, constant: 5),
             separator.rightAnchor.constraint(
                 equalTo: rightAnchor, constant: -5),
@@ -115,58 +138,27 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         highlightedSuggestion = 0
     }
 
-    // MARK: Search Actions
-    private func searchEnter(_ url: URL) {
-        if newTabMode {
-            searchBarWindow.searchBarDelegate?.searchBarCreatesNewTab(with: url)
-        } else {
-            searchBarWindow.searchBarDelegate?.searchBarUpdatesCurrentTab(
-                with: url)
-        }
+    func windowClosed() {
+        searchField.stringValue = ""
         newTabMode = true
+        suggestions.forEach { $0?.isHidden = true }
     }
+}
 
-    @objc private func searchSuggestionAction(
-        _ sender: AXSearchFieldSuggestItem
-    ) {
-        guard !sender.titleValue.isEmpty else { return }
-        let url = fixURL(
-            URL(
-                string:
-                    "https://www.google.com/search?client=Malvon&q=\(sender.titleValue.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)!)"
-            )!)
-        searchEnter(url)
-        searchBarWindow.close()
-    }
-
-    func searchFieldAction() {
-        searchBarWindow.searchBarDelegate?.searchBarDidDisappear()
-
-        guard !searchField.stringValue.isEmpty else {
-            searchBarWindow.close()
-            return
-        }
-
-        let value = searchField.stringValue
-
-        // Section 1: Handle File URLs
-        if value.starts(with: "malvon?") {
-            searchActionMalvonURL(value)
-        } else if value.starts(with: "file:///") {
-            searchActionFileURL(value)
-
-            /* Section 2: Handle Regular Search Terms */
-        } else if value.isValidURL() && !value.hasWhitespace() {
-            searchActionURL(value)
-        } else {
-            searchActionSearchTerm(value)
-        }
-
-        searchBarWindow.close()
-    }
-
-    // MARK: Suggestion Action
+extension AXSearchFieldPopoverView {
+    // MARK: Search Suggestions
+    // Update icon based on input
     func controlTextDidChange(_ notification: Notification) {
+        if searchField.stringValue.isValidURL() {
+            searchIcon.image = NSImage(
+                systemSymbolName: "network",
+                accessibilityDescription: "Internet Icon")
+        } else {
+            searchIcon.image = NSImage(
+                systemSymbolName: "magnifyingglass",
+                accessibilityDescription: "Search Icon")
+        }
+
         if !skipSuggestions {
             updateSuggestions()
         } else {
@@ -184,16 +176,14 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         suggestions[0]?.isHidden = false
         suggestions[0]?.titleValue = searchField.stringValue
 
-        let userInput = searchField.stringValue.lowercased()
+        let userInput = searchField.stringValue
 
-        // Perform the database query on a background thread
         DispatchQueue.global(qos: .userInitiated).async {
             let filteredWebsites = AXSearchDatabase.shared
                 .getRelevantSearchSuggestions(
                     prefix: userInput, minOccurrences: 3)
 
             DispatchQueue.main.async {
-                // Update UI on the main thread
                 for (index, suggestion) in self.suggestions.enumerated()
                     .dropFirst()
                 {
@@ -211,6 +201,10 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
                 {
                     self.updateFieldEditor(
                         fieldEditor, withSuggestion: firstSuggestion)
+
+                    self.highlightedSuggestion = 1
+                } else {
+                    self.highlightedSuggestion = 0
                 }
             }
         }
@@ -268,11 +262,54 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
             return false
         }
     }
+}
 
-    func windowClosed() {
-        searchField.stringValue = ""
+// MARK: - Search Actions
+extension AXSearchFieldPopoverView {
+    private func searchEnter(_ url: URL) {
+        if newTabMode {
+            searchBarWindow.searchBarDelegate?.searchBarCreatesNewTab(with: url)
+        } else {
+            searchBarWindow.searchBarDelegate?.searchBarUpdatesCurrentTab(
+                with: url)
+        }
         newTabMode = true
-        suggestions.forEach { $0?.isHidden = true }
+    }
+
+    @objc private func searchSuggestionAction(
+        _ sender: AXSearchFieldSuggestItem
+    ) {
+        guard !sender.titleValue.isEmpty else { return }
+
+        searchField.stringValue = sender.titleValue
+        searchFieldAction()
+        searchBarWindow.close()
+    }
+
+    func searchFieldAction() {
+        searchBarWindow.searchBarDelegate?.searchBarDidDisappear()
+
+        guard !searchField.stringValue.isEmpty else {
+            searchBarWindow.close()
+            return
+        }
+
+        let value = searchField.stringValue
+
+        // Section 1: Handle File URLs
+        if value.starts(with: "malvon?") {
+            searchActionMalvonURL(value)
+        } else if value.starts(with: "file:///") {
+            searchActionFileURL(value)
+
+            /* Section 2: Handle Regular Search Terms */
+        } else if value.isValidURL() && !value.hasWhitespace() {
+            searchActionURL(value)
+        } else {
+            searchActionSearchTerm(value)
+        }
+
+        searchBarWindow.close()
     }
 
     /// URL: malvon?

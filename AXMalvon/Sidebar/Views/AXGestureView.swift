@@ -11,7 +11,7 @@ import SwiftUI
 
 protocol AXGestureViewDelegate: AnyObject {
     func gestureView(didSwipe direction: AXGestureViewSwipeDirection!)
-    func gestureViewMouseDown()
+    func gestureView(didUpdate tabGroup: AXTabGroup)
 }
 
 enum AXGestureViewSwipeDirection {
@@ -25,8 +25,16 @@ class AXGestureView: NSView {
     weak var delegate: AXGestureViewDelegate?
     private var hasDrawn: Bool = false
 
-    var tabGroupInformationView = AXSidebarTabGroupInformativeView()
-    var tabGroupInfoViewLeftConstraint: NSLayoutConstraint?
+    weak var currentTabGroup: AXTabGroup?
+
+    var searchButton = AXSidebarSearchButton()
+
+    private lazy var tabGroupInfoView = {
+        let view = AXTabGroupInfoView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.onRightMouseDown = infoViewRightMouseDown
+        return view
+    }()
 
     // Gestures
     private var userSwipedDirection: AXGestureViewSwipeDirection?
@@ -34,23 +42,8 @@ class AXGestureView: NSView {
     var trackingArea: NSTrackingArea!
     var scrollWithMice: Bool = false
 
-    var searchButton = AXSidebarSearchButton()
-
-    // This standalone view is needed for the NSWindow to access its delegate
-    lazy var popoverView: AXSidebarPopoverView = {
-        return AXSidebarPopoverView()
-    }()
-
-    lazy var popover: NSPopover = {
-        let popover = NSPopover()
-        popover.behavior = .transient
-
-        let controller = NSViewController()
-        controller.view = popoverView
-        popover.contentViewController = controller
-
-        return popover
-    }()
+    // Other
+    var tabGroupInfoViewLeftConstraint: NSLayoutConstraint?
 
     override func viewWillDraw() {
         if hasDrawn { return }
@@ -58,19 +51,16 @@ class AXGestureView: NSView {
         setTrackingArea()
 
         // Constraints for the Tab Group Information View
-        tabGroupInformationView.translatesAutoresizingMaskIntoConstraints =
-            false
+        addSubview(tabGroupInfoView)
 
-        addSubview(tabGroupInformationView)
-
-        tabGroupInfoViewLeftConstraint = tabGroupInformationView.leftAnchor
+        tabGroupInfoViewLeftConstraint = tabGroupInfoView.leftAnchor
             .constraint(
                 equalTo: leftAnchor, constant: 8
             )
         NSLayoutConstraint.activate([
-            tabGroupInformationView.rightAnchor.constraint(
+            tabGroupInfoView.rightAnchor.constraint(
                 equalTo: rightAnchor),
-            tabGroupInformationView.topAnchor.constraint(
+            tabGroupInfoView.topAnchor.constraint(
                 equalTo: topAnchor, constant: 4),
             tabGroupInfoViewLeftConstraint!,
         ])
@@ -89,11 +79,6 @@ class AXGestureView: NSView {
             searchButton.rightAnchor.constraint(
                 equalTo: rightAnchor, constant: -7),
         ])
-    }
-
-    func updateTitles(title: String, subtitle: String) {
-        tabGroupInformationView.tabGroupLabel.stringValue = title
-        tabGroupInformationView.profileLabel.stringValue = subtitle
     }
 
     @objc func searchButtonTapped() {
@@ -151,18 +136,8 @@ class AXGestureView: NSView {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.15  // Set the animation duration
-            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-
-            tabGroupInformationView.imageView.isHidden = true
-            tabGroupInfoViewLeftConstraint?.animator().constant = 70
-            tabGroupInformationView.contentStackView.layoutSubtreeIfNeeded()
-
-            if let window = event.window as? AXWindow {
-                window.trafficLightManager.hideButtons()
-            }
-        }
+        updateConstraintsWhenMouse(
+            window: event.window as? AXWindow, entered: true)
     }
 
     override func mouseExited(with event: NSEvent) {
@@ -171,23 +146,44 @@ class AXGestureView: NSView {
             scrollEventFinished = false
         }
 
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.18  // Set the animation duration
-            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-
-            tabGroupInformationView.imageView.isHidden = false
-            tabGroupInfoViewLeftConstraint?.animator().constant = 8
-            tabGroupInformationView.contentStackView.layoutSubtreeIfNeeded()
-
-            if let window = event.window as? AXWindow {
-                window.trafficLightManager.showButtons()
-            }
-        }
+        updateConstraintsWhenMouse(
+            window: event.window as? AXWindow, entered: false)
     }
 
-    override func mouseDown(with event: NSEvent) {
-        popover.show(relativeTo: self.bounds, of: self, preferredEdge: .minY)
-        delegate?.gestureViewMouseDown()
+    func handleScrollEnd() {
+        scrollEventFinished = true
+        delegate?.gestureView(didSwipe: userSwipedDirection)
+        userSwipedDirection = nil
+    }
+
+    func updateConstraintsWhenMouse(
+        window: AXWindow?, entered: Bool
+    ) {
+        guard let window else { return }
+        var entered = entered
+
+        if window.styleMask.contains(.fullScreen) {
+            entered = false
+        }
+
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = entered ? 0.15 : 0.18
+            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+
+            // Update constraints and visibility based on the state
+            tabGroupInfoView.imageView.isHidden = entered
+            tabGroupInfoViewLeftConstraint?.animator().constant =
+                entered ? 70 : 5.5
+            tabGroupInfoView.contentStackView.layoutSubtreeIfNeeded()
+
+            if !window.styleMask.contains(.fullScreen) {
+                entered
+                    ? window.trafficLightManager.displayTrafficLights()
+                    : window.trafficLightManager.hideTrafficLights()
+            } else {
+                window.trafficLightManager.displayTrafficLights()
+            }
+        }
     }
 
     func setTrackingArea() {
@@ -207,10 +203,40 @@ class AXGestureView: NSView {
         }
         trackingArea = nil
     }
+}
 
-    func handleScrollEnd() {
-        scrollEventFinished = true
-        delegate?.gestureView(didSwipe: userSwipedDirection)
-        userSwipedDirection = nil
+extension AXGestureView {
+    func currentTabGroupChanged(_ to: AXTabGroup, profile: String) {
+        tabGroupInfoView.updateLabels(tabGroup: to, profileName: profile)
+        self.currentTabGroup = to
+    }
+
+    // Show the popover
+    @objc func infoViewRightMouseDown() {
+        guard let tabGroup = currentTabGroup else { return }
+
+        let popover = NSPopover()
+        popover.behavior = .transient
+        let vc = NSViewController()
+        let view = AXTabGroupCustomizerView(tabGroup: tabGroup)
+        view.delegate = self
+        vc.view = view
+        popover.contentViewController = vc
+
+        popover.show(relativeTo: bounds, of: self, preferredEdge: .maxX)
+    }
+}
+
+extension AXGestureView: AXTabGroupCustomizerViewDelegate {
+    func didUpdateIcon(_ tabGroup: AXTabGroup) {
+        tabGroupInfoView.updateIcon(tabGroup: tabGroup)
+    }
+
+    func didUpdateTabGroup(_ tabGroup: AXTabGroup) {
+        tabGroupInfoView.updateLabels(tabGroup: tabGroup)
+    }
+
+    func didUpdateColor(_ tabGroup: AXTabGroup) {
+        delegate?.gestureView(didUpdate: tabGroup)
     }
 }

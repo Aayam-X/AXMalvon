@@ -18,7 +18,7 @@ protocol AXTabBarViewDelegate: AnyObject {
 }
 
 class AXTabBarView: NSView {
-    var tabGroup: AXTabGroup
+    weak var tabGroup: AXTabGroup!
     weak var delegate: AXTabBarViewDelegate?
     private var hasDrawn = false
     private var dragTargetIndex: Int?
@@ -39,6 +39,11 @@ class AXTabBarView: NSView {
 
     init(tabGroup: AXTabGroup) {
         self.tabGroup = tabGroup
+        super.init(frame: .zero)
+    }
+
+    init() {
+        self.tabGroup = nil
         super.init(frame: .zero)
     }
 
@@ -111,7 +116,6 @@ class AXTabBarView: NSView {
 
     func removeTab(at index: Int) {
         let button = tabStackView.arrangedSubviews[index] as! AXTabButton
-        button.stopObserving()
 
         // Calculate the off-screen position for the slide animation
         let finalPosition = button.frame.offsetBy(
@@ -135,16 +139,13 @@ class AXTabBarView: NSView {
         }
     }
 
-    func addTabButton(for tab: AXTab, index: Int) {
+    func addTabButtonInBackground(for tab: AXTab, index: Int) {
         let button = AXTabButton(tab: tab)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.delegate = self
 
-        let newIndex = index
-        button.tag = newIndex
+        button.tag = index
         button.webTitle = tab.title
-
-        tabGroup.selectedIndex = newIndex
 
         addButtonToTabView(button)
         button.startObserving()
@@ -164,15 +165,18 @@ class AXTabBarView: NSView {
     }
 
     func updateTabSelection(from: Int, to: Int) {
-        guard tabStackView.arrangedSubviews.count > to else { return }
+        let arragedSubviews = tabStackView.arrangedSubviews
+        let arrangedSubviewsCount = arragedSubviews.count
 
-        if from >= 0 && from < tabStackView.arrangedSubviews.count {
+        guard arrangedSubviewsCount > to else { return }
+
+        if from >= 0 && from < arrangedSubviewsCount {
             let previousButton =
-                tabStackView.arrangedSubviews[from] as! AXTabButton
+                arragedSubviews[from] as! AXTabButton
             previousButton.isSelected = false
         }
 
-        let newButton = tabStackView.arrangedSubviews[to] as! AXTabButton
+        let newButton = arragedSubviews[to] as! AXTabButton
         newButton.isSelected = true
 
         delegate?.tabBarSwitchedTo(tabAt: to)
@@ -240,9 +244,6 @@ extension AXTabBarView: AXTabButtonDelegate {
         if tab.webConfiguration == nil {
             tab.webConfiguration = delegate?.deactivatedTab()
         }
-
-        tab._webView?.removeFromSuperview()
-        tab._webView = nil
     }
 
     func tabButtonActiveTitleChanged(
@@ -266,7 +267,6 @@ extension AXTabBarView: AXTabButtonDelegate {
 
         // Remove the tab from the group
         tabGroup.tabs.remove(at: index)
-        tabButton.stopObserving()
         tabButton.removeFromSuperview()
 
         mxPrint("DELETED TAB COUNT", tabGroup.tabs.count)
@@ -385,5 +385,24 @@ extension AXTabBarView {
 final class AXFlippedClipView: NSClipView {
     override var isFlipped: Bool {
         return true
+    }
+}
+
+extension AXTabBarView {
+    @MainActor func updateTabGroup(_ newTabGroup: AXTabGroup) {
+        for button in self.tabStackView.arrangedSubviews {
+            button.removeFromSuperview()
+        }
+
+        // Update the tab group
+        self.tabGroup = newTabGroup
+        newTabGroup.tabBarView = self
+
+        for (index, tab) in newTabGroup.tabs.enumerated() {
+            addTabButtonInBackground(for: tab, index: index)
+        }
+
+        guard tabGroup.selectedIndex != -1 else { return }
+        self.updateTabSelection(from: -1, to: tabGroup.selectedIndex)
     }
 }

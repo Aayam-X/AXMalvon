@@ -37,7 +37,7 @@ class AXProfile {
     var name: String
     var configuration: WKWebViewConfiguration
     var tabGroups: [AXTabGroup] = []
-    var currentTabGroup: AXTabGroup
+    weak var currentTabGroup: AXTabGroup!
 
     var hasLoadedTabs: Bool = false
 
@@ -68,8 +68,7 @@ class AXProfile {
     init(name: String, config: WKWebViewConfiguration, loadsDefaultData: Bool) {
         self.name = name
         self.configuration = config
-        self.tabGroups = [.init(name: "Untitled Tab Group")]
-        currentTabGroup = tabGroups[0]
+        self.tabGroups = []
 
         addOtherConfigs()
 
@@ -208,6 +207,30 @@ class AXProfile {
 
         configuration.preferences.setValue(
             false, forKey: "backspaceKeyNavigationEnabled")
+
+        // Usage
+        //        let experimentalFeatures = WKPreferences.value(forKey: "experimentalFeatures")
+        //        // i have to call - (void)_setEnabled:(BOOL)value forFeature:(_WKFeature *)feature WK_API_AVAILABLE(macos(10.12), ios(10.0));
+        //        // experimentalFeatures is an array of [_WKFeature]
+        //        // how do i do this? i want to set true for all of them
+        //        print(experimentalFeatures)
+
+        //        let preferences = configuration.preferences
+        //
+        //        if let experimentalFeatures = WKPreferences.value(forKey: "experimentalFeatures") as? [AnyObject] {
+        //            for feature in experimentalFeatures {
+        //                // Call the private API method _setEnabled:forFeature: using Objective-C runtime
+        //                if let feature = feature as? NSObject {
+        //                    let selector = NSSelectorFromString("_setEnabled:forFeature:")
+        //                    if preferences.responds(to: selector) {
+        //                        preferences.perform(selector, with: false as NSNumber, with: feature)
+        //                    }
+        //                }
+        //            }
+        //        } else {
+        //            print("Unable to access experimentalFeatures.")
+        //        }
+
     }
 
     func enableContentBlockers() {
@@ -228,6 +251,7 @@ class AXProfile {
             injectionTime: .atDocumentStart,
             forMainFrameOnly: true
         )
+
         configuration.userContentController.addUserScript(userScript)
     }
 

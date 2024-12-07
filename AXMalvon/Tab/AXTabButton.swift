@@ -46,6 +46,7 @@ class AXTabButton: NSButton {
         set {
             self.favIconImageView.image =
                 newValue == nil ? AX_DEFAULT_FAVICON : newValue
+            tab.icon = newValue
         }
         get {
             self.favIconImageView.image
@@ -58,12 +59,8 @@ class AXTabButton: NSButton {
     var hoverColor: NSColor = NSColor.systemGray.withAlphaComponent(0.3)
     var selectedColor: NSColor = .textBackgroundColor
 
-    // Observers
-    var titleObserver: NSKeyValueObservation?
-
     // Other
     private var hasDrawn = false
-    var hasCustomTitle = false
 
     weak var titleViewRightAnchor: NSLayoutConstraint?
     weak var heightConstraint: NSLayoutConstraint?
@@ -74,7 +71,7 @@ class AXTabButton: NSButton {
             self.layer?.backgroundColor =
                 isSelected ? selectedColor.cgColor : .clear
             layer?.shadowOpacity = isSelected ? 0.3 : 0.0
-            if self.titleObserver == nil {
+            if isSelected, tab.titleObserver == nil {
                 forceCreateWebview()
             }
         }
@@ -82,9 +79,9 @@ class AXTabButton: NSButton {
 
     var webTitle: String = "Untitled" {
         didSet {
-            if !hasCustomTitle {
-                titleView.stringValue = webTitle
-            }
+            //if !hasCustomTitle {
+            titleView.stringValue = webTitle
+            //}
         }
     }
 
@@ -126,11 +123,17 @@ class AXTabButton: NSButton {
         // Setup trackingArea
         self.setTrackingArea()
 
+        if isSelected {
+            self.layer?.backgroundColor = selectedColor.cgColor
+            layer?.shadowOpacity = 0.3
+        }
+
         self.heightAnchor.constraint(equalToConstant: 36).isActive = true
 
         // Setup imageView
         favIconImageView.translatesAutoresizingMaskIntoConstraints = false
-        favIconImageView.image = AX_DEFAULT_FAVICON_SLEEP
+        favIconImageView.image =
+            tab.icon != nil ? tab.icon : AX_DEFAULT_FAVICON_SLEEP
         favIconImageView.contentTintColor = .textBackgroundColor
             .withAlphaComponent(0.2)
         addSubview(favIconImageView)
@@ -184,13 +187,6 @@ class AXTabButton: NSButton {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func removeFromSuperview() {
-        titleObserver?.invalidate()
-        titleObserver = nil
-
-        super.removeFromSuperview()
-    }
-
     func faviconNotFound() {
         favIconImageView.image = AX_DEFAULT_FAVICON
     }
@@ -203,15 +199,14 @@ extension AXTabButton {
     }
 
     @objc func deactiveTab() {
-        titleObserver?.invalidate()
-        titleObserver = nil
+        tab.deactivateWebView()
+
         favicon = AX_DEFAULT_FAVICON_SLEEP
         delegate?.tabButtonDeactivatedWebView(self)
     }
 
     func updateTitle(_ to: String) {
         self.webTitle = to
-        tab.title = to
 
         if self.isSelected {
             self.delegate?.tabButtonActiveTitleChanged(to, for: self)
@@ -226,11 +221,6 @@ extension AXTabButton {
 
 // MARK: Web View Functions
 extension AXTabButton {
-    public func stopObserving() {
-        titleObserver?.invalidate()
-        titleObserver = nil
-    }
-
     func findFavicon(for webView: AXWebView) {
         Task {
             do {
@@ -276,48 +266,7 @@ extension AXTabButton {
     }
 
     func createObserver(_ webView: AXWebView) {
-        // Initial favicon fetching with delay
-        Task {
-            try await Task.sleep(for: .seconds(2.22))
-            findFavicon(for: webView)
-        }
-
-        // Observe changes to the webView's title
-        self.titleObserver = webView.observe(
-            \.title, options: .new,
-            changeHandler: { [weak self] _, _ in
-                guard let self = self else { return }
-
-                // Update the tab title
-                let title = webView.title ?? "Untitled"
-                self.updateTitle(title)
-
-                // Ensure new URL and its host are valid
-                guard let newURL = webView.url,
-                    let newHost = newURL.host
-                else { return }
-
-                // Extract host substring for comparison
-                let newHostSubstring = newHost.dropFirst(3).prefix(3)
-
-                if let currentURL = self.tab.url,
-                    let currentHost = currentURL.host
-                {
-                    let currentHostSubstring = currentHost.dropFirst(3).prefix(
-                        3)
-
-                    // Compare hosts and update if different
-                    if newHostSubstring != currentHostSubstring {
-                        self.tab.url = newURL
-                        self.findFavicon(for: webView)
-                    }
-                } else {
-                    // No previous URL, so set the tab's URL and update the favicon
-                    self.tab.url = newURL
-                    self.findFavicon(for: webView)
-                }
-            }
-        )
+        tab.startTitleObservation(for: self)
     }
 
 }

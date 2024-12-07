@@ -36,8 +36,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             createNewWindowIfNeeded()
             window!.makeKeyAndOrderFront(nil)
 
-            ev()
-            bgU_Check()
+            #if !DEBUG
+                ev()
+                bgU_Check()
+            #endif
         } else {
             // First Launch
             showWelcomeView()
@@ -103,7 +105,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    @IBAction func toggleSearchBarForNewTab(_ sender: Any) {
+    @IBAction func toggleSearchBarForNewTab(_ sender: Any?) {
         guard let keyWindow = NSApplication.shared.keyWindow as? AXWindow else {
             return
         }

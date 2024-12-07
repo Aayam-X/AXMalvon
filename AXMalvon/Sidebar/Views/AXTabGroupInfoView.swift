@@ -1,5 +1,5 @@
 //
-//  AXSidebarTabGroupInformativeView.swift
+//  AXTabGroupInfoView.swift
 //  Malvon
 //
 //  Created by Ashwin Paudel on 2024-11-10.
@@ -8,8 +8,9 @@
 
 import Cocoa
 
-class AXSidebarTabGroupInformativeView: NSView {
+class AXTabGroupInfoView: NSView {
     private var hasDrawn: Bool = false
+    var onRightMouseDown: (() -> Void)?
 
     // Create the image view
     lazy var imageView: NSImageView = {
@@ -22,7 +23,7 @@ class AXSidebarTabGroupInformativeView: NSView {
         return imageView
     }()
 
-    lazy var tabGroupLabel: NSTextField = {
+    private lazy var tabGroupLabel: NSTextField = {
         let label = NSTextField(labelWithString: "Math")
         label.font = .titleBarFont(ofSize: 14)
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -32,7 +33,7 @@ class AXSidebarTabGroupInformativeView: NSView {
         return label
     }()
 
-    lazy var profileLabel: NSTextField = {
+    private lazy var profileLabel: NSTextField = {
         let label = NSTextField(labelWithString: "School")
         label.font = .messageFont(ofSize: 11)
         label.textColor = NSColor.gray
@@ -58,6 +59,7 @@ class AXSidebarTabGroupInformativeView: NSView {
         return stackView
     }()
 
+    @MainActor
     override func viewWillDraw() {
         guard !hasDrawn else { return }
         defer { hasDrawn = true }
@@ -78,5 +80,33 @@ class AXSidebarTabGroupInformativeView: NSView {
             imageView.widthAnchor.constraint(equalToConstant: 24),
             imageView.heightAnchor.constraint(equalToConstant: 24),
         ])
+    }
+
+    @MainActor
+    func updateLabels(tabGroup: AXTabGroup, profileName: String) {
+        self.tabGroupLabel.stringValue = tabGroup.name
+        self.profileLabel.stringValue = profileName
+
+        updateIcon(tabGroup.icon)
+    }
+
+    @MainActor
+    func updateLabels(tabGroup: AXTabGroup) {
+        updateIcon(tabGroup.icon)
+    }
+
+    @MainActor
+    func updateIcon(tabGroup: AXTabGroup) {
+        updateIcon(tabGroup.icon)
+    }
+
+    @MainActor
+    func updateIcon(_ named: String) {
+        self.imageView.image = NSImage(
+            systemSymbolName: named, accessibilityDescription: nil)
+    }
+
+    override func rightMouseDown(with event: NSEvent) {
+        onRightMouseDown?()
     }
 }

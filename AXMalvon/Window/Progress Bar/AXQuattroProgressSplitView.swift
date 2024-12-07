@@ -92,18 +92,16 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
     }
 
     func beginAnimation(with value: Double) {
-        DispatchQueue.main.async { [self] in
-            if value >= 93 {
-                finishAnimation()
-            } else if value >= 0.75 {
-                animateProgress(from: 0.75, to: 0.80, duration: 9)
-            } else if value >= 0.50 {
-                animateProgress(from: 0.50, to: 0.75, duration: 1.2)
-            } else if value >= 0.25 {
-                animateProgress(from: 0.25, to: 0.50, duration: 0.9)
-            } else {
-                animateProgress(from: 0.0, to: 0.25, duration: 0.6)
-            }
+        if value >= 93 {
+            finishAnimation()
+        } else if value >= 0.75 {
+            animateProgress(from: 0.75, to: 0.80, duration: 9)
+        } else if value >= 0.50 {
+            animateProgress(from: 0.50, to: 0.75, duration: 1.2)
+        } else if value >= 0.25 {
+            animateProgress(from: 0.25, to: 0.50, duration: 0.9)
+        } else {
+            animateProgress(from: 0.0, to: 0.25, duration: 0.6)
         }
     }
 
@@ -115,6 +113,7 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         animateProgress(from: 0.8, to: 1.0, duration: 0.69)  // Quick animation to 100%
     }
 
+    @MainActor
     private func animateProgress(
         from start: CGFloat, to end: CGFloat, duration: CFTimeInterval
     ) {
@@ -183,6 +182,7 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         layer.add(animation, forKey: "progressAnimation")
     }
 
+    @MainActor
     private func cancelOngoingAnimations() {
         // Remove all animations from each layer
         topBorderLayer.removeAllAnimations()
@@ -194,6 +194,7 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         isAnimating = false
     }
 
+    @MainActor
     func cancelAnimations() {
         // Remove all animations from each layer
         topBorderLayer.removeAllAnimations()

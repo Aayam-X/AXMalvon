@@ -10,8 +10,7 @@ import Cocoa
 import WebKit
 
 protocol AXSideBarViewDelegate: AnyObject {
-    func sidebarView(didSelectTabGroup tabGroupAt: Int)
-    func sidebarViewactiveTitle(changed to: String)
+    func sidebarViewActiveTitle(changed to: String)
     func sidebarSwitchedTab(at: Int)
 
     func deactivatedTab() -> WKWebViewConfiguration?
@@ -23,7 +22,8 @@ class AXSidebarView: NSView {
     var currentTabGroup: AXTabGroup?
 
     var gestureView = AXGestureView()
-    private weak var tabBarView: AXTabBarView?
+    let tabBarView = AXTabBarView()
+
     var mouseExitedTrackingArea: NSTrackingArea!
 
     override var tag: Int {
@@ -35,6 +35,46 @@ class AXSidebarView: NSView {
         line.boxType = .separator
         line.translatesAutoresizingMaskIntoConstraints = false
         return line
+    }()
+
+    private lazy var addNewTabButton: NSButton = {
+        let button = NSButton(
+            image: NSImage(named: NSImage.addTemplateName)!, target: self,
+            action: #selector(addNewTab))
+        button.isBordered = false
+        button.imagePosition = .imageOnly
+        button.translatesAutoresizingMaskIntoConstraints = false
+
+        return button
+    }()
+
+    private lazy var workspaceSwapperButton: NSButton = {
+        let button = NSButton(
+            image: NSImage(
+                systemSymbolName: "rectangle.stack",
+                accessibilityDescription: nil)!, target: self,
+            action: #selector(showWorkspaceSwapper))
+        button.isBordered = false
+        button.imagePosition = .imageOnly
+        button.translatesAutoresizingMaskIntoConstraints = false
+
+        return button
+    }()
+
+    // This standalone view is needed for the NSWindow to access its delegate
+    lazy var workspaceSwapperView: AXWorkspaceSwapperView = {
+        return AXWorkspaceSwapperView()
+    }()
+
+    lazy var workspaceSwapperPopoverView: NSPopover = {
+        let popover = NSPopover()
+        popover.behavior = .transient
+
+        let controller = NSViewController()
+        controller.view = workspaceSwapperView
+        popover.contentViewController = controller
+
+        return popover
     }()
 
     override func viewWillDraw() {
@@ -63,6 +103,39 @@ class AXSidebarView: NSView {
             bottomLine.heightAnchor.constraint(equalToConstant: 1),
         ])
 
+        addSubview(addNewTabButton)
+        NSLayoutConstraint.activate([
+            addNewTabButton.bottomAnchor.constraint(
+                equalTo: bottomAnchor, constant: -9),
+            addNewTabButton.rightAnchor.constraint(
+                equalTo: rightAnchor, constant: -10),
+            addNewTabButton.heightAnchor.constraint(equalToConstant: 30),
+            addNewTabButton.widthAnchor.constraint(equalToConstant: 30),
+        ])
+
+        addSubview(workspaceSwapperButton)
+        NSLayoutConstraint.activate([
+            workspaceSwapperButton.bottomAnchor.constraint(
+                equalTo: bottomAnchor, constant: -9),
+            workspaceSwapperButton.leftAnchor.constraint(
+                equalTo: leftAnchor, constant: 10),
+            workspaceSwapperButton.heightAnchor.constraint(equalToConstant: 30),
+            workspaceSwapperButton.widthAnchor.constraint(equalToConstant: 30),
+        ])
+
+        // AXTabBarView
+        tabBarView.translatesAutoresizingMaskIntoConstraints = false
+        tabBarView.delegate = self
+        addSubview(tabBarView)
+        NSLayoutConstraint.activate([
+            tabBarView.topAnchor.constraint(
+                equalTo: bottomLine.bottomAnchor, constant: 5),
+            tabBarView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            tabBarView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            tabBarView.bottomAnchor.constraint(
+                equalTo: bottomAnchor, constant: -49),
+        ])
+
         // Mouse Tracking Area
         mouseExitedTrackingArea = NSTrackingArea(
             rect: .init(
@@ -73,52 +146,32 @@ class AXSidebarView: NSView {
 
         // Update tab bar
         if let window = self.window as? AXWindow {
-            self.changeShownTabBarGroup(window.currentTabGroup)
+            window.switchToTabGroup(window.currentTabGroup)
         }
     }
 
     // MARK: - Tab Bar Functions
-    func changeShownTabBarGroup(_ tabGroup: AXTabGroup) {
-        currentTabGroup = tabGroup
+    func changeShownTabGroup(_ tabGroup: AXTabGroup) {
+        tabBarView.updateTabGroup(tabGroup)
 
-        tabGroup.initializeTabBarView()
-        updateTabBarView(tabBar: tabGroup.tabBarView!)
+        // Tab Group Information View
+        let tabs = tabGroup.tabs
+        let window = self.window as! AXWindow
+
+        gestureView.currentTabGroupChanged(
+            tabGroup, profile: window.activeProfile.name)
 
         // Update the webview
-        if let tabs = currentTabGroup?.tabs {
-            let window = self.window as! AXWindow
-            gestureView.tabGroupInformationView.profileLabel.stringValue =
-                window.defaultProfile.name
-            gestureView.tabGroupInformationView.tabGroupLabel.stringValue =
-                tabGroup.name
+        let tabAt = tabGroup.selectedIndex
 
-            let tabAt = tabGroup.selectedIndex
-
-            if tabAt == -1 || tabGroup.tabs.count <= tabAt {
-                tabGroup.selectedIndex = -1
-                window.containerView.createEmptyView()
-            } else {
-                window.containerView.updateView(webView: tabs[tabAt].webView)
-            }
+        if tabAt == -1 || tabGroup.tabs.count <= tabAt {
+            tabGroup.selectedIndex = -1
+            window.containerView.createEmptyView()
+        } else {
+            window.containerView.updateView(webView: tabs[tabAt].webView)
         }
-    }
 
-    private func updateTabBarView(tabBar: AXTabBarView) {
-        tabBarView?.removeFromSuperview()
-
-        self.tabBarView = tabBar
-        self.tabBarView?.translatesAutoresizingMaskIntoConstraints = false
-        self.tabBarView?.delegate = self
-
-        addSubview(tabBarView!)
-
-        NSLayoutConstraint.activate([
-            tabBarView!.topAnchor.constraint(
-                equalTo: bottomLine.bottomAnchor, constant: 5),
-            tabBarView!.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tabBarView!.trailingAnchor.constraint(equalTo: trailingAnchor),
-            tabBarView!.bottomAnchor.constraint(equalTo: bottomAnchor),
-        ])
+        gestureView.searchButton.url = window.containerView.currentWebView?.url
     }
 
     // MARK: - Mouse Functions
@@ -155,11 +208,28 @@ extension AXSidebarView: AXTabBarViewDelegate {
     }
 
     func activeTabTitleChanged(to: String) {
-        delegate?.sidebarViewactiveTitle(changed: to)
+        delegate?.sidebarViewActiveTitle(changed: to)
     }
 
     func tabBarSwitchedTo(tabAt: Int) {
         delegate?.sidebarSwitchedTab(at: tabAt)
         mxPrint("Switched to tab at \(tabAt).")
+    }
+}
+
+// MARK: - UI Elements
+extension AXSidebarView {
+    @objc func addNewTab() {
+        guard let appDelegate = NSApp.delegate as? AppDelegate else { return }
+
+        appDelegate.toggleSearchBarForNewTab(nil)
+    }
+
+    @objc func showWorkspaceSwapper() {
+        workspaceSwapperView.reloadTabGroups()
+
+        workspaceSwapperPopoverView.show(
+            relativeTo: workspaceSwapperButton.bounds,
+            of: workspaceSwapperButton, preferredEdge: .maxX)
     }
 }

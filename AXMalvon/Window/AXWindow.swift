@@ -20,73 +20,69 @@ class AXWindow: NSWindow, NSWindowDelegate {
     var hiddenSidebarView = false
 
     var profiles: [AXProfile]
+    var activeProfile: AXProfile
 
-    var defaultProfile: AXProfile
     var profileIndex = 0 {
         didSet {
-            defaultProfile = profiles[profileIndex]
-            self.sidebarView(
-                didSelectTabGroup: defaultProfile.currentTabGroupIndex)
+            activeProfile = profiles[profileIndex]
+            self.switchToTabGroup(activeProfile.currentTabGroupIndex)
         }
     }
 
     var currentConfiguration: WKWebViewConfiguration {
-        defaultProfile.configuration
+        activeProfile.configuration
     }
 
     var tabGroups: [AXTabGroup] {
-        defaultProfile.tabGroups
+        activeProfile.tabGroups
     }
 
     var currentTabGroupIndex: Int {
         get {
-            defaultProfile.currentTabGroupIndex
+            activeProfile.currentTabGroupIndex
         }
         set {
-            defaultProfile.currentTabGroupIndex = newValue
+            activeProfile.currentTabGroupIndex = newValue
         }
     }
 
     var currentTabGroup: AXTabGroup {
-        defaultProfile.currentTabGroup
+        activeProfile.currentTabGroup
     }
 
     private lazy var visualEffectView: NSVisualEffectView = {
         let visualEffectView = NSVisualEffectView()
         visualEffectView.blendingMode = .behindWindow
-        visualEffectView.material = .sidebar
+        visualEffectView.material = .popover
         visualEffectView.wantsLayer = true
 
-        let tintView = NSView()
-        tintView.translatesAutoresizingMaskIntoConstraints = false
-        tintView.wantsLayer = true
-
-        #if DEBUG
-            tintView.layer?.backgroundColor =
-                NSColor.systemGray.withAlphaComponent(0.2).cgColor
-        #else
-            tintView.layer?.backgroundColor =
-                NSColor.systemPink.withAlphaComponent(0.2).cgColor
-        #endif
-
         // Add tint view on top of the visual effect view
-        visualEffectView.addSubview(tintView)
+        visualEffectView.addSubview(visualEffectTintView)
         NSLayoutConstraint.activate([
-            tintView.leadingAnchor.constraint(
+            visualEffectTintView.leadingAnchor.constraint(
                 equalTo: visualEffectView.leadingAnchor),
-            tintView.trailingAnchor.constraint(
+            visualEffectTintView.trailingAnchor.constraint(
                 equalTo: visualEffectView.trailingAnchor),
-            tintView.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
-            tintView.bottomAnchor.constraint(
+            visualEffectTintView.topAnchor.constraint(
+                equalTo: visualEffectView.topAnchor),
+            visualEffectTintView.bottomAnchor.constraint(
                 equalTo: visualEffectView.bottomAnchor),
         ])
 
         return visualEffectView
     }()
 
+    private lazy var visualEffectTintView: NSView = {
+        let tintView = NSView()
+        tintView.translatesAutoresizingMaskIntoConstraints = false
+        tintView.wantsLayer = true
+
+        return tintView
+    }()
+
     init(with profiles: [AXProfile]) {
         self.profiles = profiles
-        defaultProfile = profiles[profileIndex]  // 0
+        activeProfile = profiles[profileIndex]  // 0
 
         super.init(
             contentRect: AXWindow.updateWindowFrame(),
@@ -126,7 +122,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
             containerView.delegate = self
 
             sidebarView.gestureView.delegate = self
-            sidebarView.gestureView.popoverView.delegate = self
+            sidebarView.workspaceSwapperView.delegate = self
             sidebarView.gestureView.searchButton.delegate = self
 
             trafficLightManager.updateTrafficLights()
@@ -155,6 +151,12 @@ class AXWindow: NSWindow, NSWindowDelegate {
     func windowDidEndLiveResize(_ notification: Notification) {
         let frameAsString = NSStringFromRect(self.frame)
         UserDefaults.standard.set(frameAsString, forKey: "windowFrame")
+    }
+
+    func windowWillExitFullScreen(_ notification: Notification) {
+        sidebarView.gestureView.updateConstraintsWhenMouse(
+            window: self, entered: false)
+        trafficLightManager.hideTrafficLights(true)
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -204,6 +206,47 @@ class AXWindow: NSWindow, NSWindowDelegate {
             return NSMakeRect(
                 100, 100, screenFrame.width / 2, screenFrame.height / 2)
         }
+    }
+
+    func toggleTabSidebar() {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.25  // Adjust duration as needed
+            context.allowsImplicitAnimation = true
+
+            let sideBarWillCollapsed = splitView.subviews.count == 2
+            if sideBarWillCollapsed {
+                hiddenSidebarView = true
+                splitView.removeArrangedSubview(sidebarView)
+                containerView.websiteTitleLabel.isHidden = true
+            } else {
+                hiddenSidebarView = false
+                splitView.insertArrangedSubview(sidebarView, at: 0)
+                containerView.websiteTitleLabel.isHidden = false
+            }
+
+            containerView.sidebarCollapsed(
+                sideBarWillCollapsed,
+                isFullScreen: self.styleMask.contains(.fullScreen))
+            splitView.layoutSubtreeIfNeeded()
+        }
+    }
+
+    func switchToTabGroup(_ tabGroup: AXTabGroup) {
+        sidebarView.changeShownTabGroup(currentTabGroup)
+        visualEffectTintView.layer?.backgroundColor = tabGroup.color.cgColor
+
+        mxPrint("Changed to Tab Group \(tabGroup.name), unknown index.")
+    }
+
+    func switchToTabGroup(_ at: Int) {
+        let tabGroup = activeProfile.tabGroups[at]
+        self.currentTabGroupIndex = at
+
+        switchToTabGroup(tabGroup)
+
+        mxPrint(
+            "Changed to Tab Group \(tabGroup.name), known index: \(self.currentTabGroupIndex). Ignore top message."
+        )
     }
 }
 
@@ -286,14 +329,14 @@ extension AXWindow: AXWebContainerViewDelegate {
 }
 
 // MARK: - Sidebar View Delegate
-// TODO: - Move this code to the popover view
 extension AXWindow: AXSideBarViewDelegate {
     func deactivatedTab() -> WKWebViewConfiguration? {
-        return defaultProfile.configuration
+        return activeProfile.configuration
     }
 
     func sidebarSwitchedTab(at: Int) {
-        guard let tabs = sidebarView.currentTabGroup?.tabs else { return }
+        guard let tabGroup = sidebarView.tabBarView.tabGroup else { return }
+        let tabs = tabGroup.tabs
 
         if at == -1 {
             containerView.removeAllWebViews()
@@ -306,37 +349,16 @@ extension AXWindow: AXSideBarViewDelegate {
             containerView.currentWebView?.url
     }
 
-    func sidebarViewactiveTitle(changed to: String) {
+    func sidebarViewActiveTitle(changed to: String) {
         containerView.websiteTitleLabel.stringValue = to
     }
 
-    func sidebarView(didSelectTabGroup tabGroupAt: Int) {
-        self.currentTabGroupIndex = tabGroupAt
-        sidebarView.changeShownTabBarGroup(currentTabGroup)
-
-        mxPrint("SELECTED NEW TAB GROUP AT \(tabGroupAt)")
-    }
-
-    func toggleTabSidebar() {
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.25  // Adjust duration as needed
-            context.allowsImplicitAnimation = true
-
-            let sideBarWillCollapsed = splitView.subviews.count == 2
-            if sideBarWillCollapsed {
-                hiddenSidebarView = true
-                splitView.removeArrangedSubview(sidebarView)
-            } else {
-                hiddenSidebarView = false
-                splitView.insertArrangedSubview(sidebarView, at: 0)
-            }
-
-            containerView.sidebarCollapsed(
-                sideBarWillCollapsed,
-                isFullScreen: self.styleMask.contains(.fullScreen))
-            splitView.layoutSubtreeIfNeeded()
-        }
-    }
+    //    func sidebarView(didSelectTabGroup tabGroupAt: Int) {
+    //        self.currentTabGroupIndex = tabGroupAt
+    //        sidebarView.changeShownTabBarGroup(currentTabGroup)
+    //
+    //        mxPrint("SELECTED NEW TAB GROUP AT \(tabGroupAt)")
+    //    }
 }
 
 // MARK: Sidebar Search Button Delegate
@@ -354,11 +376,8 @@ extension AXWindow: AXSidebarSearchButtonDelegate {
 
 // MARK: - Gesture View Delegate
 extension AXWindow: AXGestureViewDelegate {
-    func gestureViewMouseDown() {
-        if hiddenSidebarView {
-            toggleTabSidebar()
-            sidebarView.layer?.backgroundColor = nil
-        }
+    func gestureView(didUpdate tabGroup: AXTabGroup) {
+        visualEffectTintView.layer?.backgroundColor = tabGroup.color.cgColor
     }
 
     func gestureView(didSwipe direction: AXGestureViewSwipeDirection!) {
@@ -375,27 +394,32 @@ extension AXWindow: AXGestureViewDelegate {
     }
 }
 
-// MARK: - Popover View Delegate
-extension AXWindow: AXSidebarPopoverViewDelegate {
+// MARK: - Workspace Swapper View Delegate
+extension AXWindow: AXWorkspaceSwapperViewDelegate {
+    func currentProfileName() -> String {
+        activeProfile.name
+    }
+
     func didSwitchProfile(to index: Int) {
         profileIndex = profileIndex == 1 ? 0 : 1
     }
 
     func popoverViewTabGroups() -> [AXTabGroup] {
-        return self.defaultProfile.tabGroups
-    }
-
-    func updatedTabGroupName(at: Int, to: String) {
-        tabGroups[at].name = to
+        return self.activeProfile.tabGroups
     }
 
     func didSwitchTabGroup(to index: Int) {
-        self.sidebarView(didSelectTabGroup: index)
+        let tabGroup = self.activeProfile.tabGroups[index]
+        self.currentTabGroupIndex = index
+
+        visualEffectTintView.layer?.backgroundColor = tabGroup.color.cgColor
+
+        self.switchToTabGroup(tabGroup)
     }
 
     func didAddTabGroup(_ newGroup: AXTabGroup) {
         // Switch to the new tab group
-        self.defaultProfile.tabGroups.append(newGroup)
+        self.activeProfile.tabGroups.append(newGroup)
     }
 }
 
@@ -427,7 +451,7 @@ extension AXWindow {
     }
 
     @IBAction func enableContentBlockers(_ sender: Any) {
-        defaultProfile.enableContentBlockers()
+        activeProfile.enableContentBlockers()
     }
 
     @IBAction func enableYouTubeAdBlocker(_ sender: Any) {
@@ -435,7 +459,7 @@ extension AXWindow {
             sender.title = "Disable YouTube Ad Blocker (Restart App)"
         }
 
-        defaultProfile.enableYouTubeAdBlocker()
+        activeProfile.enableYouTubeAdBlocker()
     }
 
     @IBAction func closeTab(_ sender: Any) {

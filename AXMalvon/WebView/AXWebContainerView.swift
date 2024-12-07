@@ -47,8 +47,8 @@ class AXWebContainerView: NSView {
         title.isBordered = false
         title.usesSingleLineMode = true
         title.drawsBackground = false
-        title.alphaValue = 0.3
-        title.font = .boldSystemFont(ofSize: 9)
+        title.alphaValue = 0.5
+        title.font = .systemFont(ofSize: 9)
         title.translatesAutoresizingMaskIntoConstraints = false
         return title
     }()
@@ -187,11 +187,14 @@ class AXWebContainerView: NSView {
 
     func sidebarHover() {
         ensureSidebarExists()
-        guard let sidebar = sidebar else { return }
+        guard let sidebar = sidebar, let window = window as? AXWindow else {
+            return
+        }
         addSubview(sidebar)
 
         if !isAnimating {
-            sidebar.layer?.backgroundColor = NSColor.systemGray.cgColor
+            sidebar.layer?.backgroundColor =
+                window.currentTabGroup.color.withAlphaComponent(1.0).cgColor
             NSAnimationContext.runAnimationGroup(
                 { context in
                     context.duration = 0.1
@@ -281,6 +284,8 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
 
     func createEmptyView() {
         currentWebView?.removeFromSuperview()
+        currentWebView = nil
+
         self.websiteTitleLabel.stringValue = "Empty Window"
     }
 
