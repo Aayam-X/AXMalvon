@@ -6,17 +6,31 @@
 //  Copyright © 2022-2024 Ashwin Paudel, Aayam(X). All rights reserved.
 //
 
-import AppKit
+import Cocoa
+import QuartzCore
 
 class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
     CAAnimationDelegate
 {
-    private var isAnimating: Bool = false  // Flag to check if animation is ongoing
+    private let animationQueue = DispatchQueue(
+        label: "com.ayaamx.AXMalvon.progressAnimation",
+        qos: .userInitiated
+    )
 
-    private var topBorderLayer = CAShapeLayer()
-    private var rightBorderLayer = CAShapeLayer()
-    private var bottomBorderLayer = CAShapeLayer()
-    private var leftBorderLayer = CAShapeLayer()
+    private let borderLayers: [CAShapeLayer] = {
+        return (0..<4).map { _ in
+            let layer = CAShapeLayer()
+            layer.lineWidth = 6.0
+            layer.strokeColor =
+                NSColor.textColor.withAlphaComponent(0.3).cgColor
+            layer.isHidden = true
+            layer.opacity = 0.0
+            return layer
+        }
+    }()
+
+    private var currentProgress: CGFloat = 0.0
+    private var animationToken: UUID?
 
     init() {
         super.init(frame: .zero)
@@ -33,6 +47,124 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         fatalError("init(coder:) has not been implemented")
     }
 
+    private func setupLayers() {
+        borderLayers.forEach { layer?.addSublayer($0) }
+    }
+
+    private func createBorderPath(for edge: NSRectEdge) -> NSBezierPath {
+        let path = NSBezierPath()
+        switch edge {
+        case .maxY:
+            path.move(to: CGPoint(x: 0, y: bounds.height))
+            path.line(to: CGPoint(x: bounds.width, y: bounds.height))
+        case .maxX:
+            path.move(to: CGPoint(x: bounds.width, y: bounds.height))
+            path.line(to: CGPoint(x: bounds.width, y: 0))
+        case .minY:
+            path.move(to: CGPoint(x: bounds.width, y: 0))
+            path.line(to: CGPoint(x: 0, y: 0))
+        case .minX:
+            path.move(to: CGPoint(x: 0, y: 0))
+            path.line(to: CGPoint(x: 0, y: bounds.height))
+        @unknown default:
+            break
+        }
+        return path
+    }
+
+    func beginAnimation(with value: Double) {
+        let targetProgress: CGFloat
+        let duration: CFTimeInterval
+
+        switch value {
+        case 93...:
+            targetProgress = 1.0
+            duration = 0.69
+        case 0.75...:
+            targetProgress = 0.80
+            duration = 9.0
+        case 0.50...:
+            targetProgress = 0.75
+            duration = 1.2
+        case 0.25...:
+            targetProgress = 0.50
+            duration = 0.9
+        default:
+            targetProgress = 0.25
+            duration = 0.6
+        }
+
+        animateProgressAsync(to: targetProgress, duration: duration)
+    }
+
+    private func animateProgressAsync(
+        to targetProgress: CGFloat, duration: CFTimeInterval
+    ) {
+        let currentToken = UUID()
+        animationToken = currentToken
+
+        animationQueue.async { [weak self] in
+            guard let self = self else { return }
+
+            let startProgress = self.currentProgress
+
+            DispatchQueue.main.async {
+                guard self.animationToken == currentToken else { return }
+
+                // Prepare and start animation
+                let animation = CABasicAnimation(keyPath: "strokeEnd")
+                animation.fromValue = startProgress
+                animation.toValue = targetProgress
+                animation.duration = duration
+                animation.timingFunction = CAMediaTimingFunction(
+                    name: .easeInEaseOut)
+
+                // Apply animation to each border layer
+                for (index, layer) in self.borderLayers.enumerated() {
+                    let path = self.createBorderPath(
+                        for: NSRectEdge(rawValue: UInt(index))!)
+                    layer.path = path.cgPath
+                    layer.zPosition = 1
+                    layer.opacity = 1.0
+                    layer.isHidden = false
+                    layer.add(animation, forKey: "progressAnimation")
+                }
+
+                if targetProgress >= 0.95 {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+                        [weak self] in
+                        guard let self = self else { return }
+                        self.borderLayers.forEach { layer in
+                            layer.opacity = 0.0
+                            layer.isHidden = true
+                        }
+                    }
+                }
+
+                self.currentProgress = targetProgress
+            }
+        }
+    }
+
+    func finishAnimation() {
+        animateProgressAsync(to: 1.0, duration: 0.69)
+    }
+
+    func cancelAnimations() {
+        animationToken = nil
+
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+
+            self.borderLayers.forEach { layer in
+                layer.removeAllAnimations()
+                layer.opacity = 0.0
+                layer.isHidden = true
+            }
+        }
+    }
+
+    // MARK: - NSSplitViewDelegate Methods
     func splitView(
         _ splitView: NSSplitView,
         constrainMinCoordinate proposedMinimumPosition: CGFloat,
@@ -52,7 +184,7 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
     func splitView(
         _ splitView: NSSplitView, shouldAdjustSizeOfSubview view: NSView
     ) -> Bool {
-        return view.tag == 0x01 ? false : true
+        return view.tag != 0x01
     }
 
     func splitView(_ splitView: NSSplitView, canCollapseSubview subview: NSView)
@@ -63,178 +195,5 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
 
     override func drawDivider(in rect: NSRect) {
         // Empty Divider
-    }
-
-    private func setupLayers() {
-        let borderWidth: CGFloat = 6.0
-        let progressColor = NSColor.textColor.withAlphaComponent(0.3).cgColor
-
-        // Configure each layer
-        topBorderLayer.lineWidth = borderWidth
-        topBorderLayer.strokeColor = progressColor
-        topBorderLayer.isHidden = false
-        layer?.addSublayer(topBorderLayer)
-
-        rightBorderLayer.lineWidth = borderWidth
-        rightBorderLayer.strokeColor = progressColor
-        rightBorderLayer.isHidden = false
-        layer?.addSublayer(rightBorderLayer)
-
-        bottomBorderLayer.lineWidth = borderWidth
-        bottomBorderLayer.strokeColor = progressColor
-        bottomBorderLayer.isHidden = false
-        layer?.addSublayer(bottomBorderLayer)
-
-        leftBorderLayer.lineWidth = borderWidth
-        leftBorderLayer.strokeColor = progressColor
-        leftBorderLayer.isHidden = false
-        layer?.addSublayer(leftBorderLayer)
-    }
-
-    func beginAnimation(with value: Double) {
-        if value >= 93 {
-            finishAnimation()
-        } else if value >= 0.75 {
-            animateProgress(from: 0.75, to: 0.80, duration: 9)
-        } else if value >= 0.50 {
-            animateProgress(from: 0.50, to: 0.75, duration: 1.2)
-        } else if value >= 0.25 {
-            animateProgress(from: 0.25, to: 0.50, duration: 0.9)
-        } else {
-            animateProgress(from: 0.0, to: 0.25, duration: 0.6)
-        }
-    }
-
-    func finishAnimation() {
-        // Immediately stop any ongoing animations
-        cancelOngoingAnimations()
-
-        // Override current progress and animate quickly to 100%
-        animateProgress(from: 0.8, to: 1.0, duration: 0.69)  // Quick animation to 100%
-    }
-
-    @MainActor
-    private func animateProgress(
-        from start: CGFloat, to end: CGFloat, duration: CFTimeInterval
-    ) {
-        // Get the current progress if an animation is running
-        let currentProgress = topBorderLayer.presentation()?.strokeEnd ?? start
-
-        // Remove ongoing animations to avoid conflicts
-        cancelOngoingAnimations()
-
-        // Create a new animation with the current state as the starting point
-        let animation = CABasicAnimation(keyPath: "strokeEnd")
-        animation.fromValue = currentProgress
-        animation.toValue = end
-        animation.duration = duration
-        animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-        animation.delegate = self
-
-        // Apply the animation to all borders
-        applyAnimation(
-            animation, to: topBorderLayer, withPath: createTopBorderPath())
-        applyAnimation(
-            animation, to: rightBorderLayer, withPath: createRightBorderPath())
-        applyAnimation(
-            animation, to: bottomBorderLayer, withPath: createBottomBorderPath()
-        )
-        applyAnimation(
-            animation, to: leftBorderLayer, withPath: createLeftBorderPath())
-
-        isAnimating = true
-    }
-
-    private func createTopBorderPath() -> NSBezierPath {
-        let path = NSBezierPath()
-        path.move(to: CGPoint(x: 0, y: bounds.height))
-        path.line(to: CGPoint(x: bounds.width, y: bounds.height))
-        return path
-    }
-
-    private func createRightBorderPath() -> NSBezierPath {
-        let path = NSBezierPath()
-        path.move(to: CGPoint(x: bounds.width, y: bounds.height))
-        path.line(to: CGPoint(x: bounds.width, y: 0))
-        return path
-    }
-
-    private func createBottomBorderPath() -> NSBezierPath {
-        let path = NSBezierPath()
-        path.move(to: CGPoint(x: bounds.width, y: 0))
-        path.line(to: CGPoint(x: 0, y: 0))
-        return path
-    }
-
-    private func createLeftBorderPath() -> NSBezierPath {
-        let path = NSBezierPath()
-        path.move(to: CGPoint(x: 0, y: 0))
-        path.line(to: CGPoint(x: 0, y: bounds.height))
-        return path
-    }
-
-    private func applyAnimation(
-        _ animation: CABasicAnimation, to layer: CAShapeLayer,
-        withPath path: NSBezierPath
-    ) {
-        layer.path = path.cgPath
-        layer.zPosition = 1
-        layer.add(animation, forKey: "progressAnimation")
-    }
-
-    @MainActor
-    private func cancelOngoingAnimations() {
-        // Remove all animations from each layer
-        topBorderLayer.removeAllAnimations()
-        rightBorderLayer.removeAllAnimations()
-        bottomBorderLayer.removeAllAnimations()
-        leftBorderLayer.removeAllAnimations()
-
-        // Reset animation flag
-        isAnimating = false
-    }
-
-    @MainActor
-    func cancelAnimations() {
-        // Remove all animations from each layer
-        topBorderLayer.removeAllAnimations()
-        rightBorderLayer.removeAllAnimations()
-        bottomBorderLayer.removeAllAnimations()
-        leftBorderLayer.removeAllAnimations()
-
-        [
-            self.topBorderLayer, self.rightBorderLayer, self.bottomBorderLayer,
-            self.leftBorderLayer,
-        ].forEach { layer in
-            layer.opacity = 0.0
-            layer.isHidden = true
-        }
-
-        isAnimating = false
-    }
-
-    func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
-        guard flag, !isAnimating else { return }  // Ensure the animation completed
-
-        [
-            self.topBorderLayer, self.rightBorderLayer, self.bottomBorderLayer,
-            self.leftBorderLayer,
-        ].forEach { layer in
-            layer.opacity = 0.0
-            layer.isHidden = true
-        }
-
-        self.isAnimating = false
-    }
-
-    func animationDidStart(_ anim: CAAnimation) {
-        [
-            self.topBorderLayer, self.rightBorderLayer, self.bottomBorderLayer,
-            self.leftBorderLayer,
-        ].forEach { layer in
-            layer.opacity = 1.0
-            layer.isHidden = false
-            self.isAnimating = false
-        }
     }
 }

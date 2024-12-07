@@ -306,7 +306,8 @@ extension AXTabBarView: AXTabButtonDelegate {
 // MARK: - Tab Group Swiping Functionality
 class AXScrollView: NSScrollView {
     override func scrollWheel(with event: NSEvent) {
-        mxPrint("Scroll Wheeeeeeelelelelelele")
+        // Minimal scroll handling to reduce CPU usage
+        guard event.deltaY != 0 else { return }
         super.scrollWheel(with: event)
     }
 }

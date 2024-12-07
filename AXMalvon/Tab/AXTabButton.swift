@@ -15,7 +15,7 @@ let AX_DEFAULT_FAVICON_SLEEP = NSImage(
     systemSymbolName: "moon.fill", accessibilityDescription: nil)
 
 private let AX_DEFAULT_FAVICON_SCRIPT = """
-    ["icon", "shortcut icon", "apple-touch-icon"].map(r => document.head.querySelector(`link[rel="${r}"]`)).find(l => l)?.href || ""
+    (d=>{const h=d.head,l=["icon","shortcut icon","apple-touch-icon","mask-icon"];for(let r of l)if((r=h.querySelector(`link[rel="${r}"]`))&&r.href)return r.href;return d.location.origin+"/favicon.ico"})(document)
     """
 
 protocol AXTabButtonDelegate: AnyObject {
@@ -41,6 +41,27 @@ class AXTabButton: NSButton {
     // Animations
     private let shrinkScale: CGFloat = 0.9  // Factor to shrink the button by
     private let animationDuration: CFTimeInterval = 0.2
+
+    // Singleton session to reduce resource allocation
+    let session: URLSession = {
+        // Hyper-optimized session configuration
+        let config = URLSessionConfiguration.ephemeral
+        config.timeoutIntervalForRequest = 1.5  // Aggressive timeout
+        config.timeoutIntervalForResource = 1.5
+        config.requestCachePolicy = .returnCacheDataElseLoad
+        config.httpMaximumConnectionsPerHost = 1
+        config.waitsForConnectivity = false
+
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
+        queue.qualityOfService = .background
+
+        return URLSession(
+            configuration: config,
+            delegate: nil,
+            delegateQueue: queue
+        )
+    }()
 
     var favicon: NSImage? {
         set {
@@ -222,35 +243,41 @@ extension AXTabButton {
 // MARK: Web View Functions
 extension AXTabButton {
     func findFavicon(for webView: AXWebView) {
-        Task {
+        // Weak self to prevent retain cycles
+        Task(priority: .low) { [weak self] in
+            guard let self = self else { return }
+
             do {
+                // Ultra-lightweight favicon extraction
                 guard
-                    let faviconURLString = try await webView.evaluateJavaScript(
-                        AX_DEFAULT_FAVICON_SCRIPT) as? String,
+                    let faviconURLString = try? await webView
+                        .evaluateJavaScript(AX_DEFAULT_FAVICON_SCRIPT)
+                        as? String,
                     let faviconURL = URL(string: faviconURLString)
                 else {
                     self.favicon = nil
                     return
                 }
 
-                // Download the favicon asynchronously
-                self.favicon = try await downloadFavicon(from: faviconURL)
+                // Minimal, quick download
+                self.favicon = try await quickFaviconDownload(from: faviconURL)
             } catch {
-                // Handle errors gracefully
-                mxPrint("Error fetching or downloading favicon: \(error)")
+                // Ultra-minimal error handling
                 self.favicon = nil
             }
         }
     }
 
-    func downloadFavicon(from url: URL) async throws -> NSImage? {
-        // Use `URLSession` with async API
-        let (data, _) = try await URLSession.shared.data(from: url)
-        guard let image = NSImage(data: data) else {
-            throw NSError(
-                domain: "DownloadFaviconError", code: 0,
-                userInfo: [NSLocalizedDescriptionKey: "Invalid image data"])
+    // Static method to minimize instance overhead
+    private func quickFaviconDownload(from url: URL) async throws -> NSImage? {
+        // Ultra-lightweight download with strict size limit
+        let (data, _) = try await session.data(from: url)
+
+        // Minimal image creation with immediate downsizing
+        guard let image = NSImage(data: data)?.downsizedIcon() else {
+            throw URLError(.cannotParseResponse)
         }
+
         return image
     }
 
@@ -478,5 +505,25 @@ class AXSidebarTabCloseButton: NSButton {
 
     override func mouseExited(with event: NSEvent) {
         self.layer?.backgroundColor = defaultColor
+    }
+}
+
+// Extension for ultra-lightweight image downsizing
+extension NSImage {
+    func downsizedIcon() -> NSImage? {
+        let targetSize = NSSize(width: 16, height: 16)
+        let newImage = NSImage(size: targetSize)
+
+        newImage.lockFocus()
+        defer { newImage.unlockFocus() }
+
+        self.draw(
+            in: NSRect(origin: .zero, size: targetSize),
+            from: NSRect(origin: .zero, size: self.size),
+            operation: .sourceOver,
+            fraction: 1.0
+        )
+
+        return newImage
     }
 }

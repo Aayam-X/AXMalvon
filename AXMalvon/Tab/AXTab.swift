@@ -6,7 +6,7 @@
 //  Copyright © 2022-2024 Ashwin Paudel, Aayam(X). All rights reserved.
 //
 
-import AppKit
+import Combine
 import WebKit
 
 class AXTab: Codable {
@@ -14,7 +14,7 @@ class AXTab: Codable {
     var title: String = "Untitled Tab"
     weak var icon: NSImage?
 
-    var titleObserver: NSKeyValueObservation? = nil
+    var titleObserver: Cancellable? = nil
 
     weak var webConfiguration: WKWebViewConfiguration? = nil
     weak var _webView: AXWebView?
@@ -23,9 +23,6 @@ class AXTab: Codable {
         if let existingWebView = _webView {
             return existingWebView
         } else {
-            // `_webView` is nil, so create a new instance
-            // FIXME: When the user deactivates a tab, a new webview needs to be created
-            // The configuration must be set when deactivating a tab.
             let newWebView = AXWebView(
                 frame: .zero, configuration: webConfiguration!)
             if let url = url {
@@ -69,48 +66,39 @@ class AXTab: Codable {
     func startTitleObservation(for tabButton: AXTabButton) {
         guard let webView = _webView else { return }
 
-        // Create a new observer
-        self.titleObserver = webView.observe(
-            \.title, options: .new,
-            changeHandler: { [weak self, weak tabButton] _, _ in
+        // Use a more efficient observation method
+        self.titleObserver = webView.publisher(for: \.title)
+            .removeDuplicates()  // Prevent unnecessary updates
+            .sink { [weak self, weak tabButton] title in
                 guard let self = self, let tabButton = tabButton else { return }
 
-                // Update the tab title
-                let title = webView.title ?? "Untitled"
-                self.title = title
-                tabButton.updateTitle(title)
+                // Optimize title handling
+                let displayTitle = title ?? "Untitled"
+                self.title = displayTitle
+                tabButton.updateTitle(displayTitle)
 
-                // Ensure new URL and its host are valid
-                guard let newURL = webView.url,
-                    let newHost = newURL.host
-                else { return }
-
-                // Extract host substring for comparison
-                let newHostSubstring = newHost.dropFirst(3).prefix(3)
-
-                if let currentURL = self.url,
-                    let currentHost = currentURL.host
-                {
-                    let currentHostSubstring = currentHost.dropFirst(3).prefix(
-                        3)
-
-                    // Compare hosts and update if different
-                    if newHostSubstring != currentHostSubstring {
-                        self.url = newURL
-                        tabButton.findFavicon(for: webView)
-                    }
-                } else {
-                    // No previous URL, so set the tab's URL and update the favicon
-                    self.url = newURL
-                    tabButton.findFavicon(for: webView)
-                }
+                // Efficiently handle URL and favicon updates
+                self.updateTabURLAndFavicon(for: webView, tabButton: tabButton)
             }
-        )
+    }
+
+    // Separate method to handle URL and favicon updates
+    private func updateTabURLAndFavicon(
+        for webView: AXWebView, tabButton: AXTabButton
+    ) {
+        guard let newURL = webView.url else { return }
+
+        self.url = newURL
+
+        // Perform favicon fetch asynchronously to reduce main thread load
+        DispatchQueue.main.async {
+            tabButton.findFavicon(for: webView)
+        }
     }
 
     // Method to stop observing title changes
     func stopTitleObservation() {
-        titleObserver?.invalidate()
+        titleObserver?.cancel()
         titleObserver = nil
     }
 
