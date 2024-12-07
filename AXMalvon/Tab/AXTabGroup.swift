@@ -23,7 +23,7 @@ class AXTabGroup: Codable {
 
     init(name: String) {
         self.name = name
-        self.color = .textColor.withAlphaComponent(0.8)
+        self.color = .textBackgroundColor.withAlphaComponent(0.8)
     }
 
     // MARK: - Tab Functions

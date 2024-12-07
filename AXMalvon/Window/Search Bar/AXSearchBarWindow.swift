@@ -113,7 +113,11 @@ class AXSearchBarWindow: NSPanel, NSWindowDelegate {
         searchBarView.windowClosed()
 
         searchBarDelegate?.searchBarDidDisappear()
-        parentWindow1.removeChildWindow(self)
+
+        if parentWindow1 != nil {
+            parentWindow1.removeChildWindow(self)
+        }
+
         removeMouseEventMonitor()
 
         super.close()

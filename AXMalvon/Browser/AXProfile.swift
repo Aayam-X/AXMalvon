@@ -284,6 +284,11 @@ class AXPrivateProfile: AXProfile {
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .nonPersistent()
         super.init(name: "Private", config: config, loadsDefaultData: false)
+
+        let privateTabGroup = AXTabGroup(name: "Private Tab Group")
+        privateTabGroup.color = .black
+
+        self.tabGroups.append(privateTabGroup)
     }
 
     override func saveTabGroups() {

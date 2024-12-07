@@ -28,6 +28,9 @@ class AXTabBarView: NSView {
     var scrollView: AXScrollView!
     let clipView = AXFlippedClipView()
 
+    // Optional: Add cancellation support for long-running tasks
+    private var updateTabGroupTask: Task<Void, Never>?
+
     lazy var divider: NSBox = {
         let box = NSBox()
         box.boxType = .custom
@@ -215,6 +218,19 @@ class AXTabBarView: NSView {
         }
     }
 
+    private func addButtonToTabViewWithoutAnimation(_ button: NSView) {
+        // Add the button off-screen by modifying its frame
+        button.translatesAutoresizingMaskIntoConstraints = false
+        tabStackView.addArrangedSubview(button)
+
+        NSLayoutConstraint.activate([
+            button.leadingAnchor.constraint(
+                equalTo: tabStackView.leadingAnchor, constant: 5),
+            button.trailingAnchor.constraint(
+                equalTo: tabStackView.trailingAnchor, constant: -3),
+        ])
+    }
+
     private func reorderTabs(from: Int, to: Int) {
         mxPrint("Reordering tabs from \(from) to \(to)")
 
@@ -305,11 +321,11 @@ extension AXTabBarView: AXTabButtonDelegate {
 
 // MARK: - Tab Group Swiping Functionality
 class AXScrollView: NSScrollView {
-    override func scrollWheel(with event: NSEvent) {
-        // Minimal scroll handling to reduce CPU usage
-        guard event.deltaY != 0 else { return }
-        super.scrollWheel(with: event)
-    }
+    //    override func scrollWheel(with event: NSEvent) {
+    //        // Minimal scroll handling to reduce CPU usage
+    //        guard event.deltaY != 0 else { return }
+    //        super.scrollWheel(with: event)
+    //    }
 }
 
 // MARK: - Dragging Destination
@@ -390,20 +406,86 @@ final class AXFlippedClipView: NSClipView {
 }
 
 extension AXTabBarView {
-    @MainActor func updateTabGroup(_ newTabGroup: AXTabGroup) {
+    @MainActor
+    func updateTabGroupAsync(_ newTabGroup: AXTabGroup) {
+        // Cancel any ongoing update
+        updateTabGroupTask?.cancel()
+
+        updateTabGroupTask = Task {
+            // Clear existing buttons
+            for button in self.tabStackView.arrangedSubviews {
+                button.removeFromSuperview()
+            }
+
+            // Prepare tab buttons on a background thread
+            let tabButtons = await withTaskGroup(of: (Int, AXTabButton).self) {
+                group in
+                for (index, tab) in newTabGroup.tabs.enumerated() {
+                    group.addTask {
+                        // Create button on main actor
+                        await MainActor.run {
+
+                            let button = AXTabButton(tab: tab)
+                            button.translatesAutoresizingMaskIntoConstraints =
+                                false
+                            button.delegate = self
+                            button.tag = index
+                            button.webTitle = tab.title
+                            return (index, button)
+                        }
+                    }
+                }
+
+                // Collect results
+                var results: [(Int, AXTabButton)] = []
+                for await result in group {
+                    results.append(result)
+                }
+                return results
+            }
+
+            // Perform UI updates on main actor
+            self.tabGroup = newTabGroup
+            newTabGroup.tabBarView = self
+
+            for (_, button) in tabButtons.sorted(by: { $0.0 < $1.0 }) {
+                self.addButtonToTabViewWithoutAnimation(button)
+                button.startObserving()
+            }
+
+            guard newTabGroup.selectedIndex != -1 else { return }
+            self.updateTabSelection(from: -1, to: newTabGroup.selectedIndex)
+        }
+    }
+
+    // Optional: Add a non-async version for simpler use cases
+    @MainActor
+    func updateTabGroup(_ newTabGroup: AXTabGroup) {
+        // Cancel any ongoing async update
+        updateTabGroupTask?.cancel()
+
+        // Clear existing buttons
         for button in self.tabStackView.arrangedSubviews {
             button.removeFromSuperview()
         }
 
-        // Update the tab group
+        // Update tab group
         self.tabGroup = newTabGroup
         newTabGroup.tabBarView = self
 
+        // Add tab buttons
         for (index, tab) in newTabGroup.tabs.enumerated() {
-            addTabButtonInBackground(for: tab, index: index)
+            let button = AXTabButton(tab: tab)
+            button.translatesAutoresizingMaskIntoConstraints = false
+            button.delegate = self
+            button.tag = index
+            button.webTitle = tab.title
+
+            self.addButtonToTabViewWithoutAnimation(button)
+            button.startObserving()
         }
 
-        guard tabGroup.selectedIndex != -1 else { return }
-        self.updateTabSelection(from: -1, to: tabGroup.selectedIndex)
+        guard newTabGroup.selectedIndex != -1 else { return }
+        self.updateTabSelection(from: -1, to: newTabGroup.selectedIndex)
     }
 }
