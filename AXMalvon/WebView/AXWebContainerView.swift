@@ -23,6 +23,7 @@ protocol AXWebContainerViewDelegate: AnyObject {
 class AXWebContainerView: NSView {
     weak var delegate: AXWebContainerViewDelegate?
     weak var sidebar: NSView?
+    let isVertical: Bool
 
     private var hasDrawn: Bool = false
     weak var currentWebView: AXWebView?
@@ -35,10 +36,10 @@ class AXWebContainerView: NSView {
     var progressBarObserver: NSKeyValueObservation?
 
     // Constraints
-    private var splitViewLeftAnchorConstraint: NSLayoutConstraint?
-    private var splitViewTopAnchorConstraint: NSLayoutConstraint?
-    private var splitViewBottomAnchorConstraint: NSLayoutConstraint?
-    private var splitViewRightAnchorConstraint: NSLayoutConstraint?
+    private lazy var splitViewLeftAnchorConstraint: NSLayoutConstraint? = nil
+    private lazy var splitViewTopAnchorConstraint: NSLayoutConstraint? = nil
+    private lazy var splitViewBottomAnchorConstraint: NSLayoutConstraint? = nil
+    private lazy var splitViewRightAnchorConstraint: NSLayoutConstraint? = nil
 
     var websiteTitleLabel: NSTextField = {
         let title = NSTextField()
@@ -57,40 +58,43 @@ class AXWebContainerView: NSView {
         if hasDrawn { return }
         defer { hasDrawn = true }
 
-        updateTrackingArea()
+        if isVertical {
+            updateTrackingArea()
 
-        addSubview(websiteTitleLabel)
-        websiteTitleLabel.topAnchor.constraint(
-            equalTo: topAnchor, constant: -1.2
-        ).isActive = true
-        websiteTitleLabel.leftAnchor.constraint(
-            equalTo: leftAnchor, constant: 15
-        )
-        .isActive = true
-        websiteTitleLabel.rightAnchor.constraint(
-            equalTo: rightAnchor, constant: -15
-        )
-        .isActive = true
-        websiteTitleLabel.stringValue = "Empty Window"
-        websiteTitleLabel.delegate = self
+            addSubview(websiteTitleLabel)
+            websiteTitleLabel.topAnchor.constraint(
+                equalTo: topAnchor, constant: -1.2
+            ).isActive = true
+            websiteTitleLabel.leftAnchor.constraint(
+                equalTo: leftAnchor, constant: 15
+            )
+            .isActive = true
+            websiteTitleLabel.rightAnchor.constraint(
+                equalTo: rightAnchor, constant: -15
+            )
+            .isActive = true
+            websiteTitleLabel.stringValue = "Empty Window"
+            websiteTitleLabel.delegate = self
+
+            splitViewContainer.wantsLayer = true
+            splitViewContainer.layer?.masksToBounds = false
+
+            // Add splitView to the container view
+            let shadow = NSShadow()
+            shadow.shadowColor = .textColor.withAlphaComponent(0.6)
+            shadow.shadowBlurRadius = 2.0
+            shadow.shadowOffset = NSMakeSize(0.0, 0.0)
+            splitViewContainer.shadow = shadow
+
+            splitView.wantsLayer = true
+            splitView.layer?.cornerRadius = 5.0
+        }
 
         splitViewContainer.translatesAutoresizingMaskIntoConstraints = false
-        splitViewContainer.wantsLayer = true
-        splitViewContainer.layer?.masksToBounds = false
-
-        // Add splitView to the container view
-        let shadow = NSShadow()
-        shadow.shadowColor = .textColor.withAlphaComponent(0.6)
-        shadow.shadowBlurRadius = 2.0
-        shadow.shadowOffset = NSMakeSize(0.0, 0.0)
-        splitViewContainer.shadow = shadow
+        splitView.translatesAutoresizingMaskIntoConstraints = false
 
         addSubview(splitViewContainer)
         createSplitViewContainerConstraints()
-
-        splitView.wantsLayer = true
-        splitView.layer?.cornerRadius = 5.0
-        splitView.translatesAutoresizingMaskIntoConstraints = false
 
         splitViewContainer.addSubview(splitView)
         NSLayoutConstraint.activate([
@@ -113,19 +117,30 @@ class AXWebContainerView: NSView {
     }
 
     func createSplitViewContainerConstraints() {
-        splitViewTopAnchorConstraint = splitViewContainer.topAnchor.constraint(
-            equalTo: topAnchor, constant: 9.0)
-        splitViewLeftAnchorConstraint = splitViewContainer.leftAnchor
-            .constraint(equalTo: leftAnchor, constant: 2.0)
-        splitViewRightAnchorConstraint = splitViewContainer.rightAnchor
-            .constraint(equalTo: rightAnchor, constant: -9.0)
-        splitViewBottomAnchorConstraint = splitViewContainer.bottomAnchor
-            .constraint(equalTo: bottomAnchor, constant: -9.0)
+        if isVertical {
+            splitViewTopAnchorConstraint = splitViewContainer.topAnchor
+                .constraint(
+                    equalTo: topAnchor, constant: 9.0)
+            splitViewLeftAnchorConstraint = splitViewContainer.leftAnchor
+                .constraint(equalTo: leftAnchor, constant: 2.0)
+            splitViewRightAnchorConstraint = splitViewContainer.rightAnchor
+                .constraint(equalTo: rightAnchor, constant: -9.0)
+            splitViewBottomAnchorConstraint = splitViewContainer.bottomAnchor
+                .constraint(equalTo: bottomAnchor, constant: -9.0)
 
-        splitViewTopAnchorConstraint!.isActive = true
-        splitViewLeftAnchorConstraint!.isActive = true
-        splitViewRightAnchorConstraint!.isActive = true
-        splitViewBottomAnchorConstraint!.isActive = true
+            splitViewTopAnchorConstraint!.isActive = true
+            splitViewLeftAnchorConstraint!.isActive = true
+            splitViewRightAnchorConstraint!.isActive = true
+            splitViewBottomAnchorConstraint!.isActive = true
+        } else {
+            NSLayoutConstraint.activate([
+                splitViewContainer.topAnchor.constraint(equalTo: topAnchor),
+                splitViewContainer.leftAnchor.constraint(equalTo: leftAnchor),
+                splitViewContainer.rightAnchor.constraint(equalTo: rightAnchor),
+                splitViewContainer.bottomAnchor.constraint(
+                    equalTo: bottomAnchor),
+            ])
+        }
     }
 
     func sidebarCollapsed(_ collapsed: Bool, isFullScreen: Bool) {
@@ -228,6 +243,15 @@ class AXWebContainerView: NSView {
         addTrackingArea(sidebarTrackingArea)
     }
 
+    init(isVertical: Bool) {
+        self.isVertical = isVertical
+
+        super.init(frame: .zero)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
 // MARK: - Page Find Functions
@@ -298,6 +322,7 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         mxPrint("Webview finished loading")
+
         delegate?.webViewDidFinishLoading()
     }
 

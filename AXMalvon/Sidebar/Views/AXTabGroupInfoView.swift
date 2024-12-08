@@ -11,6 +11,7 @@ import Cocoa
 class AXTabGroupInfoView: NSView {
     private var hasDrawn: Bool = false
     var onRightMouseDown: (() -> Void)?
+    var onLeftMouseDown: (() -> Void)?
 
     // Create the image view
     lazy var imageView: NSImageView = {
@@ -108,5 +109,9 @@ class AXTabGroupInfoView: NSView {
 
     override func rightMouseDown(with event: NSEvent) {
         onRightMouseDown?()
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        onLeftMouseDown?()
     }
 }

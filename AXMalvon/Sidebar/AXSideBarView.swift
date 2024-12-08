@@ -9,20 +9,11 @@
 import Cocoa
 import WebKit
 
-protocol AXSideBarViewDelegate: AnyObject {
-    func sidebarViewActiveTitle(changed to: String)
-    func sidebarSwitchedTab(at: Int)
-
-    func deactivatedTab() -> WKWebViewConfiguration?
-}
-
 class AXSidebarView: NSView {
     private var hasDrawn: Bool = false
-    weak var delegate: AXSideBarViewDelegate?
     var currentTabGroup: AXTabGroup?
 
     var gestureView = AXGestureView()
-    let tabBarView = AXTabBarView()
 
     var mouseExitedTrackingArea: NSTrackingArea!
 
@@ -124,17 +115,6 @@ class AXSidebarView: NSView {
         ])
 
         // AXTabBarView
-        tabBarView.translatesAutoresizingMaskIntoConstraints = false
-        tabBarView.delegate = self
-        addSubview(tabBarView)
-        NSLayoutConstraint.activate([
-            tabBarView.topAnchor.constraint(
-                equalTo: bottomLine.bottomAnchor, constant: 5),
-            tabBarView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tabBarView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            tabBarView.bottomAnchor.constraint(
-                equalTo: bottomAnchor, constant: -49),
-        ])
 
         // Mouse Tracking Area
         mouseExitedTrackingArea = NSTrackingArea(
@@ -143,35 +123,20 @@ class AXSidebarView: NSView {
                 width: bounds.size.width + 100, height: bounds.size.height),
             options: [.activeAlways, .mouseEnteredAndExited], owner: self)
         addTrackingArea(mouseExitedTrackingArea)
-
-        // Update tab bar
-        if let window = self.window as? AXWindow {
-            window.switchToTabGroup(window.currentTabGroup)
-        }
     }
 
     // MARK: - Tab Bar Functions
-    func changeShownTabGroup(_ tabGroup: AXTabGroup) {
-        tabBarView.updateTabGroup(tabGroup)
-
-        // Tab Group Information View
-        let tabs = tabGroup.tabs
-        let window = self.window as! AXWindow
-
-        gestureView.currentTabGroupChanged(
-            tabGroup, profile: window.activeProfile.name)
-
-        // Update the webview
-        let tabAt = tabGroup.selectedIndex
-
-        if tabAt == -1 || tabGroup.tabs.count <= tabAt {
-            tabGroup.selectedIndex = -1
-            window.containerView.createEmptyView()
-        } else {
-            window.containerView.updateView(webView: tabs[tabAt].webView)
-        }
-
-        gestureView.searchButton.url = window.containerView.currentWebView?.url
+    func insertTabBarView(tabBarView: AXTabBarViewTemplate) {
+        tabBarView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(tabBarView)
+        NSLayoutConstraint.activate([
+            tabBarView.topAnchor.constraint(
+                equalTo: topAnchor, constant: 86),
+            tabBarView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            tabBarView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            tabBarView.bottomAnchor.constraint(
+                equalTo: bottomAnchor, constant: -49),
+        ])
     }
 
     // MARK: - Mouse Functions
@@ -198,22 +163,6 @@ class AXSidebarView: NSView {
                 width: bounds.size.width + 100, height: bounds.size.height),
             options: [.activeAlways, .mouseEnteredAndExited], owner: self)
         addTrackingArea(mouseExitedTrackingArea)
-    }
-}
-
-// MARK: - Tab Bar Delegate
-extension AXSidebarView: AXTabBarViewDelegate {
-    func deactivatedTab() -> WKWebViewConfiguration? {
-        delegate?.deactivatedTab()
-    }
-
-    func activeTabTitleChanged(to: String) {
-        delegate?.sidebarViewActiveTitle(changed: to)
-    }
-
-    func tabBarSwitchedTo(tabAt: Int) {
-        delegate?.sidebarSwitchedTab(at: tabAt)
-        mxPrint("Switched to tab at \(tabAt).")
     }
 }
 

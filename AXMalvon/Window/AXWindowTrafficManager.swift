@@ -10,28 +10,34 @@ import Cocoa
 
 class AXTrafficLightOverlayManager {
     var window: AXWindow
-    private var buttons: [NSButton]
+    private var buttons: [NSButton]!
 
     init(window: AXWindow) {
         self.window = window
 
-        self.buttons = [
-            window.standardWindowButton(.closeButton)!,
-            window.standardWindowButton(.miniaturizeButton)!,
-            window.standardWindowButton(.zoomButton)!,
-        ]
+        if window.verticalTabs {
+            self.buttons = [
+                window.standardWindowButton(.closeButton)!,
+                window.standardWindowButton(.miniaturizeButton)!,
+                window.standardWindowButton(.zoomButton)!,
+            ]
 
-        updateTrafficLights()
-        hideTrafficLights(true)
+            updateTrafficLights()
+            hideTrafficLights()
+        }
     }
 
-    func hideTrafficLights(_ b: Bool) {
+    func _hideTrafficLights(_ b: Bool) {
+        guard window.verticalTabs else { return }
+
         buttons.forEach { button in
             button.isHidden = b
         }
     }
 
     func updateTrafficLights() {
+        guard window.verticalTabs == true else { return }
+
         // Update positioning
         for (index, button) in buttons.enumerated() {
             button.frame.origin = NSPoint(
@@ -40,10 +46,10 @@ class AXTrafficLightOverlayManager {
     }
 
     func displayTrafficLights() {
-        hideTrafficLights(false)
+        _hideTrafficLights(false)
     }
 
     func hideTrafficLights() {
-        hideTrafficLights(true)
+        _hideTrafficLights(true)
     }
 }

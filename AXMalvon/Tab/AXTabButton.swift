@@ -79,6 +79,12 @@ class AXTabButton: NSButton {
     // Colors
     var hoverColor: NSColor = NSColor.systemGray.withAlphaComponent(0.3)
     var selectedColor: NSColor = .textBackgroundColor
+    var backgroundColor: NSColor = .textBackgroundColor.withAlphaComponent(0.0)
+    {
+        didSet {
+            self.layer?.backgroundColor = backgroundColor.cgColor
+        }
+    }
 
     // Other
     private var hasDrawn = false
@@ -90,7 +96,7 @@ class AXTabButton: NSButton {
     var isSelected: Bool = false {
         didSet {
             self.layer?.backgroundColor =
-                isSelected ? selectedColor.cgColor : .clear
+                isSelected ? selectedColor.cgColor : backgroundColor.cgColor
             layer?.shadowOpacity = isSelected ? 0.3 : 0.0
             if isSelected, tab.titleObserver == nil {
                 forceCreateWebview()
@@ -347,7 +353,8 @@ extension AXTabButton {
     override func mouseExited(with event: NSEvent) {
         titleViewRightAnchor?.constant = 20
         closeButton.isHidden = true
-        self.layer?.backgroundColor = isSelected ? selectedColor.cgColor : .none
+        self.layer?.backgroundColor =
+            isSelected ? selectedColor.cgColor : backgroundColor.cgColor
     }
 
     override func rightMouseDown(with event: NSEvent) {

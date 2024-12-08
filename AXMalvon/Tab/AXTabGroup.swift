@@ -14,7 +14,7 @@ class AXTabGroup: Codable {
     var tabs: [AXTab] = []
     var selectedIndex: Int = -1
 
-    var tabBarView: AXTabBarView?
+    var tabBarView: AXTabBarViewTemplate?
 
     // Customization
     var color: NSColor
@@ -49,7 +49,7 @@ class AXTabGroup: Codable {
 
     func removeTab(_ at: Int) {
         tabs.remove(at: at)
-        tabBarView?.removeTab(at: at)
+        tabBarView?.removeTabButton(at: at)
     }
 
     func removeCurrentTab() {

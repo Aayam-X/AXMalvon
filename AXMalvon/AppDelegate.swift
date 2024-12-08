@@ -164,11 +164,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func showSettings(_ sender: Any?) {
-        #if DEBUG
-            createSwiftUIWindow(
-                with: AXSettingsView(), title: "Malvon Settings",
-                size: .init(width: 600, height: 500))
-        #endif
+        createSwiftUIWindow(
+            with: AXSettingsView(), title: "Malvon Settings",
+            size: .init(width: 600, height: 500))
     }
 
     @IBAction func showAboutView(_ sender: Any?) {

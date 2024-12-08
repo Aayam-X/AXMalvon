@@ -335,7 +335,7 @@ extension AXSearchFieldPopoverView {
     func searchActionURL(_ value: String) {
         guard let url = URL(string: value) else { return }
 
-        searchEnter(fixURL(url))
+        searchEnter(url.fixURL())
 
         guard let parentWindow = searchBarWindow.parentWindow1 else { return }
 
@@ -351,34 +351,35 @@ extension AXSearchFieldPopoverView {
         let searchQuery =
             value.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
             ?? ""
-        let searchURL = fixURL(
-            URL(
-                string:
-                    "https://www.google.com/search?client=Malvon&q=\(searchQuery)"
-            )!)
+        let searchURL = URL(
+            string:
+                "https://www.google.com/search?client=Malvon&q=\(searchQuery)"
+        )!.fixURL()
         searchEnter(searchURL)
     }
 }
 
 // MARK: Extensions
-private func fixURL(_ url: URL) -> URL {
-    var newURL = ""
-
-    if url.isFileURL || (url.host != nil && url.scheme != nil) {
-        return url
+extension URL {
+    func fixURL() -> URL {
+        var newURL = ""
+        
+        if isFileURL || (host != nil && scheme != nil) {
+            return self
+        }
+        
+        if scheme == nil {
+            newURL += "https://"
+        }
+        
+        if let host = host, host.contains("www") {
+            newURL += "www.\(host)"
+        }
+        
+        newURL += path
+        newURL += query ?? ""
+        return URL(string: newURL)!
     }
-
-    if url.scheme == nil {
-        newURL += "https://"
-    }
-
-    if let host = url.host, host.contains("www") {
-        newURL += "www.\(url.host!)"
-    }
-
-    newURL += url.path
-    newURL += url.query ?? ""
-    return URL(string: newURL)!
 }
 
 extension String {
