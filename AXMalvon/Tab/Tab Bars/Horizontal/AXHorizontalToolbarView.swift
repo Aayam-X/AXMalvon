@@ -35,6 +35,35 @@ class AXHorizontalToolbarView: NSView {
         button.imageScaling = .scaleProportionallyDown
         return button
     }()
+    
+    private lazy var workspaceSwapperButton: NSButton = {
+        let button = NSButton(
+            image: NSImage(
+                systemSymbolName: "rectangle.stack",
+                accessibilityDescription: nil)!, target: self,
+            action: #selector(showWorkspaceSwapper))
+        button.isBordered = false
+        button.imagePosition = .imageOnly
+        button.translatesAutoresizingMaskIntoConstraints = false
+
+        return button
+    }()
+    
+    lazy var workspaceSwapperPopoverView: NSPopover = {
+        let popover = NSPopover()
+        popover.behavior = .transient
+
+        let controller = NSViewController()
+        controller.view = workspaceSwapperView
+        popover.contentViewController = controller
+
+        return popover
+    }()
+    
+    // This standalone view is needed for the NSWindow to access its delegate
+    lazy var workspaceSwapperView: AXWorkspaceSwapperView = {
+        return AXWorkspaceSwapperView()
+    }()
 
     lazy var searchField = AXSidebarSearchButton()
     
@@ -64,6 +93,7 @@ class AXHorizontalToolbarView: NSView {
         addSubview(backButton)
         addSubview(forwardButton)
         addSubview(searchField)
+        addSubview(workspaceSwapperButton)
         addSubview(bottomDivider)
 
         // Layout subviews
@@ -71,6 +101,7 @@ class AXHorizontalToolbarView: NSView {
         backButton.translatesAutoresizingMaskIntoConstraints = false
         forwardButton.translatesAutoresizingMaskIntoConstraints = false
         searchField.translatesAutoresizingMaskIntoConstraints = false
+        workspaceSwapperButton.translatesAutoresizingMaskIntoConstraints = false
         bottomDivider.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
@@ -95,7 +126,10 @@ class AXHorizontalToolbarView: NSView {
             // Search field constraints
             searchField.leftAnchor.constraint(equalTo: forwardButton.rightAnchor, constant: 16),
             searchField.centerYAnchor.constraint(equalTo: centerYAnchor),
-            searchField.rightAnchor.constraint(equalTo: rightAnchor, constant: -16),
+            searchField.rightAnchor.constraint(equalTo: workspaceSwapperButton.leftAnchor, constant: -16),
+            
+            workspaceSwapperButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -16),
+            workspaceSwapperButton.centerYAnchor.constraint(equalTo: centerYAnchor),
 
             // Bottom divider constraints
             bottomDivider.bottomAnchor.constraint(equalTo: bottomAnchor),
@@ -141,5 +175,13 @@ class AXHorizontalToolbarView: NSView {
     
     @objc func forwardButtonAction(_ sender: Any?) {
         delegate?.didTapForwardButton()
+    }
+    
+    @objc func showWorkspaceSwapper() {
+        workspaceSwapperView.reloadTabGroups()
+
+        workspaceSwapperPopoverView.show(
+            relativeTo: workspaceSwapperButton.bounds,
+            of: workspaceSwapperButton, preferredEdge: .minY)
     }
 }

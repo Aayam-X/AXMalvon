@@ -300,6 +300,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
         ])
 
         horizontalToolbar.searchField.delegate = self
+        horizontalToolbar.workspaceSwapperView.delegate = self
         horizontalToolbar.delegate = self
     }
 

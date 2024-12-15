@@ -91,7 +91,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
-    @IBAction func toggleSearchField(_ sender: Any) {
+    @IBAction func toggleSearchField(_ sender: Any?) {
         guard let keyWindow = NSApplication.shared.keyWindow as? AXWindow else {
             return
         }
