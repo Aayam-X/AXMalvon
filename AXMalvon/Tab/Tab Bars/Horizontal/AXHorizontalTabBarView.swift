@@ -10,21 +10,14 @@ import Cocoa
 private let tabBarHeight = 30.0
 private let tabBarWidth = 120.0
 
-final class FlippedView: NSClipView {
-    override var isFlipped: Bool {
-        return true
-    }
-}
-
 class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     var tabGroup: AXTabGroup!
     var delegate: (any AXTabBarViewDelegate)?
 
     private var hasDrawn = false
 
-    private let tabStackView = NSStackView()
-    private let scrollView = NSScrollView()
-    private let containerView = FlippedView()
+    var tabStackView = NSStackView()
+    private lazy var scrollView = AXScrollView(frame: self.bounds)
 
     override func viewWillDraw() {
         guard !hasDrawn else { return }
@@ -36,46 +29,36 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     func configure() {
         wantsLayer = true
 
+        self.scrollView.drawsBackground = false
+        self.scrollView.hasHorizontalScroller = false
+        self.scrollView.hasVerticalScroller = false
+        self.scrollView.usesPredominantAxisScrolling = true
+        self.scrollView.horizontalScrollElasticity = .allowed
+        self.scrollView.verticalScrollElasticity = .none
+        self.scrollView.autoresizingMask = [.width, .height]
+        self.scrollView.translatesAutoresizingMaskIntoConstraints = true
+        self.scrollView.automaticallyAdjustsContentInsets = false
+
         addSubview(scrollView)
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.hasVerticalScroller = false
-        scrollView.hasVerticalRuler = false
-        scrollView.drawsBackground = false
-        scrollView.verticalScrollElasticity = .none
-
-        NSLayoutConstraint.activate([
-            scrollView.topAnchor.constraint(equalTo: topAnchor),
-            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
-        ])
-
-        containerView.drawsBackground = false
-        scrollView.contentView = containerView
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            containerView.leftAnchor.constraint(equalTo: scrollView.leftAnchor),
-            containerView.rightAnchor.constraint(
-                equalTo: scrollView.rightAnchor),
-            containerView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            containerView.bottomAnchor.constraint(
-                equalTo: scrollView.bottomAnchor),
-        ])
 
         scrollView.documentView = tabStackView
+        tabStackView.frame = scrollView.bounds
+
+        // Configure stack view constraints
         tabStackView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            tabStackView.leftAnchor.constraint(
-                equalTo: containerView.leftAnchor),
-            tabStackView.topAnchor.constraint(equalTo: containerView.topAnchor),
+            tabStackView.topAnchor.constraint(
+                equalTo: scrollView.contentView.topAnchor),
             tabStackView.bottomAnchor.constraint(
-                equalTo: containerView.bottomAnchor),
+                equalTo: scrollView.contentView.bottomAnchor),
+            tabStackView.leadingAnchor.constraint(
+                equalTo: scrollView.contentView.leadingAnchor),
         ])
 
         tabStackView.orientation = .horizontal
-        tabStackView.distribution = .gravityAreas
+        tabStackView.distribution = .fillProportionally
         tabStackView.alignment = .centerY
-        tabStackView.spacing = 0.5
+        tabStackView.spacing = 6
     }
 
     func addTabButton(for tab: AXTab) {
@@ -90,7 +73,6 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         tabGroup.selectedIndex = newIndex
 
         addButtonToTabView(button)
-        button.startObserving()
 
         updateTabSelection(from: previousIndex, to: newIndex)
         delegate?.tabBarSwitchedTo(tabAt: newIndex)
@@ -192,17 +174,12 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         // Add the button off-screen by modifying its frame
         tabStackView.addArrangedSubview(button)
         button.widthAnchor.constraint(equalToConstant: 250).isActive = true
-
-        // Layout the stack view to update frames
-        layoutSubtreeIfNeeded()
     }
 
     private func addButtonToTabViewWithoutAnimation(_ button: AXTabButton) {
         // Add the button off-screen by modifying its frame
         tabStackView.addArrangedSubview(button)
         button.widthAnchor.constraint(equalToConstant: 250).isActive = true
-
-        layoutSubtreeIfNeeded()
     }
 
     private func updateSelectedItemIndex(after index: Int) {
@@ -230,26 +207,5 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
             .isSelected = true
 
         delegate?.tabBarSwitchedTo(tabAt: tabGroup.selectedIndex)
-    }
-
-    func updateTabGroup(_ newTabGroup: AXTabGroup) {
-        newTabGroup.tabBarView = self
-
-        // Clear existing buttons
-        for button in self.tabStackView.arrangedSubviews {
-            button.removeFromSuperview()
-        }
-
-        // Update tab group
-        self.tabGroup = newTabGroup
-        //newTabGroup.tabBarView = self
-
-        // Add tab buttons
-        for (index, tab) in newTabGroup.tabs.enumerated() {
-            addTabButtonInBackground(for: tab, index: index)
-        }
-
-        guard newTabGroup.selectedIndex != -1 else { return }
-        self.updateTabSelection(from: -1, to: newTabGroup.selectedIndex)
     }
 }

@@ -41,7 +41,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
         field.drawsBackground = false
         field.lineBreakMode = .byTruncatingTail
         field.placeholderString = "Search or Enter URL..."
-        field.font = .systemFont(ofSize: 25)
+        field.font = .systemFont(ofSize: 21)
         field.focusRingType = .none
         field.delegate = self
         return field
@@ -363,19 +363,19 @@ extension AXSearchFieldPopoverView {
 extension URL {
     func fixURL() -> URL {
         var newURL = ""
-        
+
         if isFileURL || (host != nil && scheme != nil) {
             return self
         }
-        
+
         if scheme == nil {
             newURL += "https://"
         }
-        
+
         if let host = host, host.contains("www") {
             newURL += "www.\(host)"
         }
-        
+
         newURL += path
         newURL += query ?? ""
         return URL(string: newURL)!

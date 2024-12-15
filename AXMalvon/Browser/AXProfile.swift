@@ -187,7 +187,6 @@ class AXProfile {
     // MARK: - Configuration Features
     func addOtherConfigs() {
         let AX_DEFAULT_WEBVIEW_CONFIGURATIONS = [
-            "fullScreenEnabled",
             "allowsPictureInPictureMediaPlayback",
             "appNapEnabled",
             "acceleratedCompositingEnabled",
@@ -204,6 +203,8 @@ class AXProfile {
         for config in AX_DEFAULT_WEBVIEW_CONFIGURATIONS {
             configuration.preferences.setValue(true, forKey: config)
         }
+
+        configuration.preferences.isElementFullscreenEnabled = true
 
         configuration.preferences.setValue(
             false, forKey: "backspaceKeyNavigationEnabled")

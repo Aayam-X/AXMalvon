@@ -174,14 +174,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
 
         // Add tab buttons
         for (index, tab) in newTabGroup.tabs.enumerated() {
-            let button = AXTabButton(tab: tab)
-            button.translatesAutoresizingMaskIntoConstraints = false
-            button.delegate = self
-            button.tag = index
-            button.webTitle = tab.title
-
-            self.addButtonToTabViewWithoutAnimation(button)
-            button.startObserving()
+            self.addTabButtonInBackground(for: tab, index: index)
         }
 
         guard newTabGroup.selectedIndex != -1 else { return }

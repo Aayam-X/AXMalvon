@@ -13,9 +13,10 @@ import WebKit
 
 class AXWindow: NSWindow, NSWindowDelegate {
     // Window Defaults
-    var hiddenSidebarView = false
     lazy var verticalTabs = UserDefaults.standard.bool(forKey: "verticalTabs")
+    var hiddenSidebarView = false
 
+    // Other Views
     lazy var trafficLightManager = AXTrafficLightOverlayManager(window: self)
     lazy var splitView = AXQuattroProgressSplitView()
     lazy var containerView = AXWebContainerView(isVertical: verticalTabs)
@@ -32,32 +33,13 @@ class AXWindow: NSWindow, NSWindowDelegate {
         }
     }()
 
-    var toolbarSearchField: NSSearchToolbarItem?
-
-    //    lazy var tabGroupInfoView: AXTabGroupInfoView = {
-    //        let view = AXTabGroupInfoView()
-    //
-    //        view.translatesAutoresizingMaskIntoConstraints = false
-    //        view.onRightMouseDown = displayTabGroupInformationPopover
-    //        return view
-    //    }()
-
-    lazy var tabGroupInfoView: AXTabGroupInfoView = {
-        let value = AXTabGroupInfoView()
-
-        value.translatesAutoresizingMaskIntoConstraints = false
-        value.onLeftMouseDown = displayTabGroupInformationPopover
-        return value
-    }()
+    lazy var horizontalToolbar = AXHorizontalToolbarView()
 
     var profiles: [AXProfile]
     var activeProfile: AXProfile
 
-    // MARK: - Toolbar Components
+    // Main Components
     var splitViewController: NSSplitViewController?
-    var searchField: NSSearchField?
-    var progressIndicator: NSProgressIndicator?
-    var refreshButton: NSButton?
 
     var profileIndex = 0 {
         didSet {
@@ -128,14 +110,11 @@ class AXWindow: NSWindow, NSWindowDelegate {
                 .closable,
                 .miniaturizable,
                 .resizable,
+                .fullSizeContentView,
             ],
             backing: .buffered,
             defer: false
         )
-
-        if verticalTabs {
-            self.styleMask.insert(.fullSizeContentView)
-        }
 
         configureWindow()
         setupComponents()
@@ -143,7 +122,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
 
     private func configureWindow() {
         self.animationBehavior = .documentWindow
-        self.titlebarAppearsTransparent = verticalTabs
+        self.titlebarAppearsTransparent = true
         self.backgroundColor = .textBackgroundColor
         self.isReleasedWhenClosed = true
         self.delegate = self
@@ -153,21 +132,14 @@ class AXWindow: NSWindow, NSWindowDelegate {
         self.contentView = visualEffectView
 
         verticalTabs
-            ? setupVerticalTabLayout(in: visualEffectView)
-            : setupHorizontalTabLayout(in: visualEffectView)
+            ? setupVerticalTabLayout()
+            : setupHorizontalTabLayout()
 
         tabBarView.delegate = self
         containerView.delegate = self
 
         currentTabGroupIndex = 0
         tabBarView.updateTabGroup(currentTabGroup)
-
-        // FIXME: Move this elsewhere
-        if !verticalTabs {
-            tabGroupInfoView.updateLabels(
-                tabGroup: currentTabGroup,
-                profileName: self.currentProfileName())
-        }
     }
 
     // MARK: Window Events
@@ -276,11 +248,6 @@ class AXWindow: NSWindow, NSWindowDelegate {
         visualEffectTintView.layer?.backgroundColor = tabGroup.color.cgColor
 
         mxPrint("Changed to Tab Group \(tabGroup.name), unknown index.")
-
-        if !verticalTabs {
-            tabGroupInfoView.updateLabels(
-                tabGroup: tabGroup, profileName: self.currentProfileName())
-        }
     }
 
     func switchToTabGroup(_ at: Int) {
@@ -295,40 +262,48 @@ class AXWindow: NSWindow, NSWindowDelegate {
     }
 
     // MARK: - Tab Layout Functions
-    private func setupHorizontalTabLayout(
-        in visualEffectView: NSVisualEffectView
-    ) {
+    private func setupHorizontalTabLayout() {
+        horizontalToolbar.translatesAutoresizingMaskIntoConstraints = false
         tabBarView.translatesAutoresizingMaskIntoConstraints = false
         containerView.translatesAutoresizingMaskIntoConstraints = false
 
         visualEffectView.addSubview(tabBarView)
+        visualEffectView.addSubview(horizontalToolbar)
         visualEffectView.addSubview(containerView)
 
         NSLayoutConstraint.activate([
-            tabBarView.leadingAnchor.constraint(
-                equalTo: visualEffectView.leadingAnchor),
-            tabBarView.trailingAnchor.constraint(
-                equalTo: visualEffectView.trailingAnchor),
+            tabBarView.leftAnchor.constraint(
+                equalTo: visualEffectView.leftAnchor, constant: 70),
+            tabBarView.rightAnchor.constraint(
+                equalTo: visualEffectView.rightAnchor, constant: -6),
             tabBarView.topAnchor.constraint(
                 equalTo: visualEffectView.topAnchor),
             tabBarView.heightAnchor.constraint(
-                equalToConstant: 40),
+                equalToConstant: 45),
+
+            horizontalToolbar.topAnchor.constraint(
+                equalTo: tabBarView.bottomAnchor),
+            horizontalToolbar.leftAnchor.constraint(
+                equalTo: visualEffectView.leftAnchor),
+            horizontalToolbar.rightAnchor.constraint(
+                equalTo: visualEffectView.rightAnchor),
+            horizontalToolbar.heightAnchor.constraint(equalToConstant: 40),
 
             containerView.leadingAnchor.constraint(
                 equalTo: visualEffectView.leadingAnchor),
             containerView.trailingAnchor.constraint(
                 equalTo: visualEffectView.trailingAnchor),
             containerView.topAnchor.constraint(
-                equalTo: tabBarView.bottomAnchor),
+                equalTo: horizontalToolbar.bottomAnchor),
             containerView.bottomAnchor.constraint(
                 equalTo: visualEffectView.bottomAnchor),
         ])
 
-        setupHorizontalToolbar()
+        horizontalToolbar.searchField.delegate = self
+        horizontalToolbar.delegate = self
     }
 
-    private func setupVerticalTabLayout(in visualEffectView: NSVisualEffectView)
-    {
+    private func setupVerticalTabLayout() {
         splitView.frame = visualEffectView.bounds
         splitView.autoresizingMask = [.height, .width]
         visualEffectView.addSubview(splitView)
@@ -345,17 +320,6 @@ class AXWindow: NSWindow, NSWindowDelegate {
         sidebarView.gestureView.searchButton.delegate = self
 
         sidebarView.insertTabBarView(tabBarView: tabBarView)
-
-        trafficLightManager.updateTrafficLights()
-    }
-
-    private func setupHorizontalToolbar() {
-        let toolbar = NSToolbar(identifier: "SafariToolbar")
-        toolbar.delegate = self
-        toolbar.displayMode = .iconOnly
-        toolbar.allowsUserCustomization = true
-
-        self.toolbar = toolbar
     }
 }
 
@@ -391,27 +355,12 @@ extension AXWindow: AXSearchBarWindowDelegate {
     }
 }
 
-extension AXWindow: NSSearchFieldDelegate {
-    func controlTextDidEndEditing(_ obj: Notification) {
-        guard let value = toolbarSearchField?.searchField.stringValue else {
-            return
-        }
-
-        if value.isValidURL() && !value.hasWhitespace() {
-            self.containerView.currentWebView?.load(
-                URLRequest(url: URL(string: value)!.fixURL()))
-        } else {
-            let newURL = URL(
-                string: "https://www.google.com/search?client=Malvon&q=\(value)"
-            )
-
-            self.containerView.currentWebView?.load(URLRequest(url: newURL!))
-        }
-    }
-}
-
 // MARK: - WebContainer View Delegate
 extension AXWindow: AXWebContainerViewDelegate {
+    func webViewURLChanged(to url: URL) {
+        horizontalToolbar.searchField.fullAddress = url
+    }
+
     func webViewRequestsToClose() {
         currentTabGroup.removeCurrentTab()
     }
@@ -481,6 +430,16 @@ extension AXWindow: AXTabBarViewDelegate {
     }
 }
 
+extension AXWindow: AXHorizontalToolbarViewDelegate {
+    func didTapBackButton() {
+        backWebpage(nil)
+    }
+
+    func didTapForwardButton() {
+        forwardWebpage(nil)
+    }
+}
+
 // MARK: Sidebar Search Button Delegate
 extension AXWindow: AXSidebarSearchButtonDelegate {
     func lockClicked() {
@@ -543,197 +502,9 @@ extension AXWindow: AXWorkspaceSwapperViewDelegate {
     }
 }
 
-// MARK: - Toolbar Delegate
-extension AXWindow: NSToolbarDelegate {
-    func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem
-        .Identifier]
-    {
-        return [
-            .flexibleSpace,
-            .back,
-            .forward,
-            .refresh,
-            .flexibleSpace,
-            .search,
-            .addTab,
-            .workspaceSwapper,
-            .flexibleSpace,
-            .tabGroupInformationView,
-        ]
-    }
-
-    func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem
-        .Identifier]
-    {
-        return [
-            .flexibleSpace,
-            .flexibleSpace,
-            .back,
-            .forward,
-            .refresh,
-            .flexibleSpace,
-            .search,
-            .addTab,
-            .workspaceSwapper,
-            .flexibleSpace,
-            .tabGroupInformationView,
-        ]
-    }
-
-    func toolbar(
-        _ toolbar: NSToolbar,
-        itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
-        willBeInsertedIntoToolbar flag: Bool
-    ) -> NSToolbarItem? {
-        switch itemIdentifier {
-        case .refresh:
-            let item = NSToolbarItem(itemIdentifier: .refresh)
-            item.label = "Refresh"
-            item.image = NSImage(
-                systemSymbolName: "arrow.clockwise",
-                accessibilityDescription: "Refresh")
-            item.target = self
-            item.isNavigational = true
-            item.action = #selector(reloadWebpage)
-            return item
-
-        case .back:
-            let item = NSToolbarItem(itemIdentifier: .back)
-            item.label = "Back"
-            item.image = NSImage(
-                systemSymbolName: "chevron.backward",
-                accessibilityDescription: "Back")
-            item.target = self
-            item.isNavigational = true
-            item.action = #selector(backWebpage)
-            return item
-
-        case .forward:
-            let item = NSToolbarItem(itemIdentifier: .forward)
-            item.label = "Forward"
-            item.image = NSImage(
-                systemSymbolName: "chevron.forward",
-                accessibilityDescription: "Forward")
-            item.target = self
-            item.isNavigational = true
-            item.action = #selector(forwardWebpage)
-            return item
-
-        case .search:
-            toolbarSearchField = NSSearchToolbarItem(itemIdentifier: .search)
-            toolbarSearchField!.label = "Search"
-            toolbarSearchField!.preferredWidthForSearchField = 300
-            toolbarSearchField!.visibilityPriority = .high
-            toolbarSearchField!.searchField.placeholderString =
-                "Search or enter address"
-            toolbarSearchField!.searchField.delegate = self
-
-            // Add progress bar to search field
-            let progressBar = createProgressBar()
-            toolbarSearchField!.searchField.addSubview(progressBar)
-
-            // Constrain progress bar to fill search field
-            NSLayoutConstraint.activate([
-                progressBar.leadingAnchor.constraint(
-                    equalTo: toolbarSearchField!.searchField.leadingAnchor),
-                progressBar.trailingAnchor.constraint(
-                    equalTo: toolbarSearchField!.searchField.trailingAnchor),
-                progressBar.bottomAnchor.constraint(
-                    equalTo: toolbarSearchField!.searchField.bottomAnchor),
-                progressBar.heightAnchor.constraint(equalToConstant: 1),
-            ])
-
-            return toolbarSearchField!
-
-        case .addTab:
-            let item = NSToolbarItem(itemIdentifier: .addTab)
-            item.label = "Add Tab"
-            item.image = NSImage(
-                systemSymbolName: "plus", accessibilityDescription: "Add Tab")
-            item.target = self
-            item.action = #selector(AppDelegate.toggleSearchBarForNewTab(_:))
-            return item
-
-        case .workspaceSwapper:
-            let item = NSToolbarItem(itemIdentifier: .workspaceSwapper)
-            item.label = "Workspace Swapper"
-            item.image = NSImage(
-                systemSymbolName: "rectangle.stack",
-                accessibilityDescription: "Switch Workspace")
-            item.target = self
-            item.action = #selector(showWorkspaceSwapper)
-            return item
-
-        case .tabGroupInformationView:
-            let item = NSToolbarItem(itemIdentifier: .tabGroupInformationView)
-            item.label = ""
-            item.image = nil
-            item.target = self
-            item.action = #selector(displayTabGroupInformationPopover)
-
-            item.view = .init(frame: .init(x: 0, y: 0, width: 70, height: 30))
-            item.view!.addSubview(tabGroupInfoView)
-
-            return item
-
-        default:
-            return nil
-        }
-    }
-
-    func createProgressBar() -> NSProgressIndicator {
-        let progressBar = NSProgressIndicator()
-        progressBar.style = .bar
-        progressBar.isIndeterminate = false
-        progressBar.doubleValue = 50  // Example value
-        progressBar.translatesAutoresizingMaskIntoConstraints = false
-        //progressBar.controlTint = .clear // Make it blend with the background
-        return progressBar
-    }
-
-    @objc func showWorkspaceSwapper(_ sender: Any?) {
-        guard let sender = sender as? NSToolbarItem else { return }
-
-        guard let itemViewer = sender.value(forKey: "_itemViewer") as? NSView
-        else {
-            return
-        }
-
-        let workspaceSwapperView = AXWorkspaceSwapperView()
-        workspaceSwapperView.delegate = self
-        workspaceSwapperView.reloadTabGroups()
-
-        let popover = NSPopover()
-        popover.behavior = .transient
-        let viewController = NSViewController()
-        viewController.view = workspaceSwapperView
-        popover.contentViewController = viewController
-
-        popover.show(
-            relativeTo: itemViewer.bounds,
-            of: itemViewer, preferredEdge: .minY)
-    }
-
-    @objc func displayTabGroupInformationPopover() {
-        let popover = NSPopover()
-        popover.behavior = .transient
-        let vc = NSViewController()
-        let view = AXTabGroupCustomizerView(tabGroup: currentTabGroup)
-        view.delegate = self
-        vc.view = view
-        popover.contentViewController = vc
-
-        popover.show(
-            relativeTo: tabGroupInfoView.bounds, of: tabGroupInfoView,
-            preferredEdge: .minY)
-    }
-}
-
 extension AXWindow: AXTabGroupCustomizerViewDelegate {
     func didUpdateTabGroup(_ tabGroup: AXTabGroup) {
         gestureView(didUpdate: tabGroup)
-        tabGroupInfoView.updateLabels(
-            tabGroup: tabGroup, profileName: self.currentProfileName())
     }
 
     func didUpdateColor(_ tabGroup: AXTabGroup) {
@@ -742,22 +513,7 @@ extension AXWindow: AXTabGroupCustomizerViewDelegate {
 
     func didUpdateIcon(_ tabGroup: AXTabGroup) {
         gestureView(didUpdate: tabGroup)
-        tabGroupInfoView.updateIcon(tabGroup: tabGroup)
     }
-}
-
-// MARK: - Toolbar Item Identifiers
-extension NSToolbarItem.Identifier {
-    static let refresh = NSToolbarItem.Identifier("Refresh")
-    static let back = NSToolbarItem.Identifier("Back")
-    static let forward = NSToolbarItem.Identifier("Forward")
-    static let search = NSToolbarItem.Identifier("Search")
-    static let addTab = NSToolbarItem.Identifier("AddTab")
-    static let flexibleSpace = NSToolbarItem.Identifier("flexibleSpace")
-    static let workspaceSwapper = NSToolbarItem.Identifier("WorkspaceSwapper")  // New identifier
-
-    static let tabGroupInformationView = NSToolbarItem.Identifier(
-        "TabGroupInformationView")
 }
 
 // MARK: - Menu Bar Actions
@@ -766,15 +522,15 @@ extension AXWindow {
         containerView.webViewPerformSearch()
     }
 
-    @IBAction func backWebpage(_ sender: Any) {
+    @IBAction func backWebpage(_ sender: Any?) {
         containerView.currentWebView?.goBack()
     }
 
-    @IBAction func forwardWebpage(_ sender: Any) {
+    @IBAction func forwardWebpage(_ sender: Any?) {
         containerView.currentWebView?.goForward()
     }
 
-    @IBAction func reloadWebpage(_ sender: Any) {
+    @IBAction func reloadWebpage(_ sender: Any?) {
         containerView.currentWebView?.reload()
     }
 

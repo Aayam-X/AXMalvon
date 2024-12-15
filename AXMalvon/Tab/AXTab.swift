@@ -68,17 +68,20 @@ class AXTab: Codable {
 
         // Use a more efficient observation method
         self.titleObserver = webView.publisher(for: \.title)
-            .removeDuplicates()  // Prevent unnecessary updates
             .sink { [weak self, weak tabButton] title in
                 guard let self = self, let tabButton = tabButton else { return }
 
                 // Optimize title handling
                 let displayTitle = title ?? "Untitled"
-                self.title = displayTitle
-                tabButton.updateTitle(displayTitle)
 
                 // Efficiently handle URL and favicon updates
-                self.updateTabURLAndFavicon(for: webView, tabButton: tabButton)
+                if self.title != displayTitle {
+                    self.updateTabURLAndFavicon(
+                        for: webView, tabButton: tabButton)
+                }
+
+                self.title = displayTitle
+                tabButton.updateTitle(displayTitle)
             }
     }
 
@@ -86,7 +89,9 @@ class AXTab: Codable {
     private func updateTabURLAndFavicon(
         for webView: AXWebView, tabButton: AXTabButton
     ) {
-        guard let newURL = webView.url else { return }
+        guard let newURL = webView.url else {
+            return
+        }
 
         self.url = newURL
 

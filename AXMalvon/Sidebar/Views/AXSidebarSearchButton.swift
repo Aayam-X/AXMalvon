@@ -15,9 +15,22 @@ class AXSidebarSearchButton: NSButton {
     private var hasDrawn = false
     weak var delegate: AXSidebarSearchButtonDelegate?
 
+    var fullAddress: URL? {
+        didSet {
+            addressField.stringValue = fullAddress?.absoluteString ?? "Empty"
+
+            if fullAddress?.scheme?.last != "s" {
+                lockView.image = NSImage(
+                    named: NSImage.lockUnlockedTemplateName)
+            } else {
+                lockView.image = NSImage(named: NSImage.lockLockedTemplateName)
+            }
+        }
+    }
+
     var url: URL? {
         didSet {
-            titleView.stringValue = url?.host() ?? "Empty"
+            addressField.stringValue = url?.host() ?? "Empty"
 
             if url?.scheme?.last != "s" {
                 lockView.image = NSImage(
@@ -28,19 +41,21 @@ class AXSidebarSearchButton: NSButton {
         }
     }
 
-    private let titleView: NSTextField = {
-        let textField = NSTextField()
-        textField.stringValue = "Search"
-        textField.font = NSFont.systemFont(ofSize: 12, weight: .medium)
-        textField.textColor = .secondaryLabelColor
-        textField.isBezeled = false
-        textField.isEditable = false
-        textField.alignment = .left
-        textField.drawsBackground = false
-        textField.usesSingleLineMode = true
-        textField.lineBreakMode = .byTruncatingTail
-        textField.translatesAutoresizingMaskIntoConstraints = false
-        return textField
+    lazy var addressField: NSTextField = {
+        let field = NSTextField()
+
+        field.placeholderString = "Search or Enter URL..."
+        field.textColor = .secondaryLabelColor
+        field.isBezeled = false
+        field.isEditable = false
+        field.alignment = .left
+        field.drawsBackground = false
+        field.usesSingleLineMode = true
+        field.lineBreakMode = .byTruncatingTail
+        field.cell?.truncatesLastVisibleLine = true
+        field.translatesAutoresizingMaskIntoConstraints = false
+
+        return field
     }()
 
     private let lockView: NSButton = {
@@ -66,24 +81,27 @@ class AXSidebarSearchButton: NSButton {
 
         heightAnchor.constraint(equalToConstant: 36).isActive = true
 
+        // Restore auto resizing mask
+        lockView.translatesAutoresizingMaskIntoConstraints = false
+        addressField.translatesAutoresizingMaskIntoConstraints = false
+
         // Add the lock button
         addSubview(lockView)
-        NSLayoutConstraint.activate([
-            lockView.leftAnchor.constraint(equalTo: leftAnchor, constant: 10),
-            lockView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            lockView.widthAnchor.constraint(equalToConstant: 16),
-            lockView.heightAnchor.constraint(equalToConstant: 16),
-        ])
+        lockView.heightAnchor.constraint(equalToConstant: 16).isActive = true
+        lockView.widthAnchor.constraint(equalToConstant: 16).isActive = true
+        lockView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive =
+            true
+        lockView.leftAnchor.constraint(equalTo: leftAnchor, constant: 10)
+            .isActive = true
 
         // Add the title view
-        addSubview(titleView)
-        NSLayoutConstraint.activate([
-            titleView.leftAnchor.constraint(
-                equalTo: lockView.rightAnchor, constant: 5),
-            titleView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            titleView.rightAnchor.constraint(
-                equalTo: rightAnchor, constant: -8),
-        ])
+
+        addSubview(addressField)
+        addressField.leftAnchor.constraint(
+            equalTo: lockView.rightAnchor, constant: 6
+        ).isActive = true
+        addressField.centerYAnchor.constraint(equalTo: centerYAnchor).isActive =
+            true
 
         // Configure lock button action
         lockView.target = self

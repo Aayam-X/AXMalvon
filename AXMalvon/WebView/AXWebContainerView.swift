@@ -12,6 +12,7 @@ import WebKit
 protocol AXWebContainerViewDelegate: AnyObject {
     func webViewDidFinishLoading()
     func webViewStartedLoading(with progress: Double)
+    func webViewURLChanged(to url: URL)
     func webViewRequestsToClose()
 
     func webViewCreateWebView(config: WKWebViewConfiguration) -> WKWebView
@@ -34,6 +35,7 @@ class AXWebContainerView: NSView {
     var sidebarTrackingArea: NSTrackingArea!
     var isAnimating: Bool = false
     var progressBarObserver: NSKeyValueObservation?
+    var urlObserver: NSKeyValueObservation?
 
     // Constraints
     private lazy var splitViewLeftAnchorConstraint: NSLayoutConstraint? = nil
@@ -107,6 +109,10 @@ class AXWebContainerView: NSView {
             splitView.bottomAnchor.constraint(
                 equalTo: splitViewContainer.bottomAnchor),
         ])
+
+        if let window = self.window as? AXWindow {
+            window.trafficLightManager.updateTrafficLights()
+        }
     }
 
     override func removeFromSuperview() {
@@ -183,6 +189,18 @@ class AXWebContainerView: NSView {
                 self?.updateProgress(newProgress)
             } else {
                 mxPrint("Progress change has no new value.")
+            }
+        }
+
+        guard !isVertical else { return }
+        if let url = webView.url {
+            self.delegate?.webViewURLChanged(to: url)
+        }
+
+        urlObserver = webView.observe(\.url, options: [.new]) {
+            [weak self] _, change in
+            if let newURL = change.newValue, let newURL {
+                self?.delegate?.webViewURLChanged(to: newURL)
             }
         }
     }

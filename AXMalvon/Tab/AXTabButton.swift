@@ -8,15 +8,31 @@
 
 import AppKit
 
-let AX_DEFAULT_FAVICON = NSImage(
-    systemSymbolName: "square.fill", accessibilityDescription: nil)
+// MARK: - Constants
+private struct AXTabButtonConstants {
+    static let defaultFavicon = NSImage(
+        systemSymbolName: "square.fill", accessibilityDescription: nil)
+    static let defaultFaviconSleep = NSImage(
+        systemSymbolName: "moon.fill", accessibilityDescription: nil)
+    static let faviconScript = """
+            (d=>{const h=d.head,l=["icon","shortcut icon","apple-touch-icon","mask-icon"];for(let r of l)if((r=h.querySelector(`link[rel=\"${r}\"]`))&&r.href)return r.href;return d.location.origin+"/favicon.ico"})(document)
+        """
 
-let AX_DEFAULT_FAVICON_SLEEP = NSImage(
-    systemSymbolName: "moon.fill", accessibilityDescription: nil)
+    static let animationDuration: CFTimeInterval = 0.2
+    static let shrinkScale: CGFloat = 0.9
+    static let tabHeight: CGFloat = 36
+    static let iconSize = NSSize(width: 16, height: 16)
+    static let closeButtonSize = NSSize(width: 20, height: 16)
+    static let shadowOpacity: Float = 0.3
+    static let shadowRadius: CGFloat = 4.0
+    static let shadowOffset = CGSize(width: 0, height: 0)
 
-private let AX_DEFAULT_FAVICON_SCRIPT = """
-    (d=>{const h=d.head,l=["icon","shortcut icon","apple-touch-icon","mask-icon"];for(let r of l)if((r=h.querySelector(`link[rel="${r}"]`))&&r.href)return r.href;return d.location.origin+"/favicon.ico"})(document)
-    """
+    // Colors
+    static let hoverColor: NSColor = NSColor.systemGray.withAlphaComponent(0.3)
+    static let selectedColor: NSColor = .textBackgroundColor
+    static let backgroundColor: NSColor = .textBackgroundColor
+        .withAlphaComponent(0.0)
+}
 
 protocol AXTabButtonDelegate: AnyObject {
     func tabButtonDidSelect(_ tabButton: AXTabButton)
@@ -38,12 +54,8 @@ class AXTabButton: NSButton {
     // Drag & Drop
     private var initialMouseDownLocation: NSPoint?
 
-    // Animations
-    private let shrinkScale: CGFloat = 0.9  // Factor to shrink the button by
-    private let animationDuration: CFTimeInterval = 0.2
-
     // Singleton session to reduce resource allocation
-    let session: URLSession = {
+    static let session: URLSession = {
         // Hyper-optimized session configuration
         let config = URLSessionConfiguration.ephemeral
         config.timeoutIntervalForRequest = 1.5  // Aggressive timeout
@@ -66,7 +78,7 @@ class AXTabButton: NSButton {
     var favicon: NSImage? {
         set {
             self.favIconImageView.image =
-                newValue == nil ? AX_DEFAULT_FAVICON : newValue
+                newValue == nil ? AXTabButtonConstants.defaultFavicon : newValue
             tab.icon = newValue
         }
         get {
@@ -75,16 +87,6 @@ class AXTabButton: NSButton {
     }
 
     var closeButton: AXSidebarTabCloseButton! = AXSidebarTabCloseButton()
-
-    // Colors
-    var hoverColor: NSColor = NSColor.systemGray.withAlphaComponent(0.3)
-    var selectedColor: NSColor = .textBackgroundColor
-    var backgroundColor: NSColor = .textBackgroundColor.withAlphaComponent(0.0)
-    {
-        didSet {
-            self.layer?.backgroundColor = backgroundColor.cgColor
-        }
-    }
 
     // Other
     private var hasDrawn = false
@@ -96,8 +98,14 @@ class AXTabButton: NSButton {
     var isSelected: Bool = false {
         didSet {
             self.layer?.backgroundColor =
-                isSelected ? selectedColor.cgColor : backgroundColor.cgColor
+                isSelected
+                ? AXTabButtonConstants.selectedColor.cgColor
+                : AXTabButtonConstants.backgroundColor.cgColor
             layer?.shadowOpacity = isSelected ? 0.3 : 0.0
+
+            closeButton.isHidden = !isSelected
+            titleViewRightAnchor?.constant = isSelected ? -6 : 20
+
             if isSelected, tab.titleObserver == nil {
                 forceCreateWebview()
             }
@@ -140,8 +148,8 @@ class AXTabButton: NSButton {
 
         layer?.shadowColor = NSColor.textColor.cgColor
         layer?.shadowOpacity = 0.0  // Adjust shadow visibility
-        layer?.shadowRadius = 1.0  // Adjust softness
-        layer?.shadowOffset = CGSize(width: 0, height: 2)  // Shadow below the button
+        layer?.shadowRadius = 4.0  // Adjust softness
+        layer?.shadowOffset = CGSize(width: 0, height: 0)  // Shadow below the button
     }
 
     override func viewWillDraw() {
@@ -151,7 +159,8 @@ class AXTabButton: NSButton {
         self.setTrackingArea()
 
         if isSelected {
-            self.layer?.backgroundColor = selectedColor.cgColor
+            self.layer?.backgroundColor =
+                AXTabButtonConstants.selectedColor.cgColor
             layer?.shadowOpacity = 0.3
         }
 
@@ -160,7 +169,8 @@ class AXTabButton: NSButton {
         // Setup imageView
         favIconImageView.translatesAutoresizingMaskIntoConstraints = false
         favIconImageView.image =
-            tab.icon != nil ? tab.icon : AX_DEFAULT_FAVICON_SLEEP
+            tab.icon != nil
+            ? tab.icon : AXTabButtonConstants.defaultFaviconSleep
         favIconImageView.contentTintColor = .textBackgroundColor
             .withAlphaComponent(0.2)
         addSubview(favIconImageView)
@@ -188,7 +198,7 @@ class AXTabButton: NSButton {
             .isActive = true
         closeButton.centerYAnchor.constraint(equalTo: centerYAnchor).isActive =
             true
-        closeButton.isHidden = true
+        closeButton.isHidden = !isSelected
 
         // Setup titleView
         titleView.translatesAutoresizingMaskIntoConstraints = false
@@ -205,8 +215,9 @@ class AXTabButton: NSButton {
         ).isActive = true
         titleView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive =
             true
+
         titleViewRightAnchor = titleView.rightAnchor.constraint(
-            equalTo: closeButton.leftAnchor, constant: 7)
+            equalTo: closeButton.leftAnchor, constant: isSelected ? -7 : 7)
         titleViewRightAnchor?.isActive = true
     }
 
@@ -215,7 +226,7 @@ class AXTabButton: NSButton {
     }
 
     func faviconNotFound() {
-        favIconImageView.image = AX_DEFAULT_FAVICON
+        favIconImageView.image = AXTabButtonConstants.defaultFavicon
     }
 }
 
@@ -228,7 +239,7 @@ extension AXTabButton {
     @objc func deactiveTab() {
         tab.deactivateWebView()
 
-        favicon = AX_DEFAULT_FAVICON_SLEEP
+        favicon = AXTabButtonConstants.defaultFaviconSleep
         delegate?.tabButtonDeactivatedWebView(self)
     }
 
@@ -257,7 +268,7 @@ extension AXTabButton {
                 // Ultra-lightweight favicon extraction
                 guard
                     let faviconURLString = try? await webView
-                        .evaluateJavaScript(AX_DEFAULT_FAVICON_SCRIPT)
+                        .evaluateJavaScript(AXTabButtonConstants.faviconScript)
                         as? String,
                     let faviconURL = URL(string: faviconURLString)
                 else {
@@ -277,7 +288,7 @@ extension AXTabButton {
     // Static method to minimize instance overhead
     private func quickFaviconDownload(from url: URL) async throws -> NSImage? {
         // Ultra-lightweight download with strict size limit
-        let (data, _) = try await session.data(from: url)
+        let (data, _) = try await AXTabButton.session.data(from: url)
 
         // Minimal image creation with immediate downsizing
         guard let image = NSImage(data: data)?.downsizedIcon() else {
@@ -331,7 +342,7 @@ extension AXTabButton {
             // Double click: Allow User to Edit the Title
         }
 
-        self.layer?.backgroundColor = selectedColor.cgColor
+        self.layer?.backgroundColor = AXTabButtonConstants.selectedColor.cgColor
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -346,15 +357,21 @@ extension AXTabButton {
         closeButton.isHidden = false
 
         if !isSelected {
-            self.layer?.backgroundColor = hoverColor.cgColor
+            self.layer?.backgroundColor =
+                AXTabButtonConstants.hoverColor.cgColor
         }
     }
 
     override func mouseExited(with event: NSEvent) {
-        titleViewRightAnchor?.constant = 20
-        closeButton.isHidden = true
+        if !isSelected {
+            closeButton.isHidden = true
+            titleViewRightAnchor?.constant = 20
+        }
+
         self.layer?.backgroundColor =
-            isSelected ? selectedColor.cgColor : backgroundColor.cgColor
+            isSelected
+            ? AXTabButtonConstants.selectedColor.cgColor
+            : AXTabButtonConstants.backgroundColor.cgColor
     }
 
     override func rightMouseDown(with event: NSEvent) {
@@ -467,7 +484,7 @@ class AXSidebarTabCloseButton: NSButton {
         self.wantsLayer = true
         self.layer?.cornerRadius = 5
         self.isBordered = false
-        self.bezelStyle = .shadowlessSquare
+        self.bezelStyle = .smallSquare
         self.setTrackingArea()
     }
 
