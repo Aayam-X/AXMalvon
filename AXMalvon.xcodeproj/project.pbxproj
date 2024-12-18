@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		ED1522C62CFAC29C00941684 /* Malvon-Updater.app in CopyFiles */ = {isa = PBXBuildFile; fileRef = ED1522C12CFABCFE00941684 /* Malvon-Updater.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		ED1522C62CFAC29C00941684 /* Malvon-Updater.app in Copy Malvon-Updater */ = {isa = PBXBuildFile; fileRef = ED1522C12CFABCFE00941684 /* Malvon-Updater.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		ED9D55AE2CF155A1000E6319 /* license.txt in Resources */ = {isa = PBXBuildFile; fileRef = ED9D55AD2CF155A1000E6319 /* license.txt */; };
 /* End PBXBuildFile section */
 
@@ -29,14 +29,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		ED1522C52CFAC29600941684 /* CopyFiles */ = {
+		ED1522C52CFAC29600941684 /* Copy Malvon-Updater */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 12;
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				ED1522C62CFAC29C00941684 /* Malvon-Updater.app in CopyFiles */,
+				ED1522C62CFAC29C00941684 /* Malvon-Updater.app in Copy Malvon-Updater */,
 			);
+			name = "Copy Malvon-Updater";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -212,7 +213,7 @@
 				ED3AEFDE2CDAED2F002AE6CC /* Sources */,
 				ED3AEFDF2CDAED2F002AE6CC /* Frameworks */,
 				ED3AEFE02CDAED2F002AE6CC /* Resources */,
-				ED1522C52CFAC29600941684 /* CopyFiles */,
+				ED1522C52CFAC29600941684 /* Copy Malvon-Updater */,
 			);
 			buildRules = (
 			);

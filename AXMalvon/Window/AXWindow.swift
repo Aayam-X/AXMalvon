@@ -299,9 +299,13 @@ class AXWindow: NSWindow, NSWindowDelegate {
                 equalTo: visualEffectView.bottomAnchor),
         ])
 
+        horizontalToolbar.delegate = self
         horizontalToolbar.searchField.delegate = self
         horizontalToolbar.workspaceSwapperView.delegate = self
-        horizontalToolbar.delegate = self
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+            self.horizontalToolbar.tabGroupCustomizerView?.delegate = self
+        }
     }
 
     private func setupVerticalTabLayout() {
@@ -432,6 +436,10 @@ extension AXWindow: AXTabBarViewDelegate {
 }
 
 extension AXWindow: AXHorizontalToolbarViewDelegate {
+    func requestsCurrentTabGroup() -> AXTabGroup {
+        return currentTabGroup
+    }
+
     func didTapBackButton() {
         backWebpage(nil)
     }
@@ -456,6 +464,10 @@ extension AXWindow: AXSidebarSearchButtonDelegate {
 
 // MARK: - Gesture View Delegate
 extension AXWindow: AXGestureViewDelegate {
+    func gestureViewrequestsCurrentTabGroup() -> AXTabGroup {
+        return currentTabGroup
+    }
+
     func gestureView(didUpdate tabGroup: AXTabGroup) {
         visualEffectTintView.layer?.backgroundColor = tabGroup.color.cgColor
     }
@@ -482,6 +494,11 @@ extension AXWindow: AXWorkspaceSwapperViewDelegate {
 
     func didSwitchProfile(to index: Int) {
         profileIndex = profileIndex == 1 ? 0 : 1
+
+        if !verticalTabs {
+            horizontalToolbar.tabGroupInfoView.updateLabels(
+                tabGroup: currentTabGroup, profileName: activeProfile.name)
+        }
     }
 
     func popoverViewTabGroups() -> [AXTabGroup] {
@@ -506,14 +523,29 @@ extension AXWindow: AXWorkspaceSwapperViewDelegate {
 extension AXWindow: AXTabGroupCustomizerViewDelegate {
     func didUpdateTabGroup(_ tabGroup: AXTabGroup) {
         gestureView(didUpdate: tabGroup)
+
+        if !verticalTabs {
+            horizontalToolbar.tabGroupInfoView.updateLabels(
+                tabGroup: tabGroup, profileName: currentProfileName())
+        }
     }
 
     func didUpdateColor(_ tabGroup: AXTabGroup) {
         gestureView(didUpdate: tabGroup)
+
+        if !verticalTabs {
+            horizontalToolbar.tabGroupInfoView.updateLabels(
+                tabGroup: tabGroup, profileName: currentProfileName())
+        }
     }
 
     func didUpdateIcon(_ tabGroup: AXTabGroup) {
         gestureView(didUpdate: tabGroup)
+
+        if !verticalTabs {
+            horizontalToolbar.tabGroupInfoView.updateLabels(
+                tabGroup: tabGroup, profileName: currentProfileName())
+        }
     }
 }
 

@@ -12,6 +12,8 @@ import SwiftUI
 protocol AXGestureViewDelegate: AnyObject {
     func gestureView(didSwipe direction: AXGestureViewSwipeDirection!)
     func gestureView(didUpdate tabGroup: AXTabGroup)
+
+    func gestureViewrequestsCurrentTabGroup() -> AXTabGroup
 }
 
 enum AXGestureViewSwipeDirection {
@@ -213,7 +215,8 @@ extension AXGestureView {
 
     // Show the popover
     @objc func infoViewRightMouseDown() {
-        guard let tabGroup = currentTabGroup else { return }
+        guard let tabGroup = delegate?.gestureViewrequestsCurrentTabGroup()
+        else { return }
 
         let popover = NSPopover()
         popover.behavior = .transient

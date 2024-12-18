@@ -18,7 +18,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
 
     var tabStackView = NSStackView()
     private lazy var scrollView = AXScrollView(frame: self.bounds)
-    
+
     private lazy var plusButton: NSButton = {
         let button = NSButton()
         button.title = "+"
@@ -70,13 +70,14 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         tabStackView.distribution = .fillProportionally
         tabStackView.alignment = .centerY
         tabStackView.spacing = 6
-        tabStackView.edgeInsets = .init(top: 0, left: 6, bottom: 0, right: 6)
-        
+        tabStackView.edgeInsets = .init(top: 0, left: 16, bottom: 0, right: 6)
+
         // Configure plus button constraints
         plusButton.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             plusButton.centerYAnchor.constraint(equalTo: centerYAnchor),
-            plusButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -6),
+            plusButton.rightAnchor.constraint(
+                equalTo: rightAnchor, constant: -6),
             plusButton.heightAnchor.constraint(equalToConstant: 16),
             plusButton.widthAnchor.constraint(equalToConstant: 16),
         ])
@@ -229,7 +230,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
 
         delegate?.tabBarSwitchedTo(tabAt: tabGroup.selectedIndex)
     }
-    
+
     @objc func plusButtonTapped() {
         if let appDelegate = NSApplication.shared.delegate as? AppDelegate {
             appDelegate.toggleSearchBarForNewTab(nil)
