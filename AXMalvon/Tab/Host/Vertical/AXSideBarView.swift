@@ -6,14 +6,17 @@
 //  Copyright © 2022-2024 Ashwin Paudel, Aayam(X). All rights reserved.
 //
 
-import Cocoa
+import AppKit
 import WebKit
 
-class AXSidebarView: NSView {
+class AXSidebarView: NSView, AXTabHostingViewProtocol, AXGestureViewDelegate {
     private var hasDrawn: Bool = false
-    var currentTabGroup: AXTabGroup?
+    var delegate: (any AXTabHostingViewDelegate)?
 
-    var gestureView = AXGestureView()
+    var tabGroupInfoView: AXTabGroupInfoView = AXTabGroupInfoView()
+    var searchButton: AXSidebarSearchButton = AXSidebarSearchButton()
+    lazy var gestureView = AXGestureView(
+        tabGroupInfoView: tabGroupInfoView, searchButton: searchButton)
 
     var mouseExitedTrackingArea: NSTrackingArea!
 
@@ -74,6 +77,7 @@ class AXSidebarView: NSView {
 
         // Gesture View
         gestureView.translatesAutoresizingMaskIntoConstraints = false
+        gestureView.delegate = self
         addSubview(gestureView)
         NSLayoutConstraint.activate([
             gestureView.topAnchor.constraint(equalTo: topAnchor),
@@ -82,6 +86,9 @@ class AXSidebarView: NSView {
                 equalTo: rightAnchor, constant: 3),
             gestureView.heightAnchor.constraint(equalToConstant: 80),
         ])
+
+        tabGroupInfoView.onRightMouseDown =
+            delegate?.tabHostingViewDisplaysTabGroupCustomizationPanel
 
         // Divider between Search Bar and Tab
         addSubview(bottomLine)
@@ -164,10 +171,7 @@ class AXSidebarView: NSView {
             options: [.activeAlways, .mouseEnteredAndExited], owner: self)
         addTrackingArea(mouseExitedTrackingArea)
     }
-}
 
-// MARK: - UI Elements
-extension AXSidebarView {
     @objc func addNewTab() {
         guard let appDelegate = NSApp.delegate as? AppDelegate else { return }
 
@@ -175,10 +179,19 @@ extension AXSidebarView {
     }
 
     @objc func showWorkspaceSwapper() {
-        workspaceSwapperView.reloadTabGroups()
+        delegate?.tabHostingViewDisplaysWorkspaceSwapperPanel()
+    }
 
-        workspaceSwapperPopoverView.show(
-            relativeTo: workspaceSwapperButton.bounds,
-            of: workspaceSwapperButton, preferredEdge: .maxX)
+    func gestureView(didSwipe direction: AXGestureViewSwipeDirection!) {
+        switch direction {
+        case .backwards:
+            delegate?.tabHostingViewNavigateBackwards()
+        case .forwards:
+            delegate?.tabHostingViewNavigateForward()
+        case .reload:
+            delegate?.tabHostingViewReloadCurrentPage()
+        case .nothing, nil:
+            break
+        }
     }
 }

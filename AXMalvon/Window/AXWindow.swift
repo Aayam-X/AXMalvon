@@ -7,67 +7,48 @@
 //
 
 import AppKit
-import SQLite3
 import SecurityInterface
 import WebKit
 
-class AXWindow: NSWindow, NSWindowDelegate {
+// MARK: - AXWindow
+class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
+    AXWebContainerViewDelegate, AXTabBarViewDelegate, AXTabHostingViewDelegate
+{
+
     // Window Defaults
-    lazy var verticalTabs = UserDefaults.standard.bool(forKey: "verticalTabs")
+    lazy var usesVerticalTabs = UserDefaults.standard.bool(
+        forKey: "verticalTabs")
     var hiddenSidebarView = false
+    private var trafficLightButtons: [NSButton]!
 
     // Other Views
-    lazy var trafficLightManager = AXTrafficLightOverlayManager(window: self)
     lazy var splitView = AXQuattroProgressSplitView()
-    lazy var containerView = AXWebContainerView(isVertical: verticalTabs)
+    lazy var containerView = AXWebContainerView(isVertical: usesVerticalTabs)
 
-    // Vertical + Horizontal Tabs
-    // Lazy loading to save ram
-    lazy var sidebarView = AXSidebarView()
-
+    // Lazy loading to stop unnecesary initilizations
     lazy var tabBarView: AXTabBarViewTemplate = {
-        if verticalTabs {
+        if usesVerticalTabs {
             return AXVerticalTabBarView()
         } else {
             return AXHorizontalTabBarView()
         }
     }()
 
-    lazy var horizontalToolbar = AXHorizontalToolbarView()
-
-    var profiles: [AXProfile]
-    var activeProfile: AXProfile
-
-    // Main Components
-    var splitViewController: NSSplitViewController?
-
-    var profileIndex = 0 {
-        didSet {
-            activeProfile = profiles[profileIndex]
-            self.switchToTabGroup(activeProfile.currentTabGroupIndex)
+    lazy var tabHostingView: AXTabHostingViewProtocol = {
+        if usesVerticalTabs {
+            AXSidebarView()
+        } else {
+            AXHorizontalTabHostingView()
         }
-    }
+    }()
 
-    var currentConfiguration: WKWebViewConfiguration {
-        activeProfile.configuration
-    }
+    private lazy var visualEffectTintView: NSView = {
+        let tintView = NSView()
+        tintView.translatesAutoresizingMaskIntoConstraints = false
+        tintView.wantsLayer = true
 
-    var tabGroups: [AXTabGroup] {
-        activeProfile.tabGroups
-    }
-
-    var currentTabGroupIndex: Int {
-        get {
-            activeProfile.currentTabGroupIndex
-        }
-        set {
-            activeProfile.currentTabGroupIndex = newValue
-        }
-    }
-
-    var currentTabGroup: AXTabGroup {
-        activeProfile.currentTabGroup
-    }
+        return tintView
+    }()
 
     private lazy var visualEffectView: NSVisualEffectView = {
         let visualEffectView = NSVisualEffectView()
@@ -89,14 +70,6 @@ class AXWindow: NSWindow, NSWindowDelegate {
         ])
 
         return visualEffectView
-    }()
-
-    private lazy var visualEffectTintView: NSView = {
-        let tintView = NSView()
-        tintView.translatesAutoresizingMaskIntoConstraints = false
-        tintView.wantsLayer = true
-
-        return tintView
     }()
 
     init(with profiles: [AXProfile]) {
@@ -126,12 +99,47 @@ class AXWindow: NSWindow, NSWindowDelegate {
         self.backgroundColor = .textBackgroundColor
         self.isReleasedWhenClosed = true
         self.delegate = self
+
+        configureTrafficLights()
     }
 
+    // MARK: - Traffic Lights
+    private func configureTrafficLights() {
+        self.trafficLightButtons = [
+            self.standardWindowButton(.closeButton)!,
+            self.standardWindowButton(.miniaturizeButton)!,
+            self.standardWindowButton(.zoomButton)!,
+        ]
+
+        trafficLightsPosition()
+    }
+
+    func trafficLightsPosition() {
+        // Update positioning
+        for (index, button) in trafficLightButtons.enumerated() {
+            button.frame.origin = NSPoint(
+                x: 13.0 + CGFloat(index) * 20.0, y: -2)
+        }
+    }
+
+    func trafficLightsHide() {
+        trafficLightButtons.forEach { button in
+            button.isHidden = true
+        }
+    }
+
+    func trafficLightsShow() {
+        trafficLightButtons.forEach { button in
+            button.isHidden = false
+        }
+    }
+
+    // MARK: - Content View
     private func setupComponents() {
+        // Visual Effect View
         self.contentView = visualEffectView
 
-        verticalTabs
+        usesVerticalTabs
             ? setupVerticalTabLayout()
             : setupHorizontalTabLayout()
 
@@ -140,6 +148,8 @@ class AXWindow: NSWindow, NSWindowDelegate {
 
         currentTabGroupIndex = 0
         tabBarView.updateTabGroup(currentTabGroup)
+        visualEffectTintView.layer?.backgroundColor =
+            currentTabGroup.color.cgColor
     }
 
     // MARK: Window Events
@@ -156,7 +166,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
     }
 
     func windowDidResize(_ notification: Notification) {
-        trafficLightManager.updateTrafficLights()
+        trafficLightsPosition()
     }
 
     func windowDidEndLiveResize(_ notification: Notification) {
@@ -165,9 +175,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
     }
 
     func windowWillExitFullScreen(_ notification: Notification) {
-        sidebarView.gestureView.updateConstraintsWhenMouse(
-            window: self, entered: false)
-        trafficLightManager.hideTrafficLights()
+        trafficLightsHide()
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -183,11 +191,12 @@ class AXWindow: NSWindow, NSWindowDelegate {
     override func otherMouseDown(with event: NSEvent) {
         let buttonNumber = event.buttonNumber
 
+        // Logitech MX Master 3S mouse keymapping.
         switch buttonNumber {
         case 3:
-            gestureView(didSwipe: .backwards)
+            tabHostingViewNavigateBackwards()
         case 4:
-            gestureView(didSwipe: .forwards)
+            tabHostingViewNavigateForward()
         default: break
         }
     }
@@ -219,6 +228,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
         }
     }
 
+    // MARK: - Content View Events
     func toggleTabSidebar() {
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.25  // Adjust duration as needed
@@ -227,11 +237,11 @@ class AXWindow: NSWindow, NSWindowDelegate {
             let sideBarWillCollapsed = splitView.subviews.count == 2
             if sideBarWillCollapsed {
                 hiddenSidebarView = true
-                splitView.removeArrangedSubview(sidebarView)
+                splitView.removeArrangedSubview(tabHostingView)
                 containerView.websiteTitleLabel.isHidden = true
             } else {
                 hiddenSidebarView = false
-                splitView.insertArrangedSubview(sidebarView, at: 0)
+                splitView.insertArrangedSubview(tabHostingView, at: 0)
                 containerView.websiteTitleLabel.isHidden = false
             }
 
@@ -240,6 +250,86 @@ class AXWindow: NSWindow, NSWindowDelegate {
                 isFullScreen: self.styleMask.contains(.fullScreen))
             splitView.layoutSubtreeIfNeeded()
         }
+    }
+
+    private func setupHorizontalTabLayout() {
+        tabBarView.translatesAutoresizingMaskIntoConstraints = false
+        tabHostingView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+
+        tabHostingView.delegate = self
+
+        visualEffectView.addSubview(tabHostingView)
+        visualEffectView.addSubview(containerView)
+
+        NSLayoutConstraint.activate([
+            tabHostingView.leftAnchor.constraint(
+                equalTo: visualEffectView.leftAnchor, constant: 70),
+            tabHostingView.rightAnchor.constraint(
+                equalTo: visualEffectView.rightAnchor, constant: -6),
+            tabHostingView.topAnchor.constraint(
+                equalTo: visualEffectView.topAnchor),
+            tabHostingView.heightAnchor.constraint(
+                equalToConstant: 85),
+
+            containerView.leadingAnchor.constraint(
+                equalTo: visualEffectView.leadingAnchor),
+            containerView.trailingAnchor.constraint(
+                equalTo: visualEffectView.trailingAnchor),
+            containerView.topAnchor.constraint(
+                equalTo: tabHostingView.bottomAnchor),
+            containerView.bottomAnchor.constraint(
+                equalTo: visualEffectView.bottomAnchor),
+        ])
+
+        tabHostingView.insertTabBarView(tabBarView: tabBarView)
+    }
+
+    private func setupVerticalTabLayout() {
+        splitView.frame = visualEffectView.bounds
+        splitView.autoresizingMask = [.height, .width]
+        visualEffectView.addSubview(splitView)
+
+        splitView.addArrangedSubview(tabHostingView)
+        splitView.addArrangedSubview(containerView)
+
+        tabHostingView.frame.size.width = 180
+
+        // Delegate setup
+        tabHostingView.translatesAutoresizingMaskIntoConstraints = false
+        tabHostingView.insertTabBarView(tabBarView: tabBarView)
+    }
+
+    // MARK: - Profile/Groups Tab Functions
+    var profiles: [AXProfile]
+    var activeProfile: AXProfile
+
+    var profileIndex = 0 {
+        didSet {
+            activeProfile = profiles[profileIndex]
+            self.switchToTabGroup(activeProfile.currentTabGroupIndex)
+        }
+    }
+
+    var currentConfiguration: WKWebViewConfiguration {
+        activeProfile.configuration
+    }
+
+    var tabGroups: [AXTabGroup] {
+        activeProfile.tabGroups
+    }
+
+    var currentTabGroupIndex: Int {
+        get {
+            activeProfile.currentTabGroupIndex
+        }
+        set {
+            activeProfile.currentTabGroupIndex = newValue
+        }
+    }
+
+    var currentTabGroup: AXTabGroup {
+        activeProfile.currentTabGroup
     }
 
     func switchToTabGroup(_ tabGroup: AXTabGroup) {
@@ -261,75 +351,7 @@ class AXWindow: NSWindow, NSWindowDelegate {
         )
     }
 
-    // MARK: - Tab Layout Functions
-    private func setupHorizontalTabLayout() {
-        horizontalToolbar.translatesAutoresizingMaskIntoConstraints = false
-        tabBarView.translatesAutoresizingMaskIntoConstraints = false
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-
-        visualEffectView.addSubview(tabBarView)
-        visualEffectView.addSubview(horizontalToolbar)
-        visualEffectView.addSubview(containerView)
-
-        NSLayoutConstraint.activate([
-            tabBarView.leftAnchor.constraint(
-                equalTo: visualEffectView.leftAnchor, constant: 70),
-            tabBarView.rightAnchor.constraint(
-                equalTo: visualEffectView.rightAnchor, constant: -6),
-            tabBarView.topAnchor.constraint(
-                equalTo: visualEffectView.topAnchor),
-            tabBarView.heightAnchor.constraint(
-                equalToConstant: 45),
-
-            horizontalToolbar.topAnchor.constraint(
-                equalTo: tabBarView.bottomAnchor),
-            horizontalToolbar.leftAnchor.constraint(
-                equalTo: visualEffectView.leftAnchor),
-            horizontalToolbar.rightAnchor.constraint(
-                equalTo: visualEffectView.rightAnchor),
-            horizontalToolbar.heightAnchor.constraint(equalToConstant: 40),
-
-            containerView.leadingAnchor.constraint(
-                equalTo: visualEffectView.leadingAnchor),
-            containerView.trailingAnchor.constraint(
-                equalTo: visualEffectView.trailingAnchor),
-            containerView.topAnchor.constraint(
-                equalTo: horizontalToolbar.bottomAnchor),
-            containerView.bottomAnchor.constraint(
-                equalTo: visualEffectView.bottomAnchor),
-        ])
-
-        horizontalToolbar.delegate = self
-        horizontalToolbar.searchField.delegate = self
-        horizontalToolbar.workspaceSwapperView.delegate = self
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-            self.horizontalToolbar.tabGroupCustomizerView?.delegate = self
-        }
-    }
-
-    private func setupVerticalTabLayout() {
-        splitView.frame = visualEffectView.bounds
-        splitView.autoresizingMask = [.height, .width]
-        visualEffectView.addSubview(splitView)
-
-        splitView.addArrangedSubview(sidebarView)
-        splitView.addArrangedSubview(containerView)
-
-        sidebarView.frame.size.width = 180
-
-        // Delegate setup
-        sidebarView.translatesAutoresizingMaskIntoConstraints = false
-        sidebarView.gestureView.delegate = self
-        sidebarView.workspaceSwapperView.delegate = self
-        sidebarView.gestureView.searchButton.delegate = self
-
-        sidebarView.insertTabBarView(tabBarView: tabBarView)
-    }
-}
-
-// MARK: - Search Bar Delegate
-extension AXWindow: AXSearchBarWindowDelegate {
+    // MARK: - Search Bar Delegate
     func searchBarDidAppear() {
         // Change contentView alpha value to 0.5
         contentView?.alphaValue = 0.5
@@ -358,38 +380,23 @@ extension AXWindow: AXSearchBarWindowDelegate {
         // Returns the current web view's url
         self.containerView.currentWebView?.url?.absoluteString ?? ""
     }
-}
 
-// MARK: - WebContainer View Delegate
-extension AXWindow: AXWebContainerViewDelegate {
-    func webViewURLChanged(to url: URL) {
-        horizontalToolbar.searchField.fullAddress = url
+    // MARK: - WebContainer View Delegate
+    func webContainerViewChangedURL(to url: URL) {
+        tabHostingView.searchButton.fullAddress = url
     }
 
-    func webViewRequestsToClose() {
+    func webContainerViewCloses() {
         currentTabGroup.removeCurrentTab()
     }
 
-    func webViewOpenLinkInNewTab(request: URLRequest) {
-        let newWebView = AXWebView(
-            frame: .zero, configuration: currentConfiguration)
-        newWebView.load(request)
-
-        let tab = AXTab(
-            title: newWebView.title ?? "Untitled Popup", webView: newWebView)
-
-        currentTabGroup.addTab(tab)
+    func webContainerViewRequestsSidebar() -> NSView {
+        return tabHostingView
     }
 
-    func webContainerViewRequestsSidebar() -> AXSidebarView {
-        return sidebarView
-    }
-
-    func webViewContainerUserHoveredForSidebar() -> AXSidebarView {
-        return sidebarView
-    }
-
-    func webViewCreateWebView(config: WKWebViewConfiguration) -> WKWebView {
+    func webContainerViewCreatesPopupWebView(config: WKWebViewConfiguration)
+        -> WKWebView
+    {
         let newWebView = AXWebView(frame: .zero, configuration: config)
         let tab = AXTab(
             title: newWebView.title ?? "Untitled Popup", webView: newWebView)
@@ -399,21 +406,20 @@ extension AXWindow: AXWebContainerViewDelegate {
         return newWebView
     }
 
-    func webViewStartedLoading(with progress: Double) {
+    func webContainerViewProgressUpdated(with progress: Double) {
         splitView.beginAnimation(with: progress)
     }
 
-    func webViewDidFinishLoading() {
+    func webContainerViewFinishedLoading() {
         splitView.finishAnimation()
 
-        if verticalTabs {
-            sidebarView.gestureView.searchButton.url =
+        if usesVerticalTabs {
+            tabHostingView.searchButton.url =
                 containerView.currentWebView?.url
         }
     }
-}
 
-extension AXWindow: AXTabBarViewDelegate {
+    // MARK: - Tab Bar View Delegate
     func tabBarSwitchedTo(tabAt: Int) {
         let tabGroup = currentTabGroup
         let tabs = tabGroup.tabs
@@ -426,32 +432,36 @@ extension AXWindow: AXTabBarViewDelegate {
         }
     }
 
-    func activeTabTitleChanged(to: String) {
+    func tabBarActiveTabTitleChanged(to: String) {
         containerView.websiteTitleLabel.stringValue = to
     }
 
-    func deactivatedTab() -> WKWebViewConfiguration? {
+    func tabBarDeactivatedTab() -> WKWebViewConfiguration? {
         return activeProfile.configuration
     }
-}
 
-extension AXWindow: AXHorizontalToolbarViewDelegate {
-    func requestsCurrentTabGroup() -> AXTabGroup {
-        return currentTabGroup
+    // MARK: - Tab Hosting View Delegate
+    func tabHostingViewReloadCurrentPage() {
+        containerView.currentWebView?.reload()
     }
 
-    func didTapBackButton() {
-        backWebpage(nil)
+    func tabHostingViewNavigateForward() {
+        containerView.currentWebView?.goForward()
     }
 
-    func didTapForwardButton() {
-        forwardWebpage(nil)
+    func tabHostingViewNavigateBackwards() {
+        containerView.currentWebView?.goBack()
     }
-}
 
-// MARK: Sidebar Search Button Delegate
-extension AXWindow: AXSidebarSearchButtonDelegate {
-    func lockClicked() {
+    func tabHostingViewDisplaysTabGroupCustomizationPanel() {
+        // FIXME: Add button and bounds in the argument
+    }
+
+    func tabHostingViewDisplaysWorkspaceSwapperPanel() {
+        // FIXME: Add button and bounds in the argument
+    }
+
+    func tabHostingViewDisplayTrustPanel() {
         guard let webView = containerView.currentWebView,
             let serverTrust = webView.serverTrust
         else { return }
@@ -459,30 +469,6 @@ extension AXWindow: AXSidebarSearchButtonDelegate {
         SFCertificateTrustPanel.shared().beginSheet(
             for: self, modalDelegate: nil, didEnd: nil, contextInfo: nil,
             trust: serverTrust, message: "TLS Certificate Details")
-    }
-}
-
-// MARK: - Gesture View Delegate
-extension AXWindow: AXGestureViewDelegate {
-    func gestureViewrequestsCurrentTabGroup() -> AXTabGroup {
-        return currentTabGroup
-    }
-
-    func gestureView(didUpdate tabGroup: AXTabGroup) {
-        visualEffectTintView.layer?.backgroundColor = tabGroup.color.cgColor
-    }
-
-    func gestureView(didSwipe direction: AXGestureViewSwipeDirection!) {
-        switch direction {
-        case .backwards:
-            containerView.currentWebView?.goBack()
-        case .forwards:
-            containerView.currentWebView?.goForward()
-        case .reload:
-            containerView.currentWebView?.reload()
-        case .nothing, nil:
-            break
-        }
     }
 }
 
@@ -495,10 +481,8 @@ extension AXWindow: AXWorkspaceSwapperViewDelegate {
     func didSwitchProfile(to index: Int) {
         profileIndex = profileIndex == 1 ? 0 : 1
 
-        if !verticalTabs {
-            horizontalToolbar.tabGroupInfoView.updateLabels(
-                tabGroup: currentTabGroup, profileName: activeProfile.name)
-        }
+        tabHostingView.tabGroupInfoView.updateLabels(
+            tabGroup: currentTabGroup, profileName: activeProfile.name)
     }
 
     func popoverViewTabGroups() -> [AXTabGroup] {
@@ -522,30 +506,16 @@ extension AXWindow: AXWorkspaceSwapperViewDelegate {
 
 extension AXWindow: AXTabGroupCustomizerViewDelegate {
     func didUpdateTabGroup(_ tabGroup: AXTabGroup) {
-        gestureView(didUpdate: tabGroup)
-
-        if !verticalTabs {
-            horizontalToolbar.tabGroupInfoView.updateLabels(
-                tabGroup: tabGroup, profileName: currentProfileName())
-        }
+        // No need to update profile name here, AXTabGroupCustomizerViewDelegate
+        tabHostingView.tabGroupInfoView.updateLabels(tabGroup: tabGroup)
     }
 
     func didUpdateColor(_ tabGroup: AXTabGroup) {
-        gestureView(didUpdate: tabGroup)
-
-        if !verticalTabs {
-            horizontalToolbar.tabGroupInfoView.updateLabels(
-                tabGroup: tabGroup, profileName: currentProfileName())
-        }
+        visualEffectTintView.layer?.backgroundColor = tabGroup.color.cgColor
     }
 
     func didUpdateIcon(_ tabGroup: AXTabGroup) {
-        gestureView(didUpdate: tabGroup)
-
-        if !verticalTabs {
-            horizontalToolbar.tabGroupInfoView.updateLabels(
-                tabGroup: tabGroup, profileName: currentProfileName())
-        }
+        tabHostingView.tabGroupInfoView.updateIcon(tabGroup: tabGroup)
     }
 }
 

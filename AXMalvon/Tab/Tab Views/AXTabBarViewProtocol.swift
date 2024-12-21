@@ -5,15 +5,15 @@
 //  Created by Ashwin Paudel on 2024-12-08.
 //
 
-import Cocoa
+import AppKit
 import WebKit
 
 protocol AXTabBarViewDelegate: AnyObject {
     func tabBarSwitchedTo(tabAt: Int)
-    func activeTabTitleChanged(to: String)
+    func tabBarActiveTabTitleChanged(to: String)
 
     /// Return a WKWebViewConfiguration when the user deactivates a self-created web view
-    func deactivatedTab() -> WKWebViewConfiguration?
+    func tabBarDeactivatedTab() -> WKWebViewConfiguration?
 }
 
 protocol AXTabBarViewTemplate: AnyObject, NSView, AXTabButtonDelegate {

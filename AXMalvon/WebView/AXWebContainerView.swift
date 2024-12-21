@@ -10,15 +10,15 @@ import AppKit
 import WebKit
 
 protocol AXWebContainerViewDelegate: AnyObject {
-    func webViewDidFinishLoading()
-    func webViewStartedLoading(with progress: Double)
-    func webViewURLChanged(to url: URL)
-    func webViewRequestsToClose()
+    func webContainerViewFinishedLoading()
+    func webContainerViewProgressUpdated(with progress: Double)
+    func webContainerViewChangedURL(to url: URL)
+    func webContainerViewCloses()
 
-    func webViewCreateWebView(config: WKWebViewConfiguration) -> WKWebView
-    func webViewOpenLinkInNewTab(request: URLRequest)
+    func webContainerViewCreatesPopupWebView(config: WKWebViewConfiguration)
+        -> WKWebView
 
-    func webContainerViewRequestsSidebar() -> AXSidebarView
+    func webContainerViewRequestsSidebar() -> NSView
 }
 
 class AXWebContainerView: NSView {
@@ -109,10 +109,6 @@ class AXWebContainerView: NSView {
             splitView.bottomAnchor.constraint(
                 equalTo: splitViewContainer.bottomAnchor),
         ])
-
-        if let window = self.window as? AXWindow {
-            window.trafficLightManager.updateTrafficLights()
-        }
     }
 
     override func removeFromSuperview() {
@@ -194,13 +190,13 @@ class AXWebContainerView: NSView {
 
         guard !isVertical else { return }
         if let url = webView.url {
-            self.delegate?.webViewURLChanged(to: url)
+            self.delegate?.webContainerViewChangedURL(to: url)
         }
 
         urlObserver = webView.observe(\.url, options: [.new]) {
             [weak self] _, change in
             if let newURL = change.newValue, let newURL {
-                self?.delegate?.webViewURLChanged(to: newURL)
+                self?.delegate?.webContainerViewChangedURL(to: newURL)
             }
         }
     }
@@ -321,7 +317,7 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
 {
 
     func updateProgress(_ value: Double) {
-        delegate?.webViewStartedLoading(with: value)
+        delegate?.webContainerViewProgressUpdated(with: value)
     }
 
     func createEmptyView() {
@@ -341,7 +337,7 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         mxPrint("Webview finished loading")
 
-        delegate?.webViewDidFinishLoading()
+        delegate?.webContainerViewFinishedLoading()
     }
 
     func webView(
@@ -350,11 +346,11 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
         for navigationAction: WKNavigationAction,
         windowFeatures: WKWindowFeatures
     ) -> WKWebView? {
-        delegate?.webViewCreateWebView(config: configuration)
+        delegate?.webContainerViewCreatesPopupWebView(config: configuration)
     }
 
     func webViewDidClose(_ webView: WKWebView) {
-        delegate?.webViewRequestsToClose()
+        delegate?.webContainerViewCloses()
     }
 
     func webView(

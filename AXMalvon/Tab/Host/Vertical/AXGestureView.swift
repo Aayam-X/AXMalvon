@@ -6,14 +6,11 @@
 //  Copyright © 2022-2024 Ashwin Paudel, Aayam(X). All rights reserved.
 //
 
-import Cocoa
+import AppKit
 import SwiftUI
 
 protocol AXGestureViewDelegate: AnyObject {
     func gestureView(didSwipe direction: AXGestureViewSwipeDirection!)
-    func gestureView(didUpdate tabGroup: AXTabGroup)
-
-    func gestureViewrequestsCurrentTabGroup() -> AXTabGroup
 }
 
 enum AXGestureViewSwipeDirection {
@@ -29,14 +26,8 @@ class AXGestureView: NSView {
 
     weak var currentTabGroup: AXTabGroup?
 
-    var searchButton = AXSidebarSearchButton()
-
-    private lazy var tabGroupInfoView = {
-        let view = AXTabGroupInfoView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.onRightMouseDown = infoViewRightMouseDown
-        return view
-    }()
+    private var searchButton: AXSidebarSearchButton
+    private var tabGroupInfoView: AXTabGroupInfoView
 
     // Gestures
     private var userSwipedDirection: AXGestureViewSwipeDirection?
@@ -47,12 +38,27 @@ class AXGestureView: NSView {
     // Other
     var tabGroupInfoViewLeftConstraint: NSLayoutConstraint?
 
+    init(
+        tabGroupInfoView: AXTabGroupInfoView,
+        searchButton: AXSidebarSearchButton
+    ) {
+        self.tabGroupInfoView = tabGroupInfoView
+        self.searchButton = searchButton
+
+        super.init(frame: .zero)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func viewWillDraw() {
         if hasDrawn { return }
         defer { hasDrawn = true }
         setTrackingArea()
 
-        // Constraints for the Tab Group Information View
+        // Tab Group Information View
+        tabGroupInfoView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(tabGroupInfoView)
 
         tabGroupInfoViewLeftConstraint = tabGroupInfoView.leftAnchor
@@ -67,9 +73,9 @@ class AXGestureView: NSView {
             tabGroupInfoViewLeftConstraint!,
         ])
 
-        // Search Bar
+        // Search Button
         searchButton.translatesAutoresizingMaskIntoConstraints = false
-        searchButton.title = "Hello"
+        searchButton.title = ""
         searchButton.target = self
         searchButton.action = #selector(searchButtonTapped)
         addSubview(searchButton)
@@ -180,10 +186,10 @@ class AXGestureView: NSView {
 
             if !window.styleMask.contains(.fullScreen) {
                 entered
-                    ? window.trafficLightManager.displayTrafficLights()
-                    : window.trafficLightManager.hideTrafficLights()
+                    ? window.trafficLightsShow()
+                    : window.trafficLightsHide()
             } else {
-                window.trafficLightManager.displayTrafficLights()
+                window.trafficLightsShow()
             }
         }
     }
@@ -204,42 +210,5 @@ class AXGestureView: NSView {
             self.removeTrackingArea(trackingArea)
         }
         trackingArea = nil
-    }
-}
-
-extension AXGestureView {
-    func currentTabGroupChanged(_ to: AXTabGroup, profile: String) {
-        tabGroupInfoView.updateLabels(tabGroup: to, profileName: profile)
-        self.currentTabGroup = to
-    }
-
-    // Show the popover
-    @objc func infoViewRightMouseDown() {
-        guard let tabGroup = delegate?.gestureViewrequestsCurrentTabGroup()
-        else { return }
-
-        let popover = NSPopover()
-        popover.behavior = .transient
-        let vc = NSViewController()
-        let view = AXTabGroupCustomizerView(tabGroup: tabGroup)
-        view.delegate = self
-        vc.view = view
-        popover.contentViewController = vc
-
-        popover.show(relativeTo: bounds, of: self, preferredEdge: .maxX)
-    }
-}
-
-extension AXGestureView: AXTabGroupCustomizerViewDelegate {
-    func didUpdateIcon(_ tabGroup: AXTabGroup) {
-        tabGroupInfoView.updateIcon(tabGroup: tabGroup)
-    }
-
-    func didUpdateTabGroup(_ tabGroup: AXTabGroup) {
-        tabGroupInfoView.updateLabels(tabGroup: tabGroup)
-    }
-
-    func didUpdateColor(_ tabGroup: AXTabGroup) {
-        delegate?.gestureView(didUpdate: tabGroup)
     }
 }

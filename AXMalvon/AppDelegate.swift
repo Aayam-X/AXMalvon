@@ -6,28 +6,23 @@
 //  Copyright © 2022-2024 Ashwin Paudel, Aayam(X). All rights reserved.
 //
 
-import Cocoa
+import AppKit
 import SwiftUI
 import WebKit
-
-func mxPrint(
-    _ items: Any..., separator: String = " ", terminator: String = "\n"
-) {
-    #if DEBUG
-        Swift.print(items, separator: separator, terminator: terminator)
-    #endif
-}
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
 
+    // Default Profiles
     static let profiles: [AXProfile] = [
         .init(name: "Default"),
         .init(name: "School"),
     ]
 
+    // Main Browser Window + Search Bar
     weak var window: AXWindow?
     static var searchBar = AXSearchBarWindow()
+
     let launchedBefore = UserDefaults.standard.bool(
         forKey: "launchedBefore")
 
@@ -37,6 +32,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             window!.makeKeyAndOrderFront(nil)
 
             #if !DEBUG
+                // Email Validation + Update checking
                 ev()
                 bgU_Check()
             #endif
@@ -57,20 +53,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             for url in urls {
                 firstWindow.searchBarCreatesNewTab(with: url)
             }
-        }
+        } else {
+            createNewWindowIfNeeded()
+            window!.makeKeyAndOrderFront(nil)
 
-        //        else {
-        //            window = AXWindow(with: profiles)
-        //            window!.makeKeyAndOrderFront(nil)
-        //
-        //            for url in urls {
-        //                window!.searchBarCreatesNewTab(with: url)
-        //            }
-        //        }
+            for url in urls {
+                window!.searchBarCreatesNewTab(with: url)
+            }
+        }
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
+        // Save profiles
         for profile in AppDelegate.profiles {
             profile.saveTabGroups()
         }
@@ -78,7 +72,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool
     {
-        return true
+        return false
     }
 
     func applicationShouldHandleReopen(
@@ -115,34 +109,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         AppDelegate.searchBar.show()
     }
 
-    @IBAction func reportFeedback(_ sender: Any?) {
-        // Define the window size and position
-        let windowRect = NSRect(x: 100, y: 100, width: 600, height: 400)
-
-        // Create the NSWindow
-        let window = NSWindow(
-            contentRect: windowRect,
-            styleMask: [.titled, .closable, .resizable],
-            backing: .buffered,
-            defer: false
-        )
-        window.isReleasedWhenClosed = false
-
-        // Set the title of the window
-        window.title = "Feedback Reporter"
-
-        // Create the SwiftUI feedback reporter view
-        let feedbackReporterView = AXFeedbackReporterView()
-        let hostingView = NSHostingView(rootView: feedbackReporterView)
-
-        // Embed the SwiftUI view in the NSWindow
-        window.contentView = hostingView
-
-        // Display the window
-        window.center()
-        window.makeKeyAndOrderFront(nil)
-    }
-
     @IBAction func newWindow(_ sender: Any?) {
         guard launchedBefore else { return }
         ev()
@@ -161,6 +127,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         let window = AXWindow(with: [AXPrivateProfile()])
         window.makeKeyAndOrderFront(nil)
+    }
+
+    @IBAction func reportFeedback(_ sender: Any?) {
+        createSwiftUIWindow(
+            with: AXFeedbackReporterView(), title: "Feedback Reporter",
+            size: .init(width: 600, height: 400))
     }
 
     @IBAction func showSettings(_ sender: Any?) {
@@ -289,6 +261,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 }
 
+// MARK: - Malvon Updater
 extension AppDelegate {
     // Relaunch Malvon
     static func relaunchApplication() {
@@ -446,4 +419,12 @@ extension AppDelegate {
                 "Failed to manage Updater.app: \(error.localizedDescription)")
         }
     }
+}
+
+func mxPrint(
+    _ items: Any..., separator: String = " ", terminator: String = "\n"
+) {
+    #if DEBUG
+        Swift.print(items, separator: separator, terminator: terminator)
+    #endif
 }

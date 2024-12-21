@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1610"
+   LastUpgradeVersion = "1620"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -16,8 +16,8 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "ED3AEFE12CDAED2F002AE6CC"
-               BuildableName = "Malvon.app"
-               BlueprintName = "Malvon"
+               BuildableName = "Malvon Debug.app"
+               BlueprintName = "Malvon Debug"
                ReferencedContainer = "container:AXMalvon.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -31,25 +31,22 @@
       shouldAutocreateTestPlan = "YES">
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Release"
+      buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      disableMainThreadChecker = "YES"
-      disablePerformanceAntipatternChecker = "YES"
       launchStyle = "0"
       useCustomWorkingDirectory = "NO"
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
-      enableGPUValidationMode = "1"
       allowLocationSimulation = "YES">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "ED3AEFE12CDAED2F002AE6CC"
-            BuildableName = "Malvon.app"
-            BlueprintName = "Malvon"
+            BuildableName = "Malvon Debug.app"
+            BlueprintName = "Malvon Debug"
             ReferencedContainer = "container:AXMalvon.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -65,8 +62,8 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "ED3AEFE12CDAED2F002AE6CC"
-            BuildableName = "Malvon.app"
-            BlueprintName = "Malvon"
+            BuildableName = "Malvon Debug.app"
+            BlueprintName = "Malvon Debug"
             ReferencedContainer = "container:AXMalvon.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

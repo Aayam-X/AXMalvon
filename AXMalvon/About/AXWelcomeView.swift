@@ -41,7 +41,8 @@ struct AXWelcomeView: View {
             .padding()
             .alert(isPresented: $showAlert) {
                 Alert(
-                    title: Text("Verification"), message: Text(alertMessage),
+                    title: Text("Verification"),
+                    message: Text(alertMessage),
                     dismissButton: .default(Text("OK")) {
                         if alertMessage == "Email verified." {
                             //navigateToImportView = true
@@ -55,12 +56,15 @@ struct AXWelcomeView: View {
             //AXImportCookieView()
             VStack {
                 Text("Import from Other Browser")
-                Text("Feature not yet implemented. Wait for a future release.")
+                Text(
+                    "Feature not yet implemented. Wait for a future release."
+                )
             }
             .padding()
             .alert(isPresented: $showAlert) {
                 Alert(
-                    title: Text("Verification"), message: Text(alertMessage),
+                    title: Text("Verification"),
+                    message: Text(alertMessage),
                     dismissButton: .default(Text("OK")) {
                         if alertMessage == "Email verified." {
                             showAlert = true

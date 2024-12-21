@@ -6,7 +6,7 @@
 //  Copyright © 2022-2024 Ashwin Paudel, Aayam(X). All rights reserved.
 //
 
-import Cocoa
+import AppKit
 import QuartzCore
 
 class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,

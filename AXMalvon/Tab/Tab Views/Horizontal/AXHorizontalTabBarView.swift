@@ -5,7 +5,7 @@
 //  Created by Ashwin Paudel on 2024-12-08.
 //
 
-import Cocoa
+import AppKit
 
 private let tabBarHeight = 30.0
 private let tabBarWidth = 120.0
@@ -180,14 +180,14 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     func tabButtonActiveTitleChanged(
         _ newTitle: String, for tabButton: AXTabButton
     ) {
-        delegate?.activeTabTitleChanged(to: newTitle)
+        delegate?.tabBarActiveTabTitleChanged(to: newTitle)
     }
 
     func tabButtonDeactivatedWebView(_ tabButton: AXTabButton) {
         let tab = tabGroup.tabs[tabButton.tag]
 
         if tab.webConfiguration == nil {
-            tab.webConfiguration = delegate?.deactivatedTab()
+            tab.webConfiguration = delegate?.tabBarDeactivatedTab()
         }
     }
 

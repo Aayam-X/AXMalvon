@@ -5,7 +5,7 @@
 //  Created by Ashwin Paudel on 2024-12-07.
 //
 
-import Cocoa
+import AppKit
 
 protocol AXTabGroupCustomizerViewDelegate: AnyObject {
     func didUpdateTabGroup(_ tabGroup: AXTabGroup)
