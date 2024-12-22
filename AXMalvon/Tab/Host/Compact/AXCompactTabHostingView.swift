@@ -7,15 +7,18 @@
 
 import AppKit
 
+// The hosting view contains the tabView along with the search field, web navigation buttons and the workspace swapper view
 class AXCompactTabHostingView: NSView, AXTabHostingViewProtocol {
     var delegate: (any AXTabHostingViewDelegate)?
     private var hasDrawn: Bool = false
 
+    // The tab that is being stickied.
     private weak var stickyTab: AXTabButton?
 
-    // Control views
     internal lazy var tabGroupInfoView: AXTabGroupInfoView = {
         let view = AXTabGroupInfoView()
+        view.onLeftMouseDown = tabGroupInfoViewLeftDown
+        view.onRightMouseDown = tabGroupInfoViewRightDown
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -44,8 +47,7 @@ class AXCompactTabHostingView: NSView, AXTabHostingViewProtocol {
         return button
     }()
 
-    // Cache frequently accessed views
-    private lazy var controlsStackView: NSStackView = {
+    private lazy var browserNavigationStackView: NSStackView = {
         let stackView = NSStackView()
         stackView.orientation = .horizontal
         stackView.alignment = .centerY
@@ -54,24 +56,12 @@ class AXCompactTabHostingView: NSView, AXTabHostingViewProtocol {
         return stackView
     }()
 
+    // Workaround for the sticky tabs
     private lazy var contentContainer: NSView = {
         let view = NSView()
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
-
-    // Use a single function to create sticky tabs with shared configuration
-    private func createConfiguredStickyTab() -> AXCompactTabButton {
-        let view = AXCompactTabButton(tab: nil)
-        view.translatesAutoresizingMaskIntoConstraints = false
-        view.wantsLayer = true
-        view.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
-        view.layer?.shadowColor = NSColor.black.cgColor
-        view.layer?.shadowOpacity = 0.3
-        view.layer?.shadowRadius = 10
-
-        return view
-    }
 
     private lazy var leftStickyTab: AXCompactTabButton =
         createConfiguredStickyTab()
@@ -83,16 +73,11 @@ class AXCompactTabHostingView: NSView, AXTabHostingViewProtocol {
         setupViews()
     }
 
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupViews()
-    }
-
     private func setupViews() {
         // Control Stack View
         for view in [tabGroupInfoView, backButton, forwardButton, searchButton]
         {
-            controlsStackView.addArrangedSubview(view)
+            browserNavigationStackView.addArrangedSubview(view)
         }
 
         // Set fixed constraints
@@ -103,7 +88,7 @@ class AXCompactTabHostingView: NSView, AXTabHostingViewProtocol {
 
         // Add subviews in correct z-order
         addSubview(contentContainer)
-        addSubview(controlsStackView)
+        addSubview(browserNavigationStackView)
         addSubview(
             leftStickyTab, positioned: .above, relativeTo: contentContainer)
         addSubview(
@@ -112,20 +97,25 @@ class AXCompactTabHostingView: NSView, AXTabHostingViewProtocol {
         setupConstraints()
     }
 
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            controlsStackView.leadingAnchor.constraint(
+            browserNavigationStackView.leadingAnchor.constraint(
                 equalTo: leadingAnchor, constant: 8),
-            controlsStackView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            browserNavigationStackView.centerYAnchor.constraint(
+                equalTo: centerYAnchor),
 
             contentContainer.leadingAnchor.constraint(
-                equalTo: controlsStackView.trailingAnchor, constant: 8),
+                equalTo: browserNavigationStackView.trailingAnchor, constant: 8),
             contentContainer.trailingAnchor.constraint(equalTo: trailingAnchor),
             contentContainer.topAnchor.constraint(equalTo: topAnchor),
             contentContainer.bottomAnchor.constraint(equalTo: bottomAnchor),
 
             leftStickyTab.leadingAnchor.constraint(
-                equalTo: controlsStackView.trailingAnchor, constant: 5),
+                equalTo: browserNavigationStackView.trailingAnchor, constant: 5),
             leftStickyTab.centerYAnchor.constraint(equalTo: centerYAnchor),
             leftStickyTab.widthAnchor.constraint(equalToConstant: 90),
 
@@ -133,12 +123,6 @@ class AXCompactTabHostingView: NSView, AXTabHostingViewProtocol {
             rightStickyTab.centerYAnchor.constraint(equalTo: centerYAnchor),
             rightStickyTab.widthAnchor.constraint(equalToConstant: 90),
         ])
-    }
-
-    private func createStickyTab() -> AXCompactTabButton {
-        let view = AXCompactTabButton(tab: nil)
-        view.layer?.zPosition = 1000
-        return view
     }
 
     func insertTabBarView(tabBarView: any AXTabBarViewTemplate) {
@@ -160,8 +144,43 @@ class AXCompactTabHostingView: NSView, AXTabHostingViewProtocol {
             tabBarView.stickyDelegate = self
         }
     }
+
+    func tabGroupInfoViewLeftDown() {
+        delegate?.tabHostingViewDisplaysWorkspaceSwapperPanel(tabGroupInfoView)
+    }
+
+    func tabGroupInfoViewRightDown() {
+        delegate?.tabHostingViewDisplaysTabGroupCustomizationPanel(
+            tabGroupInfoView)
+    }
+
+    @objc func didTapBackButton() {
+        delegate?.tabHostingViewNavigateBackwards()
+    }
+    @objc func didTapForwardButton() {
+        delegate?.tabHostingViewNavigateForward()
+    }
+
+    // FIXME: AXWindow should be handling this method
+    @objc private func searchButtonTapped() {
+        guard let window = window as? AXWindow else { return }
+        let searchBar = AppDelegate.searchBar
+        searchBar.parentWindow1 = window
+        searchBar.searchBarDelegate = window
+
+        if let buttonFrameInScreen = searchButton.superview.map({
+            window.convertToScreen($0.convert(searchButton.frame, to: nil))
+        }) {
+            searchBar.showCurrentURL(
+                at: NSPoint(
+                    x: buttonFrameInScreen.origin.x,
+                    y: buttonFrameInScreen.origin.y - searchBar.frame.height
+                ))
+        }
+    }
 }
 
+// MARK: - Sticky Tab Methods
 extension AXCompactTabHostingView: AXCompactTabBarViewDelegate {
     func tabBarShouldMakeTabSticky(
         _ tab: AXTabButton, position: TabStickyPosition
@@ -197,27 +216,18 @@ extension AXCompactTabHostingView: AXCompactTabBarViewDelegate {
         [leftStickyTab, rightStickyTab].forEach { $0.tab = nil }
     }
 
-    @objc func didTapBackButton() {
-        delegate?.tabHostingViewNavigateBackwards()
-    }
-    @objc func didTapForwardButton() {
-        delegate?.tabHostingViewNavigateForward()
-    }
+    // Use a single function to create sticky tabs with shared configuration
+    private func createConfiguredStickyTab() -> AXCompactTabButton {
+        let view = AXCompactTabButton(tab: nil)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.wantsLayer = true
+        view.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
+        view.layer?.shadowColor = NSColor.black.cgColor
+        view.layer?.shadowOpacity = 0.3
+        view.layer?.shadowRadius = 10
 
-    @objc private func searchButtonTapped() {
-        guard let window = window as? AXWindow else { return }
-        let searchBar = AppDelegate.searchBar
-        searchBar.parentWindow1 = window
-        searchBar.searchBarDelegate = window
+        view.isHidden = true
 
-        if let buttonFrameInScreen = searchButton.superview.map({
-            window.convertToScreen($0.convert(searchButton.frame, to: nil))
-        }) {
-            searchBar.showCurrentURL(
-                at: NSPoint(
-                    x: buttonFrameInScreen.origin.x,
-                    y: buttonFrameInScreen.origin.y - searchBar.frame.height
-                ))
-        }
+        return view
     }
 }

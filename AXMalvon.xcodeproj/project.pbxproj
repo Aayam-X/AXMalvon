@@ -465,7 +465,7 @@
 				DEVELOPMENT_TEAM = 3TJDS4N2C3;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Malvon copy-Info.plist";
+				INFOPLIST_FILE = AXMalvon/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Malvon needs access to your camera";
@@ -500,7 +500,7 @@
 				DEVELOPMENT_TEAM = 3TJDS4N2C3;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "Malvon copy-Info.plist";
+				INFOPLIST_FILE = AXMalvon/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Malvon needs access to your camera";

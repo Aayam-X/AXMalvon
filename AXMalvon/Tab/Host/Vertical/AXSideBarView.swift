@@ -87,8 +87,7 @@ class AXSidebarView: NSView, AXTabHostingViewProtocol, AXGestureViewDelegate {
             gestureView.heightAnchor.constraint(equalToConstant: 80),
         ])
 
-        tabGroupInfoView.onRightMouseDown =
-            delegate?.tabHostingViewDisplaysTabGroupCustomizationPanel
+        tabGroupInfoView.onRightMouseDown = showTabGroupCustomizer
 
         // Divider between Search Bar and Tab
         addSubview(bottomLine)
@@ -179,7 +178,13 @@ class AXSidebarView: NSView, AXTabHostingViewProtocol, AXGestureViewDelegate {
     }
 
     @objc func showWorkspaceSwapper() {
-        delegate?.tabHostingViewDisplaysWorkspaceSwapperPanel()
+        delegate?.tabHostingViewDisplaysWorkspaceSwapperPanel(
+            workspaceSwapperButton)
+    }
+
+    func showTabGroupCustomizer() {
+        delegate?.tabHostingViewDisplaysTabGroupCustomizationPanel(
+            tabGroupInfoView)
     }
 
     func gestureView(didSwipe direction: AXGestureViewSwipeDirection!) {

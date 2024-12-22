@@ -137,12 +137,16 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
     private func setupComponents() {
         // Visual Effect View
         self.contentView = visualEffectView
+        tabHostingView.translatesAutoresizingMaskIntoConstraints = false
 
         usesVerticalTabs
             ? setupVerticalTabLayout()
             : setupHorizontalTabLayout()
 
+        tabHostingView.insertTabBarView(tabBarView: tabBarView)
+
         tabBarView.delegate = self
+        tabHostingView.delegate = self
         containerView.delegate = self
 
         currentTabGroupIndex = 0
@@ -174,7 +178,9 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
     }
 
     func windowWillExitFullScreen(_ notification: Notification) {
-        trafficLightsHide()
+        if usesVerticalTabs {
+            trafficLightsHide()
+        }
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -252,11 +258,8 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
     }
 
     private func setupHorizontalTabLayout() {
-        tabBarView.translatesAutoresizingMaskIntoConstraints = false
         tabHostingView.translatesAutoresizingMaskIntoConstraints = false
         containerView.translatesAutoresizingMaskIntoConstraints = false
-
-        tabHostingView.delegate = self
 
         visualEffectView.addSubview(tabHostingView)
         visualEffectView.addSubview(containerView)
@@ -280,8 +283,6 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
             containerView.bottomAnchor.constraint(
                 equalTo: visualEffectView.bottomAnchor),
         ])
-
-        tabHostingView.insertTabBarView(tabBarView: tabBarView)
     }
 
     private func setupVerticalTabLayout() {
@@ -293,10 +294,6 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         splitView.addArrangedSubview(containerView)
 
         tabHostingView.frame.size.width = 180
-
-        // Delegate setup
-        tabHostingView.translatesAutoresizingMaskIntoConstraints = false
-        tabHostingView.insertTabBarView(tabBarView: tabBarView)
     }
 
     // MARK: - Profile/Groups Tab Functions
@@ -349,6 +346,26 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
             "Changed to Tab Group \(tabGroup.name), known index: \(self.currentTabGroupIndex). Ignore top message."
         )
     }
+
+    // MARK: - Workspace Variables
+    lazy var workspaceSwapperView: AXWorkspaceSwapperView = {
+        let view = AXWorkspaceSwapperView()
+        view.delegate = self
+        return view
+    }()
+
+    lazy var tabCustomizationView: AXTabGroupCustomizerView = {
+        let view = AXTabGroupCustomizerView(tabGroup: currentTabGroup)
+        view.delegate = self
+        return view
+    }()
+
+    lazy var browserSpaceSharedPopover: NSPopover = {
+        let popover = NSPopover()
+        popover.contentViewController = .init()
+        popover.behavior = .transient
+        return popover
+    }()
 
     // MARK: - Search Bar Delegate
     func searchBarDidAppear() {
@@ -452,12 +469,20 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         containerView.currentWebView?.goBack()
     }
 
-    func tabHostingViewDisplaysTabGroupCustomizationPanel() {
-        // FIXME: Add button and bounds in the argument
+    func tabHostingViewDisplaysTabGroupCustomizationPanel(_ sender: NSView) {
+        browserSpaceSharedPopover.contentViewController?.view =
+            tabCustomizationView
+
+        browserSpaceSharedPopover.show(
+            relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
     }
 
-    func tabHostingViewDisplaysWorkspaceSwapperPanel() {
-        // FIXME: Add button and bounds in the argument
+    func tabHostingViewDisplaysWorkspaceSwapperPanel(_ sender: NSView) {
+        browserSpaceSharedPopover.contentViewController?.view =
+            workspaceSwapperView
+
+        browserSpaceSharedPopover.show(
+            relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
     }
 
     func tabHostingViewDisplayTrustPanel() {

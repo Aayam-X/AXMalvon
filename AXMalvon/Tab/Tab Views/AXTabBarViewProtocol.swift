@@ -30,6 +30,10 @@ protocol AXTabBarViewTemplate: AnyObject, NSView, AXTabButtonDelegate {
 }
 
 extension AXTabBarViewTemplate {
+    // Similar to NSTableView.reload() function
+    // Gets rid of all the tabs, and replaces them with new ones
+    // I did this so that rather than having 5 different tabViews in the user's memory, there is only a single tabView.
+    // And I believe this approach is a really nice one as it helps with battery life and low memory consumption.
     func updateTabGroup(_ newTabGroup: AXTabGroup) {
         newTabGroup.tabBarView = self
 

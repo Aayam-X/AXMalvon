@@ -13,9 +13,9 @@ protocol AXTabHostingViewDelegate: AnyObject {
     func tabHostingViewNavigateForward()
     func tabHostingViewNavigateBackwards()
 
-    // Browser Tab Functionality
-    func tabHostingViewDisplaysTabGroupCustomizationPanel()
-    func tabHostingViewDisplaysWorkspaceSwapperPanel()
+    // Browsing Functions
+    func tabHostingViewDisplaysTabGroupCustomizationPanel(_ sender: NSView)
+    func tabHostingViewDisplaysWorkspaceSwapperPanel(_ sender: NSView)
     func tabHostingViewDisplayTrustPanel()
 }
 
@@ -24,5 +24,6 @@ protocol AXTabHostingViewProtocol: AnyObject, NSView {
     var tabGroupInfoView: AXTabGroupInfoView { get }
     var searchButton: AXSidebarSearchButton { get set }
 
+    /// The hosting views need a tabBarView to go with them, and so there is this function.
     func insertTabBarView(tabBarView: AXTabBarViewTemplate)
 }

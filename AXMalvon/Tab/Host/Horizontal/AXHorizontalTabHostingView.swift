@@ -24,10 +24,8 @@ class AXHorizontalTabHostingView: NSView, AXTabHostingViewProtocol,
         defer { hasDrawn = true }
 
         // TabGroup Information View
-        tabGroupInfoView.onLeftMouseDown =
-            delegate?.tabHostingViewDisplaysWorkspaceSwapperPanel
-        tabGroupInfoView.onRightMouseDown =
-            delegate?.tabHostingViewDisplaysTabGroupCustomizationPanel
+        tabGroupInfoView.onLeftMouseDown = displayWorkspaceSwapper
+        tabGroupInfoView.onRightMouseDown = displayTabCustomizer
 
         // Horizontal Toolbar
         self.horizontalToolbar = AXHorizontalToolbarView(
@@ -66,5 +64,14 @@ class AXHorizontalTabHostingView: NSView, AXTabHostingViewProtocol,
 
     func didTapForwardButton() {
         delegate?.tabHostingViewNavigateForward()
+    }
+
+    func displayWorkspaceSwapper() {
+        delegate?.tabHostingViewDisplaysWorkspaceSwapperPanel(tabGroupInfoView)
+    }
+
+    func displayTabCustomizer() {
+        delegate?.tabHostingViewDisplaysTabGroupCustomizationPanel(
+            tabGroupInfoView)
     }
 }
