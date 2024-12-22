@@ -27,6 +27,7 @@ struct AXWelcomeView: View {
             }
 
             Button("Continue") {
+                verifyEmailAddress()
                 AppDelegate.relaunchApplication()
             }
             .padding()
