@@ -24,6 +24,7 @@ protocol AXTabHostingViewProtocol: AnyObject, NSView {
     var tabGroupInfoView: AXTabGroupInfoView { get }
     var searchButton: AXSidebarSearchButton { get set }
 
-    /// The hosting views need a tabBarView to go with them, and so there is this function.
-    func insertTabBarView(tabBarView: AXTabBarViewTemplate)
+    var tabBarView: AXTabBarViewTemplate { get }
+
+    init(tabBarView: AXTabBarViewTemplate)
 }

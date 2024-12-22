@@ -26,7 +26,6 @@ class AXWebContainerView: NSView {
     weak var sidebar: NSView?
     let isVertical: Bool
 
-    private var hasDrawn: Bool = false
     weak var currentWebView: AXWebView?
 
     let splitViewContainer = NSView()
@@ -56,10 +55,7 @@ class AXWebContainerView: NSView {
         return title
     }()
 
-    override func viewWillDraw() {
-        if hasDrawn { return }
-        defer { hasDrawn = true }
-
+    func setupViews() {
         if isVertical {
             updateTrackingArea()
 
@@ -261,6 +257,7 @@ class AXWebContainerView: NSView {
         self.isVertical = isVertical
 
         super.init(frame: .zero)
+        setupViews()
     }
 
     required init?(coder: NSCoder) {

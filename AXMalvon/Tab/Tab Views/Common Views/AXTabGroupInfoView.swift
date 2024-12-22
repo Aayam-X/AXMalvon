@@ -9,7 +9,6 @@
 import AppKit
 
 class AXTabGroupInfoView: NSView {
-    private var hasDrawn: Bool = false
     var onRightMouseDown: (() -> Void)?
     var onLeftMouseDown: (() -> Void)?
 
@@ -60,11 +59,16 @@ class AXTabGroupInfoView: NSView {
         return stackView
     }()
 
-    @MainActor
-    override func viewWillDraw() {
-        guard !hasDrawn else { return }
-        defer { hasDrawn = true }
+    init() {
+        super.init(frame: .zero)
+        setupViews()
+    }
 
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func setupViews() {
         // Add content stack view
         addSubview(contentStackView)
 
@@ -75,9 +79,9 @@ class AXTabGroupInfoView: NSView {
             contentStackView.trailingAnchor.constraint(
                 equalTo: trailingAnchor, constant: -5),
             contentStackView.topAnchor.constraint(
-                equalTo: topAnchor, constant: 2),
+                equalTo: topAnchor),
             contentStackView.bottomAnchor.constraint(
-                lessThanOrEqualTo: bottomAnchor, constant: 4),
+                lessThanOrEqualTo: bottomAnchor),
             imageView.widthAnchor.constraint(equalToConstant: 24),
             imageView.heightAnchor.constraint(equalToConstant: 24),
         ])

@@ -14,7 +14,6 @@ protocol AXTabGroupCustomizerViewDelegate: AnyObject {
 }
 
 class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
-    private var hasDrawn = false
     weak var delegate: AXTabGroupCustomizerViewDelegate?
     private weak var tabGroup: AXTabGroup!
 
@@ -74,11 +73,9 @@ class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
         fatalError("init(coder:) has not been implemented")
     }
 
+    var hasDrawn: Bool = false
     override func viewWillDraw() {
-        if hasDrawn == false {
-            setupView()
-            hasDrawn = true
-        }
+        hasDrawn ? () : setupView()
     }
 
     private func setupView() {

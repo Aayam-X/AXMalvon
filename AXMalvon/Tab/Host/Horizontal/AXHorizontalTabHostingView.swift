@@ -10,19 +10,25 @@ import AppKit
 class AXHorizontalTabHostingView: NSView, AXTabHostingViewProtocol,
     AXHorizontalToolbarViewDelegate
 {
-
+    var tabBarView: any AXTabBarViewTemplate
     var delegate: (any AXTabHostingViewDelegate)?
-    private var hasDrawn: Bool = false
 
     var tabGroupInfoView: AXTabGroupInfoView = AXTabGroupInfoView()
     var searchButton: AXSidebarSearchButton = AXSidebarSearchButton()
 
     var horizontalToolbar: AXHorizontalToolbarView!
 
-    override func viewWillDraw() {
-        guard !hasDrawn else { return }
-        defer { hasDrawn = true }
+    required init(tabBarView: any AXTabBarViewTemplate) {
+        self.tabBarView = tabBarView
+        super.init(frame: .zero)
+        setupView()
+    }
 
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func setupView() {
         // TabGroup Information View
         tabGroupInfoView.onLeftMouseDown = displayWorkspaceSwapper
         tabGroupInfoView.onRightMouseDown = displayTabCustomizer

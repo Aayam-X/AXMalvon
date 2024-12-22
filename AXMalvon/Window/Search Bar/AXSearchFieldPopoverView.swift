@@ -9,7 +9,6 @@
 import AppKit
 
 class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
-    private var hasDrawn = false
     unowned var searchBarWindow: AXSearchBarWindow
 
     var newTabMode = true
@@ -61,6 +60,7 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     init(searchBarWindow: AXSearchBarWindow) {
         self.searchBarWindow = searchBarWindow
         super.init(frame: .zero)
+        setupUI()
     }
 
     required init?(coder: NSCoder) {
@@ -72,9 +72,6 @@ class AXSearchFieldPopoverView: NSView, NSTextFieldDelegate {
     }
 
     override func viewWillDraw() {
-        guard !hasDrawn else { return }
-        setupUI()
-        hasDrawn = true
         searchField.becomeFirstResponder()
     }
 

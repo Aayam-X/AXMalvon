@@ -9,8 +9,8 @@ import AppKit
 
 // The hosting view contains the tabView along with the search field, web navigation buttons and the workspace swapper view
 class AXCompactTabHostingView: NSView, AXTabHostingViewProtocol {
+    var tabBarView: any AXTabBarViewTemplate
     var delegate: (any AXTabHostingViewDelegate)?
-    private var hasDrawn: Bool = false
 
     // The tab that is being stickied.
     private weak var stickyTab: AXTabButton?
@@ -19,48 +19,25 @@ class AXCompactTabHostingView: NSView, AXTabHostingViewProtocol {
         let view = AXTabGroupInfoView()
         view.onLeftMouseDown = tabGroupInfoViewLeftDown
         view.onRightMouseDown = tabGroupInfoViewRightDown
-        view.translatesAutoresizingMaskIntoConstraints = false
         return view
-    }()
-
-    private lazy var backButton: NSButton = {
-        let button = NSButton(
-            image: NSImage(named: NSImage.goLeftTemplateName)!, target: self,
-            action: #selector(didTapBackButton))
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-
-    private lazy var forwardButton: NSButton = {
-        let button = NSButton(
-            image: NSImage(named: NSImage.goRightTemplateName)!, target: self,
-            action: #selector(didTapForwardButton))
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
     }()
 
     internal lazy var searchButton: AXSidebarSearchButton = {
         let button = AXSidebarSearchButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
         button.target = self
         button.action = #selector(searchButtonTapped)
         return button
     }()
 
-    private lazy var browserNavigationStackView: NSStackView = {
-        let stackView = NSStackView()
+    private lazy var browserNavigationStackView: AXGestureStackView = {
+        let stackView = AXGestureStackView()
         stackView.orientation = .horizontal
         stackView.alignment = .centerY
-        stackView.spacing = 8
+        stackView.distribution = .gravityAreas
+        stackView.spacing = 3
         stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.gestureDelegate = self
         return stackView
-    }()
-
-    // Workaround for the sticky tabs
-    private lazy var contentContainer: NSView = {
-        let view = NSView()
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
     }()
 
     private lazy var leftStickyTab: AXCompactTabButton =
@@ -68,31 +45,24 @@ class AXCompactTabHostingView: NSView, AXTabHostingViewProtocol {
     private lazy var rightStickyTab: AXCompactTabButton =
         createConfiguredStickyTab()
 
-    override init(frame: NSRect) {
-        super.init(frame: frame)
+    required init(tabBarView: any AXTabBarViewTemplate) {
+        self.tabBarView = tabBarView
+        super.init(frame: .zero)
         setupViews()
     }
 
     private func setupViews() {
-        // Control Stack View
-        for view in [tabGroupInfoView, backButton, forwardButton, searchButton]
-        {
+        for view in [tabGroupInfoView, searchButton] {
             browserNavigationStackView.addArrangedSubview(view)
         }
 
-        // Set fixed constraints
-        NSLayoutConstraint.activate([
-            searchButton.widthAnchor.constraint(equalToConstant: 300),
-            tabGroupInfoView.widthAnchor.constraint(equalToConstant: 80),
-        ])
-
         // Add subviews in correct z-order
-        addSubview(contentContainer)
+        addSubview(tabBarView)
         addSubview(browserNavigationStackView)
         addSubview(
-            leftStickyTab, positioned: .above, relativeTo: contentContainer)
+            leftStickyTab, positioned: .above, relativeTo: tabBarView)
         addSubview(
-            rightStickyTab, positioned: .above, relativeTo: contentContainer)
+            rightStickyTab, positioned: .above, relativeTo: tabBarView)
 
         setupConstraints()
     }
@@ -102,17 +72,19 @@ class AXCompactTabHostingView: NSView, AXTabHostingViewProtocol {
     }
 
     private func setupConstraints() {
+        tabBarView.translatesAutoresizingMaskIntoConstraints = false
+
         NSLayoutConstraint.activate([
             browserNavigationStackView.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 8),
+                equalTo: leadingAnchor),
             browserNavigationStackView.centerYAnchor.constraint(
                 equalTo: centerYAnchor),
+            browserNavigationStackView.trailingAnchor.constraint(
+                equalTo: tabBarView.leadingAnchor),
 
-            contentContainer.leadingAnchor.constraint(
-                equalTo: browserNavigationStackView.trailingAnchor, constant: 8),
-            contentContainer.trailingAnchor.constraint(equalTo: trailingAnchor),
-            contentContainer.topAnchor.constraint(equalTo: topAnchor),
-            contentContainer.bottomAnchor.constraint(equalTo: bottomAnchor),
+            tabBarView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            tabBarView.topAnchor.constraint(equalTo: topAnchor),
+            tabBarView.bottomAnchor.constraint(equalTo: bottomAnchor),
 
             leftStickyTab.leadingAnchor.constraint(
                 equalTo: browserNavigationStackView.trailingAnchor, constant: 5),
@@ -122,22 +94,11 @@ class AXCompactTabHostingView: NSView, AXTabHostingViewProtocol {
             rightStickyTab.trailingAnchor.constraint(equalTo: trailingAnchor),
             rightStickyTab.centerYAnchor.constraint(equalTo: centerYAnchor),
             rightStickyTab.widthAnchor.constraint(equalToConstant: 90),
-        ])
-    }
 
-    func insertTabBarView(tabBarView: any AXTabBarViewTemplate) {
-        tabBarView.translatesAutoresizingMaskIntoConstraints = false
-        contentContainer.addSubview(tabBarView)
-
-        NSLayoutConstraint.activate([
-            tabBarView.leadingAnchor.constraint(
-                equalTo: contentContainer.leadingAnchor),
-            tabBarView.trailingAnchor.constraint(
-                equalTo: contentContainer.trailingAnchor),
-            tabBarView.topAnchor.constraint(
-                equalTo: contentContainer.topAnchor),
-            tabBarView.bottomAnchor.constraint(
-                equalTo: contentContainer.bottomAnchor),
+            searchButton.widthAnchor.constraint(
+                equalTo: self.widthAnchor, multiplier: 0.25),
+            searchButton.heightAnchor.constraint(equalToConstant: 30),
+            tabGroupInfoView.widthAnchor.constraint(equalToConstant: 150),
         ])
 
         if let tabBarView = tabBarView as? AXCompactTabBarView {
@@ -229,5 +190,20 @@ extension AXCompactTabHostingView: AXCompactTabBarViewDelegate {
         view.isHidden = true
 
         return view
+    }
+}
+
+extension AXCompactTabHostingView: AXGestureViewDelegate {
+    func gestureView(didSwipe direction: AXGestureViewSwipeDirection!) {
+        switch direction {
+        case .backwards:
+            delegate?.tabHostingViewNavigateBackwards()
+        case .reload:
+            delegate?.tabHostingViewReloadCurrentPage()
+        case .forwards:
+            delegate?.tabHostingViewNavigateForward()
+        case .nothing, .none:
+            break
+        }
     }
 }

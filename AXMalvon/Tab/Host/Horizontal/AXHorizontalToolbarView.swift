@@ -13,7 +13,6 @@ protocol AXHorizontalToolbarViewDelegate: AnyObject {
 }
 
 class AXHorizontalToolbarView: NSView {
-    private var hasDrawn: Bool = false
     var delegate: AXHorizontalToolbarViewDelegate?
 
     var tabGroupInfoView: AXTabGroupInfoView
@@ -63,23 +62,17 @@ class AXHorizontalToolbarView: NSView {
     ) {
         self.tabGroupInfoView = tabGroupInfoView
         self.searchButton = searchButton
-
         super.init(frame: .zero)
+
+        layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
+        setupViews()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewWillDraw() {
-        guard !hasDrawn else { return }
-        defer { hasDrawn = true }
-
-        layer?.backgroundColor = NSColor.windowBackgroundColor.cgColor
-        setupSubviews()
-    }
-
-    private func setupSubviews() {
+    private func setupViews() {
         // Add subviews
         addSubview(topDivider)
         addSubview(backButton)

@@ -46,28 +46,24 @@ class AXGestureView: NSView {
         self.searchButton = searchButton
 
         super.init(frame: .zero)
+
+        setTrackingArea()
+        setupViews()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewWillDraw() {
-        if hasDrawn { return }
-        defer { hasDrawn = true }
-        setTrackingArea()
-
+    private func setupViews() {
         // Tab Group Information View
         tabGroupInfoView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(tabGroupInfoView)
 
-        tabGroupInfoViewLeftConstraint = tabGroupInfoView.leftAnchor
-            .constraint(
-                equalTo: leftAnchor, constant: 8
-            )
+        tabGroupInfoViewLeftConstraint = tabGroupInfoView.leftAnchor.constraint(
+            equalTo: leftAnchor, constant: 8)
         NSLayoutConstraint.activate([
-            tabGroupInfoView.rightAnchor.constraint(
-                equalTo: rightAnchor),
+            tabGroupInfoView.rightAnchor.constraint(equalTo: rightAnchor),
             tabGroupInfoView.topAnchor.constraint(
                 equalTo: topAnchor, constant: 4),
             tabGroupInfoViewLeftConstraint!,
@@ -80,12 +76,12 @@ class AXGestureView: NSView {
         searchButton.action = #selector(searchButtonTapped)
         addSubview(searchButton)
         NSLayoutConstraint.activate([
-            searchButton.bottomAnchor.constraint(
-                equalTo: bottomAnchor),
+            searchButton.bottomAnchor.constraint(equalTo: bottomAnchor),
             searchButton.leftAnchor.constraint(
                 equalTo: leftAnchor, constant: 5),
             searchButton.rightAnchor.constraint(
                 equalTo: rightAnchor, constant: -7),
+            searchButton.heightAnchor.constraint(equalToConstant: 36),
         ])
     }
 
@@ -210,5 +206,59 @@ class AXGestureView: NSView {
             self.removeTrackingArea(trackingArea)
         }
         trackingArea = nil
+    }
+}
+
+class AXGestureStackView: NSStackView {
+    weak var gestureDelegate: AXGestureViewDelegate?
+
+    // Gestures
+    private var userSwipedDirection: AXGestureViewSwipeDirection?
+    private var scrollEventFinished: Bool = false
+    var trackingArea: NSTrackingArea!
+    var scrollWithMice: Bool = false
+
+    init() {
+        super.init(frame: .zero)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func handleScrollEnd() {
+        scrollEventFinished = true
+        gestureDelegate?.gestureView(didSwipe: userSwipedDirection)
+        userSwipedDirection = nil
+    }
+
+    override func scrollWheel(with event: NSEvent) {
+        let x = event.deltaX
+        let y = event.deltaY
+
+        // Update scroll event phase state
+        switch event.phase {
+        case .began:
+            scrollEventFinished = false
+        case .mayBegin:
+            return  // Cancelled, exit early
+        case .ended where !scrollEventFinished,
+            .ended where event.momentumPhase == .ended:
+            mxPrint("Scroll ended")
+            handleScrollEnd()
+            return
+        default:
+            break
+        }
+
+        // Determine if scrolling is from a mouse
+        scrollWithMice = event.phase == [] && event.momentumPhase == []
+
+        // Handle directional scroll
+        if x != 0 {
+            userSwipedDirection = x > 0 ? .backwards : .forwards
+        } else if y != 0 {
+            userSwipedDirection = y > 0 ? .reload : .nothing
+        }
     }
 }

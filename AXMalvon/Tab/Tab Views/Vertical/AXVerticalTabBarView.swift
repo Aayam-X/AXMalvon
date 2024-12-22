@@ -13,7 +13,6 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     var tabGroup: AXTabGroup!
     var delegate: (any AXTabBarViewDelegate)?
 
-    private var hasDrawn = false
     private var dragTargetIndex: Int?
 
     // Views
@@ -30,10 +29,16 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         return box
     }()
 
-    override func viewWillDraw() {
-        guard !hasDrawn else { return }
-        defer { hasDrawn = true }
+    init() {
+        super.init(frame: .zero)
+        setupViews()
+    }
 
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func setupViews() {
         self.translatesAutoresizingMaskIntoConstraints = false
 
         tabStackView.translatesAutoresizingMaskIntoConstraints = false

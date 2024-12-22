@@ -10,7 +10,7 @@ import AppKit
 import WebKit
 
 class AXSidebarView: NSView, AXTabHostingViewProtocol, AXGestureViewDelegate {
-    private var hasDrawn: Bool = false
+    var tabBarView: any AXTabBarViewTemplate
     var delegate: (any AXTabHostingViewDelegate)?
 
     var tabGroupInfoView: AXTabGroupInfoView = AXTabGroupInfoView()
@@ -71,37 +71,62 @@ class AXSidebarView: NSView, AXTabHostingViewProtocol, AXGestureViewDelegate {
         return popover
     }()
 
-    override func viewWillDraw() {
-        if hasDrawn { return }
-        defer { hasDrawn = true }
+    required init(tabBarView: any AXTabBarViewTemplate) {
+        self.tabBarView = tabBarView
+        super.init(frame: .zero)
+        setupView()
+    }
 
-        // Gesture View
-        gestureView.translatesAutoresizingMaskIntoConstraints = false
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func setupView() {
         gestureView.delegate = self
+        tabGroupInfoView.onRightMouseDown = showTabGroupCustomizer
+
+        gestureView.translatesAutoresizingMaskIntoConstraints = false
+        tabBarView.translatesAutoresizingMaskIntoConstraints = false
+
         addSubview(gestureView)
+        addSubview(addNewTabButton)
+        addSubview(workspaceSwapperButton)
+        addSubview(tabBarView)
+        addSubview(bottomLine)
+
         NSLayoutConstraint.activate([
+            // Gesture View
             gestureView.topAnchor.constraint(equalTo: topAnchor),
             gestureView.leftAnchor.constraint(equalTo: leftAnchor),
             gestureView.rightAnchor.constraint(
                 equalTo: rightAnchor, constant: 3),
             gestureView.heightAnchor.constraint(equalToConstant: 80),
-        ])
 
-        tabGroupInfoView.onRightMouseDown = showTabGroupCustomizer
-
-        // Divider between Search Bar and Tab
-        addSubview(bottomLine)
-        NSLayoutConstraint.activate([
+            // Divider between Search Bar and Tab
             bottomLine.topAnchor.constraint(
                 equalTo: gestureView.bottomAnchor, constant: 5),
             bottomLine.leftAnchor.constraint(equalTo: leftAnchor, constant: 12),
             bottomLine.rightAnchor.constraint(
                 equalTo: rightAnchor, constant: -10),
             bottomLine.heightAnchor.constraint(equalToConstant: 1),
-        ])
 
-        addSubview(addNewTabButton)
-        NSLayoutConstraint.activate([
+            // Tab Bar View
+            tabBarView.topAnchor.constraint(
+                equalTo: bottomLine.bottomAnchor, constant: 2),
+            tabBarView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            tabBarView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            tabBarView.bottomAnchor.constraint(
+                equalTo: addNewTabButton.topAnchor, constant: -2),
+
+            // Workspace Swapper Button
+            workspaceSwapperButton.bottomAnchor.constraint(
+                equalTo: bottomAnchor, constant: -9),
+            workspaceSwapperButton.leftAnchor.constraint(
+                equalTo: leftAnchor, constant: 10),
+            workspaceSwapperButton.heightAnchor.constraint(equalToConstant: 30),
+            workspaceSwapperButton.widthAnchor.constraint(equalToConstant: 30),
+
+            // New Tab Button
             addNewTabButton.bottomAnchor.constraint(
                 equalTo: bottomAnchor, constant: -9),
             addNewTabButton.rightAnchor.constraint(
@@ -110,18 +135,6 @@ class AXSidebarView: NSView, AXTabHostingViewProtocol, AXGestureViewDelegate {
             addNewTabButton.widthAnchor.constraint(equalToConstant: 30),
         ])
 
-        addSubview(workspaceSwapperButton)
-        NSLayoutConstraint.activate([
-            workspaceSwapperButton.bottomAnchor.constraint(
-                equalTo: bottomAnchor, constant: -9),
-            workspaceSwapperButton.leftAnchor.constraint(
-                equalTo: leftAnchor, constant: 10),
-            workspaceSwapperButton.heightAnchor.constraint(equalToConstant: 30),
-            workspaceSwapperButton.widthAnchor.constraint(equalToConstant: 30),
-        ])
-
-        // AXTabBarView
-
         // Mouse Tracking Area
         mouseExitedTrackingArea = NSTrackingArea(
             rect: .init(
@@ -129,20 +142,6 @@ class AXSidebarView: NSView, AXTabHostingViewProtocol, AXGestureViewDelegate {
                 width: bounds.size.width + 100, height: bounds.size.height),
             options: [.activeAlways, .mouseEnteredAndExited], owner: self)
         addTrackingArea(mouseExitedTrackingArea)
-    }
-
-    // MARK: - Tab Bar Functions
-    func insertTabBarView(tabBarView: AXTabBarViewTemplate) {
-        tabBarView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(tabBarView)
-        NSLayoutConstraint.activate([
-            tabBarView.topAnchor.constraint(
-                equalTo: topAnchor, constant: 86),
-            tabBarView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tabBarView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            tabBarView.bottomAnchor.constraint(
-                equalTo: bottomAnchor, constant: -49),
-        ])
     }
 
     // MARK: - Mouse Functions

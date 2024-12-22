@@ -15,8 +15,6 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     var tabGroup: AXTabGroup!
     var delegate: (any AXTabBarViewDelegate)?
 
-    private var hasDrawn = false
-
     var tabStackView = NSStackView()
     private lazy var scrollView = AXScrollView(frame: self.bounds)
 
@@ -30,11 +28,13 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         return button
     }()
 
-    override func viewWillDraw() {
-        guard !hasDrawn else { return }
-        defer { hasDrawn = true }
-
+    init() {
+        super.init(frame: .zero)
         configure()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     func configure() {

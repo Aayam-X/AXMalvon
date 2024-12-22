@@ -35,9 +35,9 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
 
     lazy var tabHostingView: AXTabHostingViewProtocol = {
         if usesVerticalTabs {
-            AXSidebarView()
+            AXSidebarView(tabBarView: tabBarView)
         } else {
-            AXCompactTabHostingView()
+            AXCompactTabHostingView(tabBarView: tabBarView)
         }
     }()
 
@@ -138,12 +138,11 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         // Visual Effect View
         self.contentView = visualEffectView
         tabHostingView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.translatesAutoresizingMaskIntoConstraints = false
 
         usesVerticalTabs
             ? setupVerticalTabLayout()
             : setupHorizontalTabLayout()
-
-        tabHostingView.insertTabBarView(tabBarView: tabBarView)
 
         tabBarView.delegate = self
         tabHostingView.delegate = self
@@ -258,9 +257,6 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
     }
 
     private func setupHorizontalTabLayout() {
-        tabHostingView.translatesAutoresizingMaskIntoConstraints = false
-        containerView.translatesAutoresizingMaskIntoConstraints = false
-
         visualEffectView.addSubview(tabHostingView)
         visualEffectView.addSubview(containerView)
 
@@ -478,6 +474,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
     }
 
     func tabHostingViewDisplaysWorkspaceSwapperPanel(_ sender: NSView) {
+        workspaceSwapperView.reloadTabGroups()
         browserSpaceSharedPopover.contentViewController?.view =
             workspaceSwapperView
 

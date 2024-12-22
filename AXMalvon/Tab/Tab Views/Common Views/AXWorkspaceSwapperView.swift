@@ -18,7 +18,6 @@ protocol AXWorkspaceSwapperViewDelegate: AnyObject {
 }
 
 class AXWorkspaceSwapperView: NSView {
-    private var hasDrawn: Bool = false
     weak var delegate: AXWorkspaceSwapperViewDelegate?
 
     // MARK: - UI Components
@@ -45,11 +44,9 @@ class AXWorkspaceSwapperView: NSView {
     private var selectedProfileIndex: Int = 0
 
     // MARK: - Initializer
+    var hasDrawn: Bool = false
     override func viewWillDraw() {
-        if hasDrawn == false {
-            setupView()
-            hasDrawn = true
-        }
+        hasDrawn ? () : setupView()
     }
 
     // MARK: - Setup

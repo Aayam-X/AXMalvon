@@ -12,7 +12,6 @@ protocol AXSidebarSearchButtonDelegate: AnyObject {
 }
 
 class AXSidebarSearchButton: NSButton {
-    private var hasDrawn = false
     weak var delegate: AXSidebarSearchButtonDelegate?
 
     var fullAddress: URL? {
@@ -66,10 +65,16 @@ class AXSidebarSearchButton: NSButton {
         return button
     }()
 
-    override func viewWillDraw() {
-        guard !hasDrawn else { return }
-        defer { hasDrawn = true }
+    init() {
+        super.init(frame: .zero)
+        setupViews()
+    }
 
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    func setupViews() {
         // Configure the button appearance
         self.isBordered = false
         self.bezelStyle = .shadowlessSquare
@@ -78,8 +83,6 @@ class AXSidebarSearchButton: NSButton {
         self.layer?.cornerRadius = 10
         self.layer?.backgroundColor =
             NSColor.systemGray.withAlphaComponent(0.4).cgColor
-
-        heightAnchor.constraint(equalToConstant: 36).isActive = true
 
         // Restore auto resizing mask
         lockView.translatesAutoresizingMaskIntoConstraints = false

@@ -55,9 +55,7 @@ class AXNormalTabButton: NSButton, AXTabButton {
 
     var closeButton: AXSidebarTabCloseButton! = AXSidebarTabCloseButton()
 
-    // Other
-    private var hasDrawn = false
-
+    // Constraints
     weak var titleViewRightAnchor: NSLayoutConstraint?
     weak var heightConstraint: NSLayoutConstraint?
     var trackingArea: NSTrackingArea!
@@ -117,11 +115,11 @@ class AXNormalTabButton: NSButton, AXTabButton {
         layer?.shadowOpacity = 0.0  // Adjust shadow visibility
         layer?.shadowRadius = 4.0  // Adjust softness
         layer?.shadowOffset = CGSize(width: 0, height: 0)  // Shadow below the button
+
+        setupViews()
     }
 
-    override func viewWillDraw() {
-        guard !hasDrawn else { return }
-        defer { hasDrawn = true }
+    func setupViews() {
         // Setup trackingArea
         self.setTrackingArea()
 

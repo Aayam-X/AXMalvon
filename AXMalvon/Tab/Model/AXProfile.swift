@@ -192,7 +192,6 @@ class AXProfile {
             "acceleratedCompositingEnabled",
             "webGLEnabled",
             "largeImageAsyncDecodingEnabled",
-            "requiresUserGestureForVideoPlayback",
             "mediaSourceEnabled",
             "acceleratedDrawingEnabled",
             "animatedImageAsyncDecodingEnabled",

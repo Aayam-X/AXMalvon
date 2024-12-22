@@ -27,7 +27,6 @@ class AXCompactTabBarView: NSView, AXTabBarViewTemplate {
     var tabGroup: AXTabGroup!
     var delegate: (any AXTabBarViewDelegate)?
     var stickyDelegate: (any AXCompactTabBarViewDelegate)?
-    private var hasDrawn = false
 
     private let minTabWidth: CGFloat = 90
     private let maxTabWidth: CGFloat = 250
@@ -55,11 +54,14 @@ class AXCompactTabBarView: NSView, AXTabBarViewTemplate {
     private var lastScrollPosition: CGFloat = 0
     private var firstTabInitialFrame: CGRect?
 
-    override func viewWillDraw() {
-        guard !hasDrawn else { return }
-        defer { hasDrawn = true }
+    init() {
+        super.init(frame: .zero)
         configure()
         widthOfCurrentBounds = bounds.width
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     override func layout() {
@@ -160,6 +162,7 @@ class AXCompactTabBarView: NSView, AXTabBarViewTemplate {
     func removeTabButton(at index: Int) {
         let button = tabStackView.arrangedSubviews[index] as! AXTabButton
         self.updateIndices(after: index)
+        tabWidthConstraints.remove(at: index)
 
         // Slides in from the right and then goes to the left, underneath the stackView making it look like it's going kinda inwards
         NSAnimationContext.runAnimationGroup(

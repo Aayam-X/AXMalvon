@@ -35,8 +35,6 @@ class AXCompactTabButton: NSButton, AXTabButton {
     var tab: AXTab!
     var delegate: (any AXTabButtonDelegate)?
 
-    private var hasDrawn = false
-
     private var closeButton = AXCompactTabCloseButton()
     var titleView = NSTextField()
 
@@ -86,16 +84,14 @@ class AXCompactTabButton: NSButton, AXTabButton {
         layer?.shadowOffset = CGSize(width: 0, height: 0)  // Shadow below the button
 
         setTrackingArea()
+        setupViews()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    override func viewWillDraw() {
-        guard !hasDrawn else { return }
-        defer { hasDrawn = true }
-
+    func setupViews() {
         if isSelected {
             self.layer?.backgroundColor =
                 AXCompactTabButtonConstants.selectedColor.cgColor
@@ -160,6 +156,8 @@ class AXCompactTabButton: NSButton, AXTabButton {
     }
 
     override func mouseDown(with event: NSEvent) {
+        closeButton.hideCloseButton()
+
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.1
             self.animator().layer?.setAffineTransform(
@@ -188,9 +186,8 @@ class AXCompactTabButton: NSButton, AXTabButton {
         if !isSelected {
             self.layer?.backgroundColor =
                 AXCompactTabButtonConstants.hoverColor.cgColor
+            closeButton.showCloseButton()
         }
-
-        closeButton.showCloseButton()
     }
 
     override func mouseExited(with event: NSEvent) {
@@ -205,6 +202,8 @@ class AXCompactTabButton: NSButton, AXTabButton {
 
 // MARK: - Close Button + Favicon
 class AXCompactTabCloseButton: NSButton {
+    var trackingArea: NSTrackingArea!
+
     var _favicon: NSImage?
 
     var favicon: NSImage? {
@@ -224,10 +223,18 @@ class AXCompactTabCloseButton: NSButton {
 
         self.imagePosition = .imageOnly
         self.image = AXCompactTabButtonConstants.defaultFavicon
+
+        setTrackingArea()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        if isEnabled {
+            showCloseButton()
+        }
     }
 
     func showCloseButton() {
@@ -236,5 +243,14 @@ class AXCompactTabCloseButton: NSButton {
 
     func hideCloseButton() {
         self.image = _favicon
+    }
+
+    func setTrackingArea() {
+        let options: NSTrackingArea.Options = [
+            .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
+        ]
+        trackingArea = NSTrackingArea.init(
+            rect: self.bounds, options: options, owner: self, userInfo: nil)
+        self.addTrackingArea(trackingArea)
     }
 }
