@@ -44,6 +44,18 @@ extension AXTabBarViewTemplate {
         }
 
         guard newTabGroup.selectedIndex != -1 else { return }
-        self.updateTabSelection(from: -1, to: newTabGroup.selectedIndex)
+
+        // Update Tab Selection
+        let selectedIndex = newTabGroup.selectedIndex
+
+        let arragedSubviews = tabStackView.arrangedSubviews
+        let arrangedSubviewsCount = arragedSubviews.count
+
+        guard arrangedSubviewsCount > selectedIndex else { return }
+
+        let newButton = arragedSubviews[selectedIndex] as! AXTabButton
+        newButton.isSelected = true
+
+        delegate?.tabBarSwitchedTo(tabAt: selectedIndex)
     }
 }

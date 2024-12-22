@@ -14,7 +14,6 @@ import WebKit
 class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
     AXWebContainerViewDelegate, AXTabBarViewDelegate, AXTabHostingViewDelegate
 {
-
     // Window Defaults
     lazy var usesVerticalTabs = UserDefaults.standard.bool(
         forKey: "verticalTabs")
@@ -30,7 +29,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         if usesVerticalTabs {
             return AXVerticalTabBarView()
         } else {
-            return AXHorizontalTabBarView()
+            return AXCompactTabBarView()
         }
     }()
 
@@ -38,7 +37,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         if usesVerticalTabs {
             AXSidebarView()
         } else {
-            AXHorizontalTabHostingView()
+            AXCompactTabHostingView()
         }
     }()
 
@@ -270,7 +269,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
             tabHostingView.topAnchor.constraint(
                 equalTo: visualEffectView.topAnchor),
             tabHostingView.heightAnchor.constraint(
-                equalToConstant: 85),
+                equalToConstant: 40),
 
             containerView.leadingAnchor.constraint(
                 equalTo: visualEffectView.leadingAnchor),

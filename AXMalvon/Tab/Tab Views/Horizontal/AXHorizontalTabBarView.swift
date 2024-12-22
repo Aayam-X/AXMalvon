@@ -11,6 +11,7 @@ private let tabBarHeight = 30.0
 private let tabBarWidth = 120.0
 
 class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
+
     var tabGroup: AXTabGroup!
     var delegate: (any AXTabBarViewDelegate)?
 
@@ -84,7 +85,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func addTabButton(for tab: AXTab) {
-        let button = AXTabButton(tab: tab)
+        let button = AXNormalTabButton(tab: tab)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.delegate = self
 
@@ -112,7 +113,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func addTabButtonInBackground(for tab: AXTab, index: Int) {
-        let button = AXTabButton(tab: tab)
+        let button = AXNormalTabButton(tab: tab)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.delegate = self
 
@@ -128,7 +129,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
             .dropFirst(index)
         {
             mxPrint("NEW DELETATION INDEX = \(index)")
-            if let button = button as? AXTabButton {
+            if let button = button as? AXNormalTabButton {
                 button.tag = index
             }
         }
@@ -144,17 +145,17 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
 
         if from >= 0 && from < arrangedSubviewsCount {
             let previousButton =
-                arragedSubviews[from] as! AXTabButton
+                arragedSubviews[from] as! AXNormalTabButton
             previousButton.isSelected = false
         }
 
-        let newButton = arragedSubviews[to] as! AXTabButton
+        let newButton = arragedSubviews[to] as! AXNormalTabButton
         newButton.isSelected = true
 
         delegate?.tabBarSwitchedTo(tabAt: to)
     }
 
-    func tabButtonDidSelect(_ tabButton: AXTabButton) {
+    func tabButtonDidSelect(_ tabButton: any AXTabButton) {
         let previousTag = tabGroup.selectedIndex
 
         let newTag = tabButton.tag
@@ -164,7 +165,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         updateTabSelection(from: previousTag, to: newTag)
     }
 
-    func tabButtonWillClose(_ tabButton: AXTabButton) {
+    func tabButtonWillClose(_ tabButton: any AXTabButton) {
         let index = tabButton.tag
 
         // Remove the tab from the group
@@ -178,12 +179,12 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func tabButtonActiveTitleChanged(
-        _ newTitle: String, for tabButton: AXTabButton
+        _ newTitle: String, for tabButton: any AXTabButton
     ) {
         delegate?.tabBarActiveTabTitleChanged(to: newTitle)
     }
 
-    func tabButtonDeactivatedWebView(_ tabButton: AXTabButton) {
+    func tabButtonDeactivatedWebView(_ tabButton: any AXTabButton) {
         let tab = tabGroup.tabs[tabButton.tag]
 
         if tab.webConfiguration == nil {
@@ -191,14 +192,15 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         }
     }
 
-    private func addButtonToTabView(_ button: AXTabButton) {
+    private func addButtonToTabView(_ button: AXNormalTabButton) {
         // FIXME: Animations
         // Add the button off-screen by modifying its frame
         tabStackView.addArrangedSubview(button)
         button.widthAnchor.constraint(equalToConstant: 250).isActive = true
     }
 
-    private func addButtonToTabViewWithoutAnimation(_ button: AXTabButton) {
+    private func addButtonToTabViewWithoutAnimation(_ button: AXNormalTabButton)
+    {
         // Add the button off-screen by modifying its frame
         tabStackView.addArrangedSubview(button)
         button.widthAnchor.constraint(equalToConstant: 250).isActive = true
@@ -225,7 +227,8 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         }
 
         mxPrint("Updated Tab Index: \(tabGroup.selectedIndex)")
-        (tabStackView.arrangedSubviews[tabGroup.selectedIndex] as! AXTabButton)
+        (tabStackView.arrangedSubviews[tabGroup.selectedIndex]
+            as! AXNormalTabButton)
             .isSelected = true
 
         delegate?.tabBarSwitchedTo(tabAt: tabGroup.selectedIndex)

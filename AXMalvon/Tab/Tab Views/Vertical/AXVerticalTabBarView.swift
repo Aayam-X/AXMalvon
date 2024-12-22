@@ -75,7 +75,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func addTabButton(for tab: AXTab) {
-        let button = AXTabButton(tab: tab)
+        let button = AXNormalTabButton(tab: tab)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.delegate = self
 
@@ -118,7 +118,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func addTabButtonInBackground(for tab: AXTab, index: Int) {
-        let button = AXTabButton(tab: tab)
+        let button = AXNormalTabButton(tab: tab)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.delegate = self
 

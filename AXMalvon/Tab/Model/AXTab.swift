@@ -81,7 +81,7 @@ class AXTab: Codable {
                 }
 
                 self.title = displayTitle
-                tabButton.updateTitle(displayTitle)
+                tabButton.webTitle = displayTitle
             }
     }
 
@@ -97,7 +97,7 @@ class AXTab: Codable {
 
         // Perform favicon fetch asynchronously to reduce main thread load
         DispatchQueue.main.async {
-            tabButton.findFavicon(for: webView)
+            self.findFavicon(tabButton: tabButton)
         }
     }
 
@@ -117,5 +117,84 @@ class AXTab: Codable {
 
     deinit {
         stopTitleObservation()
+    }
+}
+
+// MARK: - Favicon Downloading
+extension AXTab {
+    func findFavicon(tabButton: AXTabButton) {
+        Task(priority: .low) { @MainActor in
+            do {
+                if let faviconURLString = try? await webView.evaluateJavaScript(
+                    AX_FAVICON_SCRIPT) as? String,
+                    let faviconURL = URL(string: faviconURLString)
+                {
+                    tabButton.favicon = try await quickFaviconDownload(
+                        from: faviconURL)
+                } else {
+                    tabButton.favicon = nil
+                }
+            } catch {
+                tabButton.favicon = nil
+            }
+        }
+    }
+
+    // Static method to minimize instance overhead
+    private func quickFaviconDownload(from url: URL) async throws -> NSImage {
+        // Ultra-lightweight download with strict size limit
+        let (data, _) = try await AX_DOWNLOAD_SESSION.data(from: url)
+
+        // Minimal image creation with immediate downsizing
+        guard let image = NSImage(data: data)?.downsizedIcon() else {
+            throw URLError(.cannotParseResponse)
+        }
+
+        return image
+    }
+}
+
+private let AX_FAVICON_SCRIPT = """
+        (d=>{const h=d.head,l=["icon","shortcut icon","apple-touch-icon","mask-icon"];for(let r of l)if((r=h.querySelector(`link[rel=\"${r}\"]`))&&r.href)return r.href;return d.location.origin+"/favicon.ico"})(document)
+    """
+
+// Singleton session to reduce resource allocation
+private let AX_DOWNLOAD_SESSION: URLSession = {
+    // Hyper-optimized session configuration
+    let config = URLSessionConfiguration.ephemeral
+    config.timeoutIntervalForRequest = 1.5  // Aggressive timeout
+    config.timeoutIntervalForResource = 1.5
+    config.requestCachePolicy = .returnCacheDataElseLoad
+    config.httpMaximumConnectionsPerHost = 1
+    config.waitsForConnectivity = false
+
+    let queue = OperationQueue()
+    queue.maxConcurrentOperationCount = 1
+    queue.qualityOfService = .background
+
+    return URLSession(
+        configuration: config,
+        delegate: nil,
+        delegateQueue: queue
+    )
+}()
+
+// Extension for ultra-lightweight image downsizing
+extension NSImage {
+    func downsizedIcon() -> NSImage? {
+        let targetSize = NSSize(width: 16, height: 16)
+        let newImage = NSImage(size: targetSize)
+
+        newImage.lockFocus()
+        defer { newImage.unlockFocus() }
+
+        self.draw(
+            in: NSRect(origin: .zero, size: targetSize),
+            from: NSRect(origin: .zero, size: self.size),
+            operation: .sourceOver,
+            fraction: 1.0
+        )
+
+        return newImage
     }
 }

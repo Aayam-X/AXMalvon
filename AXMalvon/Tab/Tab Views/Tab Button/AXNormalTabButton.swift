@@ -14,9 +14,6 @@ private struct AXTabButtonConstants {
         systemSymbolName: "square.fill", accessibilityDescription: nil)
     static let defaultFaviconSleep = NSImage(
         systemSymbolName: "moon.fill", accessibilityDescription: nil)
-    static let faviconScript = """
-            (d=>{const h=d.head,l=["icon","shortcut icon","apple-touch-icon","mask-icon"];for(let r of l)if((r=h.querySelector(`link[rel=\"${r}\"]`))&&r.href)return r.href;return d.location.origin+"/favicon.ico"})(document)
-        """
 
     static let animationDuration: CFTimeInterval = 0.2
     static let shrinkScale: CGFloat = 0.9
@@ -34,16 +31,7 @@ private struct AXTabButtonConstants {
         .withAlphaComponent(0.0)
 }
 
-protocol AXTabButtonDelegate: AnyObject {
-    func tabButtonDidSelect(_ tabButton: AXTabButton)
-    func tabButtonWillClose(_ tabButton: AXTabButton)
-    func tabButtonActiveTitleChanged(
-        _ newTitle: String, for tabButton: AXTabButton)
-
-    func tabButtonDeactivatedWebView(_ tabButton: AXTabButton)
-}
-
-class AXTabButton: NSButton {
+class AXNormalTabButton: NSButton, AXTabButton {
     unowned var tab: AXTab!
     weak var delegate: AXTabButtonDelegate?
 
@@ -53,27 +41,6 @@ class AXTabButton: NSButton {
 
     // Drag & Drop
     private var initialMouseDownLocation: NSPoint?
-
-    // Singleton session to reduce resource allocation
-    static let session: URLSession = {
-        // Hyper-optimized session configuration
-        let config = URLSessionConfiguration.ephemeral
-        config.timeoutIntervalForRequest = 1.5  // Aggressive timeout
-        config.timeoutIntervalForResource = 1.5
-        config.requestCachePolicy = .returnCacheDataElseLoad
-        config.httpMaximumConnectionsPerHost = 1
-        config.waitsForConnectivity = false
-
-        let queue = OperationQueue()
-        queue.maxConcurrentOperationCount = 1
-        queue.qualityOfService = .background
-
-        return URLSession(
-            configuration: config,
-            delegate: nil,
-            delegateQueue: queue
-        )
-    }()
 
     var favicon: NSImage? {
         set {
@@ -134,7 +101,7 @@ class AXTabButton: NSButton {
         return menu
     }()
 
-    init(tab: AXTab) {
+    required init(tab: AXTab!) {
         self.tab = tab
         super.init(frame: .zero)
         self.translatesAutoresizingMaskIntoConstraints = false
@@ -231,7 +198,7 @@ class AXTabButton: NSButton {
 }
 
 // MARK: Tab Functions
-extension AXTabButton {
+extension AXNormalTabButton {
     @objc func closeTab() {
         delegate?.tabButtonWillClose(self)
     }
@@ -258,46 +225,7 @@ extension AXTabButton {
 }
 
 // MARK: Web View Functions
-extension AXTabButton {
-    func findFavicon(for webView: AXWebView) {
-        // Weak self to prevent retain cycles
-        Task(priority: .low) { [weak self] in
-            guard let self = self else { return }
-
-            do {
-                // Ultra-lightweight favicon extraction
-                guard
-                    let faviconURLString = try? await webView
-                        .evaluateJavaScript(AXTabButtonConstants.faviconScript)
-                        as? String,
-                    let faviconURL = URL(string: faviconURLString)
-                else {
-                    self.favicon = nil
-                    return
-                }
-
-                // Minimal, quick download
-                self.favicon = try await quickFaviconDownload(from: faviconURL)
-            } catch {
-                // Ultra-minimal error handling
-                self.favicon = nil
-            }
-        }
-    }
-
-    // Static method to minimize instance overhead
-    private func quickFaviconDownload(from url: URL) async throws -> NSImage? {
-        // Ultra-lightweight download with strict size limit
-        let (data, _) = try await AXTabButton.session.data(from: url)
-
-        // Minimal image creation with immediate downsizing
-        guard let image = NSImage(data: data)?.downsizedIcon() else {
-            throw URLError(.cannotParseResponse)
-        }
-
-        return image
-    }
-
+extension AXNormalTabButton {
     public func startObserving() {
         guard let webView = tab._webView else { return }
 
@@ -312,11 +240,10 @@ extension AXTabButton {
     func createObserver(_ webView: AXWebView) {
         tab.startTitleObservation(for: self)
     }
-
 }
 
 // MARK: Mouse Functions
-extension AXTabButton {
+extension AXNormalTabButton {
     func setTrackingArea() {
         let options: NSTrackingArea.Options = [
             .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
@@ -385,85 +312,85 @@ extension AXTabButton {
     }
 }
 
-// MARK: - Draging Source
-extension AXTabButton: NSDraggingSource, NSPasteboardWriting {
-    // Define drag operations
-    func draggingSession(
-        _ session: NSDraggingSession,
-        sourceOperationMaskFor context: NSDraggingContext
-    ) -> NSDragOperation {
-        return .move
-    }
-
-    // Provide writable types for the pasteboard
-    func writableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard
-        .PasteboardType]
-    {
-        return [.axTabButton]
-    }
-
-    // Provide the pasteboard property list (button.tag)
-    func pasteboardPropertyList(forType type: NSPasteboard.PasteboardType)
-        -> Any?
-    {
-        guard type == .axTabButton else { return nil }
-        return "\(self.tag)"  // Send tag as a string
-    }
-
-    // Start a dragging session when the mouse is dragged
-    override func mouseDragged(with event: NSEvent) {
-        guard let initialLocation = initialMouseDownLocation else { return }
-
-        // Calculate the distance moved
-        let currentLocation = event.locationInWindow
-        let distance = hypot(
-            currentLocation.x - initialLocation.x,
-            currentLocation.y - initialLocation.y)
-
-        guard distance > 5.0 else { return }
-
-        let draggingItem = NSDraggingItem(pasteboardWriter: self)
-
-        // Define the item's image for the drag session
-        let draggingFrame = self.bounds
-        draggingItem.setDraggingFrame(draggingFrame, contents: self.toImage())
-
-        // Start the dragging session
-        self.beginDraggingSession(
-            with: [draggingItem], event: event, source: self)
-
-        self.isHidden = true
-    }
-
-    override func draggingExited(_ sender: (any NSDraggingInfo)?) {
-        self.isHidden = false
-    }
-
-    override func draggingEnded(_ sender: any NSDraggingInfo) {
-        self.isHidden = false
-    }
-
-    override func concludeDragOperation(_ sender: (any NSDraggingInfo)?) {
-        self.isHidden = false
-    }
-
-    // Helper: Create a snapshot of the button for the dragging image
-    func toImage() -> NSImage? {
-        guard
-            let bitmapImageRepresentation =
-                self.bitmapImageRepForCachingDisplay(in: bounds)
-        else {
-            return nil
-        }
-        bitmapImageRepresentation.size = bounds.size
-        self.cacheDisplay(in: bounds, to: bitmapImageRepresentation)
-
-        let image = NSImage(size: bounds.size)
-        image.addRepresentation(bitmapImageRepresentation)
-
-        return image
-    }
-}
+//// MARK: - Draging Source
+//extension AXTabButton: NSDraggingSource, NSPasteboardWriting {
+//    // Define drag operations
+//    func draggingSession(
+//        _ session: NSDraggingSession,
+//        sourceOperationMaskFor context: NSDraggingContext
+//    ) -> NSDragOperation {
+//        return .move
+//    }
+//
+//    // Provide writable types for the pasteboard
+//    func writableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard
+//        .PasteboardType]
+//    {
+//        return [.axTabButton]
+//    }
+//
+//    // Provide the pasteboard property list (button.tag)
+//    func pasteboardPropertyList(forType type: NSPasteboard.PasteboardType)
+//        -> Any?
+//    {
+//        guard type == .axTabButton else { return nil }
+//        return "\(self.tag)"  // Send tag as a string
+//    }
+//
+//    // Start a dragging session when the mouse is dragged
+//    override func mouseDragged(with event: NSEvent) {
+//        guard let initialLocation = initialMouseDownLocation else { return }
+//
+//        // Calculate the distance moved
+//        let currentLocation = event.locationInWindow
+//        let distance = hypot(
+//            currentLocation.x - initialLocation.x,
+//            currentLocation.y - initialLocation.y)
+//
+//        guard distance > 5.0 else { return }
+//
+//        let draggingItem = NSDraggingItem(pasteboardWriter: self)
+//
+//        // Define the item's image for the drag session
+//        let draggingFrame = self.bounds
+//        draggingItem.setDraggingFrame(draggingFrame, contents: self.toImage())
+//
+//        // Start the dragging session
+//        self.beginDraggingSession(
+//            with: [draggingItem], event: event, source: self)
+//
+//        self.isHidden = true
+//    }
+//
+//    override func draggingExited(_ sender: (any NSDraggingInfo)?) {
+//        self.isHidden = false
+//    }
+//
+//    override func draggingEnded(_ sender: any NSDraggingInfo) {
+//        self.isHidden = false
+//    }
+//
+//    override func concludeDragOperation(_ sender: (any NSDraggingInfo)?) {
+//        self.isHidden = false
+//    }
+//
+//    // Helper: Create a snapshot of the button for the dragging image
+//    func toImage() -> NSImage? {
+//        guard
+//            let bitmapImageRepresentation =
+//                self.bitmapImageRepForCachingDisplay(in: bounds)
+//        else {
+//            return nil
+//        }
+//        bitmapImageRepresentation.size = bounds.size
+//        self.cacheDisplay(in: bounds, to: bitmapImageRepresentation)
+//
+//        let image = NSImage(size: bounds.size)
+//        image.addRepresentation(bitmapImageRepresentation)
+//
+//        return image
+//    }
+//}
 
 extension NSPasteboard.PasteboardType {
     static let axTabButton = NSPasteboard.PasteboardType(
@@ -529,25 +456,5 @@ class AXSidebarTabCloseButton: NSButton {
 
     override func mouseExited(with event: NSEvent) {
         self.layer?.backgroundColor = defaultColor
-    }
-}
-
-// Extension for ultra-lightweight image downsizing
-extension NSImage {
-    func downsizedIcon() -> NSImage? {
-        let targetSize = NSSize(width: 16, height: 16)
-        let newImage = NSImage(size: targetSize)
-
-        newImage.lockFocus()
-        defer { newImage.unlockFocus() }
-
-        self.draw(
-            in: NSRect(origin: .zero, size: targetSize),
-            from: NSRect(origin: .zero, size: self.size),
-            operation: .sourceOver,
-            fraction: 1.0
-        )
-
-        return newImage
     }
 }
