@@ -80,7 +80,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func addTabButton(for tab: AXTab) {
-        let button = AXNormalTabButton(tab: tab)
+        let button = AXVerticalTabButton(tab: tab)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.delegate = self
 
@@ -123,7 +123,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func addTabButtonInBackground(for tab: AXTab, index: Int) {
-        let button = AXNormalTabButton(tab: tab)
+        let button = AXVerticalTabButton(tab: tab)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.delegate = self
 
@@ -135,7 +135,9 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func updateIndices(after index: Int) {
-        for case let (index, button as AXTabButton) in tabStackView.arrangedSubviews.enumerated().dropFirst(index) {
+        for case let (index, button as AXTabButton) in tabStackView
+            .arrangedSubviews.enumerated().dropFirst(index)
+        {
             mxPrint("DELETATION START INDEX = \(index)")
             button.tag = index
         }

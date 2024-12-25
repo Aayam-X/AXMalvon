@@ -89,14 +89,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard let keyWindow = NSApplication.shared.keyWindow as? AXWindow else {
             return
         }
-        AppDelegate.searchBar.parentWindow1 = keyWindow
-        AppDelegate.searchBar.searchBarDelegate = keyWindow
-
-        if keyWindow.currentTabGroup.selectedIndex < 0 {
-            AppDelegate.searchBar.show()
-        } else {
-            AppDelegate.searchBar.showCurrentURL()
-        }
+        keyWindow.makeFirstResponder(
+            keyWindow.tabHostingView.searchButton.addressField)
     }
 
     @IBAction func toggleSearchBarForNewTab(_ sender: Any?) {

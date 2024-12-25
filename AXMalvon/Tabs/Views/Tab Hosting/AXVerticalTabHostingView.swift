@@ -1,5 +1,5 @@
 //
-//  AXSidebarView.swift
+//  AXVerticalTabHostingView.swift
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2024-11-05.
@@ -9,7 +9,9 @@
 import AppKit
 import WebKit
 
-class AXSidebarView: NSView, AXTabHostingViewProtocol, AXGestureViewDelegate {
+class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
+    AXGestureViewDelegate
+{
     var tabBarView: any AXTabBarViewTemplate
     var delegate: (any AXTabHostingViewDelegate)?
 

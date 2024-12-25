@@ -31,7 +31,7 @@ private struct AXTabButtonConstants {
         .withAlphaComponent(0.0)
 }
 
-class AXNormalTabButton: NSButton, AXTabButton {
+class AXVerticalTabButton: NSButton, AXTabButton {
     unowned var tab: AXTab!
     weak var delegate: AXTabButtonDelegate?
 
@@ -196,7 +196,7 @@ class AXNormalTabButton: NSButton, AXTabButton {
 }
 
 // MARK: Tab Functions
-extension AXNormalTabButton {
+extension AXVerticalTabButton {
     @objc func closeTab() {
         delegate?.tabButtonWillClose(self)
     }
@@ -223,7 +223,7 @@ extension AXNormalTabButton {
 }
 
 // MARK: Web View Functions
-extension AXNormalTabButton {
+extension AXVerticalTabButton {
     public func startObserving() {
         guard let webView = tab._webView else { return }
 
@@ -241,7 +241,7 @@ extension AXNormalTabButton {
 }
 
 // MARK: Mouse Functions
-extension AXNormalTabButton {
+extension AXVerticalTabButton {
     func setTrackingArea() {
         let options: NSTrackingArea.Options = [
             .activeAlways, .inVisibleRect, .mouseEnteredAndExited,

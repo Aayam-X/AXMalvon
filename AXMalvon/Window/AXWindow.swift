@@ -30,15 +30,15 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         if usesVerticalTabs {
             return AXVerticalTabBarView()
         } else {
-            return AXCompactTabBarView()
+            return AXHorizontalTabBarView()
         }
     }()
 
     lazy var tabHostingView: AXTabHostingViewProtocol = {
         if usesVerticalTabs {
-            AXSidebarView(tabBarView: tabBarView)
+            AXVerticalTabHostingView(tabBarView: tabBarView)
         } else {
-            AXCompactTabHostingView(tabBarView: tabBarView)
+            AXHorizontalTabHostingView(tabBarView: tabBarView)
         }
     }()
 
@@ -118,7 +118,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         // Update positioning
         for (index, button) in trafficLightButtons.enumerated() {
             button.frame.origin = NSPoint(
-                x: 13.0 + CGFloat(index) * 20.0, y: -2)
+                x: 13.0 + CGFloat(index) * 20.0, y: -0.5)
         }
     }
 
@@ -152,7 +152,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         currentTabGroupIndex = 0
         tabBarView.updateTabGroup(currentTabGroup)
         visualEffectTintView.layer?.backgroundColor =
-        currentTabGroup.color.cgColor
+            currentTabGroup.color.cgColor
     }
 
     // MARK: Window Events
@@ -395,6 +395,8 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
     func searchBarUpdatesCurrentTab(with url: URL) {
         // Change current webview's url to new url
         self.containerView.currentWebView?.load(URLRequest(url: url))
+
+        makeFirstResponder(self.containerView.currentWebView)
     }
 
     func searchBarCurrentWebsiteURL() -> String {
@@ -435,7 +437,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         splitView.finishAnimation()
 
         if usesVerticalTabs {
-            tabHostingView.searchButton.url =
+            tabHostingView.searchButton.fullAddress =
                 containerView.currentWebView?.url
         }
     }

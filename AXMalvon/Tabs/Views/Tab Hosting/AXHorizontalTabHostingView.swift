@@ -7,77 +7,206 @@
 
 import AppKit
 
-class AXHorizontalTabHostingView: NSView, AXTabHostingViewProtocol,
-    AXHorizontalToolbarViewDelegate
-{
+// The hosting view contains the tabView along with the search field, web navigation buttons and the workspace swapper view
+class AXHorizontalTabHostingView: NSView, AXTabHostingViewProtocol {
     var tabBarView: any AXTabBarViewTemplate
     var delegate: (any AXTabHostingViewDelegate)?
 
-    var tabGroupInfoView: AXTabGroupInfoView = AXTabGroupInfoView()
-    var searchButton: AXSidebarSearchButton = AXSidebarSearchButton()
+    // The tab that is being stickied.
+    private weak var stickyTab: AXTabButton?
 
-    var horizontalToolbar: AXHorizontalToolbarView!
+    internal lazy var tabGroupInfoView: AXTabGroupInfoView = {
+        let view = AXTabGroupInfoView()
+        view.onLeftMouseDown = tabGroupInfoViewLeftDown
+        view.onRightMouseDown = tabGroupInfoViewRightDown
+        return view
+    }()
+
+    internal lazy var searchButton: AXSidebarSearchButton = {
+        let button = AXSidebarSearchButton()
+        button.target = self
+        button.action = #selector(searchButtonTapped)
+        return button
+    }()
+
+    private lazy var browserNavigationStackView: AXGestureStackView = {
+        let stackView = AXGestureStackView()
+        stackView.orientation = .horizontal
+        stackView.alignment = .centerY
+        stackView.distribution = .gravityAreas
+        stackView.spacing = 3
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.gestureDelegate = self
+        return stackView
+    }()
+
+    private lazy var leftStickyTab: AXHorizontalTabButton =
+        createConfiguredStickyTab()
+    private lazy var rightStickyTab: AXHorizontalTabButton =
+        createConfiguredStickyTab()
 
     required init(tabBarView: any AXTabBarViewTemplate) {
         self.tabBarView = tabBarView
         super.init(frame: .zero)
-        setupView()
+        setupViews()
+    }
+
+    private func setupViews() {
+        for view in [tabGroupInfoView, searchButton] {
+            browserNavigationStackView.addArrangedSubview(view)
+        }
+
+        // Add subviews in correct z-order
+        addSubview(tabBarView)
+        addSubview(browserNavigationStackView)
+        addSubview(
+            leftStickyTab, positioned: .above, relativeTo: tabBarView)
+        addSubview(
+            rightStickyTab, positioned: .above, relativeTo: tabBarView)
+
+        setupConstraints()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func setupView() {
-        // TabGroup Information View
-        tabGroupInfoView.onLeftMouseDown = displayWorkspaceSwapper
-        tabGroupInfoView.onRightMouseDown = displayTabCustomizer
-
-        // Horizontal Toolbar
-        self.horizontalToolbar = AXHorizontalToolbarView(
-            tabGroupInfoView: tabGroupInfoView, searchButton: searchButton)
-        self.horizontalToolbar.translatesAutoresizingMaskIntoConstraints = false
-        self.horizontalToolbar.delegate = self
-
-        addSubview(horizontalToolbar)
+    private func setupConstraints() {
+        tabBarView.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
-            // Room to accomodate for the tab view
-            horizontalToolbar.topAnchor.constraint(
-                equalTo: topAnchor, constant: 45),
-            horizontalToolbar.leftAnchor.constraint(equalTo: leftAnchor),
-            horizontalToolbar.rightAnchor.constraint(equalTo: rightAnchor),
-            horizontalToolbar.heightAnchor.constraint(equalToConstant: 40),
-        ])
-    }
+            browserNavigationStackView.leadingAnchor.constraint(
+                equalTo: leadingAnchor),
+            browserNavigationStackView.centerYAnchor.constraint(
+                equalTo: centerYAnchor),
+            browserNavigationStackView.trailingAnchor.constraint(
+                equalTo: tabBarView.leadingAnchor),
 
-    // MARK: - Tab Hosting View Functions
-    func insertTabBarView(tabBarView: any AXTabBarViewTemplate) {
-        addSubview(tabBarView)
-
-        NSLayoutConstraint.activate([
+            tabBarView.trailingAnchor.constraint(equalTo: trailingAnchor),
             tabBarView.topAnchor.constraint(equalTo: topAnchor),
-            tabBarView.leftAnchor.constraint(equalTo: leftAnchor),
-            tabBarView.rightAnchor.constraint(equalTo: rightAnchor),
-            tabBarView.heightAnchor.constraint(equalToConstant: 45),
+            tabBarView.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+            leftStickyTab.leadingAnchor.constraint(
+                equalTo: browserNavigationStackView.trailingAnchor, constant: 5),
+            leftStickyTab.centerYAnchor.constraint(equalTo: centerYAnchor),
+            leftStickyTab.widthAnchor.constraint(equalToConstant: 90),
+
+            rightStickyTab.trailingAnchor.constraint(equalTo: trailingAnchor),
+            rightStickyTab.centerYAnchor.constraint(equalTo: centerYAnchor),
+            rightStickyTab.widthAnchor.constraint(equalToConstant: 90),
+
+            searchButton.widthAnchor.constraint(
+                equalTo: self.widthAnchor, multiplier: 0.36),
+            searchButton.heightAnchor.constraint(equalToConstant: 30),
+            tabGroupInfoView.widthAnchor.constraint(equalToConstant: 150),
         ])
+
+        if let tabBarView = tabBarView as? AXHorizontalTabBarView {
+            tabBarView.stickyDelegate = self
+        }
     }
 
-    // MARK: - Toolbar Delegate
-    func didTapBackButton() {
-        delegate?.tabHostingViewNavigateBackwards()
-    }
-
-    func didTapForwardButton() {
-        delegate?.tabHostingViewNavigateForward()
-    }
-
-    func displayWorkspaceSwapper() {
+    func tabGroupInfoViewLeftDown() {
         delegate?.tabHostingViewDisplaysWorkspaceSwapperPanel(tabGroupInfoView)
     }
 
-    func displayTabCustomizer() {
+    func tabGroupInfoViewRightDown() {
         delegate?.tabHostingViewDisplaysTabGroupCustomizationPanel(
             tabGroupInfoView)
+    }
+
+    @objc func didTapBackButton() {
+        delegate?.tabHostingViewNavigateBackwards()
+    }
+    @objc func didTapForwardButton() {
+        delegate?.tabHostingViewNavigateForward()
+    }
+
+    // FIXME: AXWindow should be handling this method
+    @objc private func searchButtonTapped() {
+        //        let window = AXAddressBarSuggestionsWindow()
+        //        window.showSuggestions(["Hi", "Love", "Milk", "Coffee"], for: searchButton.addressField)
+
+        //        guard let window = window as? AXWindow else { return }
+        //        let searchBar = AppDelegate.searchBar
+        //        searchBar.parentWindow1 = window
+        //        searchBar.searchBarDelegate = window
+        //
+        //        if let buttonFrameInScreen = searchButton.superview.map({
+        //            window.convertToScreen($0.convert(searchButton.frame, to: nil))
+        //        }) {
+        //            searchBar.showCurrentURL(
+        //                at: NSPoint(
+        //                    x: buttonFrameInScreen.origin.x,
+        //                    y: buttonFrameInScreen.origin.y - searchBar.frame.height
+        //                ))
+        //        }
+    }
+}
+
+// MARK: - Sticky Tab Methods
+extension AXHorizontalTabHostingView: AXHorizontalTabBarViewDelegate {
+    func tabBarShouldMakeTabSticky(
+        _ tab: AXTabButton, position: TabStickyPosition
+    ) {
+        self.stickyTab = tab
+
+        // Reset both tabs first
+        leftStickyTab.isHidden = true
+        rightStickyTab.isHidden = true
+
+        // Configure the appropriate sticky tab
+        let stickyTab = position == .left ? leftStickyTab : rightStickyTab
+        stickyTab.isHidden = false
+        stickyTab.tab = tab.tab
+        stickyTab.webTitle = tab.webTitle
+        stickyTab.favicon = tab.favicon
+        stickyTab.tag = tab.tag
+        stickyTab.isSelected = true
+        stickyTab.startObserving()
+    }
+
+    func tabBarShouldRemoveSticky() {
+        leftStickyTab.isHidden = true
+        rightStickyTab.isHidden = true
+        [leftStickyTab, rightStickyTab].forEach { $0.tab = nil }
+
+        stickyTab?.startObserving()
+    }
+
+    func tabBarRemovedTab() {
+        leftStickyTab.isHidden = true
+        rightStickyTab.isHidden = true
+        [leftStickyTab, rightStickyTab].forEach { $0.tab = nil }
+    }
+
+    // Use a single function to create sticky tabs with shared configuration
+    private func createConfiguredStickyTab() -> AXHorizontalTabButton {
+        let view = AXHorizontalTabButton(tab: nil)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        view.wantsLayer = true
+        view.layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
+        view.layer?.shadowColor = NSColor.black.cgColor
+        view.layer?.shadowOpacity = 0.3
+        view.layer?.shadowRadius = 10
+
+        view.isHidden = true
+
+        return view
+    }
+}
+
+extension AXHorizontalTabHostingView: AXGestureViewDelegate {
+    func gestureView(didSwipe direction: AXGestureViewSwipeDirection!) {
+        switch direction {
+        case .backwards:
+            delegate?.tabHostingViewNavigateBackwards()
+        case .reload:
+            delegate?.tabHostingViewReloadCurrentPage()
+        case .forwards:
+            delegate?.tabHostingViewNavigateForward()
+        case .nothing, .none:
+            break
+        }
     }
 }

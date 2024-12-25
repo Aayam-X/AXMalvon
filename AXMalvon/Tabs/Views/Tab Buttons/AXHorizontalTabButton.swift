@@ -1,5 +1,5 @@
 //
-//  AXCompactTabButton.swift
+//  AXHorizontalTabButton.swift
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2024-12-21.
@@ -7,7 +7,7 @@
 
 import AppKit
 
-private struct AXCompactTabButtonConstants {
+private struct AXHorizontalTabButtonConstants {
     static let defaultFavicon = NSImage(
         systemSymbolName: "square.fill", accessibilityDescription: nil)
     static let defaultFaviconSleep = NSImage(
@@ -31,11 +31,11 @@ private struct AXCompactTabButtonConstants {
         .withAlphaComponent(0.0)
 }
 
-class AXCompactTabButton: NSButton, AXTabButton {
+class AXHorizontalTabButton: NSButton, AXTabButton {
     var tab: AXTab!
     var delegate: (any AXTabButtonDelegate)?
 
-    private var closeButton = AXCompactTabCloseButton()
+    private var closeButton = AXHorizontalTabCloseButton()
     var titleView = NSTextField()
 
     var trackingArea: NSTrackingArea!
@@ -56,8 +56,8 @@ class AXCompactTabButton: NSButton, AXTabButton {
         didSet {
             self.layer?.backgroundColor =
                 isSelected
-                ? AXCompactTabButtonConstants.selectedColor.cgColor
-                : AXCompactTabButtonConstants.backgroundColor.cgColor
+                ? AXHorizontalTabButtonConstants.selectedColor.cgColor
+                : AXHorizontalTabButtonConstants.backgroundColor.cgColor
             layer?.shadowOpacity = isSelected ? 0.3 : 0.0
 
             if isSelected, tab.titleObserver == nil {
@@ -94,7 +94,7 @@ class AXCompactTabButton: NSButton, AXTabButton {
     func setupViews() {
         if isSelected {
             self.layer?.backgroundColor =
-                AXCompactTabButtonConstants.selectedColor.cgColor
+                AXHorizontalTabButtonConstants.selectedColor.cgColor
             self.layer?.shadowOpacity = 0.3
         }
 
@@ -103,7 +103,7 @@ class AXCompactTabButton: NSButton, AXTabButton {
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.favicon =
             tab?.icon != nil
-            ? tab.icon : AXCompactTabButtonConstants.defaultFaviconSleep
+            ? tab.icon : AXHorizontalTabButtonConstants.defaultFaviconSleep
         addSubview(closeButton)
         closeButton.centerYAnchor.constraint(equalTo: centerYAnchor)
             .isActive = true
@@ -172,7 +172,7 @@ class AXCompactTabButton: NSButton, AXTabButton {
         }
 
         self.layer?.backgroundColor =
-            AXCompactTabButtonConstants.selectedColor.cgColor
+            AXHorizontalTabButtonConstants.selectedColor.cgColor
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -185,30 +185,31 @@ class AXCompactTabButton: NSButton, AXTabButton {
     override func mouseEntered(with event: NSEvent) {
         if !isSelected {
             self.layer?.backgroundColor =
-                AXCompactTabButtonConstants.hoverColor.cgColor
+                AXHorizontalTabButtonConstants.hoverColor.cgColor
         }
-        
+
         closeButton.showCloseButton()
     }
 
     override func mouseExited(with event: NSEvent) {
         self.layer?.backgroundColor =
             isSelected
-            ? AXCompactTabButtonConstants.selectedColor.cgColor
-            : AXCompactTabButtonConstants.backgroundColor.cgColor
+            ? AXHorizontalTabButtonConstants.selectedColor.cgColor
+            : AXHorizontalTabButtonConstants.backgroundColor.cgColor
 
         closeButton.hideCloseButton()
     }
 }
 
 // MARK: - Close Button + Favicon
-class AXCompactTabCloseButton: NSButton {
+class AXHorizontalTabCloseButton: NSButton {
     var _favicon: NSImage?
 
     var favicon: NSImage? {
         set {
             self._favicon = newValue
-            self.image = newValue ?? AXCompactTabButtonConstants.defaultFavicon
+            self.image =
+                newValue ?? AXHorizontalTabButtonConstants.defaultFavicon
         }
         get {
             return _favicon
@@ -221,7 +222,7 @@ class AXCompactTabCloseButton: NSButton {
         self.bezelStyle = .smallSquare
 
         self.imagePosition = .imageOnly
-        self.image = AXCompactTabButtonConstants.defaultFavicon
+        self.image = AXHorizontalTabButtonConstants.defaultFavicon
     }
 
     required init?(coder: NSCoder) {
@@ -229,7 +230,7 @@ class AXCompactTabCloseButton: NSButton {
     }
 
     func showCloseButton() {
-        self.image = AXCompactTabButtonConstants.defaultCloseButton
+        self.image = AXHorizontalTabButtonConstants.defaultCloseButton
     }
 
     func hideCloseButton() {
