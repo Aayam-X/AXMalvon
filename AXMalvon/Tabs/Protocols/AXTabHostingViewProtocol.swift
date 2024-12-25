@@ -16,7 +16,6 @@ protocol AXTabHostingViewDelegate: AnyObject {
     // Browsing Functions
     func tabHostingViewDisplaysTabGroupCustomizationPanel(_ sender: NSView)
     func tabHostingViewDisplaysWorkspaceSwapperPanel(_ sender: NSView)
-    func tabHostingViewDisplayTrustPanel()
 }
 
 protocol AXTabHostingViewProtocol: AnyObject, NSView {

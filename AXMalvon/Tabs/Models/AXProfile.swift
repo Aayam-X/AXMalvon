@@ -32,11 +32,19 @@ struct AXProfileData: Codable {
     }
 }
 
+let youtubeAdblockingUserScript = WKUserScript(
+    source: AX_DEFAULT_YOUTUBE_BLOCKER_SCRIPT,
+    injectionTime: .atDocumentStart,
+    forMainFrameOnly: true
+)
+
 class AXProfile {
     var name: String
     var configuration: WKWebViewConfiguration
     var tabGroups: [AXTabGroup] = []
     weak var currentTabGroup: AXTabGroup!
+
+    var historyManager: AXHistoryManager!
 
     var hasLoadedTabs: Bool = false
 
@@ -51,7 +59,10 @@ class AXProfile {
         if let profileData = AXProfile.loadProfile(name: name) {
             let config = AXProfile.createConfig(with: profileData.configID)
 
-            self.init(name: name, config: config, loadsDefaultData: true)
+            self.init(
+                name: name, config: config, loadsDefaultData: true,
+                configurationID: profileData.configID)
+
             mxPrint(
                 "Current Tab Group Index: \(profileData.selectedTabGroupIndex)")
 
@@ -59,26 +70,38 @@ class AXProfile {
                 self.currentTabGroupIndex = profileData.selectedTabGroupIndex
             #endif
         } else {
-            let config = AXProfile.createNewProfile(name: name)
-            self.init(name: name, config: config, loadsDefaultData: true)
+            let newProfile = AXProfile.createNewProfile(name: name)
+            self.init(
+                name: name, config: newProfile.config, loadsDefaultData: true,
+                configurationID: newProfile.id)
         }
     }
 
-    init(name: String, config: WKWebViewConfiguration, loadsDefaultData: Bool) {
+    init(
+        name: String, config: WKWebViewConfiguration, loadsDefaultData: Bool,
+        configurationID: String? = nil
+    ) {
         self.name = name
         self.configuration = config
         self.tabGroups = []
+
+        if let configurationID {
+            self.historyManager = AXHistoryManager(fileName: configurationID)
+        }
 
         addOtherConfigs()
 
         if loadsDefaultData {
             loadTabGroups()
         }
+
+        enableContentBlockers()
     }
 
     // MARK: - Profile Defaults
-    class private func createNewProfile(name: String) -> WKWebViewConfiguration
-    {
+    class private func createNewProfile(name: String) -> (
+        id: String, config: WKWebViewConfiguration
+    ) {
         let defaults = UserDefaults.standard
         var profiles =
             defaults.dictionary(forKey: "Profiles") as? [String: [String: Any]]
@@ -95,7 +118,7 @@ class AXProfile {
         // Create a new WKWebView configuration
         let config = WKWebViewConfiguration()
         config.websiteDataStore = WKWebsiteDataStore(forIdentifier: UUID())
-        return config
+        return (newProfileData.configID, config)
     }
 
     class func loadProfile(name: String) -> AXProfileData? {
@@ -233,6 +256,8 @@ class AXProfile {
     }
 
     func enableContentBlockers() {
+        AXContentBlockerLoader.shared.enableAdblock(for: configuration)
+
         //        let extensionLoader = AX_wBlockExtension()
         //
         //        extensionLoader.getContentBlockerURLPath { blockerListURL in
@@ -245,35 +270,12 @@ class AXProfile {
     }
 
     func enableYouTubeAdBlocker() {
-        let userScript = WKUserScript(
-            source: AX_DEFAULT_YOUTUBE_BLOCKER_SCRIPT,
-            injectionTime: .atDocumentStart,
-            forMainFrameOnly: true
-        )
-
-        configuration.userContentController.addUserScript(userScript)
+        configuration.userContentController.addUserScript(
+            youtubeAdblockingUserScript)
     }
 
-    /// Inserts Content Blocking rules within Profile's Web Configurations
-    /// - Parameters:
-    ///   - url: The location of the content JSON rules
-    func loadContentBlocker(at url: URL) throws {
-        let blockerListData = try Data(contentsOf: url)
-        guard
-            let blockerListString = String(
-                data: blockerListData, encoding: .utf8)
-        else {
-            mxPrint("Failed to decode blocker list data.")
-            return
-        }
-
-        WKContentRuleListStore.default().compileContentRuleList(
-            forIdentifier: "ContentBlocker",
-            encodedContentRuleList: blockerListString
-        ) { contentRuleList, error in
-            guard let contentRuleList else { return }
-            self.configuration.userContentController.add(contentRuleList)
-        }
+    func disableYouTubeAdBlocker() {
+        configuration.userContentController.removeAllUserScripts()
     }
 
 }

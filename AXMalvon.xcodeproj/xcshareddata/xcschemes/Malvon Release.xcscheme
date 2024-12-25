@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "EDA45CC12D17303D00779C51"
-               BuildableName = "Malvon Release.app"
+               BuildableName = "Malvon.app"
                BlueprintName = "Malvon Release"
                ReferencedContainer = "container:AXMalvon.xcodeproj">
             </BuildableReference>
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EDA45CC12D17303D00779C51"
-            BuildableName = "Malvon Release.app"
+            BuildableName = "Malvon.app"
             BlueprintName = "Malvon Release"
             ReferencedContainer = "container:AXMalvon.xcodeproj">
          </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EDA45CC12D17303D00779C51"
-            BuildableName = "Malvon Release.app"
+            BuildableName = "Malvon.app"
             BlueprintName = "Malvon Release"
             ReferencedContainer = "container:AXMalvon.xcodeproj">
          </BuildableReference>

@@ -7,25 +7,25 @@
 
 import AppKit
 
-class AXAddressBarWindow: NSPanel, NSWindowDelegate {
-    enum Section: Int, CaseIterable {
-        case topSearches
-        case history
-        case googleSuggestions
+private enum Section: Int, CaseIterable {
+    case topSites
+    case history
+    case googleSearch
 
-        var title: String {
-            switch self {
-            case .topSearches: return "Top Searches"
-            case .history: return "History"
-            case .googleSuggestions: return "Google Suggestions"
-            }
+    var title: String {
+        switch self {
+        case .topSites: return "Top Searches"
+        case .history: return "History"
+        case .googleSearch: return "Google Search"
         }
     }
+}
 
-    private var data: [Section: [String]] = [
-        .topSearches: [],
+class AXAddressBarWindow: NSPanel, NSWindowDelegate {
+    private var searchSuggestions: [Section: [String]] = [
+        .topSites: [],
         .history: [],
-        .googleSuggestions: [],
+        .googleSearch: [],
     ]
 
     private let scrollView = NSScrollView()
@@ -106,13 +106,13 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
         topSearches: [String], history: [String], googleSuggestions: [String],
         for textField: NSTextField
     ) {
-        data[.topSearches] = topSearches
-        data[.history] = history
-        data[.googleSuggestions] = googleSuggestions
+        searchSuggestions[.topSites] = topSearches
+        searchSuggestions[.history] = history
+        searchSuggestions[.googleSearch] = googleSuggestions
 
         let totalItems = Section.allCases.reduce(0) { count, section in
-            return count + (data[section]?.count ?? 0)
-                + (data[section]?.isEmpty == false ? 1 : 0)
+            return count + (searchSuggestions[section]?.count ?? 0)
+                + (searchSuggestions[section]?.isEmpty == false ? 1 : 0)
         }
 
         if totalItems == 0 {
@@ -127,13 +127,13 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
         setFrameTopLeftPoint(textFieldRect.origin)
 
         var frame = self.frame
-
         frame.size.width = textField.frame.width * 2
 
         setFrame(frame, display: false)
         textFieldWindow.addChildWindow(self, ordered: .above)
 
         tableView.reloadData()
+        moveTo(position: 1)
     }
 
     func moveUp() {
@@ -160,16 +160,17 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
     }
 
     func moveTo(position: Int) {
-        var selectedRow = position
         tableView.selectRowIndexes(
-            IndexSet(integer: min(selectedRow, totalRows - 1)),
+            IndexSet(integer: min(position, totalRows - 1)),
             byExtendingSelection: false)
     }
 
     private func isHeaderRow(_ row: Int) -> Bool {
         var currentIndex = 0
         for section in Section.allCases {
-            guard let sectionData = data[section], !sectionData.isEmpty else {
+            guard let sectionData = searchSuggestions[section],
+                !sectionData.isEmpty
+            else {
                 continue
             }
 
@@ -186,8 +187,8 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
 
     private var totalRows: Int {
         return Section.allCases.reduce(0) { count, section in
-            return count + (data[section]?.count ?? 0)
-                + (data[section]?.isEmpty == false ? 1 : 0)
+            return count + (searchSuggestions[section]?.count ?? 0)
+                + (searchSuggestions[section]?.isEmpty == false ? 1 : 0)
         }
     }
 
@@ -197,7 +198,9 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
 
         var currentIndex = 0
         for section in Section.allCases {
-            guard let sectionData = data[section], !sectionData.isEmpty else {
+            guard let sectionData = searchSuggestions[section],
+                !sectionData.isEmpty
+            else {
                 continue
             }
             // Skip header row
@@ -228,7 +231,9 @@ extension AXAddressBarWindow: NSTableViewDelegate {
         var currentIndex = 0
 
         for section in Section.allCases {
-            guard let sectionData = data[section], !sectionData.isEmpty else {
+            guard let sectionData = searchSuggestions[section],
+                !sectionData.isEmpty
+            else {
                 continue
             }
 
@@ -258,10 +263,6 @@ extension AXAddressBarWindow: NSTableViewDelegate {
                     self?.moveTo(position: row)
                 }
 
-                if section != .history {
-                    moveTo(position: 1)
-                }
-
                 return cell
             }
 
@@ -275,7 +276,9 @@ extension AXAddressBarWindow: NSTableViewDelegate {
         var currentIndex = 0
 
         for section in Section.allCases {
-            guard let sectionData = data[section], !sectionData.isEmpty else {
+            guard let sectionData = searchSuggestions[section],
+                !sectionData.isEmpty
+            else {
                 continue
             }
 
@@ -322,7 +325,8 @@ class AXAddressBarSectionHeaderView: NSTableCellView {
 }
 
 class AXAddressBarSuggestionCellView: NSTableCellView {
-    let nameLabel: NSTextField
+    //  let titleLabel: NSTextField
+    let addressLabel: NSTextField
     let faviconImageView: NSImageView
     private var currentTask: URLSessionDataTask?
 
@@ -330,7 +334,9 @@ class AXAddressBarSuggestionCellView: NSTableCellView {
     var onMouseEnter: (() -> Void)?
 
     override init(frame frameRect: NSRect) {
-        nameLabel = NSTextField(labelWithString: "Suggestion")
+        addressLabel = NSTextField(labelWithString: "Suggestion")
+        //   titleLabel = NSTextField(labelWithString: "")
+
         faviconImageView = NSImageView(
             image: NSImage(named: NSImage.iconViewTemplateName)!)
         super.init(frame: frameRect)
@@ -363,12 +369,16 @@ class AXAddressBarSuggestionCellView: NSTableCellView {
     }
 
     private func setupView() {
-        nameLabel.font = NSFont.systemFont(ofSize: 14, weight: .regular)
-        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        addressLabel.font = NSFont.systemFont(ofSize: 14, weight: .regular)
+        addressLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        // titleLabel.font = NSFont.systemFont(ofSize: 14, weight: .regular)
+        // titleLabel.translatesAutoresizingMaskIntoConstraints = false
 
         faviconImageView.translatesAutoresizingMaskIntoConstraints = false
 
-        addSubview(nameLabel)
+        //addSubview(titleLabel)
+        addSubview(addressLabel)
         addSubview(faviconImageView)
 
         NSLayoutConstraint.activate([
@@ -378,53 +388,19 @@ class AXAddressBarSuggestionCellView: NSTableCellView {
             faviconImageView.widthAnchor.constraint(equalToConstant: 16),
             faviconImageView.heightAnchor.constraint(equalToConstant: 16),
 
-            nameLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-            nameLabel.leadingAnchor.constraint(
+            // titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+            // titleLabel.leadingAnchor.constraint(
+            //     equalTo: faviconImageView.trailingAnchor, constant: 5),
+
+            addressLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+            addressLabel.leadingAnchor.constraint(
                 equalTo: faviconImageView.trailingAnchor, constant: 8),
-            nameLabel.trailingAnchor.constraint(
+            addressLabel.trailingAnchor.constraint(
                 equalTo: trailingAnchor, constant: -8),
         ])
     }
 
     func configure(with suggestion: String) {
-        nameLabel.stringValue = suggestion
-        //loadFaviconIfNeeded(for: suggestion)
+        addressLabel.stringValue = suggestion
     }
-
-    //    private func loadFaviconIfNeeded(for suggestion: String) {
-    //        currentTask?.cancel()  // Cancel any previous tasks
-    //
-    //        // Check if the suggestion is a valid URL
-    //        guard suggestion.isValidURL(),
-    //            let url = URL(string: suggestion)?.fixURL()
-    //        else {
-    //            faviconImageView.image = NSImage(
-    //                named: NSImage.touchBarSearchTemplateName)
-    //            return
-    //        }
-    //
-    //        let faviconURL = url.appendingPathComponent("favicon.ico")
-    //        let request = URLRequest(
-    //            url: faviconURL, cachePolicy: .returnCacheDataElseLoad,
-    //            timeoutInterval: 10)
-    //
-    //        currentTask = URLSession.shared.dataTask(with: request) {
-    //            [weak self] data, response, error in
-    //            guard let self = self, let data = data, error == nil,
-    //                let image = NSImage(data: data)
-    //            else {
-    //                DispatchQueue.main.async {
-    //                    self?.faviconImageView.image = NSImage(
-    //                        named: NSImage.iconViewTemplateName)
-    //                }
-    //                return
-    //            }
-    //
-    //            DispatchQueue.main.async {
-    //                self.faviconImageView.image = image
-    //            }
-    //        }
-    //
-    //        currentTask?.resume()
-    //    }
 }

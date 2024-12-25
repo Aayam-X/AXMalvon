@@ -1,2 +1,14 @@
-.DS_Store
-wBlock/blockerList.json
+# Mac OS X
+*.DS_Store
+
+# Xcode
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcuserstate
+project.xcworkspace/
+xcuserdata/
+
+# AdBlocking
+contentBlocker.json

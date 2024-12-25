@@ -67,6 +67,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Save profiles
         for profile in AppDelegate.profiles {
             profile.saveTabGroups()
+            profile.historyManager?.flushAndClose()
         }
     }
 

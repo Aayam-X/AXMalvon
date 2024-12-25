@@ -148,6 +148,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         tabBarView.delegate = self
         tabHostingView.delegate = self
         containerView.delegate = self
+        tabHostingView.searchButton.delegate = self
 
         currentTabGroupIndex = 0
         tabBarView.updateTabGroup(currentTabGroup)
@@ -440,6 +441,15 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
             tabHostingView.searchButton.fullAddress =
                 containerView.currentWebView?.url
         }
+
+        if let historyManager = activeProfile.historyManager,
+            let title = webView.title, let url = webView.url
+        {
+            let newItem = AXHistoryItem(
+                title: title, address: url.absoluteString)
+
+            historyManager.insert(item: newItem)
+        }
     }
 
     // MARK: - Tab Bar View Delegate
@@ -492,16 +502,6 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         browserSpaceSharedPopover.show(
             relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
     }
-
-    func tabHostingViewDisplayTrustPanel() {
-        guard let webView = containerView.currentWebView,
-            let serverTrust = webView.serverTrust
-        else { return }
-
-        SFCertificateTrustPanel.shared().beginSheet(
-            for: self, modalDelegate: nil, didEnd: nil, contextInfo: nil,
-            trust: serverTrust, message: "TLS Certificate Details")
-    }
 }
 
 // MARK: - Workspace Swapper View Delegate
@@ -548,6 +548,22 @@ extension AXWindow: AXTabGroupCustomizerViewDelegate {
 
     func didUpdateIcon(_ tabGroup: AXTabGroup) {
         tabHostingView.tabGroupInfoView.updateIcon(tabGroup: tabGroup)
+    }
+}
+
+extension AXWindow: AXSidebarSearchButtonDelegate {
+    func lockClicked() {
+        guard let webView = containerView.currentWebView,
+            let serverTrust = webView.serverTrust
+        else { return }
+
+        SFCertificateTrustPanel.shared().beginSheet(
+            for: self, modalDelegate: nil, didEnd: nil, contextInfo: nil,
+            trust: serverTrust, message: "TLS Certificate Details")
+    }
+
+    func sidebarSearchButtonRequestsHistoryManager() -> AXHistoryManager {
+        activeProfile.historyManager
     }
 }
 

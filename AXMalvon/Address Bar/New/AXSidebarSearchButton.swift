@@ -9,16 +9,19 @@ import AppKit
 
 protocol AXSidebarSearchButtonDelegate: AnyObject {
     func lockClicked()
+    func sidebarSearchButtonRequestsHistoryManager() -> AXHistoryManager
 }
 
 class AXSidebarSearchButton: NSButton {
     weak var delegate: AXSidebarSearchButtonDelegate?
+    
+    weak var historyManager: AXHistoryManager? {
+        delegate?.sidebarSearchButtonRequestsHistoryManager()
+    }
+    
     var previousStringValueCount = 0
 
     let suggestionsWindowController = AXAddressBarWindow()
-    let suggestions = [
-        "Hi", "Love", "Milk", "Coffee", "Hello", "Hope", "Happiness",
-    ]
 
     var fullAddress: URL? {
         didSet {
@@ -136,23 +139,12 @@ class AXSidebarSearchButton: NSButton {
 
 }
 
-private var debounceInterval: TimeInterval { 0.2 }
+private var debounceInterval: TimeInterval { 0.15 }
 private var debounceWorkItem: DispatchWorkItem?
+private var textChanges: Int = 0
 
 // MARK: - Search Suggestions
 extension AXSidebarSearchButton: NSTextFieldDelegate {
-    private func filterSuggesetions(for searchString: String) -> [String] {
-        if searchString.isEmpty { return [] }
-        let results = suggestions.filter { string in
-            guard
-                let range = string.range(
-                    of: searchString, options: [.anchored, .caseInsensitive])
-            else { return false }
-            return !range.isEmpty
-        }
-        return results
-    }
-
     func controlTextDidChange(_ obj: Notification) {
         let query = addressField.stringValue
 
@@ -169,7 +161,16 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
                 let filteredSuggestions = AXSearchDatabase.shared
                     .getRelevantSearchSuggestions(
                         prefix: query, minOccurrences: 3)
-                let filteredWebsites = self.filterSuggesetions(for: query)
+                
+                let filteredWebsites: [String]
+                
+                if let historyResults = self.historyManager?.search(query: query) {
+                    filteredWebsites = historyResults.map({ item in
+                        return item.title + " — " + item.address
+                    })
+                } else {
+                    filteredWebsites = []
+                }
 
                 // Update suggestions window on the main thread
                 DispatchQueue.main.async {
@@ -186,9 +187,14 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
         // Save the new work item
         debounceWorkItem = workItem
 
-        // Schedule the work item with a delay
-        DispatchQueue.main.asyncAfter(
-            deadline: .now() + debounceInterval, execute: workItem)
+        if textChanges < 3 {
+            textChanges += 1
+            DispatchQueue.main.async(execute: workItem)
+        } else {
+            // Schedule the work item with a delay
+            DispatchQueue.main.asyncAfter(
+                deadline: .now() + debounceInterval, execute: workItem)
+        }
     }
 
     func control(
@@ -246,6 +252,7 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
     }
 
     func searchFieldAction() {
+        textChanges = 0
         let value = addressField.stringValue
 
         // Section 1: Handle File URLs
