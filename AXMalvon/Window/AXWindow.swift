@@ -15,6 +15,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
     AXWebContainerViewDelegate, AXTabBarViewDelegate, AXTabHostingViewDelegate
 {
     // Window Defaults
+    lazy var windowTrafficLightLeftAnchor: NSLayoutConstraint? = nil
     lazy var usesVerticalTabs = UserDefaults.standard.bool(
         forKey: "verticalTabs")
     var hiddenSidebarView = false
@@ -151,7 +152,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         currentTabGroupIndex = 0
         tabBarView.updateTabGroup(currentTabGroup)
         visualEffectTintView.layer?.backgroundColor =
-            currentTabGroup.color.cgColor
+        currentTabGroup.color.cgColor
     }
 
     // MARK: Window Events
@@ -180,6 +181,12 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         if usesVerticalTabs {
             trafficLightsHide()
         }
+
+        windowTrafficLightLeftAnchor?.animator().constant = 70
+    }
+
+    func windowWillEnterFullScreen(_ notification: Notification) {
+        windowTrafficLightLeftAnchor?.animator().constant = 0
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -260,9 +267,11 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         visualEffectView.addSubview(tabHostingView)
         visualEffectView.addSubview(containerView)
 
+        windowTrafficLightLeftAnchor = tabHostingView.leftAnchor.constraint(
+            equalTo: visualEffectView.leftAnchor, constant: 70)
+
         NSLayoutConstraint.activate([
-            tabHostingView.leftAnchor.constraint(
-                equalTo: visualEffectView.leftAnchor, constant: 70),
+            windowTrafficLightLeftAnchor!,
             tabHostingView.rightAnchor.constraint(
                 equalTo: visualEffectView.rightAnchor, constant: -6),
             tabHostingView.topAnchor.constraint(
@@ -422,7 +431,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         splitView.beginAnimation(with: progress)
     }
 
-    func webContainerViewFinishedLoading() {
+    func webContainerViewFinishedLoading(webView: WKWebView) {
         splitView.finishAnimation()
 
         if usesVerticalTabs {

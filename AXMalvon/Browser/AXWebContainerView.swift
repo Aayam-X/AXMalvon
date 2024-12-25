@@ -10,7 +10,7 @@ import AppKit
 import WebKit
 
 protocol AXWebContainerViewDelegate: AnyObject {
-    func webContainerViewFinishedLoading()
+    func webContainerViewFinishedLoading(webView: WKWebView)
     func webContainerViewProgressUpdated(with progress: Double)
     func webContainerViewChangedURL(to url: URL)
     func webContainerViewCloses()
@@ -159,9 +159,7 @@ class AXWebContainerView: NSView {
     }
 
     func updateView(webView: AXWebView) {
-        splitView.arrangedSubviews.forEach { view in
-            splitView.removeArrangedSubview(view)
-        }
+        splitView.arrangedSubviews.forEach(splitView.removeArrangedSubview)
 
         self.currentWebView = webView
         self.websiteTitleLabel.stringValue = webView.title ?? "Untitled Page"
@@ -333,8 +331,8 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         mxPrint("Webview finished loading")
-
-        delegate?.webContainerViewFinishedLoading()
+        
+        delegate?.webContainerViewFinishedLoading(webView: webView)
     }
 
     func webView(

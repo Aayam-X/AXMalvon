@@ -2,11 +2,10 @@
 //  AXProfile.swift
 //  AXMalvon
 //
-//  Created by Ashwin Paudel on 2024-11-17.
-//  Copyright © 2022-2024 Ashwin Paudel, Aayam(X). All rights reserved.
+//  Created by Ashwin Paudel on 2024-12-24.
 //
 
-import Foundation
+import AppKit
 import WebKit
 
 struct AXProfileData: Codable {

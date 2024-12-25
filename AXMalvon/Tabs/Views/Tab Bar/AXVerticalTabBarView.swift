@@ -135,13 +135,9 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func updateIndices(after index: Int) {
-        for (index, button) in tabStackView.arrangedSubviews.enumerated()
-            .dropFirst(index)
-        {
-            mxPrint("NEW DELETATION INDEX = \(index)")
-            if let button = button as? AXTabButton {
-                button.tag = index
-            }
+        for case let (index, button as AXTabButton) in tabStackView.arrangedSubviews.enumerated().dropFirst(index) {
+            mxPrint("DELETATION START INDEX = \(index)")
+            button.tag = index
         }
 
         updateSelectedItemIndex(after: index)

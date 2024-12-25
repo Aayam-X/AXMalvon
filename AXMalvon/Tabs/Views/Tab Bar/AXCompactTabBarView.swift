@@ -206,13 +206,9 @@ class AXCompactTabBarView: NSView, AXTabBarViewTemplate {
     // Each button has a tag, it updates the position of it
     // Called when you close a tab
     func updateIndices(after index: Int) {
-        for (index, button) in tabStackView.arrangedSubviews.enumerated()
-            .dropFirst(index)
-        {
+        for case let (index, button as AXTabButton) in tabStackView.arrangedSubviews.enumerated().dropFirst(index) {
             mxPrint("DELETATION START INDEX = \(index)")
-            if let button = button as? AXTabButton {
-                button.tag = index
-            }
+            button.tag = index
         }
 
         updateSelectedItemIndex(after: index)

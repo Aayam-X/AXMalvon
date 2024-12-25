@@ -1,11 +1,11 @@
 //
 //  AXTab.swift
-//  AXTabSystem
+//  AXMalvon
 //
-//  Created by Ashwin Paudel on 2024-11-14.
-//  Copyright © 2022-2024 Ashwin Paudel, Aayam(X). All rights reserved.
+//  Created by Ashwin Paudel on 2024-12-24.
 //
 
+import AppKit
 import Combine
 import WebKit
 
