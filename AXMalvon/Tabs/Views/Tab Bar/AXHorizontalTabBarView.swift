@@ -269,14 +269,13 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     func tabButtonWillClose(_ tabButton: AXTabButton) {
         let index = tabButton.tag
 
-        // Remove the tab from the group
         tabGroup.tabs.remove(at: index)
         tabButton.removeFromSuperview()
+        tabWidthConstraints.remove(at: index)
 
         mxPrint("DELETED TAB COUNT", tabGroup.tabs.count)
 
-        // Update indices of tabs after the removed one
-        self.updateIndices(after: index)
+        updateIndices(after: index)
     }
 
     private func addButtonToTabView(_ button: AXTabButton) {
