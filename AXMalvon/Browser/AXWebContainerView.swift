@@ -18,7 +18,7 @@ protocol AXWebContainerViewDelegate: AnyObject {
     func webContainerViewCreatesPopupWebView(config: WKWebViewConfiguration)
         -> WKWebView
 
-    func webContainerViewRequestsSidebar() -> NSView
+    func webContainerViewRequestsSidebar() -> NSView?
 }
 
 class AXWebContainerView: NSView {
@@ -331,7 +331,7 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         mxPrint("Webview finished loading")
-        
+
         delegate?.webContainerViewFinishedLoading(webView: webView)
     }
 

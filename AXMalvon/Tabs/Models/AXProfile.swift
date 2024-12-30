@@ -96,6 +96,8 @@ class AXProfile {
         }
 
         enableContentBlockers()
+
+        self.currentTabGroup = tabGroups[currentTabGroupIndex]
     }
 
     // MARK: - Profile Defaults

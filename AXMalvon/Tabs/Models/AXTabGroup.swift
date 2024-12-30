@@ -6,6 +6,7 @@
 //
 
 import AppKit
+import WebKit
 
 class AXTabGroup: Codable {
     // Essentials
@@ -29,6 +30,13 @@ class AXTabGroup: Codable {
     func addTab(_ tab: AXTab) {
         tabs.append(tab)
         tabBarView?.addTabButton(for: tab)  // Add button to tab bar view
+    }
+
+    func addEmptyTab(configuration: WKWebViewConfiguration) {
+        let tab = AXTab(
+            title: "New Tab",
+            webView: AXWebView(frame: .zero, configuration: configuration))
+        addTab(tab)
     }
 
     func switchTab(to: Int) {

@@ -11,11 +11,10 @@ import SecurityInterface
 import WebKit
 
 // MARK: - AXWindow
-class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
+class AXWindow: NSWindow, NSWindowDelegate,
     AXWebContainerViewDelegate, AXTabBarViewDelegate, AXTabHostingViewDelegate
 {
     // Window Defaults
-    lazy var windowTrafficLightLeftAnchor: NSLayoutConstraint? = nil
     lazy var usesVerticalTabs = UserDefaults.standard.bool(
         forKey: "verticalTabs")
     var hiddenSidebarView = false
@@ -34,13 +33,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         }
     }()
 
-    lazy var tabHostingView: AXTabHostingViewProtocol = {
-        if usesVerticalTabs {
-            AXVerticalTabHostingView(tabBarView: tabBarView)
-        } else {
-            AXHorizontalTabHostingView(tabBarView: tabBarView)
-        }
-    }()
+    private var layoutManager: AXWindowLayoutManaging!
 
     private lazy var visualEffectTintView: NSView = {
         let tintView = NSView()
@@ -50,7 +43,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         return tintView
     }()
 
-    private lazy var visualEffectView: NSVisualEffectView = {
+    lazy var visualEffectView: NSVisualEffectView = {
         let visualEffectView = NSVisualEffectView()
         visualEffectView.blendingMode = .behindWindow
         visualEffectView.material = .popover
@@ -83,7 +76,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
                 .closable,
                 .miniaturizable,
                 .resizable,
-                .fullSizeContentView,
+                //.fullSizeContentView,
             ],
             backing: .buffered,
             defer: false
@@ -95,42 +88,13 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
 
     private func configureWindow() {
         self.animationBehavior = .documentWindow
-        self.titlebarAppearsTransparent = true
+        // self.titlebarAppearsTransparent = true
         self.backgroundColor = .textBackgroundColor
         self.isReleasedWhenClosed = true
         self.delegate = self
 
-        configureTrafficLights()
-    }
-
-    // MARK: - Traffic Lights
-    private func configureTrafficLights() {
-        self.trafficLightButtons = [
-            self.standardWindowButton(.closeButton)!,
-            self.standardWindowButton(.miniaturizeButton)!,
-            self.standardWindowButton(.zoomButton)!,
-        ]
-
-        trafficLightsPosition()
-    }
-
-    func trafficLightsPosition() {
-        // Update positioning
-        for (index, button) in trafficLightButtons.enumerated() {
-            button.frame.origin = NSPoint(
-                x: 13.0 + CGFloat(index) * 20.0, y: -0.5)
-        }
-    }
-
-    func trafficLightsHide() {
-        trafficLightButtons.forEach { button in
-            button.isHidden = true
-        }
-    }
-
-    func trafficLightsShow() {
-        trafficLightButtons.forEach { button in
-            button.isHidden = false
+        if usesVerticalTabs {
+            configureTrafficLights()
         }
     }
 
@@ -138,17 +102,19 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
     private func setupComponents() {
         // Visual Effect View
         self.contentView = visualEffectView
-        tabHostingView.translatesAutoresizingMaskIntoConstraints = false
         containerView.translatesAutoresizingMaskIntoConstraints = false
 
-        usesVerticalTabs
-            ? setupVerticalTabLayout()
-            : setupHorizontalTabLayout()
+        layoutManager =
+            usesVerticalTabs
+            ? AXVerticalLayoutManager(tabBarView: tabBarView)
+            : AXHorizontalLayoutManager(tabBarView: tabBarView)
+
+        layoutManager.tabHostingDelegate = self
+        layoutManager.setupLayout(in: self)
+        layoutManager.searchButton.delegate = self
 
         tabBarView.delegate = self
-        tabHostingView.delegate = self
         containerView.delegate = self
-        tabHostingView.searchButton.delegate = self
 
         currentTabGroupIndex = 0
         tabBarView.updateTabGroup(currentTabGroup)
@@ -176,18 +142,6 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
     func windowDidEndLiveResize(_ notification: Notification) {
         let frameAsString = NSStringFromRect(self.frame)
         UserDefaults.standard.set(frameAsString, forKey: "windowFrame")
-    }
-
-    func windowWillExitFullScreen(_ notification: Notification) {
-        if usesVerticalTabs {
-            trafficLightsHide()
-        }
-
-        windowTrafficLightLeftAnchor?.animator().constant = 70
-    }
-
-    func windowWillEnterFullScreen(_ notification: Notification) {
-        windowTrafficLightLeftAnchor?.animator().constant = 0
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -240,8 +194,44 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         }
     }
 
+    // MARK: - Traffic Lights
+    func configureTrafficLights() {
+        self.trafficLightButtons = [
+            self.standardWindowButton(.closeButton)!,
+            self.standardWindowButton(.miniaturizeButton)!,
+            self.standardWindowButton(.zoomButton)!,
+        ]
+
+        trafficLightsPosition()
+    }
+
+    func trafficLightsPosition() {
+        guard let trafficLightButtons else { return }
+        // Update positioning
+        for (index, button) in trafficLightButtons.enumerated() {
+            button.frame.origin = NSPoint(
+                x: 13.0 + CGFloat(index) * 20.0, y: -0.5)
+        }
+    }
+
+    func trafficLightsHide() {
+        trafficLightButtons?.forEach { button in
+            button.isHidden = true
+        }
+    }
+
+    func trafficLightsShow() {
+        trafficLightButtons?.forEach { button in
+            button.isHidden = false
+        }
+    }
+
     // MARK: - Content View Events
     func toggleTabSidebar() {
+        guard let verticalTabHostingView = layoutManager.layoutView else {
+            return
+        }
+
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.25  // Adjust duration as needed
             context.allowsImplicitAnimation = true
@@ -249,11 +239,11 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
             let sideBarWillCollapsed = splitView.subviews.count == 2
             if sideBarWillCollapsed {
                 hiddenSidebarView = true
-                splitView.removeArrangedSubview(tabHostingView)
+                splitView.removeArrangedSubview(verticalTabHostingView)
                 containerView.websiteTitleLabel.isHidden = true
             } else {
                 hiddenSidebarView = false
-                splitView.insertArrangedSubview(tabHostingView, at: 0)
+                splitView.insertArrangedSubview(verticalTabHostingView, at: 0)
                 containerView.websiteTitleLabel.isHidden = false
             }
 
@@ -262,44 +252,6 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
                 isFullScreen: self.styleMask.contains(.fullScreen))
             splitView.layoutSubtreeIfNeeded()
         }
-    }
-
-    private func setupHorizontalTabLayout() {
-        visualEffectView.addSubview(tabHostingView)
-        visualEffectView.addSubview(containerView)
-
-        windowTrafficLightLeftAnchor = tabHostingView.leftAnchor.constraint(
-            equalTo: visualEffectView.leftAnchor, constant: 70)
-
-        NSLayoutConstraint.activate([
-            windowTrafficLightLeftAnchor!,
-            tabHostingView.rightAnchor.constraint(
-                equalTo: visualEffectView.rightAnchor, constant: -6),
-            tabHostingView.topAnchor.constraint(
-                equalTo: visualEffectView.topAnchor),
-            tabHostingView.heightAnchor.constraint(
-                equalToConstant: 40),
-
-            containerView.leadingAnchor.constraint(
-                equalTo: visualEffectView.leadingAnchor),
-            containerView.trailingAnchor.constraint(
-                equalTo: visualEffectView.trailingAnchor),
-            containerView.topAnchor.constraint(
-                equalTo: tabHostingView.bottomAnchor),
-            containerView.bottomAnchor.constraint(
-                equalTo: visualEffectView.bottomAnchor),
-        ])
-    }
-
-    private func setupVerticalTabLayout() {
-        splitView.frame = visualEffectView.bounds
-        splitView.autoresizingMask = [.height, .width]
-        visualEffectView.addSubview(splitView)
-
-        splitView.addArrangedSubview(tabHostingView)
-        splitView.addArrangedSubview(containerView)
-
-        tabHostingView.frame.size.width = 180
     }
 
     // MARK: - Profile/Groups Tab Functions
@@ -338,6 +290,7 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
         self.tabBarView.updateTabGroup(tabGroup)
 
         visualEffectTintView.layer?.backgroundColor = tabGroup.color.cgColor
+        layoutManager.tabGroupInfoView.updateLabels(tabGroup: tabGroup)
 
         mxPrint("Changed to Tab Group \(tabGroup.name), unknown index.")
     }
@@ -407,15 +360,15 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
 
     // MARK: - WebContainer View Delegate
     func webContainerViewChangedURL(to url: URL) {
-        tabHostingView.searchButton.fullAddress = url
+        layoutManager.searchButton.fullAddress = url
     }
 
     func webContainerViewCloses() {
         currentTabGroup.removeCurrentTab()
     }
 
-    func webContainerViewRequestsSidebar() -> NSView {
-        return tabHostingView
+    func webContainerViewRequestsSidebar() -> NSView? {
+        return layoutManager.layoutView
     }
 
     func webContainerViewCreatesPopupWebView(config: WKWebViewConfiguration)
@@ -437,10 +390,8 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
     func webContainerViewFinishedLoading(webView: WKWebView) {
         splitView.finishAnimation()
 
-        if usesVerticalTabs {
-            tabHostingView.searchButton.fullAddress =
-                containerView.currentWebView?.url
-        }
+        layoutManager.searchButton.fullAddress =
+            containerView.currentWebView?.url
 
         if let historyManager = activeProfile.historyManager,
             let title = webView.title, let url = webView.url
@@ -461,6 +412,8 @@ class AXWindow: NSWindow, NSWindowDelegate, AXSearchBarWindowDelegate,
             containerView.removeAllWebViews()
         } else {
             splitView.cancelAnimations()
+
+            layoutManager.searchButton.addressField.stringValue = ""
             containerView.updateView(webView: tabs[tabAt].webView)
         }
     }
@@ -513,7 +466,7 @@ extension AXWindow: AXWorkspaceSwapperViewDelegate {
     func didSwitchProfile(to index: Int) {
         profileIndex = profileIndex == 1 ? 0 : 1
 
-        tabHostingView.tabGroupInfoView.updateLabels(
+        layoutManager.tabGroupInfoView.updateLabels(
             tabGroup: currentTabGroup, profileName: activeProfile.name)
     }
 
@@ -539,7 +492,7 @@ extension AXWindow: AXWorkspaceSwapperViewDelegate {
 extension AXWindow: AXTabGroupCustomizerViewDelegate {
     func didUpdateTabGroup(_ tabGroup: AXTabGroup) {
         // No need to update profile name here, AXTabGroupCustomizerViewDelegate
-        tabHostingView.tabGroupInfoView.updateLabels(tabGroup: tabGroup)
+        layoutManager.tabGroupInfoView.updateLabels(tabGroup: tabGroup)
     }
 
     func didUpdateColor(_ tabGroup: AXTabGroup) {
@@ -547,7 +500,7 @@ extension AXWindow: AXTabGroupCustomizerViewDelegate {
     }
 
     func didUpdateIcon(_ tabGroup: AXTabGroup) {
-        tabHostingView.tabGroupInfoView.updateIcon(tabGroup: tabGroup)
+        layoutManager.tabGroupInfoView.updateIcon(tabGroup: tabGroup)
     }
 }
 
@@ -569,6 +522,16 @@ extension AXWindow: AXSidebarSearchButtonDelegate {
 
 // MARK: - Menu Bar Actions
 extension AXWindow {
+    @IBAction func toggleSearchField(_ sender: Any?) {
+        makeFirstResponder(
+            layoutManager.searchButton.addressField)
+    }
+
+    @IBAction func toggleSearchBarForNewTab(_ sender: Any?) {
+        currentTabGroup.addEmptyTab(configuration: activeProfile.configuration)
+        makeFirstResponder(layoutManager.searchButton.addressField)
+    }
+
     @IBAction func find(_ sender: Any) {
         containerView.webViewPerformSearch()
     }

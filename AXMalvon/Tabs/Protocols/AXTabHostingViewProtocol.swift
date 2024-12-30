@@ -18,8 +18,8 @@ protocol AXTabHostingViewDelegate: AnyObject {
     func tabHostingViewDisplaysWorkspaceSwapperPanel(_ sender: NSView)
 }
 
-protocol AXTabHostingViewProtocol: AnyObject, NSView {
-    var delegate: AXTabHostingViewDelegate? { get set }
+protocol AXTabHostingViewProtocol: AnyObject {
+    var tabHostingDelegate: AXTabHostingViewDelegate? { get set }
     var tabGroupInfoView: AXTabGroupInfoView { get }
     var searchButton: AXSidebarSearchButton { get set }
 

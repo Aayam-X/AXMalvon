@@ -13,12 +13,16 @@ protocol AXSidebarSearchButtonDelegate: AnyObject {
 }
 
 class AXSidebarSearchButton: NSButton {
+    override var intrinsicContentSize: NSSize {
+        .init(width: 300, height: 30)
+    }
+
     weak var delegate: AXSidebarSearchButtonDelegate?
-    
+
     weak var historyManager: AXHistoryManager? {
         delegate?.sidebarSearchButtonRequestsHistoryManager()
     }
-    
+
     var previousStringValueCount = 0
 
     let suggestionsWindowController = AXAddressBarWindow()
@@ -76,7 +80,8 @@ class AXSidebarSearchButton: NSButton {
     }
 
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: coder)
+        setupViews()
     }
 
     func setupViews() {
@@ -136,7 +141,6 @@ class AXSidebarSearchButton: NSButton {
 
         return isValid
     }
-
 }
 
 private var debounceInterval: TimeInterval { 0.15 }
@@ -161,10 +165,12 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
                 let filteredSuggestions = AXSearchDatabase.shared
                     .getRelevantSearchSuggestions(
                         prefix: query, minOccurrences: 3)
-                
+
                 let filteredWebsites: [String]
-                
-                if let historyResults = self.historyManager?.search(query: query) {
+
+                if let historyResults = self.historyManager?.search(
+                    query: query)
+                {
                     filteredWebsites = historyResults.map({ item in
                         return item.title + " — " + item.address
                     })
@@ -245,13 +251,14 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
         -> Bool
     {
         suggestionsWindowController.orderOut()
-        addressField.stringValue = fullAddress?.absoluteString ?? "Empty"
+        addressField.stringValue = fullAddress?.absoluteString ?? "Empty2"
         debounceWorkItem?.cancel()
 
         return true
     }
 
     func searchFieldAction() {
+        debounceWorkItem?.cancel()
         textChanges = 0
         let value = addressField.stringValue
 

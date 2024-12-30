@@ -73,7 +73,6 @@ class AXGestureView: NSView {
         searchButton.translatesAutoresizingMaskIntoConstraints = false
         searchButton.title = ""
         searchButton.target = self
-        searchButton.action = #selector(searchButtonTapped)
         addSubview(searchButton)
         NSLayoutConstraint.activate([
             searchButton.bottomAnchor.constraint(equalTo: bottomAnchor),
@@ -85,27 +84,8 @@ class AXGestureView: NSView {
         ])
     }
 
-    @objc func searchButtonTapped() {
-        guard let window = self.window as? AXWindow else { return }
-        let searchBar = AppDelegate.searchBar
-
-        searchBar.parentWindow1 = window
-        searchBar.searchBarDelegate = window
-
-        // Convert the button's frame to the screen coordinate system
-        if let buttonSuperview = searchButton.superview {
-            let buttonFrameInWindow = buttonSuperview.convert(
-                searchButton.frame, to: nil)
-            let buttonFrameInScreen = window.convertToScreen(
-                buttonFrameInWindow)
-
-            // Calculate the point just below the search button
-            let pointBelowButton = NSPoint(
-                x: buttonFrameInScreen.origin.x,
-                y: buttonFrameInScreen.origin.y - searchBar.frame.height)  // Adjust height of search bar
-
-            searchBar.showCurrentURL(at: pointBelowButton)
-        }
+    override var intrinsicContentSize: NSSize {
+        return NSSize(width: 100, height: 44)  // Adjust based on your needs
     }
 
     // MARK: - Gesture/Mouse Functions
@@ -204,26 +184,62 @@ class AXGestureView: NSView {
 
         if let trackingArea {
             self.removeTrackingArea(trackingArea)
+            self.trackingArea = nil
         }
-        trackingArea = nil
     }
 }
 
 class AXGestureStackView: NSStackView {
     weak var gestureDelegate: AXGestureViewDelegate?
-
-    // Gestures
     private var userSwipedDirection: AXGestureViewSwipeDirection?
     private var scrollEventFinished: Bool = false
-    var trackingArea: NSTrackingArea!
+    private var trackingArea: NSTrackingArea!
     var scrollWithMice: Bool = false
+
+    override var intrinsicContentSize: NSSize {
+        return NSSize(width: 200, height: 44)  // Adjust as needed
+    }
+
+    override var isFlipped: Bool {
+        return true  // Use true for top-to-bottom layout
+    }
 
     init() {
         super.init(frame: .zero)
+        setupView()
     }
 
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: coder)
+        setupView()
+    }
+
+    private func setupView() {
+        updateTrackingAreas()
+    }
+
+    override func updateTrackingAreas() {
+        if let trackingArea {
+            removeTrackingArea(trackingArea)
+        }
+        trackingArea = NSTrackingArea(
+            rect: bounds,
+            options: [.activeAlways, .mouseEnteredAndExited, .mouseMoved],
+            owner: self,
+            userInfo: nil
+        )
+        addTrackingArea(trackingArea)
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        //Bruh
+        print("bruh")
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        //Bruh2
+        print("bruh2")
+
     }
 
     func handleScrollEnd() {
@@ -244,7 +260,6 @@ class AXGestureStackView: NSStackView {
             return  // Cancelled, exit early
         case .ended where !scrollEventFinished,
             .ended where event.momentumPhase == .ended:
-            mxPrint("Scroll ended")
             handleScrollEnd()
             return
         default:
@@ -262,3 +277,112 @@ class AXGestureStackView: NSStackView {
         }
     }
 }
+
+//class AXGestureStackView: NSStackView {
+//    weak var gestureDelegate: AXGestureViewDelegate?
+//
+//    // Gestures
+//    private var userSwipedDirection: AXGestureViewSwipeDirection?
+//    private var scrollEventFinished: Bool = false
+//    private var trackingArea: NSTrackingArea!
+//    var scrollWithMice: Bool = false
+//
+//    override var isFlipped: Bool {
+//        return true
+//    }
+//
+//    // MARK: - Initialization
+//
+//    init() {
+//        super.init(frame: .zero)
+//        setupView()
+//    }
+//
+//    required init?(coder: NSCoder) {
+//        super.init(coder: coder)
+//        setupView()
+//    }
+//
+//    // MARK: - View Setup
+//
+//    private func setupView() {
+//        translatesAutoresizingMaskIntoConstraints = false
+//
+//      // Set proper content hugging and compression resistance for toolbar
+//        setContentHuggingPriority(.defaultHigh, for: .horizontal)
+//        setContentHuggingPriority(.defaultHigh, for: .vertical)
+//        setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+//        setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
+//
+//        // Set proper size constraints for toolbar
+//        let heightConstraint = heightAnchor.constraint(equalToConstant: 28)
+//        heightConstraint.priority = .defaultHigh
+//        heightConstraint.isActive = true
+//
+//        // Setup tracking area for mouse events
+//        setupTrackingArea()
+//    }
+//
+//    private func setupTrackingArea() {
+//        trackingArea = NSTrackingArea(
+//            rect: bounds,
+//            options: [.activeAlways, .mouseEnteredAndExited, .mouseMoved],
+//            owner: self,
+//            userInfo: nil
+//        )
+//        addTrackingArea(trackingArea)
+//    }
+//
+//    // MARK: - Layout
+//
+//    override var intrinsicContentSize: NSSize {
+//        // Provide proper intrinsic content size for toolbar
+//        return NSSize(width: NSView.noIntrinsicMetric, height: 28)
+//    }
+//
+//    override func layout() {
+//        super.layout()
+//        // Update tracking area when view layout changes
+//        if let existingTrackingArea = trackingArea {
+//            removeTrackingArea(existingTrackingArea)
+//        }
+//        setupTrackingArea()
+//    }
+//
+//    // MARK: - Gesture Handling
+//
+//    func handleScrollEnd() {
+//        scrollEventFinished = true
+//        gestureDelegate?.gestureView(didSwipe: userSwipedDirection)
+//        userSwipedDirection = nil
+//    }
+//
+//    override func scrollWheel(with event: NSEvent) {
+//        let x = event.deltaX
+//        let y = event.deltaY
+//
+//        // Update scroll event phase state
+//        switch event.phase {
+//        case .began:
+//            scrollEventFinished = false
+//        case .mayBegin:
+//            return  // Cancelled, exit early
+//        case .ended where !scrollEventFinished,
+//             .ended where event.momentumPhase == .ended:
+//            handleScrollEnd()
+//            return
+//        default:
+//            break
+//        }
+//
+//        // Determine if scrolling is from a mouse
+//        scrollWithMice = event.phase == [] && event.momentumPhase == []
+//
+//        // Handle directional scroll
+//        if x != 0 {
+//            userSwipedDirection = x > 0 ? .backwards : .forwards
+//        } else if y != 0 {
+//            userSwipedDirection = y > 0 ? .reload : .nothing
+//        }
+//    }
+//}

@@ -132,6 +132,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
 
         addButtonToTabView(button)
         button.startObserving()
+        button.favicon = tab.icon
     }
 
     func updateIndices(after index: Int) {

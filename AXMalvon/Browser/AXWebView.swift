@@ -24,7 +24,7 @@ class AXWebView: WKWebView {
 
     override func otherMouseDown(with event: NSEvent) {
         // Support for the Logitech MX Master 3s Mouse
-        
+
         switch event.buttonNumber {
         case 3:
             goBack()
@@ -36,5 +36,16 @@ class AXWebView: WKWebView {
         }
 
         super.otherMouseDown(with: event)
+    }
+
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        if event.modifierFlags.contains(.command)
+            && event.charactersIgnoringModifiers == "w"
+        {
+            self.uiDelegate?.webViewDidClose?(self)
+            return true
+        }
+
+        return super.performKeyEquivalent(with: event)
     }
 }

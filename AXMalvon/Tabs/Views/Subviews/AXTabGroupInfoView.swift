@@ -26,18 +26,16 @@ class AXTabGroupInfoView: NSView {
     private lazy var tabGroupLabel: NSTextField = {
         let label = NSTextField(labelWithString: "Untitled Group")
         label.font = .titleBarFont(ofSize: 14)
-        label.translatesAutoresizingMaskIntoConstraints = false
         label.usesSingleLineMode = true
         label.drawsBackground = false
         label.lineBreakMode = .byTruncatingTail
         return label
     }()
 
-    private lazy var profileLabel: NSTextField = {
+    lazy var profileLabel: NSTextField = {
         let label = NSTextField(labelWithString: "Default")
         label.font = .messageFont(ofSize: 11)
         label.textColor = NSColor.gray
-        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
 
@@ -97,6 +95,8 @@ class AXTabGroupInfoView: NSView {
 
     @MainActor
     func updateLabels(tabGroup: AXTabGroup) {
+        self.tabGroupLabel.stringValue = tabGroup.name
+
         updateIcon(tabGroup.icon)
     }
 

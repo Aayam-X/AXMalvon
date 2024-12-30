@@ -13,7 +13,7 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
     AXGestureViewDelegate
 {
     var tabBarView: any AXTabBarViewTemplate
-    var delegate: (any AXTabHostingViewDelegate)?
+    var tabHostingDelegate: (any AXTabHostingViewDelegate)?
 
     var tabGroupInfoView: AXTabGroupInfoView = AXTabGroupInfoView()
     var searchButton: AXSidebarSearchButton = AXSidebarSearchButton()
@@ -173,29 +173,29 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
     }
 
     @objc func addNewTab() {
-        guard let appDelegate = NSApp.delegate as? AppDelegate else { return }
+        guard let window = self.window as? AXWindow else { return }
 
-        appDelegate.toggleSearchBarForNewTab(nil)
+        window.toggleSearchBarForNewTab(nil)
     }
 
     @objc func showWorkspaceSwapper() {
-        delegate?.tabHostingViewDisplaysWorkspaceSwapperPanel(
+        tabHostingDelegate?.tabHostingViewDisplaysWorkspaceSwapperPanel(
             workspaceSwapperButton)
     }
 
     func showTabGroupCustomizer() {
-        delegate?.tabHostingViewDisplaysTabGroupCustomizationPanel(
+        tabHostingDelegate?.tabHostingViewDisplaysTabGroupCustomizationPanel(
             tabGroupInfoView)
     }
 
     func gestureView(didSwipe direction: AXGestureViewSwipeDirection!) {
         switch direction {
         case .backwards:
-            delegate?.tabHostingViewNavigateBackwards()
+            tabHostingDelegate?.tabHostingViewNavigateBackwards()
         case .forwards:
-            delegate?.tabHostingViewNavigateForward()
+            tabHostingDelegate?.tabHostingViewNavigateForward()
         case .reload:
-            delegate?.tabHostingViewReloadCurrentPage()
+            tabHostingDelegate?.tabHostingViewReloadCurrentPage()
         case .nothing, nil:
             break
         }

@@ -21,7 +21,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // Main Browser Window + Search Bar
     weak var window: AXWindow?
-    static var searchBar = AXSearchBarWindow()
 
     let launchedBefore = UserDefaults.standard.bool(
         forKey: "launchedBefore")
@@ -84,24 +83,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         window!.makeKeyAndOrderFront(nil)
         return true
-    }
-
-    @IBAction func toggleSearchField(_ sender: Any?) {
-        guard let keyWindow = NSApplication.shared.keyWindow as? AXWindow else {
-            return
-        }
-        keyWindow.makeFirstResponder(
-            keyWindow.tabHostingView.searchButton.addressField)
-    }
-
-    @IBAction func toggleSearchBarForNewTab(_ sender: Any?) {
-        guard let keyWindow = NSApplication.shared.keyWindow as? AXWindow else {
-            return
-        }
-        AppDelegate.searchBar.parentWindow1 = keyWindow
-        AppDelegate.searchBar.searchBarDelegate = keyWindow
-
-        AppDelegate.searchBar.show()
     }
 
     @IBAction func newWindow(_ sender: Any?) {

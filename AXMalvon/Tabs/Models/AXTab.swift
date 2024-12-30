@@ -12,7 +12,7 @@ import WebKit
 class AXTab: Codable {
     var url: URL?
     var title: String = "Untitled Tab"
-    weak var icon: NSImage?
+    var icon: NSImage?
 
     var titleObserver: Cancellable? = nil
 
@@ -75,7 +75,7 @@ class AXTab: Codable {
                 let displayTitle = title ?? "Untitled"
 
                 // Efficiently handle URL and favicon updates
-                if self.title != displayTitle {
+                if !displayTitle.isEmpty, self.title != displayTitle {
                     self.updateTabURLAndFavicon(
                         for: webView, tabButton: tabButton)
                 }
@@ -129,8 +129,10 @@ extension AXTab {
                     AX_FAVICON_SCRIPT) as? String,
                     let faviconURL = URL(string: faviconURLString)
                 {
-                    tabButton.favicon = try await quickFaviconDownload(
+                    let favicon = try await quickFaviconDownload(
                         from: faviconURL)
+                    tabButton.favicon = favicon
+                    self.icon = favicon
                 } else {
                     tabButton.favicon = nil
                 }

@@ -61,7 +61,9 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        super.init(coder: coder)
+        configure()
+        widthOfCurrentBounds = bounds.width
     }
 
     override func layout() {
@@ -98,9 +100,17 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         scrollView.documentView = tabStackView
         setupTabStackView()
 
-        // Delaying the initial scrolls kinda makes it look better idk how to explain
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.81) { [weak self] in
-            self?.scrollToTab(at: self?.tabGroup.selectedIndex ?? 0)
+        //        // Delaying the initial scrolls kinda makes it look better idk how to explain
+        //        DispatchQueue.main.asyncAfter(deadline: .now() + 0.81) { [weak self] in
+        //            self?.scrollToTab(at: self?.tabGroup.selectedIndex ?? 0)
+        //        }
+    }
+
+    override var intrinsicContentSize: NSSize {
+        if let screen = NSScreen.main {
+            return .init(width: screen.frame.width / 2.5, height: 44)
+        } else {
+            return .init(width: 100, height: 44)
         }
     }
 
@@ -362,7 +372,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
 // MARK: - Sticky Tab Functions
 extension AXHorizontalTabBarView {
     private func updateStickyTabs() {
-        guard !tabGroup.tabs.isEmpty,
+        guard let tabGroup, !tabGroup.tabs.isEmpty,
             let currentTab = tabStackView.arrangedSubviews[
                 tabGroup.selectedIndex] as? AXTabButton
         else { return }
