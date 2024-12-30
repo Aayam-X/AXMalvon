@@ -21,7 +21,7 @@ class AXWindow: NSWindow, NSWindowDelegate,
     private var trafficLightButtons: [NSButton]!
 
     // Other Views
-    lazy var splitView = AXQuattroProgressSplitView()
+    lazy var splitView = NSSplitView()
     lazy var containerView = AXWebContainerView(isVertical: usesVerticalTabs)
 
     // Lazy loading to stop unnecesary initilizations
@@ -290,6 +290,7 @@ class AXWindow: NSWindow, NSWindowDelegate,
         self.tabBarView.updateTabGroup(tabGroup)
 
         visualEffectTintView.layer?.backgroundColor = tabGroup.color.cgColor
+        self.backgroundColor = tabGroup.color.withAlphaComponent(1)
         layoutManager.tabGroupInfoView.updateLabels(tabGroup: tabGroup)
 
         mxPrint("Changed to Tab Group \(tabGroup.name), unknown index.")
@@ -383,13 +384,7 @@ class AXWindow: NSWindow, NSWindowDelegate,
         return newWebView
     }
 
-    func webContainerViewProgressUpdated(with progress: Double) {
-        splitView.beginAnimation(with: progress)
-    }
-
     func webContainerViewFinishedLoading(webView: WKWebView) {
-        splitView.finishAnimation()
-
         layoutManager.searchButton.fullAddress =
             containerView.currentWebView?.url
 
@@ -411,8 +406,6 @@ class AXWindow: NSWindow, NSWindowDelegate,
         if tabAt == -1 {
             containerView.removeAllWebViews()
         } else {
-            splitView.cancelAnimations()
-
             layoutManager.searchButton.addressField.stringValue = ""
             containerView.updateView(webView: tabs[tabAt].webView)
         }

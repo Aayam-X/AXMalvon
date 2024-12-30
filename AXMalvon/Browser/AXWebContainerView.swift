@@ -11,7 +11,6 @@ import WebKit
 
 protocol AXWebContainerViewDelegate: AnyObject {
     func webContainerViewFinishedLoading(webView: WKWebView)
-    func webContainerViewProgressUpdated(with progress: Double)
     func webContainerViewChangedURL(to url: URL)
     func webContainerViewCloses()
 
@@ -29,7 +28,7 @@ class AXWebContainerView: NSView {
     weak var currentWebView: AXWebView?
 
     let splitViewContainer = NSView()
-    private lazy var splitView = AXWebContainerSplitView()
+    private lazy var splitView = AXQuattroProgressSplitView()
 
     var sidebarTrackingArea: NSTrackingArea!
     var isAnimating: Bool = false
@@ -159,6 +158,7 @@ class AXWebContainerView: NSView {
     }
 
     func updateView(webView: AXWebView) {
+        splitView.cancelAnimations()
         splitView.arrangedSubviews.forEach(splitView.removeArrangedSubview)
 
         self.currentWebView = webView
@@ -312,7 +312,7 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
 {
 
     func updateProgress(_ value: Double) {
-        delegate?.webContainerViewProgressUpdated(with: value)
+        splitView.beginAnimation(with: value)
     }
 
     func createEmptyView() {
@@ -331,6 +331,7 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         mxPrint("Webview finished loading")
+        splitView.finishAnimation()
 
         delegate?.webContainerViewFinishedLoading(webView: webView)
     }

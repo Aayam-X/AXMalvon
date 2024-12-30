@@ -17,16 +17,40 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         qos: .userInitiated
     )
 
+    override var isFlipped: Bool {
+        true
+    }
+
     private let borderLayers: [CAShapeLayer] = {
-        return (0..<4).map { _ in
-            let layer = CAShapeLayer()
-            layer.lineWidth = 6.0
-            layer.strokeColor =
-                NSColor.textColor.withAlphaComponent(0.3).cgColor
-            layer.isHidden = true
-            layer.opacity = 0.0
-            return layer
-        }
+        let layer = CAShapeLayer()
+        layer.lineWidth = 9.0
+        layer.strokeColor =
+            NSColor.controlAccentColor.withAlphaComponent(0.2).cgColor
+        layer.isHidden = true
+        layer.opacity = 0.0
+
+        let layer1 = CAShapeLayer()
+        layer1.lineWidth = 3.0
+        layer1.strokeColor =
+            NSColor.controlAccentColor.withAlphaComponent(0.2).cgColor
+        layer1.isHidden = true
+        layer1.opacity = 0.0
+
+        let layer2 = CAShapeLayer()
+        layer2.lineWidth = 9.0
+        layer2.strokeColor =
+            NSColor.controlAccentColor.withAlphaComponent(0.2).cgColor
+        layer2.isHidden = true
+        layer2.opacity = 0.0
+
+        let layer3 = CAShapeLayer()
+        layer3.lineWidth = 9.0
+        layer3.strokeColor =
+            NSColor.controlAccentColor.withAlphaComponent(0.2).cgColor
+        layer3.isHidden = true
+        layer3.opacity = 0.0
+
+        return [layer, layer1, layer2, layer3]
     }()
 
     private var currentProgress: CGFloat = 0.0
