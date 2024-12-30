@@ -144,66 +144,40 @@ class AXSidebarSearchButton: NSButton {
 
         return isValid
     }
-}
 
-private var debounceInterval: TimeInterval { 0.15 }
-private var debounceWorkItem: DispatchWorkItem?
-private var textChanges: Int = 0
+    lazy var suggestionsManager: SuggestionsManager = {
+        let manager = SuggestionsManager(
+            historyManager: delegate!
+                .sidebarSearchButtonRequestsHistoryManager())
+        manager.onQueryUpdated = onQueryUpdated
+        manager.onTopSearchesUpdated = onTopSearchesUpdated
+        manager.onHistoryUpdated = onHistoryUpdated
+        manager.onGoogleSuggestionsUpdated = onGoogleSuggestionsUpdated
+
+        return manager
+    }()
+}
 
 // MARK: - Search Suggestions
 extension AXSidebarSearchButton: NSTextFieldDelegate {
+    // Split callback functions for each type of update
+    func onQueryUpdated(_ query: String) {
+        suggestionsWindowController.currentQuery = query
+    }
+    func onTopSearchesUpdated(_ searches: [String]) {
+        suggestionsWindowController.topSiteItems = searches
+    }
+    func onHistoryUpdated(_ history: [(title: String, url: String)]) {
+        suggestionsWindowController.historyItems = history
+    }
+    func onGoogleSuggestionsUpdated(_ suggestions: [String]) {
+        suggestionsWindowController.googleSearchItems = suggestions
+    }
+
     func controlTextDidChange(_ obj: Notification) {
         let query = addressField.stringValue
-
-        // Cancel the previous debounce work item
-        debounceWorkItem?.cancel()
-
-        // Create a new debounce work item
-        let workItem = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
-
-            // Fetch Google suggestions asynchronously
-            fetchGoogleSuggestions(for: query) { googleSuggestions in
-                // Fetch filtered suggestions and websites
-                let filteredSuggestions = AXSearchDatabase.shared
-                    .getRelevantSearchSuggestions(
-                        prefix: query, minOccurrences: 3)
-
-                let filteredWebsites: [String]
-
-                if let historyResults = self.historyManager?.search(
-                    query: query)
-                {
-                    filteredWebsites = historyResults.map({ item in
-                        return item.title + " — " + item.address
-                    })
-                } else {
-                    filteredWebsites = []
-                }
-
-                // Update suggestions window on the main thread
-                DispatchQueue.main.async {
-                    self.suggestionsWindowController.showSuggestions(
-                        topSearches: filteredSuggestions,
-                        history: filteredWebsites,
-                        googleSuggestions: googleSuggestions,
-                        for: self.addressField
-                    )
-                }
-            }
-        }
-
-        // Save the new work item
-        debounceWorkItem = workItem
-
-        if textChanges < 3 {
-            textChanges += 1
-            DispatchQueue.main.async(execute: workItem)
-        } else {
-            // Schedule the work item with a delay
-            DispatchQueue.main.asyncAfter(
-                deadline: .now() + debounceInterval, execute: workItem)
-        }
+        suggestionsManager.updateSuggestions(with: query)
+        suggestionsWindowController.showSuggestions(for: self.addressField)
     }
 
     func control(
@@ -255,14 +229,11 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
     {
         suggestionsWindowController.orderOut()
         addressField.stringValue = fullAddress?.absoluteString ?? "Empty2"
-        debounceWorkItem?.cancel()
 
         return true
     }
 
     func searchFieldAction() {
-        debounceWorkItem?.cancel()
-        textChanges = 0
         let value = addressField.stringValue
 
         // Section 1: Handle File URLs

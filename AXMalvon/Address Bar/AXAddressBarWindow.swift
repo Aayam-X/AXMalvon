@@ -7,30 +7,54 @@
 
 import AppKit
 
-private enum Section: Int, CaseIterable {
-    case topSites
-    case history
-    case googleSearch
-
-    var title: String {
-        switch self {
-        case .topSites: return "Top Searches"
-        case .history: return "History"
-        case .googleSearch: return "Google Search"
-        }
-    }
-}
-
+// MARK: - Main Window Class
 class AXAddressBarWindow: NSPanel, NSWindowDelegate {
-    private var searchSuggestions: [Section: [String]] = [
-        .topSites: [],
-        .history: [],
-        .googleSearch: [],
-    ]
-
+    // MARK: - Section Data Arrays
+    // MARK: - UI Components
     private let scrollView = NSScrollView()
+    private lazy var tableView: NSTableView = createTableView()
 
-    private lazy var tableView: NSTableView = {
+    var suggestionItemClickAction: ((String) -> Void)?
+
+    // MARK: - Initialization
+    init() {
+        super.init(
+            contentRect: .zero,
+            styleMask: [.borderless, .fullSizeContentView],
+            backing: .buffered,
+            defer: false
+        )
+
+        setupWindow()
+        setupScrollView()
+        setupConstraints()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    // MARK: - Setup Methods
+    private func setupWindow() {
+        backgroundColor = .clear
+        isMovable = false
+        delegate = self
+    }
+
+    private func setupScrollView() {
+        scrollView.wantsLayer = true
+        scrollView.layer?.cornerRadius = 10.0
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        scrollView.documentView = tableView
+        scrollView.drawsBackground = false
+        scrollView.hasVerticalScroller = true
+        contentView = scrollView
+
+        tableView.backgroundColor = .gridColor
+        tableView.usesAlternatingRowBackgroundColors = false
+    }
+
+    private func createTableView() -> NSTableView {
         let t = NSTableView()
         t.translatesAutoresizingMaskIntoConstraints = false
         t.addTableColumn(
@@ -40,47 +64,13 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
         t.dataSource = self
         t.delegate = self
         t.headerView = nil
-        t.usesAlternatingRowBackgroundColors = true
         t.target = self
         t.action = #selector(onItemClicked)
         t.style = .sourceList
         return t
-    }()
-
-    @objc private func onItemClicked() {
-        if let currentSuggestion = self.currentSuggestion {
-            self.suggestionItemClickAction?(currentSuggestion)
-            self.orderOut()
-        }
     }
 
-    var suggestionItemClickAction: ((String) -> Void)?
-
-    init() {
-        super.init(
-            contentRect: .zero,
-            styleMask: [
-                .borderless,
-                .fullSizeContentView,
-            ],
-            backing: .buffered,
-            defer: false
-        )
-
-        self.backgroundColor = .clear
-        isMovable = false
-        self.delegate = self
-
-        scrollView.wantsLayer = true
-        scrollView.layer?.cornerRadius = 10.0
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.documentView = tableView
-        scrollView.drawsBackground = false
-        tableView.backgroundColor = .gridColor
-        tableView.usesAlternatingRowBackgroundColors = false
-        scrollView.hasVerticalScroller = true
-        contentView = scrollView
-
+    private func setupConstraints() {
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(
                 equalTo: scrollView.contentView.topAnchor),
@@ -93,55 +83,58 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
         ])
     }
 
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    // MARK: - Actions
+    @objc private func onItemClicked() {
+        if let suggestion = currentSuggestion {
+            suggestionItemClickAction?(suggestion)
+            orderOut()
+        }
     }
 
+    // MARK: - Public Methods
     func orderOut() {
         tableView.deselectAll(nil)
         super.orderOut(nil)
     }
 
-    func showSuggestions(
-        topSearches: [String], history: [String], googleSuggestions: [String],
-        for textField: NSTextField
-    ) {
-        searchSuggestions[.topSites] = topSearches
-        searchSuggestions[.history] = history
-        searchSuggestions[.googleSearch] = googleSuggestions
-
-        let totalItems = Section.allCases.reduce(0) { count, section in
-            return count + (searchSuggestions[section]?.count ?? 0)
-                + (searchSuggestions[section]?.isEmpty == false ? 1 : 0)
-        }
-
-        if totalItems == 0 {
+    func showSuggestions(for textField: NSTextField) {
+        if !shouldShowWindow {
             orderOut()
             return
         }
 
+        updateWindowPosition(for: textField)
+        tableView.reloadData()
+        moveTo(position: 0)
+    }
+
+    private var shouldShowWindow: Bool {
+        return 1 + topSiteItems.count + historyItems.count
+            + googleSearchItems.count > 0
+    }
+
+    private func updateWindowPosition(for textField: NSTextField) {
         guard let textFieldWindow = textField.window else { return }
         var textFieldRect = textField.convert(textField.bounds, to: nil)
         textFieldRect = textFieldWindow.convertToScreen(textFieldRect)
         textFieldRect.origin.y -= 5
+
         setFrameTopLeftPoint(textFieldRect.origin)
 
         var frame = self.frame
         frame.size.width = textField.frame.width * 2
-
         setFrame(frame, display: false)
-        textFieldWindow.addChildWindow(self, ordered: .above)
 
-        tableView.reloadData()
-        moveTo(position: 1)
+        textFieldWindow.addChildWindow(self, ordered: .above)
     }
 
+    // MARK: - Navigation Methods
     func moveUp() {
         var selectedRow = tableView.selectedRow - 1
         while selectedRow >= 0 && isHeaderRow(selectedRow) {
             selectedRow -= 1
         }
-        if selectedRow >= 0 {  // Ensure a valid row is selected
+        if selectedRow >= 0 {
             tableView.selectRowIndexes(
                 IndexSet(integer: selectedRow), byExtendingSelection: false)
         } else {
@@ -165,31 +158,49 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
             byExtendingSelection: false)
     }
 
+    // MARK: - Helper Methods
     private func isHeaderRow(_ row: Int) -> Bool {
         var currentIndex = 0
-        for section in Section.allCases {
-            guard let sectionData = searchSuggestions[section],
-                !sectionData.isEmpty
-            else {
-                continue
-            }
 
-            // Header row
-            if row == currentIndex {
-                return true
-            }
+        // Current query section (no header)
+        currentIndex += 1
 
-            currentIndex += 1 + sectionData.count
+        // Top sites section
+        if !topSiteItems.isEmpty && row == currentIndex {
+            return true
+        }
+        currentIndex += topSiteItems.count + (topSiteItems.isEmpty ? 0 : 1)
+
+        // History section
+        if !historyItems.isEmpty && row == currentIndex {
+            return true
+        }
+        currentIndex += historyItems.count + (historyItems.isEmpty ? 0 : 1)
+
+        // Google search section
+        if !googleSearchItems.isEmpty && row == currentIndex {
+            return true
         }
 
         return false
     }
 
     private var totalRows: Int {
-        return Section.allCases.reduce(0) { count, section in
-            return count + (searchSuggestions[section]?.count ?? 0)
-                + (searchSuggestions[section]?.isEmpty == false ? 1 : 0)
+        var count = 1
+
+        if !topSiteItems.isEmpty {
+            count += 1 + topSiteItemCount
         }
+
+        if !historyItems.isEmpty {
+            count += 1 + historyItemCount
+        }
+
+        if !googleSearchItems.isEmpty {
+            count += 1 + googleSearchItemCount
+        }
+
+        return count
     }
 
     var currentSuggestion: String? {
@@ -197,99 +208,203 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
         guard selectedRow >= 0 else { return nil }
 
         var currentIndex = 0
-        for section in Section.allCases {
-            guard let sectionData = searchSuggestions[section],
-                !sectionData.isEmpty
-            else {
-                continue
-            }
-            // Skip header row
-            currentIndex += 1
 
-            // Check if selection is in current section
-            if selectedRow < currentIndex + sectionData.count {
-                return sectionData[selectedRow - currentIndex]
-            }
+        // Check current query section
+        if selectedRow < 1 {
+            return currentQuery
+        }
+        currentIndex += 1
 
-            currentIndex += sectionData.count
+        // Check top sites section
+        if !topSiteItems.isEmpty {
+            currentIndex += 1  // Header
+            if selectedRow < currentIndex + topSiteItems.count {
+                return topSiteItems[selectedRow - currentIndex]
+            }
+            currentIndex += topSiteItems.count
+        }
+
+        // Check history section
+        if !historyItems.isEmpty {
+            currentIndex += 1  // Header
+            if selectedRow < currentIndex + historyItems.count {
+                return historyItems[selectedRow - currentIndex].url
+            }
+            currentIndex += historyItems.count
+        }
+
+        // Check google search section
+        if !googleSearchItems.isEmpty {
+            currentIndex += 1  // Header
+            if selectedRow < currentIndex + googleSearchItems.count {
+                return googleSearchItems[selectedRow - currentIndex]
+            }
         }
 
         return nil
     }
-}
 
-extension AXAddressBarWindow: NSTableViewDataSource {
-    func numberOfRows(in tableView: NSTableView) -> Int {
-        return totalRows
+    private var topSiteItemCount: Int = 0
+    private var historyItemCount: Int = 0
+    private var googleSearchItemCount: Int = 0
+
+    private func reloadTableViewRow(_ row: Int) {
+        guard row < tableView.numberOfRows else { return }
+        tableView.reloadData(
+            forRowIndexes: IndexSet(integer: row), columnIndexes: IndexSet())
+    }
+
+    private func reloadTopSiteItems() {
+        guard topSiteItemCount > 0 else { return }
+        let range = 1..<(1 + topSiteItemCount)
+        guard range.upperBound <= tableView.numberOfRows else { return }
+        tableView.reloadData(
+            forRowIndexes: IndexSet(integersIn: range),
+            columnIndexes: IndexSet())
+    }
+
+    private func reloadHistoryItems() {
+        guard historyItemCount > 0 else { return }
+        let start = 1 + topSiteItemCount
+        let range = start..<(start + historyItemCount)
+        guard range.upperBound <= tableView.numberOfRows else { return }
+        tableView.reloadData(
+            forRowIndexes: IndexSet(integersIn: range),
+            columnIndexes: IndexSet())
+    }
+
+    private func reloadGoogleSearchItems() {
+        guard googleSearchItemCount > 0 else { return }
+        let start = 1 + topSiteItemCount + historyItemCount
+        let range = start..<(start + googleSearchItemCount)
+        guard range.upperBound <= tableView.numberOfRows else { return }
+        tableView.reloadData(
+            forRowIndexes: IndexSet(integersIn: range),
+            columnIndexes: IndexSet())
+    }
+
+    var currentQuery: String = "" {
+        didSet {
+            reloadTableViewRow(0)
+        }
+    }
+
+    var topSiteItems: [String] = [] {
+        didSet {
+            topSiteItemCount = topSiteItems.count
+            reloadTopSiteItems()
+        }
+    }
+
+    var historyItems: [(title: String, url: String)] = [] {
+        didSet {
+            historyItemCount = historyItems.count
+            reloadHistoryItems()
+        }
+    }
+
+    var googleSearchItems: [String] = [] {
+        didSet {
+            googleSearchItemCount = googleSearchItems.count
+            tableView.reloadData()
+            moveTo(position: 0)
+        }
     }
 }
 
-extension AXAddressBarWindow: NSTableViewDelegate {
+// MARK: - TableView DataSource & Delegate
+extension AXAddressBarWindow: NSTableViewDataSource, NSTableViewDelegate {
+    func numberOfRows(in tableView: NSTableView) -> Int {
+        return totalRows
+    }
+
     func tableView(
         _ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int
     ) -> NSView? {
         var currentIndex = 0
 
-        for section in Section.allCases {
-            guard let sectionData = searchSuggestions[section],
-                !sectionData.isEmpty
-            else {
-                continue
-            }
+        // Current query section
+        if row < 1 {
+            return createSuggestionCell(for: currentQuery, at: row)
+        }
+        currentIndex += 1
 
-            // Header row
+        // Top sites section
+        if !topSiteItems.isEmpty {
             if row == currentIndex {
-                let headerView = AXAddressBarSectionHeaderView(frame: .zero)
-                headerView.titleLabel.stringValue = section.title
-                return headerView
+                return createHeaderView(with: "Top Sites")
             }
-
             currentIndex += 1
-
-            // Check if row is in current section
-            if row < currentIndex + sectionData.count {
-                let suggestion = sectionData[row - currentIndex]
-                let cellIdentifier = NSUserInterfaceItemIdentifier(
-                    "AddressBarSuggestion")
-                let cell =
-                    tableView.makeView(
-                        withIdentifier: cellIdentifier, owner: self)
-                    as? AXAddressBarSuggestionCellView
-                    ?? AXAddressBarSuggestionCellView(frame: .zero)
-
-                cell.identifier = cellIdentifier
-                cell.configure(with: suggestion)
-                cell.onMouseEnter = { [weak self] in
-                    self?.moveTo(position: row)
-                }
-
-                return cell
+            if row < currentIndex + topSiteItems.count {
+                return createSuggestionCell(
+                    for: topSiteItems[row - currentIndex], at: row)
             }
+            currentIndex += topSiteItems.count
+        }
 
-            currentIndex += sectionData.count
+        // History section
+        if !historyItems.isEmpty {
+            if row == currentIndex {
+                return createHeaderView(with: "History")
+            }
+            currentIndex += 1
+            if row < currentIndex + historyItems.count {
+                return createSuggestionCell(
+                    for: historyItems[row - currentIndex], at: row)
+            }
+            currentIndex += historyItems.count
+        }
+
+        // Google search section
+        if !googleSearchItems.isEmpty {
+            if row == currentIndex {
+                return createHeaderView(with: "Google Search")
+            }
+            currentIndex += 1
+            if row < currentIndex + googleSearchItems.count {
+                return createSuggestionCell(
+                    for: googleSearchItems[row - currentIndex], at: row)
+            }
         }
 
         return nil
     }
 
-    func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
-        var currentIndex = 0
+    private func createHeaderView(with name: String) -> NSView {
+        let headerView = AXAddressBarSectionHeaderView(frame: .zero)
+        headerView.titleLabel.stringValue = name
+        return headerView
+    }
 
-        for section in Section.allCases {
-            guard let sectionData = searchSuggestions[section],
-                !sectionData.isEmpty
-            else {
-                continue
-            }
+    private func createSuggestionCell(for suggestion: Any, at row: Int)
+        -> NSView
+    {
+        let cellIdentifier = NSUserInterfaceItemIdentifier(
+            "AddressBarSuggestion")
+        let cell =
+            tableView.makeView(withIdentifier: cellIdentifier, owner: self)
+            as? AXAddressBarSuggestionCellView
+            ?? AXAddressBarSuggestionCellView(frame: .zero)
 
-            // Header row
-            if row == currentIndex {
-                return 30  // Header height
-            }
+        cell.identifier = cellIdentifier
 
-            currentIndex += 1 + sectionData.count
+        if let historyItem = suggestion as? (title: String, url: String) {
+            cell.configure(title: historyItem.title, subtitle: historyItem.url)
+        } else if let stringValue = suggestion as? String {
+            cell.configure(title: stringValue)
         }
 
+        cell.onMouseEnter = { [weak self] in
+            self?.moveTo(position: row)
+        }
+
+        return cell
+    }
+
+    func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
+        if isHeaderRow(row) {
+            return 30  // Header height
+        }
         return 24  // Regular cell height
     }
 }
@@ -324,62 +439,42 @@ class AXAddressBarSectionHeaderView: NSTableCellView {
     }
 }
 
+// MARK: - Cell Views
 class AXAddressBarSuggestionCellView: NSTableCellView {
-    //  let titleLabel: NSTextField
-    let addressLabel: NSTextField
+    // MARK: - Properties
+    let titleLabel: NSTextField
+    let subtitleLabel: NSTextField
     let faviconImageView: NSImageView
-    private var currentTask: URLSessionDataTask?
-
     var trackingArea: NSTrackingArea!
     var onMouseEnter: (() -> Void)?
 
+    // MARK: - Initialization
     override init(frame frameRect: NSRect) {
-        addressLabel = NSTextField(labelWithString: "Suggestion")
-        //   titleLabel = NSTextField(labelWithString: "")
-
+        titleLabel = NSTextField(labelWithString: "")
+        subtitleLabel = NSTextField(labelWithString: "")
         faviconImageView = NSImageView(
             image: NSImage(named: NSImage.iconViewTemplateName)!)
+
         super.init(frame: frameRect)
+
         setupView()
-
-        setTrackingArea()
-    }
-
-    override func mouseEntered(with event: NSEvent) {
-        super.mouseEntered(with: event)
-
-        onMouseEnter?()
-    }
-
-    func setTrackingArea() {
-        let options: NSTrackingArea.Options = [
-            .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
-        ]
-        trackingArea = NSTrackingArea.init(
-            rect: self.bounds, options: options, owner: self, userInfo: nil)
-        self.addTrackingArea(trackingArea)
-    }
-
-    deinit {
-        self.removeTrackingArea(trackingArea)
+        setupTrackingArea()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // MARK: - Setup
     private func setupView() {
-        addressLabel.font = NSFont.systemFont(ofSize: 14, weight: .regular)
-        addressLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.font = NSFont.systemFont(ofSize: 14, weight: .regular)
+        subtitleLabel.font = NSFont.systemFont(ofSize: 12, weight: .regular)
+        subtitleLabel.textColor = .secondaryLabelColor
 
-        // titleLabel.font = NSFont.systemFont(ofSize: 14, weight: .regular)
-        // titleLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        faviconImageView.translatesAutoresizingMaskIntoConstraints = false
-
-        //addSubview(titleLabel)
-        addSubview(addressLabel)
-        addSubview(faviconImageView)
+        [titleLabel, subtitleLabel, faviconImageView].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            addSubview($0)
+        }
 
         NSLayoutConstraint.activate([
             faviconImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
@@ -388,19 +483,53 @@ class AXAddressBarSuggestionCellView: NSTableCellView {
             faviconImageView.widthAnchor.constraint(equalToConstant: 16),
             faviconImageView.heightAnchor.constraint(equalToConstant: 16),
 
-            // titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-            // titleLabel.leadingAnchor.constraint(
-            //     equalTo: faviconImageView.trailingAnchor, constant: 5),
-
-            addressLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-            addressLabel.leadingAnchor.constraint(
+            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 2),
+            titleLabel.leadingAnchor.constraint(
                 equalTo: faviconImageView.trailingAnchor, constant: 8),
-            addressLabel.trailingAnchor.constraint(
+            titleLabel.trailingAnchor.constraint(
                 equalTo: trailingAnchor, constant: -8),
+
+            subtitleLabel.topAnchor.constraint(
+                equalTo: titleLabel.bottomAnchor, constant: 0),
+            subtitleLabel.leadingAnchor.constraint(
+                equalTo: titleLabel.leadingAnchor),
+            subtitleLabel.trailingAnchor.constraint(
+                equalTo: titleLabel.trailingAnchor),
+            subtitleLabel.bottomAnchor.constraint(
+                equalTo: bottomAnchor, constant: -2),
         ])
     }
 
-    func configure(with suggestion: String) {
-        addressLabel.stringValue = suggestion
+    private func setupTrackingArea() {
+        trackingArea = NSTrackingArea(
+            rect: bounds,
+            options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited],
+            owner: self,
+            userInfo: nil
+        )
+        addTrackingArea(trackingArea)
+    }
+
+    // MARK: - Configuration
+    func configure(title: String, subtitle: String? = nil) {
+        titleLabel.stringValue = title
+        subtitleLabel.stringValue = subtitle ?? ""
+        subtitleLabel.isHidden = subtitle == nil
+
+        // Adjust constraints based on whether we have a subtitle
+        if subtitle == nil {
+            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor)
+                .isActive = true
+        }
+    }
+
+    // MARK: - Mouse Handling
+    override func mouseEntered(with event: NSEvent) {
+        super.mouseEntered(with: event)
+        onMouseEnter?()
+    }
+
+    deinit {
+        removeTrackingArea(trackingArea)
     }
 }
