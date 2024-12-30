@@ -403,10 +403,11 @@ class AXWindow: NSWindow, NSWindowDelegate,
         let tabGroup = currentTabGroup
         let tabs = tabGroup.tabs
 
+        layoutManager.searchButton.addressField.stringValue = ""
+
         if tabAt == -1 {
             containerView.removeAllWebViews()
         } else {
-            layoutManager.searchButton.addressField.stringValue = ""
             containerView.updateView(webView: tabs[tabAt].webView)
         }
     }
@@ -452,6 +453,31 @@ class AXWindow: NSWindow, NSWindowDelegate,
 
 // MARK: - Workspace Swapper View Delegate
 extension AXWindow: AXWorkspaceSwapperViewDelegate {
+    func didEditTabGroup(_ at: Int) {
+        browserSpaceSharedPopover.contentViewController?.view =
+            tabCustomizationView
+
+        let sender = layoutManager.tabGroupInfoView
+
+        browserSpaceSharedPopover.show(
+            relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
+    }
+
+    func didDeleteTabGroup(_ at: Int) {
+        activeProfile.tabGroups.remove(at: at)
+
+        if activeProfile.tabGroups.isEmpty {
+            let newTabGroup = AXTabGroup(name: "New Tab Group")
+            activeProfile.tabGroups.append(newTabGroup)
+        }
+
+        if currentTabGroupIndex >= at {
+            currentTabGroupIndex = 0
+        }
+
+        switchToTabGroup(currentTabGroupIndex)
+    }
+
     func currentProfileName() -> String {
         activeProfile.name
     }
@@ -483,16 +509,17 @@ extension AXWindow: AXWorkspaceSwapperViewDelegate {
 }
 
 extension AXWindow: AXTabGroupCustomizerViewDelegate {
-    func didUpdateTabGroup(_ tabGroup: AXTabGroup) {
+    func tabGroupCustomizerDidUpdateName(_ tabGroup: AXTabGroup) {
         // No need to update profile name here, AXTabGroupCustomizerViewDelegate
         layoutManager.tabGroupInfoView.updateLabels(tabGroup: tabGroup)
     }
 
-    func didUpdateColor(_ tabGroup: AXTabGroup) {
+    func tabGroupCustomizerDidUpdateColor(_ tabGroup: AXTabGroup) {
         visualEffectTintView.layer?.backgroundColor = tabGroup.color.cgColor
+        self.backgroundColor = tabGroup.color.withAlphaComponent(1)
     }
 
-    func didUpdateIcon(_ tabGroup: AXTabGroup) {
+    func tabGroupCustomizerDidUpdateIcon(_ tabGroup: AXTabGroup) {
         layoutManager.tabGroupInfoView.updateIcon(tabGroup: tabGroup)
     }
 }

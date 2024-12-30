@@ -11,7 +11,11 @@ import AppKit
 protocol AXWorkspaceSwapperViewDelegate: AnyObject {
     func didSwitchProfile(to index: Int)
     func didSwitchTabGroup(to index: Int)
+
     func didAddTabGroup(_ newGroup: AXTabGroup)
+    func didDeleteTabGroup(_ at: Int)
+    func didEditTabGroup(_ at: Int)
+
     func currentProfileName() -> String
 
     func popoverViewTabGroups() -> [AXTabGroup]
@@ -82,6 +86,18 @@ class AXWorkspaceSwapperView: NSView {
         tabGroupTableView.dataSource = self
         tabGroupTableView.backgroundColor = .clear
         tabGroupTableView.selectionHighlightStyle = .regular
+
+        let menu = NSMenu()
+        menu.addItem(
+            NSMenuItem(
+                title: "Edit", action: #selector(tableViewEditItemRightClick),
+                keyEquivalent: ""))
+        menu.addItem(
+            NSMenuItem(
+                title: "Delete",
+                action: #selector(tableViewDeleteItemRightClick),
+                keyEquivalent: ""))
+        tabGroupTableView.menu = menu
 
         let column = NSTableColumn(
             identifier: NSUserInterfaceItemIdentifier("TabGroups"))
@@ -161,6 +177,17 @@ class AXWorkspaceSwapperView: NSView {
     }
 
     // MARK: - Actions
+    @objc private func tableViewDeleteItemRightClick() {
+        let selectedCellIndex = tabGroupTableView.clickedRow
+        delegate?.didDeleteTabGroup(selectedCellIndex)
+        reloadTabGroups()
+    }
+
+    @objc private func tableViewEditItemRightClick(_ sender: NSMenuItem) {
+        let selectedCellIndex = tabGroupTableView.clickedRow
+        delegate?.didEditTabGroup(selectedCellIndex)
+    }
+
     @objc private func addTabGroup() {
         let newGroup = AXTabGroup(name: "New Group")
         delegate?.didAddTabGroup(newGroup)

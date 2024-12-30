@@ -197,7 +197,7 @@ class AXGestureStackView: NSStackView {
     var scrollWithMice: Bool = false
 
     override var intrinsicContentSize: NSSize {
-        return NSSize(width: 120, height: 44)  // Adjust as needed
+        return NSSize(width: 150, height: 44)  // Adjust as needed
     }
 
     override var isFlipped: Bool {

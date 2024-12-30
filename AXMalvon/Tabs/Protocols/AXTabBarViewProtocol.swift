@@ -46,19 +46,18 @@ extension AXTabBarViewTemplate {
         for (index, tab) in newTabGroup.tabs.enumerated() {
             addTabButtonInBackground(for: tab, index: index)
         }
-
-        guard newTabGroup.selectedIndex != -1 else { return }
-
-        // Update Tab Selection
         let selectedIndex = newTabGroup.selectedIndex
 
-        let arragedSubviews = tabStackView.arrangedSubviews
-        let arrangedSubviewsCount = arragedSubviews.count
+        // Update Tab Selection as long as the tab index is not -1
+        if selectedIndex != -1 {
+            let arragedSubviews = tabStackView.arrangedSubviews
+            let arrangedSubviewsCount = arragedSubviews.count
 
-        guard arrangedSubviewsCount > selectedIndex else { return }
+            guard arrangedSubviewsCount > selectedIndex else { return }
 
-        let newButton = arragedSubviews[selectedIndex] as! AXTabButton
-        newButton.isSelected = true
+            let newButton = arragedSubviews[selectedIndex] as! AXTabButton
+            newButton.isSelected = true
+        }
 
         delegate?.tabBarSwitchedTo(tabAt: selectedIndex)
     }

@@ -8,9 +8,9 @@
 import AppKit
 
 protocol AXTabGroupCustomizerViewDelegate: AnyObject {
-    func didUpdateTabGroup(_ tabGroup: AXTabGroup)
-    func didUpdateColor(_ tabGroup: AXTabGroup)
-    func didUpdateIcon(_ tabGroup: AXTabGroup)
+    func tabGroupCustomizerDidUpdateName(_ tabGroup: AXTabGroup)
+    func tabGroupCustomizerDidUpdateColor(_ tabGroup: AXTabGroup)
+    func tabGroupCustomizerDidUpdateIcon(_ tabGroup: AXTabGroup)
 }
 
 class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
@@ -137,7 +137,7 @@ class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
             textField == tabGroupNameTextField
         else { return }
         tabGroup.name = textField.stringValue
-        delegate?.didUpdateTabGroup(tabGroup)
+        delegate?.tabGroupCustomizerDidUpdateName(tabGroup)
     }
 
     @objc private func iconSelectionChanged() {
@@ -146,18 +146,11 @@ class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
         }
         tabGroup.icon = selectedIcon
 
-        delegate?.didUpdateIcon(tabGroup)
+        delegate?.tabGroupCustomizerDidUpdateIcon(tabGroup)
     }
 
     @objc private func colorWellUpdated() {
         tabGroup.color = colorWell.color
-        delegate?.didUpdateColor(tabGroup)
-    }
-
-    override func viewWillMove(toSuperview newSuperview: NSView?) {
-        if newSuperview == nil {
-            // Save changes before the view disappears
-            delegate?.didUpdateTabGroup(tabGroup)
-        }
+        delegate?.tabGroupCustomizerDidUpdateColor(tabGroup)
     }
 }

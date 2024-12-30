@@ -315,15 +315,7 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
         splitView.beginAnimation(with: value)
     }
 
-    func createEmptyView() {
-        currentWebView?.removeFromSuperview()
-        currentWebView = nil
-
-        self.websiteTitleLabel.stringValue = "Empty Window"
-    }
-
     func removeAllWebViews() {
-        currentWebView?.loadHTMLString("", baseURL: nil)
         currentWebView?.removeFromSuperview()
         self.currentWebView = nil
         self.websiteTitleLabel.stringValue = "Empty Window"
