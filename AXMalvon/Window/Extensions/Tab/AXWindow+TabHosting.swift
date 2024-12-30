@@ -8,7 +8,10 @@
 import AppKit
 
 extension AXWindow: AXTabHostingViewDelegate {
-    // MARK: - Tab Hosting View Delegate
+    func tabHostingViewCreatedNewTab() {
+        toggleSearchBarForNewTab(nil)
+    }
+
     func tabHostingViewReloadCurrentPage() {
         containerView.currentWebView?.reload()
     }
