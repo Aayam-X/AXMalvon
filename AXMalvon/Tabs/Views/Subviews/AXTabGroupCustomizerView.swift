@@ -123,7 +123,7 @@ class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
                 equalTo: colorLabel.bottomAnchor, constant: 5),
             colorWell.leftAnchor.constraint(equalTo: leftAnchor, constant: 10),
             colorWell.rightAnchor.constraint(
-                equalTo: rightAnchor, constant: -10),
+                equalTo: rightAnchor, constant: -10)
         ])
     }
 
@@ -136,7 +136,8 @@ class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
         delegate?.tabGroupCustomizerDidUpdateName(tabGroup)
     }
 
-    @objc private func iconSelectionChanged() {
+    @objc
+    private func iconSelectionChanged() {
         guard let selectedIcon = iconDropdown.titleOfSelectedItem,
             let tabGroup = delegate?.tabGroupCustomizerActiveTabGroup()
         else {
@@ -147,7 +148,8 @@ class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
         delegate?.tabGroupCustomizerDidUpdateIcon(tabGroup)
     }
 
-    @objc private func colorWellUpdated() {
+    @objc
+    private func colorWellUpdated() {
         guard let tabGroup = delegate?.tabGroupCustomizerActiveTabGroup() else {
             return
         }

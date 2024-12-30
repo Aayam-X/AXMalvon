@@ -28,7 +28,7 @@ class AXHistoryItem {
 }
 
 class AXHistoryManager {
-    private var db: OpaquePointer?
+    private var historyDB: OpaquePointer?
     private let dbPath: String
     private let batchSize = 100
     private var pendingItems: [AXHistoryItem] = []
@@ -62,7 +62,7 @@ class AXHistoryManager {
     }
 
     private func setupDatabase() {
-        if sqlite3_open(dbPath, &db) == SQLITE_OK {
+        if sqlite3_open(dbPath, &historyDB) == SQLITE_OK {
             let createTableQuery = """
                     CREATE TABLE IF NOT EXISTS history (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,9 +76,8 @@ class AXHistoryManager {
 
             var createTableStatement: OpaquePointer?
             if sqlite3_prepare_v2(
-                db, createTableQuery, -1, &createTableStatement, nil)
-                == SQLITE_OK
-            {
+                historyDB, createTableQuery, -1, &createTableStatement, nil)
+                == SQLITE_OK {
                 if sqlite3_step(createTableStatement) == SQLITE_DONE {
                     print("History table created successfully")
                 }
@@ -101,88 +100,98 @@ class AXHistoryManager {
     private func flushPendingItems() {
         guard !pendingItems.isEmpty else { return }
 
-        sqlite3_exec(db, "BEGIN TRANSACTION", nil, nil, nil)
-
-        let checkQuery = """
-                SELECT id, times_accessed FROM history WHERE address = ?
-            """
-        let updateQuery = """
-                UPDATE history SET times_accessed = ?, timestamp = ? WHERE id = ?
-            """
-        let insertQuery = """
-                INSERT INTO history (title, address, timestamp, times_accessed, date_string)
-                VALUES (?, ?, ?, ?, ?)
-            """
-
-        var checkStatement: OpaquePointer?
-        var updateStatement: OpaquePointer?
-        var insertStatement: OpaquePointer?
+        sqlite3_exec(historyDB, "BEGIN TRANSACTION", nil, nil, nil)
 
         defer {
-            sqlite3_finalize(checkStatement)
-            sqlite3_finalize(updateStatement)
-            sqlite3_finalize(insertStatement)
-            sqlite3_exec(db, "COMMIT", nil, nil, nil)
+            sqlite3_exec(historyDB, "COMMIT", nil, nil, nil)
         }
 
-        if sqlite3_prepare_v2(db, checkQuery, -1, &checkStatement, nil)
-            != SQLITE_OK
-            || sqlite3_prepare_v2(db, updateQuery, -1, &updateStatement, nil)
-                != SQLITE_OK
-            || sqlite3_prepare_v2(db, insertQuery, -1, &insertStatement, nil)
-                != SQLITE_OK
-        {
-            print("Error preparing statements")
-            sqlite3_exec(db, "ROLLBACK", nil, nil, nil)
+        guard prepareStatements() else {
+            sqlite3_exec(historyDB, "ROLLBACK", nil, nil, nil)
             return
         }
 
         for item in pendingItems {
-            // Check for duplicates
-            sqlite3_bind_text(
-                checkStatement, 1, (item.address as NSString).utf8String, -1,
-                nil)
-
-            if sqlite3_step(checkStatement) == SQLITE_ROW {
-                let id = sqlite3_column_int64(checkStatement, 0)
-                let existingTimesAccessed = sqlite3_column_int(
-                    checkStatement, 1)
-
-                // Update existing record
-                sqlite3_bind_int(
-                    updateStatement, 1,
-                    existingTimesAccessed + Int32(item.timesAccessed))
-                sqlite3_bind_double(
-                    updateStatement, 2, item.timestamp.timeIntervalSince1970)
-                sqlite3_bind_int64(updateStatement, 3, id)
-
-                if sqlite3_step(updateStatement) != SQLITE_DONE {
-                    print("Error updating record")
-                }
-                sqlite3_reset(updateStatement)
-            } else {
-                // Insert new record
-                sqlite3_bind_text(
-                    insertStatement, 1, (item.title as NSString).utf8String, -1,
-                    nil)
-                sqlite3_bind_text(
-                    insertStatement, 2, (item.address as NSString).utf8String,
-                    -1, nil)
-                sqlite3_bind_double(
-                    insertStatement, 3, item.timestamp.timeIntervalSince1970)
-                sqlite3_bind_int(insertStatement, 4, Int32(item.timesAccessed))
-                sqlite3_bind_text(
-                    insertStatement, 5, (dateString as NSString).utf8String, -1,
-                    nil)
-
-                if sqlite3_step(insertStatement) != SQLITE_DONE {
-                    print("Error inserting record")
-                }
-                sqlite3_reset(insertStatement)
-            }
-
-            sqlite3_reset(checkStatement)
+            processItem(item)
         }
+
+        finalizeStatements()
+    }
+
+    // MARK: - Helper Methods
+
+    private var checkStatement: OpaquePointer?
+    private var updateStatement: OpaquePointer?
+    private var insertStatement: OpaquePointer?
+
+    private func prepareStatements() -> Bool {
+        let checkQuery = """
+            SELECT id, times_accessed FROM history WHERE address = ?
+        """
+        let updateQuery = """
+            UPDATE history SET times_accessed = ?, timestamp = ? WHERE id = ?
+        """
+        let insertQuery = """
+            INSERT INTO history (title, address, timestamp, times_accessed, date_string)
+            VALUES (?, ?, ?, ?, ?)
+        """
+
+        if sqlite3_prepare_v2(historyDB, checkQuery, -1, &checkStatement, nil) != SQLITE_OK ||
+           sqlite3_prepare_v2(historyDB, updateQuery, -1, &updateStatement, nil) != SQLITE_OK ||
+           sqlite3_prepare_v2(historyDB, insertQuery, -1, &insertStatement, nil) != SQLITE_OK {
+            print("Error preparing statements")
+            return false
+        }
+
+        return true
+    }
+
+    private func processItem(_ item: AXHistoryItem) {
+        // Check for duplicates
+        sqlite3_bind_text(checkStatement, 1, (item.address as NSString).utf8String, -1, nil)
+
+        if sqlite3_step(checkStatement) == SQLITE_ROW {
+            updateExistingRecord(item)
+        } else {
+            insertNewRecord(item)
+        }
+
+        sqlite3_reset(checkStatement)
+    }
+
+    private func updateExistingRecord(_ item: AXHistoryItem) {
+        let id = sqlite3_column_int64(checkStatement, 0)
+        let existingTimesAccessed = sqlite3_column_int(checkStatement, 1)
+
+        sqlite3_bind_int(updateStatement, 1, existingTimesAccessed + Int32(item.timesAccessed))
+        sqlite3_bind_double(updateStatement, 2, item.timestamp.timeIntervalSince1970)
+        sqlite3_bind_int64(updateStatement, 3, id)
+
+        if sqlite3_step(updateStatement) != SQLITE_DONE {
+            print("Error updating record")
+        }
+
+        sqlite3_reset(updateStatement)
+    }
+
+    private func insertNewRecord(_ item: AXHistoryItem) {
+        sqlite3_bind_text(insertStatement, 1, (item.title as NSString).utf8String, -1, nil)
+        sqlite3_bind_text(insertStatement, 2, (item.address as NSString).utf8String, -1, nil)
+        sqlite3_bind_double(insertStatement, 3, item.timestamp.timeIntervalSince1970)
+        sqlite3_bind_int(insertStatement, 4, Int32(item.timesAccessed))
+        sqlite3_bind_text(insertStatement, 5, (dateString as NSString).utf8String, -1, nil)
+
+        if sqlite3_step(insertStatement) != SQLITE_DONE {
+            print("Error inserting record")
+        }
+
+        sqlite3_reset(insertStatement)
+    }
+
+    private func finalizeStatements() {
+        sqlite3_finalize(checkStatement)
+        sqlite3_finalize(updateStatement)
+        sqlite3_finalize(insertStatement)
     }
 
     func search(query: String) -> [AXHistoryItem] {
@@ -202,9 +211,8 @@ class AXHistoryManager {
             sqlite3_finalize(searchStatement)
         }
 
-        if sqlite3_prepare_v2(db, searchQuery, -1, &searchStatement, nil)
-            == SQLITE_OK
-        {
+        if sqlite3_prepare_v2(historyDB, searchQuery, -1, &searchStatement, nil)
+            == SQLITE_OK {
             let searchPattern = "%\(query)%"
             sqlite3_bind_text(
                 searchStatement, 1, (searchPattern as NSString).utf8String, -1,
@@ -254,7 +262,7 @@ class AXHistoryManager {
         queue.sync(flags: .barrier) {
             flushPendingItems()
         }
-        sqlite3_close(db)
+        sqlite3_close(historyDB)
     }
 
     deinit {

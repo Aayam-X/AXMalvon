@@ -96,8 +96,8 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
     override func setupLayout(in window: AXWindow) {
         window.styleMask.insert(.fullSizeContentView)
 
-        //guard let splitView = window.splitView else { return }
-        let splitView = window.splitView  // TODO: MAKE ME OPTIONAL
+        // guard let splitView = window.splitView else { return }
+        let splitView = window.splitView  // MAKE ME OPTIONAL
 
         splitView.frame = window.visualEffectView.bounds
         splitView.autoresizingMask = [.height, .width]
@@ -111,5 +111,32 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
         // Configure traffic lights for vertical layout
         window.configureTrafficLights()
         window.titlebarAppearsTransparent = true
+    }
+
+    func toggleTabSidebar(in window: AXWindow) {
+        guard let verticalTabHostingView = layoutView else {
+            return
+        }
+
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.25  // Adjust duration as needed
+            context.allowsImplicitAnimation = true
+
+            let sideBarWillCollapsed = window.splitView.subviews.count == 2
+            if sideBarWillCollapsed {
+                window.hiddenSidebarView = true
+                window.splitView.removeArrangedSubview(verticalTabHostingView)
+                window.containerView.websiteTitleLabel.isHidden = true
+            } else {
+                window.hiddenSidebarView = false
+                window.splitView.insertArrangedSubview(verticalTabHostingView, at: 0)
+                window.containerView.websiteTitleLabel.isHidden = false
+            }
+
+            window.containerView.sidebarCollapsed(
+                sideBarWillCollapsed,
+                isFullScreen: window.styleMask.contains(.fullScreen))
+            window.splitView.layoutSubtreeIfNeeded()
+        }
     }
 }

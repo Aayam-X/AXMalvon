@@ -83,7 +83,7 @@ class AXTabGroupInfoView: NSView {
             contentStackView.bottomAnchor.constraint(
                 lessThanOrEqualTo: bottomAnchor),
             imageView.widthAnchor.constraint(equalToConstant: 24),
-            imageView.heightAnchor.constraint(equalToConstant: 24),
+            imageView.heightAnchor.constraint(equalToConstant: 24)
         ])
     }
 

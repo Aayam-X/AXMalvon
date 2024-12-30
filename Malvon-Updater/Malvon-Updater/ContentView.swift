@@ -45,9 +45,9 @@ struct ContentView: View {
                     Text("Release Notes")
                         .font(.title)
                         .fontWeight(.bold)
-                    
+
                     Spacer()
-                    
+
                     if let image = appIcon {
                         Image(nsImage: image)
                             .resizable()
@@ -64,7 +64,7 @@ struct ContentView: View {
                             .opacity(0.3)
                     }
                 }
-                
+
                 // Left Section: Release Notes
                 VStack(alignment: .leading, spacing: 16) {
                     if isUpdateAvailable {
@@ -78,7 +78,7 @@ struct ContentView: View {
                                 y: 2
                             )
                     }
-                    
+
                     // Update Button
                     Button(action: updateApplication) {
                         Text(
@@ -101,7 +101,7 @@ struct ContentView: View {
                     .disabled(isUpdating)
                     .scaleEffect(isUpdating ? 1.0 : 1.05)
                     .animation(.easeInOut(duration: 0.2), value: isUpdating)
-                    
+
                     Text(statusMessage)
                         .font(.caption)
                         .foregroundColor(.red.opacity(0.6))
@@ -177,8 +177,7 @@ struct ContentView: View {
         let downloadDestination = FileManager.default.temporaryDirectory
             .appendingPathComponent("update-malvon-\(UUID()).zip")
 
-        let downloadTask = URLSession.shared.downloadTask(with: updateURL) {
-            tempURL, response, error in
+        let downloadTask = URLSession.shared.downloadTask(with: updateURL) { tempURL, _, error in
             guard let tempURL = tempURL, error == nil else {
                 DispatchQueue.main.async {
                     statusMessage =
@@ -219,7 +218,7 @@ struct ContentView: View {
 
             process.executableURL = URL(fileURLWithPath: "/usr/bin/unzip")
             process.arguments = [
-                "-o", zipFilePath.path, "-d", unzipDestination.path,
+                "-o", zipFilePath.path, "-d", unzipDestination.path
             ]
             try process.run()
             process.waitUntilExit()
@@ -280,8 +279,8 @@ struct ContentView: View {
     func quitMalvon() {
         let runningApplications = NSWorkspace.shared.runningApplications
 
-        if let malvon = runningApplications.first(where: { (application) in
-            return application.bundleIdentifier == "com.ayaamx.AXMalvon"
+        if let malvon = runningApplications.first(where: { application in
+            application.bundleIdentifier == "com.ayaamx.AXMalvon"
         }) {
             malvon.terminate()
         }
@@ -348,7 +347,7 @@ extension NSTextView {
     open override func viewWillDraw() {
         super.viewWillDraw()
 
-        backgroundColor = .clear  //<<here clear
+        backgroundColor = .clear
         drawsBackground = false
     }
 }

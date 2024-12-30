@@ -28,8 +28,7 @@ private let fileURL = Bundle.main.url(
             // Enter dispatch group before starting initialization
             dispatchGroup.enter()
 
-            ruleStore?.lookUpContentRuleList(forIdentifier: "ContentBlocker") {
-                [weak self] ruleList, error in
+            ruleStore?.lookUpContentRuleList(forIdentifier: "ContentBlocker") { [weak self] ruleList, error in
                 guard let self = self else {
                     self?.dispatchGroup.leave()
                     return
@@ -71,8 +70,7 @@ private let fileURL = Bundle.main.url(
                 }
 
                 mxPrint("Looking up compiled rules")
-                ruleStore.lookUpContentRuleList(forIdentifier: "ContentBlocker")
-                { ruleList, error in
+                ruleStore.lookUpContentRuleList(forIdentifier: "ContentBlocker") { ruleList, error in
                     if let ruleList = ruleList {
                         config.userContentController.add(ruleList)
                         mxPrint("Successfully added rules to configuration")
@@ -92,7 +90,9 @@ private let fileURL = Bundle.main.url(
             }
 
             DispatchQueue.global(qos: .utility).async { [weak self] in
-                guard let self = self else { return }
+                guard let self else {
+                    return
+                }
 
                 do {
                     let blockerListString = try String(

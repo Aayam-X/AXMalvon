@@ -136,20 +136,20 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
             .isActive = true
     }
 
-    @objc func closeTab() {
+    @objc
+    func closeTab() {
         tab?.stopTitleObservation()
         delegate?.tabButtonWillClose(self)
     }
 
     // This would be called directly from a button click
-    @objc func switchTab() {
+    @objc
+    func switchTab() {
         delegate?.tabButtonDidSelect(self)
     }
 
     func setTrackingArea() {
-        let options: NSTrackingArea.Options = [
-            .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
-        ]
+        let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
         trackingArea = NSTrackingArea.init(
             rect: self.bounds, options: options, owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
@@ -203,16 +203,16 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
 
 // MARK: - Close Button + Favicon
 class AXHorizontalTabCloseButton: NSButton {
+    // swiftlint:disable:next identifier_name
     var _favicon: NSImage?
 
     var favicon: NSImage? {
-        set {
+        get {
+            return _favicon
+        } set {
             self._favicon = newValue
             self.image =
                 newValue ?? AXHorizontalTabButtonConstants.defaultFavicon
-        }
-        get {
-            return _favicon
         }
     }
 

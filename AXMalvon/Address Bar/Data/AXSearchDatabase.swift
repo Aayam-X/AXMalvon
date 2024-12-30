@@ -9,9 +9,9 @@
 import Foundation
 import SQLite3
 
-// FIXME: Convert this to Core Data rather than SQLite
+// Perhaps convert this to Core Data rather than SQLite?
 class AXSearchDatabase {
-    private var db: OpaquePointer?
+    private var dbPointer: OpaquePointer?
     static var shared = AXSearchDatabase()
 
     init() {
@@ -32,9 +32,9 @@ class AXSearchDatabase {
         let fileURL = directoryURL.appendingPathComponent("searchData.sqlite")
         mxPrint("Database file path: \(fileURL)")
 
-        if sqlite3_open(fileURL.path, &db) != SQLITE_OK {
+        if sqlite3_open(fileURL.path, &dbPointer) != SQLITE_OK {
             mxPrint(
-                "Error opening database: \(String(cString: sqlite3_errmsg(db)))"
+                "Error opening database: \(String(cString: sqlite3_errmsg(dbPointer)))"
             )
             return
         }
@@ -42,9 +42,9 @@ class AXSearchDatabase {
         // Create the table if it does not exist
         let createTableQuery =
             "CREATE TABLE IF NOT EXISTS SearchOccurrences (url TEXT PRIMARY KEY, occurrences INTEGER)"
-        if sqlite3_exec(db, createTableQuery, nil, nil, nil) != SQLITE_OK {
+        if sqlite3_exec(dbPointer, createTableQuery, nil, nil, nil) != SQLITE_OK {
             mxPrint(
-                "Error creating table: \(String(cString: sqlite3_errmsg(db)))")
+                "Error creating table: \(String(cString: sqlite3_errmsg(dbPointer)))")
         }
     }
 
@@ -58,42 +58,39 @@ class AXSearchDatabase {
         var statement: OpaquePointer?
 
         // Check if the URL exists
-        if sqlite3_prepare_v2(db, selectQuery, -1, &statement, nil) == SQLITE_OK
-        {
+        if sqlite3_prepare_v2(dbPointer, selectQuery, -1, &statement, nil) == SQLITE_OK {
             sqlite3_bind_text(
                 statement, 1, (url as NSString).utf8String, -1, nil)
             if sqlite3_step(statement) == SQLITE_ROW {
                 // URL exists, update occurrences
                 sqlite3_finalize(statement)
-                if sqlite3_prepare_v2(db, updateQuery, -1, &statement, nil)
-                    == SQLITE_OK
-                {
+                if sqlite3_prepare_v2(dbPointer, updateQuery, -1, &statement, nil)
+                    == SQLITE_OK {
                     sqlite3_bind_text(
                         statement, 1, (url as NSString).utf8String, -1, nil)
                     if sqlite3_step(statement) != SQLITE_DONE {
                         mxPrint(
-                            "Error updating occurrence: \(String(cString: sqlite3_errmsg(db)))"
+                            "Error updating occurrence: \(String(cString: sqlite3_errmsg(dbPointer)))"
                         )
                     }
                 }
             } else {
                 // URL does not exist, insert it
                 sqlite3_finalize(statement)
-                if sqlite3_prepare_v2(db, insertQuery, -1, &statement, nil)
-                    == SQLITE_OK
-                {
+                if sqlite3_prepare_v2(dbPointer, insertQuery, -1, &statement, nil)
+                    == SQLITE_OK {
                     sqlite3_bind_text(
                         statement, 1, (url as NSString).utf8String, -1, nil)
                     if sqlite3_step(statement) != SQLITE_DONE {
                         mxPrint(
-                            "Error inserting new URL: \(String(cString: sqlite3_errmsg(db)))"
+                            "Error inserting new URL: \(String(cString: sqlite3_errmsg(dbPointer)))"
                         )
                     }
                 }
             }
         } else {
             mxPrint(
-                "Error preparing select statement: \(String(cString: sqlite3_errmsg(db)))"
+                "Error preparing select statement: \(String(cString: sqlite3_errmsg(dbPointer)))"
             )
         }
         sqlite3_finalize(statement)
@@ -111,7 +108,7 @@ class AXSearchDatabase {
         var statement: OpaquePointer?
         var suggestions: [String] = []
 
-        if sqlite3_prepare_v2(db, query, -1, &statement, nil) == SQLITE_OK {
+        if sqlite3_prepare_v2(dbPointer, query, -1, &statement, nil) == SQLITE_OK {
             let prefixWithWildcard = "\(prefix)%"
             sqlite3_bind_text(
                 statement, 1, (prefixWithWildcard as NSString).utf8String, -1,
@@ -126,13 +123,13 @@ class AXSearchDatabase {
             }
         } else {
             mxPrint(
-                "Error preparing query: \(String(cString: sqlite3_errmsg(db)))")
+                "Error preparing query: \(String(cString: sqlite3_errmsg(dbPointer)))")
         }
         sqlite3_finalize(statement)
         return suggestions
     }
 
     deinit {
-        sqlite3_close(db)
+        sqlite3_close(dbPointer)
     }
 }

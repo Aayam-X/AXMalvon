@@ -9,9 +9,7 @@
 import AppKit
 import WebKit
 
-class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
-    AXGestureViewDelegate
-{
+class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol, AXGestureViewDelegate {
     var tabBarView: any AXTabBarViewTemplate
     var tabHostingDelegate: (any AXTabHostingViewDelegate)?
 
@@ -45,11 +43,8 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
     }()
 
     private lazy var workspaceSwapperButton: NSButton = {
-        let button = NSButton(
-            image: NSImage(
-                systemSymbolName: "rectangle.stack",
-                accessibilityDescription: nil)!, target: self,
-            action: #selector(showWorkspaceSwapper))
+        let buttonImage = NSImage(systemSymbolName: "rectangle.stack", accessibilityDescription: nil)!
+        let button = NSButton(image: buttonImage, target: self, action: #selector(showWorkspaceSwapper))
         button.isBordered = false
         button.imagePosition = .imageOnly
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -134,7 +129,7 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
             addNewTabButton.rightAnchor.constraint(
                 equalTo: rightAnchor, constant: -10),
             addNewTabButton.heightAnchor.constraint(equalToConstant: 30),
-            addNewTabButton.widthAnchor.constraint(equalToConstant: 30),
+            addNewTabButton.widthAnchor.constraint(equalToConstant: 30)
         ])
 
         // Mouse Tracking Area
@@ -172,13 +167,15 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
         addTrackingArea(mouseExitedTrackingArea)
     }
 
-    @objc func addNewTab() {
+    @objc
+    func addNewTab() {
         guard let window = self.window as? AXWindow else { return }
 
         window.toggleSearchBarForNewTab(nil)
     }
 
-    @objc func showWorkspaceSwapper() {
+    @objc
+    func showWorkspaceSwapper() {
         tabHostingDelegate?.tabHostingViewDisplaysWorkspaceSwapperPanel(
             workspaceSwapperButton)
     }

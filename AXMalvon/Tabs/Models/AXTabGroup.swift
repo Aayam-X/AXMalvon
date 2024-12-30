@@ -39,28 +39,28 @@ class AXTabGroup: Codable {
         addTab(tab)
     }
 
-    func switchTab(to: Int) {
-        guard selectedIndex != to else { return }
+    func switchTab(toIndex: Int) {
+        guard selectedIndex != toIndex else { return }
 
         let previousIndex = selectedIndex
-        self.selectedIndex = to
+        self.selectedIndex = toIndex
 
-        switchTab(from: previousIndex, to: to)
+        switchTab(from: previousIndex, toIndex: toIndex)
     }
 
-    func switchTab(from: Int, to: Int) {
+    func switchTab(from: Int, toIndex: Int) {
         // Logic for switching tabs
-        selectedIndex = to
-        tabBarView?.updateTabSelection(from: from, to: to)  // Notify view
+        selectedIndex = toIndex
+        tabBarView?.updateTabSelection(from: from, to: toIndex)  // Notify view
     }
 
-    func removeTab(_ at: Int) {
-        tabs.remove(at: at)
-        tabBarView?.removeTabButton(at: at)
+    func removeTab(at index: Int) {
+        tabs.remove(at: index)
+        tabBarView?.removeTabButton(at: index)
     }
 
     func removeCurrentTab() {
-        removeTab(selectedIndex)
+        removeTab(at: selectedIndex)
     }
 
     // MARK: - Codeable Functions
@@ -81,8 +81,7 @@ class AXTabGroup: Codable {
 
         // Decode `color` as hex string and convert to `NSColor`
         if let colorHex = try container.decodeIfPresent(
-            String.self, forKey: .color)
-        {
+            String.self, forKey: .color) {
             self.color = NSColor(hex: colorHex)
         } else {
             self.color = .systemMint.withAlphaComponent(0.8)

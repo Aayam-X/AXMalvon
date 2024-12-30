@@ -1,5 +1,5 @@
 //
-//  Malvon_UpdaterApp.swift
+//  MalvonUpdater.swift
 //  Malvon-Updater
 //
 //  Created by Ashwin Paudel on 2024-11-29.
@@ -8,8 +8,9 @@
 import SwiftUI
 
 @main
-struct Malvon_UpdaterApp: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+struct MalvonUpdater: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self)
+    var appDelegate
 
     var body: some Scene {
         WindowGroup {

@@ -12,11 +12,10 @@ import WebKit
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
-
     // Default Profiles
     static let profiles: [AXProfile] = [
         .init(name: "Default"),
-        .init(name: "School"),
+        .init(name: "School")
     ]
 
     // Main Browser Window + Search Bar
@@ -70,8 +69,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool
-    {
+    func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
         return false
     }
 
@@ -199,8 +197,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         "document.body.innerText")
 
                     if let result = result as? String,
-                        result.lowercased() == "yes"
-                    {
+                        result.lowercased() == "yes" {
                         mxPrint("Email is valid!!!")
                         break
                     } else {
@@ -265,11 +262,7 @@ extension AppDelegate {
     private func bgU_Check() {
         DispatchQueue.global(qos: .background).async {
             guard
-                let bgURL = URL(
-                    string:
-                        "https://raw.githubusercontent.com/ashp0/malvon-website/refs/heads/main/.github/workflows/version.txt"
-                )
-            else { return }
+                let bgURL = URL(string: updateURLString) else { return }
 
             let content = try? String(contentsOf: bgURL, encoding: .utf8)
 
@@ -280,8 +273,7 @@ extension AppDelegate {
             else { return }
 
             if currentVersion.trimmingCharacters(in: .whitespacesAndNewlines)
-                != latestVersion.trimmingCharacters(in: .whitespacesAndNewlines)
-            {
+                != latestVersion.trimmingCharacters(in: .whitespacesAndNewlines) {
                 DispatchQueue.main.async {
                     self.bgU_alert()
                 }
@@ -404,3 +396,5 @@ func mxPrint(
         Swift.print(items, separator: separator, terminator: terminator)
     #endif
 }
+
+private let updateURLString = "https://raw.githubusercontent.com/ashp0/malvon-website/refs/heads/main/.github/workflows/version.txt"

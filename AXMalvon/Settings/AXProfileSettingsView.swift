@@ -20,7 +20,7 @@ class AXProfileManager: ObservableObject {
 
 struct AXProfileSettingsView: View {
     @ObservedObject var profileManager = AXProfileManager()
-    @State private var selectedIndex: Int? = nil
+    @State private var selectedIndex: Int?
     @State private var showsInspector: Bool = false
 
     var body: some View {
@@ -39,16 +39,13 @@ struct AXProfileSettingsView: View {
             }
         }
         .padding()
-        .inspector(
-            isPresented: $showsInspector,
-            content: {
-                if let index = selectedIndex,
-                    profileManager.profiles.indices.contains(index)
-                {
-                    AXProfileSettingsInspector(
-                        profile: $profileManager.profiles[index])
-                }
-            })
+        .inspector(isPresented: $showsInspector) {
+            if let index = selectedIndex,
+                profileManager.profiles.indices.contains(index) {
+                AXProfileSettingsInspector(
+                    profile: $profileManager.profiles[index])
+            }
+        }
     }
 }
 

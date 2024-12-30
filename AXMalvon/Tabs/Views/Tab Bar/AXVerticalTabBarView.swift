@@ -9,8 +9,9 @@
 import AppKit
 import WebKit
 
+// swiftlint:disable force_cast
 class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
-    var tabGroup: AXTabGroup!
+    var tabGroup: AXTabGroup
     var delegate: (any AXTabBarViewDelegate)?
 
     private var dragTargetIndex: Int?
@@ -29,7 +30,8 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         return box
     }()
 
-    init() {
+    required init(tabGroup: AXTabGroup) {
+        self.tabGroup = tabGroup
         super.init(frame: .zero)
         setupViews()
     }
@@ -73,7 +75,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
 
             tabStackView.topAnchor.constraint(equalTo: topAnchor),
             tabStackView.leftAnchor.constraint(equalTo: clipView.leftAnchor),
-            tabStackView.rightAnchor.constraint(equalTo: clipView.rightAnchor),
+            tabStackView.rightAnchor.constraint(equalTo: clipView.rightAnchor)
         ])
 
         registerForDraggedTypes(self.registeredDraggedTypes)
@@ -137,8 +139,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
 
     func updateIndices(after index: Int) {
         for case let (index, button as AXTabButton) in tabStackView
-            .arrangedSubviews.enumerated().dropFirst(index)
-        {
+            .arrangedSubviews.enumerated().dropFirst(index) {
             mxPrint("DELETATION START INDEX = \(index)")
             button.tag = index
         }
@@ -146,11 +147,11 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         updateSelectedItemIndex(after: index)
     }
 
-    func updateTabSelection(from: Int, to: Int) {
+    func updateTabSelection(from: Int, to index: Int) {
         let arragedSubviews = tabStackView.arrangedSubviews
         let arrangedSubviewsCount = arragedSubviews.count
 
-        guard arrangedSubviewsCount > to else { return }
+        guard arrangedSubviewsCount > index else { return }
 
         if from >= 0 && from < arrangedSubviewsCount {
             let previousButton =
@@ -158,10 +159,10 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
             previousButton.isSelected = false
         }
 
-        let newButton = arragedSubviews[to] as! AXTabButton
+        let newButton = arragedSubviews[index] as! AXTabButton
         newButton.isSelected = true
 
-        delegate?.tabBarSwitchedTo(tabAt: to)
+        delegate?.tabBarSwitchedTo(tabAt: index)
     }
 
     func updateTabGroup(_ newTabGroup: AXTabGroup) {
@@ -231,7 +232,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
             button.leadingAnchor.constraint(
                 equalTo: tabStackView.leadingAnchor, constant: 5),
             button.trailingAnchor.constraint(
-                equalTo: tabStackView.trailingAnchor, constant: -3),
+                equalTo: tabStackView.trailingAnchor, constant: -3)
         ])
 
         // Layout the stack view to update frames
@@ -264,28 +265,28 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
             button.leadingAnchor.constraint(
                 equalTo: tabStackView.leadingAnchor, constant: 5),
             button.trailingAnchor.constraint(
-                equalTo: tabStackView.trailingAnchor, constant: -3),
+                equalTo: tabStackView.trailingAnchor, constant: -3)
         ])
     }
 
-    private func reorderTabs(from: Int, to: Int) {
-        mxPrint("Reordering tabs from \(from) to \(to)")
+    private func reorderTabs(from: Int, toIndex: Int) {
+        mxPrint("Reordering tabs from \(from) to \(toIndex)")
 
         let firstButton = tabStackView.arrangedSubviews[from] as! AXTabButton
-        let secondButton = tabStackView.arrangedSubviews[to] as! AXTabButton
+        let secondButton = tabStackView.arrangedSubviews[toIndex] as! AXTabButton
 
-        firstButton.tag = to
+        firstButton.tag = toIndex
         secondButton.tag = from
 
         tabStackView.removeArrangedSubview(firstButton)
-        tabStackView.insertArrangedSubview(firstButton, at: to)
+        tabStackView.insertArrangedSubview(firstButton, at: toIndex)
         tabStackView.insertArrangedSubview(secondButton, at: from)
 
         firstButton.isHidden = false
 
-        self.tabGroup.tabs.swapAt(from, to)
-        tabGroup.selectedIndex = to
-        self.updateIndices(after: min(from, to))
+        self.tabGroup.tabs.swapAt(from, toIndex)
+        tabGroup.selectedIndex = toIndex
+        self.updateIndices(after: min(from, toIndex))
     }
 
     private func updateSelectedItemIndex(after index: Int) {
@@ -329,3 +330,5 @@ final class AXFlippedClipView: NSClipView {
         return true
     }
 }
+
+// swiftlint:enable force_cast

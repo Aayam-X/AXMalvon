@@ -73,8 +73,7 @@ class AXSidebarSearchButton: NSButton {
         super.init(frame: .zero)
         setupViews()
 
-        suggestionsWindowController.suggestionItemClickAction = {
-            [weak self] suggestion in
+        suggestionsWindowController.suggestionItemClickAction = { [weak self] suggestion in
             self?.addressField.stringValue = suggestion
             self?.searchFieldAction()
         }
@@ -127,7 +126,8 @@ class AXSidebarSearchButton: NSButton {
         lockView.action = #selector(lockClicked)
     }
 
-    @objc private func lockClicked() {
+    @objc
+    private func lockClicked() {
         delegate?.lockClicked()
     }
 
@@ -187,22 +187,20 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
         if commandSelector == #selector(moveUp(_:)) {
             suggestionsWindowController.moveUp()
             if let currentSuggestion = suggestionsWindowController
-                .currentSuggestion
-            {
+                .currentSuggestion {
                 addressField.stringValue = currentSuggestion
-                addressField.currentEditor()?.selectedRange = NSMakeRange(
-                    previousStringValueCount, currentSuggestion.count)
+                addressField.currentEditor()?.selectedRange = NSRange(location: previousStringValueCount,
+                                                                      length: currentSuggestion.count)
             }
             return true
         }
         if commandSelector == #selector(moveDown(_:)) {
             suggestionsWindowController.moveDown()
             if let currentSuggestion = suggestionsWindowController
-                .currentSuggestion
-            {
+                .currentSuggestion {
                 addressField.stringValue = currentSuggestion
-                addressField.currentEditor()?.selectedRange = NSMakeRange(
-                    previousStringValueCount, currentSuggestion.count)
+                addressField.currentEditor()?.selectedRange = NSRange(location: previousStringValueCount,
+                                                                      length: currentSuggestion.count)
             }
             return true
         }
@@ -225,8 +223,7 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
     }
 
     func control(_ control: NSControl, textShouldEndEditing fieldEditor: NSText)
-        -> Bool
-    {
+        -> Bool {
         suggestionsWindowController.orderOut()
         addressField.stringValue = fullAddress?.absoluteString ?? "Empty2"
 
@@ -318,7 +315,7 @@ private func fetchGoogleSuggestions(
     }
 
     // URLSession runs network requests on a background thread
-    let task = URLSession.shared.dataTask(with: url) { data, response, error in
+    let task = URLSession.shared.dataTask(with: url) { data, _, error in
         if let error = error {
             print("Error fetching suggestions: \(error)")
             completion([])  // Return an empty list on error
@@ -334,8 +331,7 @@ private func fetchGoogleSuggestions(
             // Decode the JSON response
             if let json = try JSONSerialization.jsonObject(
                 with: data, options: []) as? [Any],
-                let suggestions = json[1] as? [String]
-            {
+                let suggestions = json[1] as? [String] {
                 // Return suggestions on the main thread
                 DispatchQueue.main.async {
                     var completionValue = suggestions

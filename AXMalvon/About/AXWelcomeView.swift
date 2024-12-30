@@ -8,40 +8,43 @@
 import SwiftUI
 import WebKit
 
-//struct AXWelcomeView: View {
-//    @AppStorage("emailAddress") var emailAddress: String =
-//        "malvontestuser@gmail.com"
-//    @AppStorage("verticalTabs") var usesVerticalTabs: Bool = false
-//
-//    @State private var buttonText: String = "Continue"
-//
-//    var body: some View {
-//        VStack {
-//            Text("Welcome to Malvon!")
-//                .font(.largeTitle)
-//                .bold()
-//
-//            Text("Would you like to enable vertical tabs?")
-//            Toggle(isOn: $usesVerticalTabs) {
-//                Text("Vertical Tabs")
-//            }
-//
-//            Button("Continue") {
-//                verifyEmailAddress()
-//                AppDelegate.relaunchApplication()
-//            }
-//            .padding()
-//        }
-//        .padding()
-//    }
-//
-//    func verifyEmailAddress() {
-//        emailAddress = "malvontestuser@gmail.com"
-//    }
-//}
+/* Test application for others to review
+struct AXWelcomeView: View {
+    @AppStorage("emailAddress") var emailAddress: String =
+        "malvontestuser@gmail.com"
+    @AppStorage("verticalTabs") var usesVerticalTabs: Bool = false
+
+    @State private var buttonText: String = "Continue"
+
+    var body: some View {
+        VStack {
+            Text("Welcome to Malvon!")
+                .font(.largeTitle)
+                .bold()
+
+            Text("Would you like to enable vertical tabs?")
+            Toggle(isOn: $usesVerticalTabs) {
+                Text("Vertical Tabs")
+            }
+
+            Button("Continue") {
+                verifyEmailAddress()
+                AppDelegate.relaunchApplication()
+            }
+            .padding()
+        }
+        .padding()
+    }
+
+    func verifyEmailAddress() {
+        emailAddress = "malvontestuser@gmail.com"
+    }
+}
+ */
 
 struct AXWelcomeView: View {
-    @AppStorage("emailAddress") var emailAddress: String = ""
+    @AppStorage("emailAddress")
+    var emailAddress: String = ""
     @State private var showAlert: Bool = false
     @State private var alertMessage: String = ""
     @State private var buttonText: String = "Continue"
@@ -55,7 +58,10 @@ struct AXWelcomeView: View {
                     .bold()
 
                 Text(
-                    "Those who have been accepted into the Malvon waitlist will automatically possess a valid email address needed to use this application. If you are not on the waitlist, please sign up for the waitlist by clicking the following link: https://ashp0.github.io/malvon-website/waitlist"
+                    "Those who have been accepted into the Malvon waitlist will automatically possess " +
+                    "a valid email address needed to use this application. If you are not on the waitlist, " +
+                    "please sign up for the waitlist by clicking the following link: " +
+                    "https://ashp0.github.io/malvon-website/waitlist"
                 )
                 .fixedSize(horizontal: false, vertical: true)
                 .lineLimit(10)
@@ -77,7 +83,7 @@ struct AXWelcomeView: View {
                     message: Text(alertMessage),
                     dismissButton: .default(Text("OK")) {
                         if alertMessage == "Email verified." {
-                            //navigateToImportView = true
+                            // navigateToImportView = true
                             showAlert = true
                             AppDelegate.relaunchApplication()
                             exit(1)
@@ -85,7 +91,7 @@ struct AXWelcomeView: View {
                     })
             }
         } else {
-            //AXImportCookieView()
+            // AXImportCookieView()
             VStack {
                 Text("Import from Other Browser")
                 Text(

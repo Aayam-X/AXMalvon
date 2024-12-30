@@ -43,13 +43,12 @@ class AXVerticalTabButton: NSButton, AXTabButton {
     private var initialMouseDownLocation: NSPoint?
 
     var favicon: NSImage? {
-        set {
+        get {
+            self.favIconImageView.image
+        } set {
             self.favIconImageView.image =
                 newValue == nil ? AXTabButtonConstants.defaultFavicon : newValue
             tab.icon = newValue
-        }
-        get {
-            self.favIconImageView.image
         }
     }
 
@@ -79,9 +78,9 @@ class AXVerticalTabButton: NSButton, AXTabButton {
 
     var webTitle: String = "Untitled" {
         didSet {
-            //if !hasCustomTitle {
+            // if !hasCustomTitle {
             titleView.stringValue = webTitle
-            //}
+            // }
         }
     }
 
@@ -197,27 +196,30 @@ class AXVerticalTabButton: NSButton, AXTabButton {
 
 // MARK: Tab Functions
 extension AXVerticalTabButton {
-    @objc func closeTab() {
+    @objc
+    func closeTab() {
         delegate?.tabButtonWillClose(self)
     }
 
-    @objc func deactiveTab() {
+    @objc
+    func deactiveTab() {
         tab.deactivateWebView()
 
         favicon = AXTabButtonConstants.defaultFaviconSleep
         delegate?.tabButtonDeactivatedWebView(self)
     }
 
-    func updateTitle(_ to: String) {
-        self.webTitle = to
+    func updateTitle(_ title: String) {
+        self.webTitle = title
 
         if self.isSelected {
-            self.delegate?.tabButtonActiveTitleChanged(to, for: self)
+            self.delegate?.tabButtonActiveTitleChanged(title, for: self)
         }
     }
 
     // This would be called directly from a button click
-    @objc func switchTab() {
+    @objc
+    func switchTab() {
         delegate?.tabButtonDidSelect(self)
     }
 }
@@ -243,9 +245,7 @@ extension AXVerticalTabButton {
 // MARK: Mouse Functions
 extension AXVerticalTabButton {
     func setTrackingArea() {
-        let options: NSTrackingArea.Options = [
-            .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
-        ]
+        let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
         trackingArea = NSTrackingArea.init(
             rect: self.bounds, options: options, owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
@@ -310,90 +310,93 @@ extension AXVerticalTabButton {
     }
 }
 
-//// MARK: - Draging Source
-//extension AXTabButton: NSDraggingSource, NSPasteboardWriting {
-//    // Define drag operations
-//    func draggingSession(
-//        _ session: NSDraggingSession,
-//        sourceOperationMaskFor context: NSDraggingContext
-//    ) -> NSDragOperation {
-//        return .move
-//    }
-//
-//    // Provide writable types for the pasteboard
-//    func writableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard
-//        .PasteboardType]
-//    {
-//        return [.axTabButton]
-//    }
-//
-//    // Provide the pasteboard property list (button.tag)
-//    func pasteboardPropertyList(forType type: NSPasteboard.PasteboardType)
-//        -> Any?
-//    {
-//        guard type == .axTabButton else { return nil }
-//        return "\(self.tag)"  // Send tag as a string
-//    }
-//
-//    // Start a dragging session when the mouse is dragged
-//    override func mouseDragged(with event: NSEvent) {
-//        guard let initialLocation = initialMouseDownLocation else { return }
-//
-//        // Calculate the distance moved
-//        let currentLocation = event.locationInWindow
-//        let distance = hypot(
-//            currentLocation.x - initialLocation.x,
-//            currentLocation.y - initialLocation.y)
-//
-//        guard distance > 5.0 else { return }
-//
-//        let draggingItem = NSDraggingItem(pasteboardWriter: self)
-//
-//        // Define the item's image for the drag session
-//        let draggingFrame = self.bounds
-//        draggingItem.setDraggingFrame(draggingFrame, contents: self.toImage())
-//
-//        // Start the dragging session
-//        self.beginDraggingSession(
-//            with: [draggingItem], event: event, source: self)
-//
-//        self.isHidden = true
-//    }
-//
-//    override func draggingExited(_ sender: (any NSDraggingInfo)?) {
-//        self.isHidden = false
-//    }
-//
-//    override func draggingEnded(_ sender: any NSDraggingInfo) {
-//        self.isHidden = false
-//    }
-//
-//    override func concludeDragOperation(_ sender: (any NSDraggingInfo)?) {
-//        self.isHidden = false
-//    }
-//
-//    // Helper: Create a snapshot of the button for the dragging image
-//    func toImage() -> NSImage? {
-//        guard
-//            let bitmapImageRepresentation =
-//                self.bitmapImageRepForCachingDisplay(in: bounds)
-//        else {
-//            return nil
-//        }
-//        bitmapImageRepresentation.size = bounds.size
-//        self.cacheDisplay(in: bounds, to: bitmapImageRepresentation)
-//
-//        let image = NSImage(size: bounds.size)
-//        image.addRepresentation(bitmapImageRepresentation)
-//
-//        return image
-//    }
-//}
+// MARK: - Draging Source
+
+/*
+extension AXTabButton: NSDraggingSource, NSPasteboardWriting {
+    // Define drag operations
+    func draggingSession(
+        _ session: NSDraggingSession,
+        sourceOperationMaskFor context: NSDraggingContext
+    ) -> NSDragOperation {
+        return .move
+    }
+
+    // Provide writable types for the pasteboard
+    func writableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard
+        .PasteboardType]
+    {
+        return [.axTabButton]
+    }
+
+    // Provide the pasteboard property list (button.tag)
+    func pasteboardPropertyList(forType type: NSPasteboard.PasteboardType)
+        -> Any?
+    {
+        guard type == .axTabButton else { return nil }
+        return "\(self.tag)"  // Send tag as a string
+    }
+
+    // Start a dragging session when the mouse is dragged
+    override func mouseDragged(with event: NSEvent) {
+        guard let initialLocation = initialMouseDownLocation else { return }
+
+        // Calculate the distance moved
+        let currentLocation = event.locationInWindow
+        let distance = hypot(
+            currentLocation.x - initialLocation.x,
+            currentLocation.y - initialLocation.y)
+
+        guard distance > 5.0 else { return }
+
+        let draggingItem = NSDraggingItem(pasteboardWriter: self)
+
+        // Define the item's image for the drag session
+        let draggingFrame = self.bounds
+        draggingItem.setDraggingFrame(draggingFrame, contents: self.toImage())
+
+        // Start the dragging session
+        self.beginDraggingSession(
+            with: [draggingItem], event: event, source: self)
+
+        self.isHidden = true
+    }
+
+    override func draggingExited(_ sender: (any NSDraggingInfo)?) {
+        self.isHidden = false
+    }
+
+    override func draggingEnded(_ sender: any NSDraggingInfo) {
+        self.isHidden = false
+    }
+
+    override func concludeDragOperation(_ sender: (any NSDraggingInfo)?) {
+        self.isHidden = false
+    }
+
+    // Helper: Create a snapshot of the button for the dragging image
+    func toImage() -> NSImage? {
+        guard
+            let bitmapImageRepresentation =
+                self.bitmapImageRepForCachingDisplay(in: bounds)
+        else {
+            return nil
+        }
+        bitmapImageRepresentation.size = bounds.size
+        self.cacheDisplay(in: bounds, to: bitmapImageRepresentation)
+
+        let image = NSImage(size: bounds.size)
+        image.addRepresentation(bitmapImageRepresentation)
+
+        return image
+    }
+}
 
 extension NSPasteboard.PasteboardType {
     static let axTabButton = NSPasteboard.PasteboardType(
         "com.ayaamx.AXMalvon.tab")
 }
+*/
 
 // MARK: - Close Button
 class AXSidebarTabCloseButton: NSButton {
@@ -418,9 +421,7 @@ class AXSidebarTabCloseButton: NSButton {
     }
 
     func setTrackingArea() {
-        let options: NSTrackingArea.Options = [
-            .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
-        ]
+        let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
         trackingArea = NSTrackingArea.init(
             rect: self.bounds, options: options, owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
@@ -429,8 +430,7 @@ class AXSidebarTabCloseButton: NSButton {
     override func mouseUp(with event: NSEvent) {
         mouseDown = false
         if self.isMousePoint(
-            self.convert(event.locationInWindow, from: nil), in: self.bounds)
-        {
+            self.convert(event.locationInWindow, from: nil), in: self.bounds) {
             sendAction(action, to: target)
         }
 

@@ -13,8 +13,8 @@ protocol AXWorkspaceSwapperViewDelegate: AnyObject {
     func didSwitchTabGroup(to index: Int)
 
     func didAddTabGroup(_ newGroup: AXTabGroup)
-    func didDeleteTabGroup(_ at: Int)
-    func didEditTabGroup(_ at: Int)
+    func didDeleteTabGroup(index: Int)
+    func didEditTabGroup(at index: Int)
 
     func currentProfileName() -> String
 
@@ -162,7 +162,7 @@ class AXWorkspaceSwapperView: NSView {
             profileNavigationStackView.leadingAnchor.constraint(
                 equalTo: leadingAnchor, constant: 10),
             profileNavigationStackView.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -10),
+                equalTo: trailingAnchor, constant: -10)
         ])
     }
 
@@ -177,18 +177,21 @@ class AXWorkspaceSwapperView: NSView {
     }
 
     // MARK: - Actions
-    @objc private func tableViewDeleteItemRightClick() {
+    @objc
+    private func tableViewDeleteItemRightClick() {
         let selectedCellIndex = tabGroupTableView.clickedRow
-        delegate?.didDeleteTabGroup(selectedCellIndex)
+        delegate?.didDeleteTabGroup(index: selectedCellIndex)
         reloadTabGroups()
     }
 
-    @objc private func tableViewEditItemRightClick(_ sender: NSMenuItem) {
+    @objc
+    private func tableViewEditItemRightClick(_ sender: NSMenuItem) {
         let selectedCellIndex = tabGroupTableView.clickedRow
-        delegate?.didEditTabGroup(selectedCellIndex)
+        delegate?.didEditTabGroup(at: selectedCellIndex)
     }
 
-    @objc private func addTabGroup() {
+    @objc
+    private func addTabGroup() {
         let newGroup = AXTabGroup(name: "New Group")
         delegate?.didAddTabGroup(newGroup)
         reloadTabGroups()
@@ -200,12 +203,14 @@ class AXWorkspaceSwapperView: NSView {
         delegate?.didSwitchTabGroup(to: row)
     }
 
-    @objc private func switchProfileLeft() {
+    @objc
+    private func switchProfileLeft() {
         delegate?.didSwitchProfile(to: max(0, selectedProfileIndex - 1))
         reloadTabGroups()
     }
 
-    @objc private func switchProfileRight() {
+    @objc
+    private func switchProfileRight() {
         let tabGroups = delegate?.popoverViewTabGroups() ?? []
         delegate?.didSwitchProfile(
             to: min(tabGroups.count - 1, selectedProfileIndex + 1))
@@ -315,7 +320,7 @@ class AXWorkspaceTabGroupCell: NSTableCellView {
             divider.heightAnchor.constraint(equalToConstant: 1),
             divider.leadingAnchor.constraint(equalTo: leadingAnchor),
             divider.trailingAnchor.constraint(equalTo: trailingAnchor),
-            divider.bottomAnchor.constraint(equalTo: bottomAnchor),
+            divider.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
 

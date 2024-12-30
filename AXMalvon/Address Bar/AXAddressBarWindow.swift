@@ -9,7 +9,6 @@ import AppKit
 
 // MARK: - Main Window Class
 class AXAddressBarWindow: NSPanel, NSWindowDelegate {
-    // MARK: - Section Data Arrays
     // MARK: - UI Components
     private let scrollView = NSScrollView()
     private lazy var tableView: NSTableView = createTableView()
@@ -55,19 +54,19 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
     }
 
     private func createTableView() -> NSTableView {
-        let t = NSTableView()
-        t.translatesAutoresizingMaskIntoConstraints = false
-        t.addTableColumn(
+        let tableView = NSTableView()
+        tableView.translatesAutoresizingMaskIntoConstraints = false
+        tableView.addTableColumn(
             NSTableColumn(
                 identifier: NSUserInterfaceItemIdentifier(
                     "AddressBarSuggestion")))
-        t.dataSource = self
-        t.delegate = self
-        t.headerView = nil
-        t.target = self
-        t.action = #selector(onItemClicked)
-        t.style = .sourceList
-        return t
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.headerView = nil
+        tableView.target = self
+        tableView.action = #selector(onItemClicked)
+        tableView.style = .sourceList
+        return tableView
     }
 
     private func setupConstraints() {
@@ -79,12 +78,13 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
             tableView.trailingAnchor.constraint(
                 equalTo: scrollView.contentView.trailingAnchor),
             tableView.bottomAnchor.constraint(
-                equalTo: scrollView.contentView.bottomAnchor),
+                equalTo: scrollView.contentView.bottomAnchor)
         ])
     }
 
     // MARK: - Actions
-    @objc private func onItemClicked() {
+    @objc
+    private func onItemClicked() {
         if let suggestion = currentSuggestion {
             suggestionItemClickAction?(suggestion)
             orderOut()
@@ -377,8 +377,7 @@ extension AXAddressBarWindow: NSTableViewDataSource, NSTableViewDelegate {
     }
 
     private func createSuggestionCell(for suggestion: Any, at row: Int)
-        -> NSView
-    {
+        -> NSView {
         let cellIdentifier = NSUserInterfaceItemIdentifier(
             "AddressBarSuggestion")
         let cell =
@@ -406,130 +405,5 @@ extension AXAddressBarWindow: NSTableViewDataSource, NSTableViewDelegate {
             return 30  // Header height
         }
         return 24  // Regular cell height
-    }
-}
-
-class AXAddressBarSectionHeaderView: NSTableCellView {
-    let titleLabel: NSTextField
-
-    override init(frame frameRect: NSRect) {
-        titleLabel = NSTextField(labelWithString: "Section")
-        super.init(frame: frameRect)
-        setupView()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    private func setupView() {
-        titleLabel.font = NSFont.systemFont(ofSize: 12, weight: .bold)
-        titleLabel.textColor = NSColor.secondaryLabelColor
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-
-        addSubview(titleLabel)
-
-        NSLayoutConstraint.activate([
-            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-            titleLabel.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 8),
-            titleLabel.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -8),
-        ])
-    }
-}
-
-// MARK: - Cell Views
-class AXAddressBarSuggestionCellView: NSTableCellView {
-    // MARK: - Properties
-    let titleLabel: NSTextField
-    let subtitleLabel: NSTextField
-    let faviconImageView: NSImageView
-    var trackingArea: NSTrackingArea!
-    var onMouseEnter: (() -> Void)?
-
-    // MARK: - Initialization
-    override init(frame frameRect: NSRect) {
-        titleLabel = NSTextField(labelWithString: "")
-        subtitleLabel = NSTextField(labelWithString: "")
-        faviconImageView = NSImageView(
-            image: NSImage(named: NSImage.iconViewTemplateName)!)
-
-        super.init(frame: frameRect)
-
-        setupView()
-        setupTrackingArea()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    // MARK: - Setup
-    private func setupView() {
-        titleLabel.font = NSFont.systemFont(ofSize: 14, weight: .regular)
-        subtitleLabel.font = NSFont.systemFont(ofSize: 12, weight: .regular)
-        subtitleLabel.textColor = .secondaryLabelColor
-
-        [titleLabel, subtitleLabel, faviconImageView].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
-            addSubview($0)
-        }
-
-        NSLayoutConstraint.activate([
-            faviconImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            faviconImageView.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 8),
-            faviconImageView.widthAnchor.constraint(equalToConstant: 16),
-            faviconImageView.heightAnchor.constraint(equalToConstant: 16),
-
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 2),
-            titleLabel.leadingAnchor.constraint(
-                equalTo: faviconImageView.trailingAnchor, constant: 8),
-            titleLabel.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -8),
-
-            subtitleLabel.topAnchor.constraint(
-                equalTo: titleLabel.bottomAnchor, constant: 0),
-            subtitleLabel.leadingAnchor.constraint(
-                equalTo: titleLabel.leadingAnchor),
-            subtitleLabel.trailingAnchor.constraint(
-                equalTo: titleLabel.trailingAnchor),
-            subtitleLabel.bottomAnchor.constraint(
-                equalTo: bottomAnchor, constant: -2),
-        ])
-    }
-
-    private func setupTrackingArea() {
-        trackingArea = NSTrackingArea(
-            rect: bounds,
-            options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited],
-            owner: self,
-            userInfo: nil
-        )
-        addTrackingArea(trackingArea)
-    }
-
-    // MARK: - Configuration
-    func configure(title: String, subtitle: String? = nil) {
-        titleLabel.stringValue = title
-        subtitleLabel.stringValue = subtitle ?? ""
-        subtitleLabel.isHidden = subtitle == nil
-
-        // Adjust constraints based on whether we have a subtitle
-        if subtitle == nil {
-            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor)
-                .isActive = true
-        }
-    }
-
-    // MARK: - Mouse Handling
-    override func mouseEntered(with event: NSEvent) {
-        super.mouseEntered(with: event)
-        onMouseEnter?()
-    }
-
-    deinit {
-        removeTrackingArea(trackingArea)
     }
 }

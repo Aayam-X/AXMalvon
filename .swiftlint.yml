@@ -1,0 +1,37 @@
+included: # paths to include during linting
+   - AXMalvon
+   - Malvon-Updater/*
+
+opt_in_rules:
+  - attributes
+  - closure_end_indentation
+  - closure_spacing
+  - fatal_error_message
+  - first_where
+  - joined_default_parameter
+  - no_extension_access_modifier
+  - object_literal
+  - operator_usage_whitespace
+  - overridden_super_call
+  - pattern_matching_keywords
+  - private_outlet
+  - prohibited_super_call
+  - quick_discouraged_call
+  - redundant_nil_coalescing
+  - single_test_class
+  - trailing_closure
+  - unneeded_parentheses_in_closure_argument
+  - vertical_parameter_alignment_on_call
+
+file_length:
+  warning: 500
+
+function_body_length:
+  warning: 60
+
+type_body_length:
+  warning: 250
+
+line_length:
+  warning: 150
+  error: 5000

@@ -80,7 +80,7 @@ class AXWebContainerView: NSView {
             let shadow = NSShadow()
             shadow.shadowColor = .textColor.withAlphaComponent(0.6)
             shadow.shadowBlurRadius = 2.0
-            shadow.shadowOffset = NSMakeSize(0.0, 0.0)
+            shadow.shadowOffset = .zero
             splitViewContainer.shadow = shadow
 
             splitView.wantsLayer = true
@@ -102,7 +102,7 @@ class AXWebContainerView: NSView {
             splitView.rightAnchor.constraint(
                 equalTo: splitViewContainer.rightAnchor),
             splitView.bottomAnchor.constraint(
-                equalTo: splitViewContainer.bottomAnchor),
+                equalTo: splitViewContainer.bottomAnchor)
         ])
     }
 
@@ -135,7 +135,7 @@ class AXWebContainerView: NSView {
                 splitViewContainer.leftAnchor.constraint(equalTo: leftAnchor),
                 splitViewContainer.rightAnchor.constraint(equalTo: rightAnchor),
                 splitViewContainer.bottomAnchor.constraint(
-                    equalTo: bottomAnchor),
+                    equalTo: bottomAnchor)
             ])
         }
     }
@@ -187,8 +187,7 @@ class AXWebContainerView: NSView {
             self.delegate?.webContainerViewChangedURL(to: url)
         }
 
-        urlObserver = webView.observe(\.url, options: [.new]) {
-            [weak self] _, change in
+        urlObserver = webView.observe(\.url, options: [.new]) { [weak self] _, change in
             if let newURL = change.newValue, let newURL {
                 self?.delegate?.webContainerViewChangedURL(to: newURL)
             }
@@ -285,8 +284,7 @@ extension AXWebContainerView: NSTextFieldDelegate {
         guard let currentWebView else { return }
 
         Task {
-            let _ = try? await currentWebView.find(
-                websiteTitleLabel.stringValue)
+            _ = try? await currentWebView.find(websiteTitleLabel.stringValue)
         }
     }
 
@@ -294,8 +292,7 @@ extension AXWebContainerView: NSTextFieldDelegate {
         _ control: NSControl, textShouldBeginEditing fieldEditor: NSText
     ) -> Bool {
         // To detect when the text field loses focus
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) {
-            [self] timer in
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [self] timer in
             if websiteTitleLabel.currentEditor() == nil {
                 timer.invalidate()
                 webPageFindTextFieldDidLoseFocus()
@@ -307,9 +304,7 @@ extension AXWebContainerView: NSTextFieldDelegate {
 }
 
 // MARK: - Web View Functions
-extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
-    WKDownloadDelegate
-{
+extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate, WKDownloadDelegate {
 
     func updateProgress(_ value: Double) {
         splitView.beginAnimation(with: value)
@@ -456,8 +451,7 @@ private class AXWebContainerSplitView: NSSplitView, NSSplitViewDelegate {
     }
 
     func splitView(_ splitView: NSSplitView, canCollapseSubview subview: NSView)
-        -> Bool
-    {
+        -> Bool {
         return false
     }
 
@@ -469,26 +463,3 @@ private class AXWebContainerSplitView: NSSplitView, NSSplitViewDelegate {
         fatalError("init(coder:) has not been implemented")
     }
 }
-
-//let faviconJavaScript1 = """
-//(() => {
-//  const favicon = ["icon", "shortcut icon", "apple-touch-icon"]
-//    .map(r => document.head.querySelector(`link[rel="${r}"]`))
-//    .find(l => l)?.href ||
-//    document.head.querySelector('meta[property="og:image"]')?.content ||
-//    document.querySelector('link[rel="icon"]')?.href;
-//  return favicon || "";
-//})();
-//"""
-//
-//let faviconJavaScript = """
-//(() => {
-//  const favicon = ["icon", "shortcut icon", "apple-touch-icon"]
-//    .map(r => document.head.querySelector(`link[rel="${r}"]`))
-//    .find(l => l)?.href ||
-//    document.querySelector('meta[name="icon"]')?.content ||
-//    document.querySelector('link[rel="icon"]')?.href ||
-//    document.querySelector('meta[property="og:image"]')?.content;
-//  return favicon || "";
-//})();
-//"""

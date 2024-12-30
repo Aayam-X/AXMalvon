@@ -16,7 +16,7 @@ struct AXProfileData: Codable {
     func toDictionary() -> [String: Any] {
         return [
             "id": configID,
-            "i": selectedTabGroupIndex,
+            "i": selectedTabGroupIndex
         ]
     }
 
@@ -33,7 +33,7 @@ struct AXProfileData: Codable {
 }
 
 let youtubeAdblockingUserScript = WKUserScript(
-    source: AX_DEFAULT_YOUTUBE_BLOCKER_SCRIPT,
+    source: jsYoutubeAdBlockScript,
     injectionTime: .atDocumentStart,
     forMainFrameOnly: true
 )
@@ -210,20 +210,7 @@ class AXProfile {
 
     // MARK: - Configuration Features
     func addOtherConfigs() {
-        let AX_DEFAULT_WEBVIEW_CONFIGURATIONS = [
-            "allowsPictureInPictureMediaPlayback",
-            "appNapEnabled",
-            "acceleratedCompositingEnabled",
-            "webGLEnabled",
-            "largeImageAsyncDecodingEnabled",
-            "mediaSourceEnabled",
-            "acceleratedDrawingEnabled",
-            "animatedImageAsyncDecodingEnabled",
-            "developerExtrasEnabled",
-            "canvasUsesAcceleratedDrawing",
-        ]
-
-        for config in AX_DEFAULT_WEBVIEW_CONFIGURATIONS {
+        for config in jsAXWebViewConfigurations {
             configuration.preferences.setValue(true, forKey: config)
         }
 
@@ -234,7 +221,7 @@ class AXProfile {
 
         // Usage
         //        let experimentalFeatures = WKPreferences.value(forKey: "experimentalFeatures")
-        //        // i have to call - (void)_setEnabled:(BOOL)value forFeature:(_WKFeature *)feature WK_API_AVAILABLE(macos(10.12), ios(10.0));
+        // i have to call - (void)_setEnabled:(BOOL)value forFeature:(_WKFeature *)feature WK_API_AVAILABLE(macos(10.12), ios(10.0));
         //        // experimentalFeatures is an array of [_WKFeature]
         //        // how do i do this? i want to set true for all of them
         //        print(experimentalFeatures)
@@ -303,6 +290,21 @@ class AXPrivateProfile: AXProfile {
     }
 }
 
-let AX_DEFAULT_YOUTUBE_BLOCKER_SCRIPT = """
+// swiftlint:disable line_length
+let jsYoutubeAdBlockScript = """
     (function(){let ytInitialPlayerResponse=null;Object.defineProperty(window,"ytInitialPlayerResponse",{get:()=>ytInitialPlayerResponse,set:(data)=>{if(data)data.adPlacements=[];ytInitialPlayerResponse=data},configurable:true})})();(function(){const originalFetch=window.fetch;window.fetch=async(...args)=>{const response=await originalFetch(...args);if(response.url.includes("/youtubei/v1/player")){const originalText=response.text.bind(response);response.text=()=>originalText().then((data)=>data.replace(/"adPlacements"/g,'"odPlacements"'))}return response}})();(function(){const skipAds=()=>{const skipButton=document.querySelector(".videoAdUiSkipButton, .ytp-ad-skip-button");if(skipButton)skipButton.click();const adOverlay=document.querySelector(".ad-showing");if(adOverlay){const video=document.querySelector("video");if(video){video.playbackRate=10;video.isMuted=1}}};const removeInlineAds=()=>{const adContainer=document.querySelector("#player-ads");if(adContainer)adContainer.remove()};const adBlockerInterval=setInterval(()=>{skipAds();removeInlineAds()},300);window.addEventListener("unload",()=>clearInterval(adBlockerInterval))})();
     """
+// swiftlint:enable line_length
+
+private let jsAXWebViewConfigurations = [
+    "allowsPictureInPictureMediaPlayback",
+    "appNapEnabled",
+    "acceleratedCompositingEnabled",
+    "webGLEnabled",
+    "largeImageAsyncDecodingEnabled",
+    "mediaSourceEnabled",
+    "acceleratedDrawingEnabled",
+    "animatedImageAsyncDecodingEnabled",
+    "developerExtrasEnabled",
+    "canvasUsesAcceleratedDrawing"
+]

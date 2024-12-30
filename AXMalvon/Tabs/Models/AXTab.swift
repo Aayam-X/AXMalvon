@@ -14,9 +14,11 @@ class AXTab: Codable {
     var title: String = "Untitled Tab"
     var icon: NSImage?
 
-    var titleObserver: Cancellable? = nil
+    var titleObserver: Cancellable?
 
-    weak var webConfiguration: WKWebViewConfiguration? = nil
+    weak var webConfiguration: WKWebViewConfiguration?
+
+    // swiftlint:disable:next identifier_name
     weak var _webView: AXWebView?
 
     var webView: AXWebView {
@@ -126,9 +128,8 @@ extension AXTab {
         Task(priority: .low) { @MainActor in
             do {
                 if let faviconURLString = try? await webView.evaluateJavaScript(
-                    AX_FAVICON_SCRIPT) as? String,
-                    let faviconURL = URL(string: faviconURLString)
-                {
+                    jsFaviconSearchScript) as? String,
+                    let faviconURL = URL(string: faviconURLString) {
                     let favicon = try await quickFaviconDownload(
                         from: faviconURL)
                     tabButton.favicon = favicon
@@ -145,7 +146,7 @@ extension AXTab {
     // Static method to minimize instance overhead
     private func quickFaviconDownload(from url: URL) async throws -> NSImage {
         // Ultra-lightweight download with strict size limit
-        let (data, _) = try await AX_DOWNLOAD_SESSION.data(from: url)
+        let (data, _) = try await globalFaviconDownloadSession.data(from: url)
 
         // Minimal image creation with immediate downsizing
         guard let image = NSImage(data: data)?.downsizedIcon() else {
@@ -156,12 +157,14 @@ extension AXTab {
     }
 }
 
-private let AX_FAVICON_SCRIPT = """
+// swiftlint:disable line_length
+private let jsFaviconSearchScript = """
         (d=>{const h=d.head,l=["icon","shortcut icon","apple-touch-icon","mask-icon"];for(let r of l)if((r=h.querySelector(`link[rel=\"${r}\"]`))&&r.href)return r.href;return d.location.origin+"/favicon.ico"})(document)
     """
+// swiftlint:enable line_length
 
 // Singleton session to reduce resource allocation
-private let AX_DOWNLOAD_SESSION: URLSession = {
+private let globalFaviconDownloadSession: URLSession = {
     // Hyper-optimized session configuration
     let config = URLSessionConfiguration.ephemeral
     config.timeoutIntervalForRequest = 1.5  // Aggressive timeout

@@ -32,7 +32,6 @@ class AXGestureView: NSView {
     // Gestures
     private var userSwipedDirection: AXGestureViewSwipeDirection?
     private var scrollEventFinished: Bool = false
-    var trackingArea: NSTrackingArea!
     var scrollWithMice: Bool = false
 
     // Other
@@ -47,7 +46,6 @@ class AXGestureView: NSView {
 
         super.init(frame: .zero)
 
-        setTrackingArea()
         setupViews()
     }
 
@@ -66,7 +64,7 @@ class AXGestureView: NSView {
             tabGroupInfoView.rightAnchor.constraint(equalTo: rightAnchor),
             tabGroupInfoView.topAnchor.constraint(
                 equalTo: topAnchor, constant: 4),
-            tabGroupInfoViewLeftConstraint!,
+            tabGroupInfoViewLeftConstraint!
         ])
 
         // Search Button
@@ -80,7 +78,7 @@ class AXGestureView: NSView {
                 equalTo: leftAnchor, constant: 5),
             searchButton.rightAnchor.constraint(
                 equalTo: rightAnchor, constant: -7),
-            searchButton.heightAnchor.constraint(equalToConstant: 36),
+            searchButton.heightAnchor.constraint(equalToConstant: 36)
         ])
     }
 
@@ -90,8 +88,8 @@ class AXGestureView: NSView {
 
     // MARK: - Gesture/Mouse Functions
     override func scrollWheel(with event: NSEvent) {
-        let x = event.deltaX
-        let y = event.deltaY
+        let deltaX = event.deltaX
+        let deltaY = event.deltaY
 
         // Update scroll event phase state
         switch event.phase {
@@ -112,10 +110,10 @@ class AXGestureView: NSView {
         scrollWithMice = event.phase == [] && event.momentumPhase == []
 
         // Handle directional scroll
-        if x != 0 {
-            userSwipedDirection = x > 0 ? .backwards : .forwards
-        } else if y != 0 {
-            userSwipedDirection = y > 0 ? .reload : .nothing
+        if deltaX != 0 {
+            userSwipedDirection = deltaX > 0 ? .backwards : .forwards
+        } else if deltaY != 0 {
+            userSwipedDirection = deltaY > 0 ? .reload : .nothing
         }
     }
 
@@ -160,31 +158,11 @@ class AXGestureView: NSView {
                 entered ? 70 : 5.5
             tabGroupInfoView.contentStackView.layoutSubtreeIfNeeded()
 
-            if !window.styleMask.contains(.fullScreen) {
-                entered
-                    ? window.trafficLightsShow()
-                    : window.trafficLightsHide()
+            if !window.styleMask.contains(.fullScreen), !entered {
+                window.trafficLightsHide()
             } else {
                 window.trafficLightsShow()
             }
-        }
-    }
-
-    func setTrackingArea() {
-        let options: NSTrackingArea.Options = [
-            .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
-        ]
-        trackingArea = NSTrackingArea.init(
-            rect: self.bounds, options: options, owner: self, userInfo: nil)
-        self.addTrackingArea(trackingArea)
-    }
-
-    override func removeFromSuperview() {
-        super.removeFromSuperview()
-
-        if let trackingArea {
-            self.removeTrackingArea(trackingArea)
-            self.trackingArea = nil
         }
     }
 }
@@ -218,30 +196,6 @@ class AXGestureStackView: NSStackView {
         updateTrackingAreas()
     }
 
-    override func updateTrackingAreas() {
-        if let trackingArea {
-            removeTrackingArea(trackingArea)
-        }
-        trackingArea = NSTrackingArea(
-            rect: bounds,
-            options: [.activeAlways, .mouseEnteredAndExited, .mouseMoved],
-            owner: self,
-            userInfo: nil
-        )
-        addTrackingArea(trackingArea)
-    }
-
-    override func mouseEntered(with event: NSEvent) {
-        //Bruh
-        print("bruh")
-    }
-
-    override func mouseExited(with event: NSEvent) {
-        //Bruh2
-        print("bruh2")
-
-    }
-
     func handleScrollEnd() {
         scrollEventFinished = true
         gestureDelegate?.gestureView(didSwipe: userSwipedDirection)
@@ -249,8 +203,8 @@ class AXGestureStackView: NSStackView {
     }
 
     override func scrollWheel(with event: NSEvent) {
-        let x = event.deltaX
-        let y = event.deltaY
+        let deltaX = event.deltaX
+        let deltaY = event.deltaY
 
         // Update scroll event phase state
         switch event.phase {
@@ -270,119 +224,10 @@ class AXGestureStackView: NSStackView {
         scrollWithMice = event.phase == [] && event.momentumPhase == []
 
         // Handle directional scroll
-        if x != 0 {
-            userSwipedDirection = x > 0 ? .backwards : .forwards
-        } else if y != 0 {
-            userSwipedDirection = y > 0 ? .reload : .nothing
+        if deltaX != 0 {
+            userSwipedDirection = deltaX > 0 ? .backwards : .forwards
+        } else if deltaY != 0 {
+            userSwipedDirection = deltaY > 0 ? .reload : .nothing
         }
     }
 }
-
-//class AXGestureStackView: NSStackView {
-//    weak var gestureDelegate: AXGestureViewDelegate?
-//
-//    // Gestures
-//    private var userSwipedDirection: AXGestureViewSwipeDirection?
-//    private var scrollEventFinished: Bool = false
-//    private var trackingArea: NSTrackingArea!
-//    var scrollWithMice: Bool = false
-//
-//    override var isFlipped: Bool {
-//        return true
-//    }
-//
-//    // MARK: - Initialization
-//
-//    init() {
-//        super.init(frame: .zero)
-//        setupView()
-//    }
-//
-//    required init?(coder: NSCoder) {
-//        super.init(coder: coder)
-//        setupView()
-//    }
-//
-//    // MARK: - View Setup
-//
-//    private func setupView() {
-//        translatesAutoresizingMaskIntoConstraints = false
-//
-//      // Set proper content hugging and compression resistance for toolbar
-//        setContentHuggingPriority(.defaultHigh, for: .horizontal)
-//        setContentHuggingPriority(.defaultHigh, for: .vertical)
-//        setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
-//        setContentCompressionResistancePriority(.defaultHigh, for: .vertical)
-//
-//        // Set proper size constraints for toolbar
-//        let heightConstraint = heightAnchor.constraint(equalToConstant: 28)
-//        heightConstraint.priority = .defaultHigh
-//        heightConstraint.isActive = true
-//
-//        // Setup tracking area for mouse events
-//        setupTrackingArea()
-//    }
-//
-//    private func setupTrackingArea() {
-//        trackingArea = NSTrackingArea(
-//            rect: bounds,
-//            options: [.activeAlways, .mouseEnteredAndExited, .mouseMoved],
-//            owner: self,
-//            userInfo: nil
-//        )
-//        addTrackingArea(trackingArea)
-//    }
-//
-//    // MARK: - Layout
-//
-//    override var intrinsicContentSize: NSSize {
-//        // Provide proper intrinsic content size for toolbar
-//        return NSSize(width: NSView.noIntrinsicMetric, height: 28)
-//    }
-//
-//    override func layout() {
-//        super.layout()
-//        // Update tracking area when view layout changes
-//        if let existingTrackingArea = trackingArea {
-//            removeTrackingArea(existingTrackingArea)
-//        }
-//        setupTrackingArea()
-//    }
-//
-//    // MARK: - Gesture Handling
-//
-//    func handleScrollEnd() {
-//        scrollEventFinished = true
-//        gestureDelegate?.gestureView(didSwipe: userSwipedDirection)
-//        userSwipedDirection = nil
-//    }
-//
-//    override func scrollWheel(with event: NSEvent) {
-//        let x = event.deltaX
-//        let y = event.deltaY
-//
-//        // Update scroll event phase state
-//        switch event.phase {
-//        case .began:
-//            scrollEventFinished = false
-//        case .mayBegin:
-//            return  // Cancelled, exit early
-//        case .ended where !scrollEventFinished,
-//             .ended where event.momentumPhase == .ended:
-//            handleScrollEnd()
-//            return
-//        default:
-//            break
-//        }
-//
-//        // Determine if scrolling is from a mouse
-//        scrollWithMice = event.phase == [] && event.momentumPhase == []
-//
-//        // Handle directional scroll
-//        if x != 0 {
-//            userSwipedDirection = x > 0 ? .backwards : .forwards
-//        } else if y != 0 {
-//            userSwipedDirection = y > 0 ? .reload : .nothing
-//        }
-//    }
-//}

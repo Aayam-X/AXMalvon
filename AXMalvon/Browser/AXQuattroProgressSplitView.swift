@@ -9,9 +9,7 @@
 import AppKit
 import QuartzCore
 
-class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
-    CAAnimationDelegate
-{
+class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate, CAAnimationDelegate {
     private let animationQueue = DispatchQueue(
         label: "com.ayaamx.AXMalvon.progressAnimation",
         qos: .userInitiated
@@ -155,10 +153,8 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
                 }
 
                 if targetProgress >= 0.95 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-                        [weak self] in
-                        guard let self = self else { return }
-                        self.borderLayers.forEach { layer in
+                    DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
+                        self?.borderLayers.forEach { layer in
                             layer.opacity = 0.0
                             layer.isHidden = true
                         }
@@ -212,8 +208,7 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
     }
 
     func splitView(_ splitView: NSSplitView, canCollapseSubview subview: NSView)
-        -> Bool
-    {
+        -> Bool {
         return false
     }
 

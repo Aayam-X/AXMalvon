@@ -9,12 +9,14 @@
 import AppKit
 import WebKit
 
+// swiftlint:disable:next line_length
+private let customUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Safari/605.1.15"
+
 class AXWebView: WKWebView {
     override init(frame: CGRect, configuration: WKWebViewConfiguration) {
         super.init(frame: frame, configuration: configuration)
 
-        customUserAgent =
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1.1 Safari/605.1.15"
+        self.customUserAgent = customUserAgent
         allowsMagnification = true
     }
 
@@ -39,9 +41,8 @@ class AXWebView: WKWebView {
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        if event.modifierFlags.contains(.command)
-            && event.charactersIgnoringModifiers == "w"
-        {
+        if event.modifierFlags.contains(.command),
+           event.charactersIgnoringModifiers == "w" {
             self.uiDelegate?.webViewDidClose?(self)
             return true
         }

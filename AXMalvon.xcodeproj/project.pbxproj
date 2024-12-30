@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ED53B1092D2312E30047B656 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = ED53B1082D2312E20047B656 /* .swiftlint.yml */; };
+		ED53B10A2D2312E30047B656 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = ED53B1082D2312E20047B656 /* .swiftlint.yml */; };
 		EDA45CC72D17303D00779C51 /* license.txt in Resources */ = {isa = PBXBuildFile; fileRef = ED9D55AD2CF155A1000E6319 /* license.txt */; };
 		EDA45CC92D17303D00779C51 /* Malvon-Updater.app in Copy Malvon-Updater */ = {isa = PBXBuildFile; fileRef = ED1522C12CFABCFE00941684 /* Malvon-Updater.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
@@ -46,6 +48,7 @@
 		ED1522BC2CFABCFD00941684 /* Malvon-Updater.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Malvon-Updater.xcodeproj"; path = "Malvon-Updater/Malvon-Updater.xcodeproj"; sourceTree = "<group>"; };
 		ED3AEFE22CDAED2F002AE6CC /* Malvon Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Malvon Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED3BA1482CE11E480094F6E9 /* Checklist.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Checklist.md; sourceTree = "<group>"; };
+		ED53B1082D2312E20047B656 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		ED9D55AD2CF155A1000E6319 /* license.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = license.txt; sourceTree = "<group>"; };
 		EDA45CCD2D17303D00779C51 /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -104,6 +107,7 @@
 		ED3AEFD92CDAED2F002AE6CC = {
 			isa = PBXGroup;
 			children = (
+				ED53B1082D2312E20047B656 /* .swiftlint.yml */,
 				ED1522BC2CFABCFD00941684 /* Malvon-Updater.xcodeproj */,
 				ED3BA1482CE11E480094F6E9 /* Checklist.md */,
 				ED9D55AD2CF155A1000E6319 /* license.txt */,
@@ -128,6 +132,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = ED3AEFEF2CDAED30002AE6CC /* Build configuration list for PBXNativeTarget "Malvon Debug" */;
 			buildPhases = (
+				ED53B1072D2312870047B656 /* SwiftLint */,
 				ED3AEFDE2CDAED2F002AE6CC /* Sources */,
 				ED3AEFE02CDAED2F002AE6CC /* Resources */,
 			);
@@ -229,6 +234,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED53B10A2D2312E30047B656 /* .swiftlint.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -236,11 +242,34 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED53B1092D2312E30047B656 /* .swiftlint.yml in Resources */,
 				EDA45CC72D17303D00779C51 /* license.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		ED53B1072D2312870047B656 /* SwiftLint */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftLint;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		ED3AEFDE2CDAED2F002AE6CC /* Sources */ = {
@@ -401,6 +430,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 3TJDS4N2C3;
 				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AXMalvon/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
@@ -437,6 +467,7 @@
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 3TJDS4N2C3;
 				ENABLE_HARDENED_RUNTIME = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AXMalvon/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Malvon;

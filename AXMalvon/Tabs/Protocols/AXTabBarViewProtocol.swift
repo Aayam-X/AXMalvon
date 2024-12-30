@@ -10,23 +10,24 @@ import WebKit
 
 protocol AXTabBarViewDelegate: AnyObject {
     func tabBarSwitchedTo(tabAt: Int)
-    func tabBarActiveTabTitleChanged(to: String)
+    func tabBarActiveTabTitleChanged(to title: String)
 
     /// Return a WKWebViewConfiguration when the user deactivates a self-created web view
     func tabBarDeactivatedTab() -> WKWebViewConfiguration?
 }
 
 protocol AXTabBarViewTemplate: AnyObject, NSView, AXTabButtonDelegate {
-    var tabGroup: AXTabGroup! { get set }
+    var tabGroup: AXTabGroup { get set }
     var delegate: AXTabBarViewDelegate? { get set }
 
     var tabStackView: NSStackView { get set }
 
+    init(tabGroup: AXTabGroup)
     func addTabButton(for tab: AXTab)
     func removeTabButton(at index: Int)
     func addTabButtonInBackground(for tab: AXTab, index: Int)
     func updateIndices(after index: Int)
-    func updateTabSelection(from: Int, to: Int)
+    func updateTabSelection(from: Int, to index: Int)
 }
 
 extension AXTabBarViewTemplate {
@@ -53,9 +54,8 @@ extension AXTabBarViewTemplate {
             let arragedSubviews = tabStackView.arrangedSubviews
             let arrangedSubviewsCount = arragedSubviews.count
 
-            guard arrangedSubviewsCount > selectedIndex else { return }
-
-            let newButton = arragedSubviews[selectedIndex] as! AXTabButton
+            guard arrangedSubviewsCount > selectedIndex,
+                  let newButton = arragedSubviews[selectedIndex] as? AXTabButton else { return }
             newButton.isSelected = true
         }
 

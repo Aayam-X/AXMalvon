@@ -61,17 +61,18 @@ struct AXAboutView: View {
                 .foregroundColor(.secondary)
 
                 HStack {
-                    Button(action: {
+                    Button {
                         // Contact button action
-                    }) {
+                    } label: {
                         Text("Contact")
                     }
 
-                    Button(action: {
+                    Button {
                         // Donate button action
-                    }) {
+                    } label: {
                         Text("Donate")
                     }
+
                 }
             }
             Spacer()

@@ -7,8 +7,7 @@
 
 import AppKit
 
-class MainWindowToolbar: NSToolbar, NSToolbarDelegate, AXTabHostingViewProtocol
-{
+class MainWindowToolbar: NSToolbar, NSToolbarDelegate, AXTabHostingViewProtocol {
     internal var tabBarView: any AXTabBarViewTemplate
     var stickyTabBarView: AXStickyHorizontalTabHostingView
 
@@ -103,24 +102,17 @@ class MainWindowToolbar: NSToolbar, NSToolbarDelegate, AXTabHostingViewProtocol
     }
 
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem
-        .Identifier]
-    {
-        return [
-            navigationIdentifier, .flexibleSpace, searchIdentifier,
-            tabBarIdentifier,
-        ]
+        .Identifier] {
+        return [navigationIdentifier, .flexibleSpace, searchIdentifier, tabBarIdentifier]
     }
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem
-        .Identifier]
-    {
-        return [
-            navigationIdentifier, .flexibleSpace, searchIdentifier,
-            tabBarIdentifier,
-        ]
+        .Identifier] {
+        return [navigationIdentifier, .flexibleSpace, searchIdentifier, tabBarIdentifier]
     }
 
-    @objc private func searchButtonTapped() {
+    @objc
+    private func searchButtonTapped() {
         // Implement search functionality
     }
 

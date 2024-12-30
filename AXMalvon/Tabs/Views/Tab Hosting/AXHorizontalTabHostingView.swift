@@ -65,7 +65,7 @@ class AXStickyHorizontalTabHostingView: NSView {
             // Configure right sticky tab
             rightStickyTab.trailingAnchor.constraint(equalTo: trailingAnchor),
             rightStickyTab.centerYAnchor.constraint(equalTo: centerYAnchor),
-            rightStickyTab.widthAnchor.constraint(equalToConstant: 90),
+            rightStickyTab.widthAnchor.constraint(equalToConstant: 90)
         ])
 
         tabBarView.stickyDelegate = self

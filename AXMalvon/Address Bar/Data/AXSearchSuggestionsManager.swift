@@ -110,8 +110,7 @@ extension SuggestionsManager {
                 if let jsonArray = try JSONSerialization.jsonObject(
                     with: data, options: []) as? [Any],
                     jsonArray.count > 1,
-                    let suggestions = jsonArray[1] as? [String]
-                {
+                    let suggestions = jsonArray[1] as? [String] {
                     completion(suggestions)
                 } else {
                     completion([])

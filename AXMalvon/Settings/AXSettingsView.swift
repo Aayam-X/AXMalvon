@@ -13,8 +13,7 @@ struct AXSettingsView: View {
     var body: some View {
         NavigationSplitView {
             // Sidebar
-            List(SettingsSection.allCases, selection: $selectedSection) {
-                section in
+            List(SettingsSection.allCases, selection: $selectedSection) { section in
                 Label(section.title, systemImage: section.icon)
                     .tag(section)
             }
@@ -58,8 +57,10 @@ enum SettingsSection: String, Identifiable, CaseIterable {
         }
     }
 
+    // swiftlint:disable attributes
     @ViewBuilder
     var contentView: some View {
+        // swiftlint:enable attributes
         switch self {
         case .general:
             GeneralSettingsView()
@@ -83,7 +84,8 @@ struct GeneralSettingsView: View {
 }
 
 struct AppearanceSettingsView: View {
-    @AppStorage("verticalTabs") private var verticalTabs = false
+    @AppStorage("verticalTabs")
+    private var verticalTabs = false
 
     var body: some View {
         Text("Appearance Settings")
