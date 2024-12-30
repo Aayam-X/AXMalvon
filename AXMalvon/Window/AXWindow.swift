@@ -76,7 +76,6 @@ class AXWindow: NSWindow, NSWindowDelegate,
                 .closable,
                 .miniaturizable,
                 .resizable,
-                //.fullSizeContentView,
             ],
             backing: .buffered,
             defer: false
@@ -315,7 +314,7 @@ class AXWindow: NSWindow, NSWindowDelegate,
     }()
 
     lazy var tabCustomizationView: AXTabGroupCustomizerView = {
-        let view = AXTabGroupCustomizerView(tabGroup: currentTabGroup)
+        let view = AXTabGroupCustomizerView()
         view.delegate = self
         return view
     }()
@@ -509,6 +508,10 @@ extension AXWindow: AXWorkspaceSwapperViewDelegate {
 }
 
 extension AXWindow: AXTabGroupCustomizerViewDelegate {
+    func tabGroupCustomizerActiveTabGroup() -> AXTabGroup? {
+        return activeProfile.currentTabGroup
+    }
+
     func tabGroupCustomizerDidUpdateName(_ tabGroup: AXTabGroup) {
         // No need to update profile name here, AXTabGroupCustomizerViewDelegate
         layoutManager.tabGroupInfoView.updateLabels(tabGroup: tabGroup)

@@ -11,11 +11,15 @@ protocol AXTabGroupCustomizerViewDelegate: AnyObject {
     func tabGroupCustomizerDidUpdateName(_ tabGroup: AXTabGroup)
     func tabGroupCustomizerDidUpdateColor(_ tabGroup: AXTabGroup)
     func tabGroupCustomizerDidUpdateIcon(_ tabGroup: AXTabGroup)
+
+    func tabGroupCustomizerActiveTabGroup() -> AXTabGroup?
 }
 
 class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
     weak var delegate: AXTabGroupCustomizerViewDelegate?
-    private weak var tabGroup: AXTabGroup!
+    weak var tabGroup: AXTabGroup? {
+        delegate?.tabGroupCustomizerActiveTabGroup()
+    }
 
     private let tabGroupLabel: NSTextField = {
         let label = NSTextField(labelWithString: "Tab Group Name")
@@ -57,21 +61,12 @@ class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
 
     private lazy var colorWell: NSColorWell = {
         let colorWell = NSColorWell()
-        colorWell.color = tabGroup.color
+        colorWell.color = tabGroup?.color ?? .white
         colorWell.action = #selector(colorWellUpdated)
         colorWell.target = self
         colorWell.translatesAutoresizingMaskIntoConstraints = false
         return colorWell
     }()
-
-    init(tabGroup: AXTabGroup) {
-        self.tabGroup = tabGroup
-        super.init(frame: .zero)
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
 
     var hasDrawn: Bool = false
     override func viewWillDraw() {
@@ -79,7 +74,7 @@ class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
     }
 
     private func setupView() {
-        tabGroupNameTextField.stringValue = tabGroup.name
+        tabGroupNameTextField.stringValue = tabGroup?.name ?? "Null Tab Group"
         self.wantsLayer = true
         self.layer?.backgroundColor = NSColor.textBackgroundColor.cgColor
 
@@ -134,14 +129,17 @@ class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
 
     func controlTextDidEndEditing(_ obj: Notification) {
         guard let textField = obj.object as? NSTextField,
-            textField == tabGroupNameTextField
+            textField == tabGroupNameTextField,
+            let tabGroup = delegate?.tabGroupCustomizerActiveTabGroup()
         else { return }
         tabGroup.name = textField.stringValue
         delegate?.tabGroupCustomizerDidUpdateName(tabGroup)
     }
 
     @objc private func iconSelectionChanged() {
-        guard let selectedIcon = iconDropdown.titleOfSelectedItem else {
+        guard let selectedIcon = iconDropdown.titleOfSelectedItem,
+            let tabGroup = delegate?.tabGroupCustomizerActiveTabGroup()
+        else {
             return
         }
         tabGroup.icon = selectedIcon
@@ -150,6 +148,9 @@ class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
     }
 
     @objc private func colorWellUpdated() {
+        guard let tabGroup = delegate?.tabGroupCustomizerActiveTabGroup() else {
+            return
+        }
         tabGroup.color = colorWell.color
         delegate?.tabGroupCustomizerDidUpdateColor(tabGroup)
     }
