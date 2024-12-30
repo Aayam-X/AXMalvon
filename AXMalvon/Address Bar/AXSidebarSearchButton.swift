@@ -15,7 +15,7 @@ protocol AXSidebarSearchButtonDelegate: AnyObject {
 
 class AXSidebarSearchButton: NSButton {
     override var intrinsicContentSize: NSSize {
-        .init(width: 300, height: 30)
+        .init(width: 300, height: 36)
     }
 
     weak var delegate: AXSidebarSearchButtonDelegate?
@@ -94,6 +94,8 @@ class AXSidebarSearchButton: NSButton {
         self.layer?.cornerRadius = 10
         self.layer?.backgroundColor =
             NSColor.systemGray.withAlphaComponent(0.4).cgColor
+
+        self.heightAnchor.constraint(equalToConstant: 33).isActive = true
 
         // Restore auto resizing mask
         lockView.translatesAutoresizingMaskIntoConstraints = false

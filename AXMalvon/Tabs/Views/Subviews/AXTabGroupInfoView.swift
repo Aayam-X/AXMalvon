@@ -32,9 +32,9 @@ class AXTabGroupInfoView: NSView {
         return label
     }()
 
-    lazy var profileLabel: NSTextField = {
+    private lazy var profileLabel: NSTextField = {
         let label = NSTextField(labelWithString: "Default")
-        label.font = .messageFont(ofSize: 11)
+        label.font = .messageFont(ofSize: 10)
         label.textColor = NSColor.gray
         return label
     }()
@@ -43,7 +43,7 @@ class AXTabGroupInfoView: NSView {
         let stackView = NSStackView(views: [tabGroupLabel, profileLabel])
         stackView.orientation = .vertical
         stackView.alignment = .leading
-        stackView.spacing = 2
+        stackView.spacing = 1
         stackView.translatesAutoresizingMaskIntoConstraints = false
         return stackView
     }()
@@ -72,6 +72,8 @@ class AXTabGroupInfoView: NSView {
 
         // Set up constraints for the content stack view
         NSLayoutConstraint.activate([
+            heightAnchor.constraint(equalToConstant: 33),
+
             contentStackView.leadingAnchor.constraint(
                 equalTo: leadingAnchor, constant: 5),
             contentStackView.trailingAnchor.constraint(

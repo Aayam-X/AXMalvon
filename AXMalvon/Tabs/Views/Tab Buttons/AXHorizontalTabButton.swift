@@ -98,7 +98,7 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
             self.layer?.shadowOpacity = 0.3
         }
 
-        self.heightAnchor.constraint(equalToConstant: 30).isActive = true
+        self.heightAnchor.constraint(equalToConstant: 33).isActive = true
 
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.favicon =

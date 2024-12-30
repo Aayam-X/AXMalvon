@@ -49,6 +49,8 @@ class AXStickyHorizontalTabHostingView: NSView {
         rightStickyTab.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
+            self.heightAnchor.constraint(equalToConstant: 40),
+
             // Fill entire superview
             tabBarView.leadingAnchor.constraint(equalTo: leadingAnchor),
             tabBarView.trailingAnchor.constraint(equalTo: trailingAnchor),
