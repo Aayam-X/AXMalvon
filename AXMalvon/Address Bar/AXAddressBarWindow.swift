@@ -105,7 +105,6 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
 
         updateWindowPosition(for: textField)
         tableView.reloadData()
-        moveTo(position: 0)
     }
 
     private var shouldShowWindow: Bool {
@@ -307,7 +306,6 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
         didSet {
             googleSearchItemCount = googleSearchItems.count
             tableView.reloadData()
-            moveTo(position: 0)
         }
     }
 }
@@ -340,6 +338,9 @@ extension AXAddressBarWindow: NSTableViewDataSource, NSTableViewDelegate {
                     for: topSiteItems[row - currentIndex], at: row)
             }
             currentIndex += topSiteItems.count
+            moveTo(position: 2)
+        } else {
+            moveTo(position: 0)
         }
 
         // History section
