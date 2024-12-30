@@ -55,6 +55,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				AdBlock/contentBlocker.json,
+				"Address Bar/readme.txt",
 				Info.plist,
 			);
 			target = ED3AEFE12CDAED2F002AE6CC /* Malvon Debug */;
@@ -62,6 +63,7 @@
 		EDA45CD02D17303D00779C51 /* Exceptions for "AXMalvon" folder in "Malvon Release" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				"Address Bar/readme.txt",
 				Info.plist,
 			);
 			target = EDA45CC12D17303D00779C51 /* Malvon Release */;

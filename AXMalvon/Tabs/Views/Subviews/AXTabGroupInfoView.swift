@@ -116,6 +116,10 @@ class AXTabGroupInfoView: NSView {
     }
 
     override func mouseDown(with event: NSEvent) {
-        onLeftMouseDown?()
+        if event.clickCount == 2 {
+            onRightMouseDown?()
+        } else {
+            onLeftMouseDown?()
+        }
     }
 }

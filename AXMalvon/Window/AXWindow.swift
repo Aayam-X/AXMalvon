@@ -505,6 +505,10 @@ extension AXWindow: AXTabGroupCustomizerViewDelegate {
 }
 
 extension AXWindow: AXSidebarSearchButtonDelegate {
+    func sidebarSearchButtonSearchesFor(_ url: URL) {
+        searchBarUpdatesCurrentTab(with: url)
+    }
+
     func lockClicked() {
         guard let webView = containerView.currentWebView,
             let serverTrust = webView.serverTrust

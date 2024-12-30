@@ -10,6 +10,7 @@ import AppKit
 protocol AXSidebarSearchButtonDelegate: AnyObject {
     func lockClicked()
     func sidebarSearchButtonRequestsHistoryManager() -> AXHistoryManager
+    func sidebarSearchButtonSearchesFor(_ url: URL)
 }
 
 class AXSidebarSearchButton: NSButton {
@@ -325,8 +326,7 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
     }
 
     private func searchEnter(_ url: URL) {
-        guard let window = self.window as? AXWindow else { return }
-        window.searchBarUpdatesCurrentTab(with: url)
+        delegate?.sidebarSearchButtonSearchesFor(url)
     }
 }
 
