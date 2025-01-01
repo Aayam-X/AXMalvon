@@ -19,7 +19,6 @@ protocol AXWebContainerViewDelegate: AnyObject {
 
     func webContainerViewRequestsSidebar() -> NSView?
 
-    func webContainerSwitchedToProperWebView()
     func webContainerSwitchedToEmptyWebView()
 }
 
@@ -173,11 +172,10 @@ class AXWebContainerView: NSView {
         splitView.addArrangedSubview(webView)
         webView.autoresizingMask = [.height, .width]
 
-        if webView.url != nil {
-            delegate?.webContainerSwitchedToProperWebView()
-            self.window?.makeFirstResponder(currentWebView)
-        } else {
+        if let url = webView.url, url.scheme == "about" {
             delegate?.webContainerSwitchedToEmptyWebView()
+        } else {
+            self.window?.makeFirstResponder(self.currentWebView)
         }
 
         progressBarObserver = webView.observe(

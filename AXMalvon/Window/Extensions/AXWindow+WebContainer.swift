@@ -11,31 +11,8 @@ import WebKit
 import SwiftUI
 
 extension AXWindow: AXWebContainerViewDelegate {
-    func webContainerSwitchedToProperWebView() {
-        //self.contentView = self.containerView
-    }
-    
     func webContainerSwitchedToEmptyWebView() {
-//        self.makeFirstResponder(layoutManager.searchButton.addressField)
-//        self.containerView.removeFromSuperview()
-//
-//        var newTabView = AXNewTabView()
-//        newTabView.delegate = self
-//        let hostingView = NSHostingView(rootView: newTabView)
-//        hostingView.translatesAutoresizingMaskIntoConstraints = false
-//
-//        // Set the hosting view directly as the content view
-//        self.contentView = hostingView
-//
-//        // Add constraints to make the hosting view fill the window
-//        if let contentView = self.contentView {
-//            NSLayoutConstraint.activate([
-//                hostingView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-//                hostingView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-//                hostingView.topAnchor.constraint(equalTo: contentView.topAnchor),
-//                hostingView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
-//            ])
-//        }
+        self.makeFirstResponder(layoutManager.searchButton.addressField)
     }
 
     func webContainerViewChangedURL(to url: URL) {
