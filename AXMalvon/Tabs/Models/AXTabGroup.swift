@@ -35,7 +35,8 @@ class AXTabGroup: Codable {
 
     func addEmptyTab(configuration: WKWebViewConfiguration) {
         let webView = AXWebView(frame: .zero, configuration: configuration)
-       // webView.loadHTMLString("", baseURL: nil)
+        webView.loadHTMLString(newTabHTMLString, baseURL: nil)
+        
         let tab = AXTab(
             title: "New Tab",
             webView: webView)

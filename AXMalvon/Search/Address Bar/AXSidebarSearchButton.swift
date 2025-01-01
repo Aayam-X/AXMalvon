@@ -76,7 +76,7 @@ class AXSidebarSearchButton: NSButton {
 
         suggestionsWindowController.suggestionItemClickAction = { [weak self] suggestion in
             self?.addressField.stringValue = suggestion
-            self?.searchFieldAction()
+            self?.searchEnterAction()
         }
     }
 
@@ -211,7 +211,8 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
                 addressField.stringValue = suggestion
             }
             suggestionsWindowController.orderOut()
-            searchFieldAction()
+            searchEnterAction()
+            
             return true
         }
 
@@ -231,72 +232,8 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
         return true
     }
 
-    func searchFieldAction() {
-        let value = addressField.stringValue
-
-        // Section 1: Handle File URLs
-        if value.starts(with: "malvon?") {
-            searchActionMalvonURL(value)
-        } else if value.starts(with: "file:///") {
-            searchActionFileURL(value)
-
-            /* Section 2: Handle Regular Search Terms */
-        } else if value.isValidURL() && !value.hasWhitespace() {
-            searchActionURL(value)
-        } else {
-            searchActionSearchTerm(value)
-        }
-
-        suggestionsWindowController.orderOut()
-    }
-
-    /// URL: malvon?
-    func searchActionMalvonURL(_ value: String) {
-        // FIXME: File URL Implementation
-        /*
-        if let resourceURL = Bundle.main.url(
-            forResource: value.string(after: 7), withExtension: "html")
-        {
-            // appProperties.tabManager.createNewTab(fileURL: resourceURL)
-        }
-         */
-    }
-
-    /// URL: file:///
-    func searchActionFileURL(_ value: String) {
-        if let url = URL(string: value) {
-            searchEnter(url)
-        }
-    }
-
-    /// URL: https://www.apple.com
-    func searchActionURL(_ value: String) {
-        guard let url = URL(string: value) else { return }
-
-        searchEnter(url.fixURL())
-
-        guard let parentWindow = self.window as? AXWindow else { return }
-
-        Task(priority: .background) {
-            if parentWindow.profiles[0].name != "Private" {
-                AXSearchDatabase.shared.incrementOccurrence(for: value)
-            }
-        }
-    }
-
-    /// Google Search Term
-    func searchActionSearchTerm(_ value: String) {
-        let searchQuery =
-            value.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
-            ?? ""
-        let searchURL = URL(
-            string:
-                "https://www.google.com/search?client=Malvon&q=\(searchQuery)"
-        )!.fixURL()
-        searchEnter(searchURL)
-    }
-
-    private func searchEnter(_ url: URL) {
+    private func searchEnterAction() {
+        let url = AXSearchQueryToURL.shared.convert(query: addressField.stringValue)
         delegate?.sidebarSearchButtonSearchesFor(url)
     }
 }

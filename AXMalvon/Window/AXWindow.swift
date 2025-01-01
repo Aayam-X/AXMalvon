@@ -19,8 +19,6 @@ class AXWindow: NSWindow {
 
     // Other Views
     lazy var splitView = NSSplitView()
-    lazy var containerView = AXWebContainerView(isVertical: usesVerticalTabs)
-
     internal var layoutManager: AXWindowLayoutManaging!
 
     // Lazy loading to stop unnecesary initilizations

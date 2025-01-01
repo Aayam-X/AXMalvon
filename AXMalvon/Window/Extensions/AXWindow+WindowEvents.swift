@@ -25,7 +25,6 @@ extension AXWindow: NSWindowDelegate {
     internal func setupComponents() {
         // Visual Effect View
         self.contentView = visualEffectView
-        containerView.translatesAutoresizingMaskIntoConstraints = false
 
         layoutManager =
             usesVerticalTabs
@@ -37,7 +36,7 @@ extension AXWindow: NSWindowDelegate {
         layoutManager.searchButton.delegate = self
 
         tabBarView.delegate = self
-        containerView.delegate = self
+        layoutManager.containerView.delegate = self
 
         currentTabGroupIndex = 0
         tabBarView.updateTabGroup(currentTabGroup)

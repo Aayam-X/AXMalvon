@@ -17,17 +17,13 @@ extension AXWindow: AXTabBarViewDelegate {
         layoutManager.searchButton.addressField.stringValue = ""
 
         if tabAt == -1 {
-            containerView.removeAllWebViews()
+            layoutManager.containerView.removeAllWebViews()
         } else {
-            containerView.updateView(webView: tabs[tabAt].webView)
+            layoutManager.containerView.updateView(webView: tabs[tabAt].webView)
         }
     }
 
     func tabBarActiveTabTitleChanged(to title: String) {
-        containerView.websiteTitleLabel.stringValue = title
-    }
-
-    func tabBarDeactivatedTab() -> WKWebViewConfiguration? {
-        return activeProfile.configuration
+        layoutManager.containerView.websiteTitleLabel.stringValue = title
     }
 }

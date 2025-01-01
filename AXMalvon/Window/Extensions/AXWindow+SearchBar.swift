@@ -17,18 +17,21 @@ extension AXWindow: AXSidebarSearchButtonDelegate {
 
         currentTabGroup.addTab(
             .init(title: webView.title ?? "Untitled Tab", webView: webView))
+        
+        //self.contentView = containerView
     }
 
     func searchBarUpdatesCurrentTab(with url: URL) {
         // Change current webview's url to new url
-        self.containerView.currentWebView?.load(URLRequest(url: url))
+        layoutManager.containerView.currentWebView?.load(URLRequest(url: url))
 
-        makeFirstResponder(self.containerView.currentWebView)
+        //self.contentView = containerView
+        makeFirstResponder(layoutManager.containerView.currentWebView)
     }
 
     func searchBarCurrentWebsiteURL() -> String {
         // Returns the current web view's url
-        self.containerView.currentWebView?.url?.absoluteString ?? ""
+        layoutManager.containerView.currentWebView?.url?.absoluteString ?? ""
     }
 
     func sidebarSearchButtonSearchesFor(_ url: URL) {
@@ -36,7 +39,7 @@ extension AXWindow: AXSidebarSearchButtonDelegate {
     }
 
     func lockClicked() {
-        guard let webView = containerView.currentWebView,
+        guard let webView = layoutManager.containerView.currentWebView,
             let serverTrust = webView.serverTrust
         else { return }
 

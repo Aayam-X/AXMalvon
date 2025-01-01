@@ -22,24 +22,24 @@ extension AXWindow {
     }
 
     @IBAction func find(_ sender: Any) {
-        containerView.webViewPerformSearch()
+        layoutManager.containerView.webViewPerformSearch()
     }
 
     @IBAction func backWebpage(_ sender: Any?) {
-        containerView.currentWebView?.goBack()
+        layoutManager.containerView.currentWebView?.goBack()
     }
 
     @IBAction func forwardWebpage(_ sender: Any?) {
-        containerView.currentWebView?.goForward()
+        layoutManager.containerView.currentWebView?.goForward()
     }
 
     @IBAction func reloadWebpage(_ sender: Any?) {
-        containerView.currentWebView?.reload()
+        layoutManager.containerView.currentWebView?.reload()
     }
 
     @IBAction func downloadWebpage(_ sender: Any) {
         Task { @MainActor in
-            if let webView = containerView.currentWebView,
+            if let webView = layoutManager.containerView.currentWebView,
                let url = webView.url {
                 await webView.startDownload(using: URLRequest(url: url))
             }
@@ -86,7 +86,7 @@ extension AXWindow {
 
     @IBAction func showReaderView(_ sender: Any) {
         // This code crashes the browser for some reason: toggleTabSidebar()
-        guard let webView = containerView.currentWebView else { return }
+        guard let webView = layoutManager.containerView.currentWebView else { return }
 
         let readerScript = """
             (function() {

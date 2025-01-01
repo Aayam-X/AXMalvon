@@ -19,6 +19,7 @@ protocol AXWebContainerViewDelegate: AnyObject {
 
     func webContainerViewRequestsSidebar() -> NSView?
 
+    func webContainerSwitchedToProperWebView()
     func webContainerSwitchedToEmptyWebView()
 }
 
@@ -173,6 +174,7 @@ class AXWebContainerView: NSView {
         webView.autoresizingMask = [.height, .width]
 
         if webView.url != nil {
+            delegate?.webContainerSwitchedToProperWebView()
             self.window?.makeFirstResponder(currentWebView)
         } else {
             delegate?.webContainerSwitchedToEmptyWebView()
@@ -366,21 +368,21 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate, WKDownloadDele
         mxPrint("DONWLOAD DOWNLAOD")
     }
 
-    //    func webView(
-    //        _ webView: WKWebView,
-    //        decidePolicyFor navigationAction: WKNavigationAction
-    //    ) async -> WKNavigationActionPolicy {
-    //        if navigationAction.navigationType == .linkActivated,
-    //            navigationAction.modifierFlags.contains(.command)
-    //        {
-    //            let request = navigationAction.request
-    //
-    //            return delegate?.webViewOpenLinkInNewTab(request: request) != nil
-    //                ? .cancel : .allow
-    //        }
-    //
-    //        return .allow
-    //    }
+//        func webView(
+//            _ webView: WKWebView,
+//            decidePolicyFor navigationAction: WKNavigationAction
+//        ) async -> WKNavigationActionPolicy {
+//            if navigationAction.navigationType == .linkActivated,
+//               navigationAction.modifierFlags.contains(.command)
+//            {
+//                let request = navigationAction.request
+//                
+//                return delegate?.webViewOpenLinkInNewTab(request: request) != nil
+//                ? .cancel : .allow
+//            }
+//            
+//            return .allow
+//        }
 
     func webView(
         _ webView: WKWebView,

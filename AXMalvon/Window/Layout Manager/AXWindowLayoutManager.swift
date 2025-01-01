@@ -7,9 +7,11 @@
 //
 
 import AppKit
+import SwiftUI
 
 // Protocol defining common interface for tab layout management
 protocol AXWindowLayoutManaging {
+    var containerView: AXWebContainerView { get }
     var tabBarView: any AXTabBarViewTemplate { get }
     var searchButton: AXSidebarSearchButton { get }
     var tabGroupInfoView: AXTabGroupInfoView { get }
@@ -26,6 +28,7 @@ protocol AXWindowLayoutManaging {
 
 // Base class implementing common functionality
 class AXBaseLayoutManager: AXWindowLayoutManaging {
+    var containerView: AXWebContainerView
     let tabBarView: any AXTabBarViewTemplate
     var searchButton: AXSidebarSearchButton
     var tabGroupInfoView: AXTabGroupInfoView
@@ -36,6 +39,7 @@ class AXBaseLayoutManager: AXWindowLayoutManaging {
         self.tabBarView = tabBarView
         self.searchButton = AXSidebarSearchButton()
         self.tabGroupInfoView = AXTabGroupInfoView()
+        self.containerView = AXWebContainerView(isVertical: false)
 
         setupCommonComponents()
     }
@@ -62,6 +66,14 @@ class AXBaseLayoutManager: AXWindowLayoutManaging {
         tabHostingDelegate?.tabHostingViewDisplaysTabGroupCustomizationPanel(
             tabGroupInfoView)
     }
+    
+    func displayNewTabPage(in window: AXWindow) {
+        
+    }
+    
+    func removeNewTabPage(in window: AXWindow) {
+        
+    }
 }
 
 // Horizontal layout manager using NSToolbar
@@ -78,7 +90,7 @@ class AXHorizontalLayoutManager: AXBaseLayoutManager {
         window.toolbar = toolbar
         window.titlebarAppearsTransparent = true
 
-        window.contentView = window.containerView
+        window.contentView = containerView
     }
 }
 
@@ -105,7 +117,7 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
         window.visualEffectView.addSubview(splitView)
 
         splitView.addArrangedSubview(verticalHostingView)
-        splitView.addArrangedSubview(window.containerView)
+        splitView.addArrangedSubview(containerView)
 
         verticalHostingView.frame.size.width = 180
 
@@ -127,14 +139,14 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
             if sideBarWillCollapsed {
                 window.hiddenSidebarView = true
                 window.splitView.removeArrangedSubview(verticalTabHostingView)
-                window.containerView.websiteTitleLabel.isHidden = true
+                containerView.websiteTitleLabel.isHidden = true
             } else {
                 window.hiddenSidebarView = false
                 window.splitView.insertArrangedSubview(verticalTabHostingView, at: 0)
-                window.containerView.websiteTitleLabel.isHidden = false
+                containerView.websiteTitleLabel.isHidden = false
             }
 
-            window.containerView.sidebarCollapsed(
+            containerView.sidebarCollapsed(
                 sideBarWillCollapsed,
                 isFullScreen: window.styleMask.contains(.fullScreen))
             window.splitView.layoutSubtreeIfNeeded()

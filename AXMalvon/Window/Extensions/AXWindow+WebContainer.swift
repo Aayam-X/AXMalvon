@@ -11,28 +11,31 @@ import WebKit
 import SwiftUI
 
 extension AXWindow: AXWebContainerViewDelegate {
+    func webContainerSwitchedToProperWebView() {
+        //self.contentView = self.containerView
+    }
+    
     func webContainerSwitchedToEmptyWebView() {
-        // TODO: Display Bookmarks View
-        self.makeFirstResponder(layoutManager.searchButton.addressField)
-        self.containerView.removeFromSuperview()
-
-        var newTabView = AXNewTabView()
-        newTabView.delegate = self
-        let hostingView = NSHostingView(rootView: newTabView)
-        hostingView.translatesAutoresizingMaskIntoConstraints = false
-
-        // Set the hosting view directly as the content view
-        self.contentView = hostingView
-
-        // Add constraints to make the hosting view fill the window
-        if let contentView = self.contentView {
-            NSLayoutConstraint.activate([
-                hostingView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-                hostingView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-                hostingView.topAnchor.constraint(equalTo: contentView.topAnchor),
-                hostingView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
-            ])
-        }
+//        self.makeFirstResponder(layoutManager.searchButton.addressField)
+//        self.containerView.removeFromSuperview()
+//
+//        var newTabView = AXNewTabView()
+//        newTabView.delegate = self
+//        let hostingView = NSHostingView(rootView: newTabView)
+//        hostingView.translatesAutoresizingMaskIntoConstraints = false
+//
+//        // Set the hosting view directly as the content view
+//        self.contentView = hostingView
+//
+//        // Add constraints to make the hosting view fill the window
+//        if let contentView = self.contentView {
+//            NSLayoutConstraint.activate([
+//                hostingView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+//                hostingView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+//                hostingView.topAnchor.constraint(equalTo: contentView.topAnchor),
+//                hostingView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+//            ])
+//        }
     }
 
     func webContainerViewChangedURL(to url: URL) {
@@ -58,8 +61,7 @@ extension AXWindow: AXWebContainerViewDelegate {
     }
 
     func webContainerViewFinishedLoading(webView: WKWebView) {
-        layoutManager.searchButton.fullAddress =
-            containerView.currentWebView?.url
+        layoutManager.searchButton.fullAddress = layoutManager.containerView.currentWebView?.url
 
         if let historyManager = activeProfile.historyManager, let title = webView.title, let url = webView.url {
             let newItem = AXHistoryItem(
@@ -67,16 +69,5 @@ extension AXWindow: AXWebContainerViewDelegate {
 
             historyManager.insert(item: newItem)
         }
-    }
-}
-
-extension AXWindow: AXNewTabViewDelegate {
-    func didClickVisitedSite(_ site: URL) {
-        self.searchBarUpdatesCurrentTab(with: site)
-        self.contentView = containerView
-    }
-
-    func didSearchFor(_ query: String) {
-        mxPrint("Not supported yet")
     }
 }
