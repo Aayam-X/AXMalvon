@@ -3,7 +3,7 @@
 //  Malvon
 //
 //  Created by Ashwin Paudel on 2024-11-21.
-//  Copyright © 2022-2024 Ashwin Paudel, Aayam(X). All rights reserved.
+//  Copyright © 2022-2025 Ashwin Paudel, Aayam(X). All rights reserved.
 //
 
 // swiftlint:disable line_length todo

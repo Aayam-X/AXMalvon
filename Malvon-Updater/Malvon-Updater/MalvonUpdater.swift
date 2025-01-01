@@ -3,6 +3,7 @@
 //  Malvon-Updater
 //
 //  Created by Ashwin Paudel on 2024-11-29.
+//  Copyright © 2022-2025 Ashwin Paudel, Aayam(X). All rights reserved.
 //
 
 import SwiftUI

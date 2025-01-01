@@ -3,15 +3,34 @@
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2024-12-30.
+//  Copyright © 2022-2025 Ashwin Paudel, Aayam(X). All rights reserved.
 //
 
 import AppKit
 import WebKit
+import SwiftUI
 
 extension AXWindow: AXWebContainerViewDelegate {
     func webContainerSwitchedToEmptyWebView() {
         // TODO: Display Bookmarks View
         self.makeFirstResponder(layoutManager.searchButton.addressField)
+        self.containerView.removeFromSuperview()
+        
+        let hostingView = NSHostingView(rootView: AXNewTabView())
+        hostingView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Set the hosting view directly as the content view
+        self.contentView = hostingView
+        
+        // Add constraints to make the hosting view fill the window
+        if let contentView = self.contentView {
+            NSLayoutConstraint.activate([
+                hostingView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+                hostingView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+                hostingView.topAnchor.constraint(equalTo: contentView.topAnchor),
+                hostingView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+            ])
+        }
     }
 
     func webContainerViewChangedURL(to url: URL) {

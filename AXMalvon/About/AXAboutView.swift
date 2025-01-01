@@ -3,6 +3,7 @@
 //  Malvon
 //
 //  Created by Ashwin Paudel on 2024-11-23.
+//  Copyright © 2022-2025 Ashwin Paudel, Aayam(X). All rights reserved.
 //
 
 import SwiftUI
@@ -55,7 +56,7 @@ struct AXAboutView: View {
                     .font(.largeTitle)
                     .fontWeight(.bold)
                 Text(
-                    "Copyright © 2022-2024 Ashwin Paudel, Aayam(X). All rights reserved."
+                    "Copyright © 2022-2025 Ashwin Paudel, Aayam(X). All rights reserved."
                 )
                 .font(.subheadline)
                 .foregroundColor(.secondary)
