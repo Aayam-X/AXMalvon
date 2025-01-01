@@ -38,14 +38,4 @@ class AXWebView: WKWebView {
 
         super.otherMouseDown(with: event)
     }
-
-    override func performKeyEquivalent(with event: NSEvent) -> Bool {
-        if event.modifierFlags.contains(.command),
-           event.charactersIgnoringModifiers == "w" {
-            self.uiDelegate?.webViewDidClose?(self)
-            return true
-        }
-
-        return super.performKeyEquivalent(with: event)
-    }
 }

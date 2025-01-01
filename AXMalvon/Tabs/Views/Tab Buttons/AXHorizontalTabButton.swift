@@ -72,8 +72,7 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
         setupTrackingArea()
     }
 
-    override func updateLayer() {
-        super.updateLayer()
+    override func viewWillDraw() {
         updateAppearance()
     }
 

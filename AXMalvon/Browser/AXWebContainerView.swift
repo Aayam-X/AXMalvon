@@ -172,7 +172,7 @@ class AXWebContainerView: NSView {
         splitView.addArrangedSubview(webView)
         webView.autoresizingMask = [.height, .width]
 
-        if let url = webView.url, url.scheme == "about" {
+        if let url = webView.url, let scheme = url.scheme, scheme.hasPrefix("a") {
             delegate?.webContainerSwitchedToEmptyWebView()
         } else {
             self.window?.makeFirstResponder(self.currentWebView)

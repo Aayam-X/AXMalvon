@@ -8,6 +8,7 @@
 
 import AppKit
 import WebKit
+import Carbon.HIToolbox
 
 extension AXWindow {
     @IBAction func toggleSearchField(_ sender: Any?) {
@@ -130,13 +131,29 @@ extension AXWindow {
         }
     }
 
-    override func keyDown(with event: NSEvent) {
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
         guard event.modifierFlags.contains(.command) else {
-            super.keyDown(with: event)
-            return
+            return super.performKeyEquivalent(with: event)
         }
-        // Directly lookup in the map or use default (8)
-        switchToTab(index: keycodeMap[event.keyCode] ?? 8)
+
+        switch Int(event.keyCode) {
+        case kVK_ANSI_T:
+            toggleSearchBarForNewTab(nil)
+            return true
+        case kVK_ANSI_L:
+            toggleSearchField(nil)
+            return true
+        case kVK_ANSI_W:
+            currentTabGroup.removeCurrentTab()
+            return true
+        default:
+            if let tabNumber = keycodeMap[event.keyCode] {
+                switchToTab(index: tabNumber)
+                return true
+            }
+        }
+
+        return super.performKeyEquivalent(with: event)
     }
 
     func switchToTab(index: Int) {
@@ -144,7 +161,6 @@ extension AXWindow {
 
         // Check if the tab index is valid
         if index < count {
-            // Hide all tabs
             currentTabGroup.switchTab(toIndex: index)
         } else {
             guard count > 0 else { return }

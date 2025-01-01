@@ -7,5 +7,103 @@
 //
 
 let newTabHTMLString = """
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Start Page</title><style>body{font-family:Arial,sans-serif;margin:0;padding:0;background-color:#f0f2f5;color:#333;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;height:100vh}header{margin-top:50px;text-align:center}h1{color:#1a73e8;font-size:2.5rem;margin-bottom:30px;text-shadow:1px 1px 2px rgba(0,0,0,.1)}#s{margin:20px 0;width:100%;max-width:600px;display:flex;padding:0 20px;box-sizing:border-box}#s input{flex:1;padding:15px 20px;font-size:16px;border:2px solid #e0e0e0;border-radius:25px;outline:0;transition:.3s ease;box-shadow:0 2px 5px rgba(0,0,0,.05)}#s input:focus{border-color:#1a73e8;box-shadow:0 4px 8px rgba(26,115,232,.1)}#f{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:25px;max-width:800px;padding:30px;width:100%;box-sizing:border-box}.v{display:flex;flex-direction:column;align-items:center;text-align:center;background:#fff;padding:20px;border-radius:20px;box-shadow:0 6px 12px rgba(0,0,0,.08);transition:transform .2s ease,box-shadow .2s ease}.v:hover{transform:translateY(-5px);box-shadow:0 8px 16px rgba(0,0,0,.12)}.v img{width:48px;height:48px;margin-bottom:15px;border-radius:12px}.v a{text-decoration:none;color:#1a73e8;font-weight:600;font-size:1.1rem;transition:color .2s ease}.v a:hover{color:#1557b0}</style></head><body><header><h1>Welcome to Your Start Page</h1></header><div id="s"><input type="text" id="i" placeholder="Search Google..."></div><section id="f"></section><script>const d=[{n:'Google',u:'https://www.google.com',f:'https://www.google.com/favicon.ico'},{n:'YouTube',u:'https://www.youtube.com',f:'https://www.youtube.com/favicon.ico'},{n:'GitHub',u:'https://github.com',f:'https://github.githubassets.com/favicon.ico'},{n:'Reddit',u:'https://www.reddit.com',f:'https://www.redditstatic.com/desktop2x/img/favicon/favicon-32x32.png'}],c=document.getElementById('f');function l(){d.forEach(s=>{const v=document.createElement('div');v.classList.add('v');const i=document.createElement('img');i.src=s.f;i.alt=`${s.n} favicon`;const a=document.createElement('a');a.href=s.u;a.textContent=s.n;v.appendChild(i);v.appendChild(a);c.appendChild(v);(new Image).src=s.f})}document.getElementById('i').addEventListener('keydown',e=>{if(e.key==='Enter'){const q=e.target.value;q.trim()&&(window.location.href=`https://www.google.com/search?q=${encodeURIComponent(q)}`)}});l()</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>New Tab</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex-grow: 1;
+        }
+
+        .search-container {
+            width: 100%;
+            margin: 2rem 0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sites-list {
+            width: 100%;
+            list-style: none;
+            padding: 0;
+            margin: 2rem 0;
+        }
+
+        .site-item {
+            margin: 0.5rem 0;
+        }
+
+        .site-link {
+            text-decoration: none;
+            color: #2196F3;
+            font-size: 1.1rem;
+        }
+
+        .site-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search the web...">
+        </div>
+        <ul class="sites-list">
+            <li class="site-item"><a href="https://www.google.com" class="site-link" rel="noopener noreferrer">Google</a></li>
+            <li class="site-item"><a href="https://app.todoist.com/app/today" class="site-link" rel="noopener noreferrer">Todoist</a></li>
+            <li class="site-item"><a href="https://mail.google.com" class="site-link" rel="noopener noreferrer">Gmail</a></li>
+            <li class="site-item"><a href="https://github.com" class="site-link" rel="noopener noreferrer">GitHub</a></li>
+        </ul>
+    </div>
+
+    <script>
+        const searchInput = document.querySelector('.search-input');
+
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const query = searchInput.value.trim();
+                if (query) {
+                    window.location.href = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
 """

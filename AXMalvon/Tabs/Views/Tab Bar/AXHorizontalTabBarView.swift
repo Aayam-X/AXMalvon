@@ -41,6 +41,8 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     private var lastScrollPosition: CGFloat = 0
     private var firstTabInitialFrame: CGRect?
 
+    private var scrollWorkItem: DispatchWorkItem?
+
     internal lazy var tabStackView: NSStackView = {
         let stack = NSStackView()
         stack.orientation = .horizontal
@@ -135,14 +137,34 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
 
         self.delegate?.tabBarSwitchedTo(tabAt: button.tag)
 
-        addButtonWithAnimation(button) {
-            self.updateTabSelection(from: previousIndex, to: button.tag)
-            self.scrollToTab(at: button.tag)
+        addButtonWithAnimation(button, previousIndex: previousIndex) {
+            self.debouncedScrollToTab(at: button.tag)
         }
     }
 
-    private func addButtonWithAnimation(_ button: AXHorizontalTabButton, completion: @escaping () -> Void) {
+        // New debounced scroll method
+        private func debouncedScrollToTab(at index: Int) {
+            // Cancel any pending scroll
+            scrollWorkItem?.cancel()
+
+            // Create new work item for scrolling
+            scrollWorkItem = DispatchWorkItem { [weak self] in
+                self?.performScrollToTab(at: index)
+            }
+
+            // Schedule the scroll after 0.5 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: scrollWorkItem!)
+        }
+
+        // Actual scroll implementation
+    private func performScrollToTab(at index: Int) {
+        self.scrollToTab(at: index)
+    }
+
+    private func addButtonWithAnimation(_ button: AXHorizontalTabButton, previousIndex: Int, completion: @escaping () -> Void) {
         addButtonToStackView(button)
+        self.updateTabSelection(from: previousIndex, to: button.tag)
+
         button.alphaValue = 0
         button.frame.origin.x = tabStackView.frame.width
 
