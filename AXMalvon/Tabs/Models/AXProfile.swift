@@ -45,7 +45,7 @@ class AXProfile {
     var tabGroups: [AXTabGroup] = []
     weak var currentTabGroup: AXTabGroup!
 
-    var historyManager: AXHistoryManager!
+    var historyManager: AXHistoryManager?
 
     var hasLoadedTabs: Bool = false
 
@@ -62,7 +62,7 @@ class AXProfile {
 
             self.init(
                 name: name, config: config, loadsDefaultData: true,
-                configurationID: profileData.configID)
+                configID: profileData.configID)
 
             mxPrint(
                 "Current Tab Group Index: \(profileData.selectedTabGroupIndex)")
@@ -74,31 +74,30 @@ class AXProfile {
             let newProfile = AXProfile.createNewProfile(name: name)
             self.init(
                 name: name, config: newProfile.config, loadsDefaultData: true,
-                configurationID: newProfile.id)
+                configID: newProfile.id)
         }
     }
 
-    init(
-        name: String, config: WKWebViewConfiguration, loadsDefaultData: Bool,
-        configurationID: String? = nil
-    ) {
+    init(name: String, config: WKWebViewConfiguration, loadsDefaultData: Bool, configID: String? = nil, usingTabGroup: AXTabGroup? = nil) {
         self.name = name
         self.configuration = config
         self.tabGroups = []
 
-        if let configurationID {
-            self.historyManager = AXHistoryManager(fileName: configurationID)
+        if let configID {
+            self.historyManager = AXHistoryManager(fileName: configID)
         }
 
         addOtherConfigs()
 
-        if loadsDefaultData {
+        if loadsDefaultData, usingTabGroup == nil {
             loadTabGroups()
+            self.currentTabGroup = tabGroups[currentTabGroupIndex]
+        } else {
+            self.tabGroups = [usingTabGroup ?? AXTabGroup(name: "NULL")]
+            self.currentTabGroup = tabGroups[0]
         }
 
         enableContentBlockers()
-
-        self.currentTabGroup = tabGroups[currentTabGroupIndex]
     }
 
     // MARK: - Profile Defaults
@@ -271,15 +270,16 @@ class AXProfile {
 }
 
 class AXPrivateProfile: AXProfile {
+  //  override var tabGroups: [AXTabGroup] = [.init(name: "Private Tab Group")]
+
     init() {
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .nonPersistent()
-        super.init(name: "Private", config: config, loadsDefaultData: false)
 
         let privateTabGroup = AXTabGroup(name: "Private Tab Group")
         privateTabGroup.color = .black
 
-        self.tabGroups.append(privateTabGroup)
+        super.init(name: "Private", config: config, loadsDefaultData: false, usingTabGroup: privateTabGroup)
     }
 
     override func saveTabGroups() {

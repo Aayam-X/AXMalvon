@@ -10,7 +10,7 @@ import AppKit
 
 protocol AXSidebarSearchButtonDelegate: AnyObject {
     func lockClicked()
-    func sidebarSearchButtonRequestsHistoryManager() -> AXHistoryManager
+    func sidebarSearchButtonRequestsHistoryManager() -> AXHistoryManager?
     func sidebarSearchButtonSearchesFor(_ url: URL)
 }
 
@@ -21,6 +21,8 @@ class AXSidebarSearchButton: NSButton {
 
     weak var delegate: AXSidebarSearchButtonDelegate?
 
+    var historyManagerExists: Bool = true
+
     weak var historyManager: AXHistoryManager? {
         delegate?.sidebarSearchButtonRequestsHistoryManager()
     }
@@ -28,6 +30,17 @@ class AXSidebarSearchButton: NSButton {
     var previousStringValueCount = 0
 
     let suggestionsWindowController = AXAddressBarWindow()
+
+    lazy var suggestionsManager: SuggestionsManager = {
+        let manager = SuggestionsManager(
+            historyManager: historyManager!)
+        manager.onQueryUpdated = onQueryUpdated
+        manager.onTopSearchesUpdated = onTopSearchesUpdated
+        manager.onHistoryUpdated = onHistoryUpdated
+        manager.onGoogleSuggestionsUpdated = onGoogleSuggestionsUpdated
+
+        return manager
+    }()
 
     var fullAddress: URL? {
         didSet {
@@ -145,18 +158,6 @@ class AXSidebarSearchButton: NSButton {
 
         return isValid
     }
-
-    lazy var suggestionsManager: SuggestionsManager = {
-        let manager = SuggestionsManager(
-            historyManager: delegate!
-                .sidebarSearchButtonRequestsHistoryManager())
-        manager.onQueryUpdated = onQueryUpdated
-        manager.onTopSearchesUpdated = onTopSearchesUpdated
-        manager.onHistoryUpdated = onHistoryUpdated
-        manager.onGoogleSuggestionsUpdated = onGoogleSuggestionsUpdated
-
-        return manager
-    }()
 }
 
 // MARK: - Search Suggestions
@@ -175,10 +176,17 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
         suggestionsWindowController.googleSearchItems = suggestions
     }
 
+    func controlTextDidBeginEditing(_ obj: Notification) {
+        historyManagerExists = historyManager != nil
+    }
+
     func controlTextDidChange(_ obj: Notification) {
         let query = addressField.stringValue
-        suggestionsManager.updateSuggestions(with: query)
-        suggestionsWindowController.showSuggestions(for: self.addressField)
+
+        if historyManagerExists {
+            suggestionsManager.updateSuggestions(with: query)
+            suggestionsWindowController.showSuggestions(for: self.addressField)
+        }
     }
 
     func control(
@@ -212,7 +220,7 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
             }
             suggestionsWindowController.orderOut()
             searchEnterAction()
-            
+
             return true
         }
 

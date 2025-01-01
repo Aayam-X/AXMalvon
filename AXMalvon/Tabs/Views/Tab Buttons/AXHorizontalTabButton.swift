@@ -24,12 +24,6 @@ private struct AXHorizontalTabButtonConstants {
     static let shadowOpacity: Float = 0.3
     static let shadowRadius: CGFloat = 4.0
     static let shadowOffset = CGSize(width: 0, height: 0)
-
-    // Colors
-    static let hoverColor: NSColor = NSColor.systemGray.withAlphaComponent(0.3)
-    static let selectedColor: NSColor = .textBackgroundColor
-    static let backgroundColor: NSColor = .textBackgroundColor
-        .withAlphaComponent(0.0)
 }
 
 class AXHorizontalTabButton: NSButton, AXTabButton {
@@ -38,7 +32,6 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
 
     private var closeButton = AXHorizontalTabCloseButton()
     var titleView = NSTextField()
-
     var trackingArea: NSTrackingArea!
 
     var webTitle: String = "Untitled" {
@@ -55,11 +48,7 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
 
     var isSelected: Bool = false {
         didSet {
-            self.layer?.backgroundColor =
-                isSelected
-                ? AXHorizontalTabButtonConstants.selectedColor.cgColor
-                : AXHorizontalTabButtonConstants.backgroundColor.cgColor
-            layer?.shadowOpacity = isSelected ? 0.3 : 0.0
+            self.updateAppearance()
 
             if isSelected, tab.titleObserver == nil {
                 forceCreateWebview()
@@ -72,69 +61,54 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
         super.init(frame: .zero)
         self.translatesAutoresizingMaskIntoConstraints = false
         self.isBordered = false
-        self.bezelStyle = .shadowlessSquare
+        self.bezelStyle = .smallSquare
         title = ""
 
         self.wantsLayer = true
         self.layer?.cornerRadius = 7
-        layer?.masksToBounds = false
-
-        layer?.shadowColor = NSColor.textColor.cgColor
-        layer?.shadowOpacity = 0.0  // Adjust shadow visibility
-        layer?.shadowRadius = 4.0  // Adjust softness
-        layer?.shadowOffset = CGSize(width: 0, height: 0)  // Shadow below the button
-
-        setTrackingArea()
+        self.layer?.masksToBounds = false
+        setupShadow()
         setupViews()
+        setupTrackingArea()
+    }
+
+    override func updateLayer() {
+        super.updateLayer()
+        updateAppearance()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func setupViews() {
-        if isSelected {
-            self.layer?.backgroundColor =
-                AXHorizontalTabButtonConstants.selectedColor.cgColor
-            self.layer?.shadowOpacity = 0.3
-        }
-
+    private func setupViews() {
         self.heightAnchor.constraint(equalToConstant: 33).isActive = true
 
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.favicon =
-            tab?.icon != nil
-            ? tab.icon : AXHorizontalTabButtonConstants.defaultFaviconSleep
+        closeButton.favicon = tab?.icon ?? NSImage(systemSymbolName: "moon.fill", accessibilityDescription: nil)
         addSubview(closeButton)
-        closeButton.centerYAnchor.constraint(equalTo: centerYAnchor)
-            .isActive = true
-        closeButton.leftAnchor.constraint(
-            equalTo: leftAnchor, constant: 10
-        )
-        .isActive = true
-        closeButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
-        closeButton.heightAnchor.constraint(equalToConstant: 20).isActive = true
-
+        NSLayoutConstraint.activate([
+            closeButton.centerYAnchor.constraint(equalTo: centerYAnchor),
+            closeButton.leftAnchor.constraint(equalTo: leftAnchor, constant: 10),
+            closeButton.widthAnchor.constraint(equalToConstant: 20),
+            closeButton.heightAnchor.constraint(equalToConstant: 20)
+        ])
         closeButton.target = self
         closeButton.action = #selector(closeTab)
 
         titleView.translatesAutoresizingMaskIntoConstraints = false
-        titleView.isEditable = false  // This should be set to true in a while :)
-        titleView.alignment = .left
+        titleView.isEditable = false
         titleView.isBordered = false
         titleView.usesSingleLineMode = true
         titleView.drawsBackground = false
         titleView.lineBreakMode = .byTruncatingTail
         titleView.textColor = .textColor
         addSubview(titleView)
-        titleView.leftAnchor.constraint(
-            equalTo: closeButton.rightAnchor, constant: 5
-        ).isActive = true
-        titleView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive =
-            true
-
-        titleView.rightAnchor.constraint(equalTo: rightAnchor, constant: -7)
-            .isActive = true
+        NSLayoutConstraint.activate([
+            titleView.leftAnchor.constraint(equalTo: closeButton.rightAnchor, constant: 5),
+            titleView.centerYAnchor.constraint(equalTo: centerYAnchor),
+            titleView.rightAnchor.constraint(equalTo: rightAnchor, constant: -7)
+        ])
     }
 
     @objc
@@ -149,31 +123,21 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
         delegate?.tabButtonDidSelect(self)
     }
 
-    func setTrackingArea() {
+    private func setupTrackingArea() {
         let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
-        trackingArea = NSTrackingArea.init(
-            rect: self.bounds, options: options, owner: self, userInfo: nil)
+        trackingArea = NSTrackingArea(rect: self.bounds, options: options, owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
     }
 
     override func mouseDown(with event: NSEvent) {
         closeButton.hideCloseButton()
-
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.1
-            self.animator().layer?.setAffineTransform(
-                CGAffineTransform(scaleX: 1, y: 0.95))
+            self.animator().layer?.setAffineTransform(CGAffineTransform(scaleX: 1, y: 0.95))
         }
 
-        if event.clickCount == 1 {
-            self.switchTab()
-            self.isSelected = true
-        } else if event.clickCount == 2 {
-            // Double click: Allow User to Edit the Title
-        }
-
-        self.layer?.backgroundColor =
-            AXHorizontalTabButtonConstants.selectedColor.cgColor
+        self.switchTab()
+        isSelected = true
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -185,20 +149,40 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
 
     override func mouseEntered(with event: NSEvent) {
         if !isSelected {
-            self.layer?.backgroundColor =
-                AXHorizontalTabButtonConstants.hoverColor.cgColor
+            self.layer?.backgroundColor = NSColor.systemGray.withAlphaComponent(0.3).cgColor
         }
-
         closeButton.showCloseButton()
     }
 
     override func mouseExited(with event: NSEvent) {
-        self.layer?.backgroundColor =
-            isSelected
-            ? AXHorizontalTabButtonConstants.selectedColor.cgColor
-            : AXHorizontalTabButtonConstants.backgroundColor.cgColor
-
         closeButton.hideCloseButton()
+        updateAppearance()
+    }
+
+    private func updateAppearance() {
+        let backgroundColor: CGColor
+        if isSelected {
+            if effectiveAppearance.name == .darkAqua {
+                backgroundColor = .black
+                layer?.shadowColor = .white
+            } else {
+                backgroundColor = .white
+                layer?.shadowColor = .black
+            }
+            layer?.shadowOpacity = 0.3
+        } else {
+            backgroundColor = .clear
+            layer?.shadowOpacity = 0.0
+        }
+
+        self.layer?.backgroundColor = backgroundColor
+    }
+
+    private func setupShadow() {
+        layer?.shadowColor = NSColor.textColor.cgColor
+        layer?.shadowOpacity = 0.0
+        layer?.shadowRadius = 4.0
+        layer?.shadowOffset = CGSize(width: 0, height: 0)
     }
 }
 
@@ -213,7 +197,7 @@ class AXHorizontalTabCloseButton: NSButton {
         } set {
             self._favicon = newValue
             self.image =
-                newValue ?? AXHorizontalTabButtonConstants.defaultFavicon
+            newValue ?? AXHorizontalTabButtonConstants.defaultFavicon
         }
     }
 

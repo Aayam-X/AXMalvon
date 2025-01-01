@@ -36,7 +36,7 @@ class AXTabGroup: Codable {
     func addEmptyTab(configuration: WKWebViewConfiguration) {
         let webView = AXWebView(frame: .zero, configuration: configuration)
         webView.loadHTMLString(newTabHTMLString, baseURL: nil)
-        
+
         let tab = AXTab(
             title: "New Tab",
             webView: webView)
@@ -60,6 +60,8 @@ class AXTabGroup: Codable {
     }
 
     func removeTab(at index: Int) {
+        tabs[index].stopTitleObservation()
+
         tabs.remove(at: index)
         tabBarView?.removeTabButton(at: index)
     }

@@ -39,9 +39,7 @@ extension AXWindow: NSWindowDelegate {
         layoutManager.containerView.delegate = self
 
         currentTabGroupIndex = 0
-        tabBarView.updateTabGroup(currentTabGroup)
-        visualEffectTintView.layer?.backgroundColor =
-            currentTabGroup.color.cgColor
+        self.switchToTabGroup(currentTabGroup)
     }
 
     // MARK: Window Events

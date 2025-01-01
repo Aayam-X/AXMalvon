@@ -40,7 +40,7 @@ extension AXWindow: AXWorkspaceSwapperViewDelegate {
 
     func didSwitchProfile(to index: Int) {
         profileIndex = profileIndex == 1 ? 0 : 1
-        
+
         // Update to let it know if it's working with a private window or not
         AXSearchQueryToURL.shared.activeProfile = activeProfile
 

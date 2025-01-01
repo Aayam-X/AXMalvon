@@ -227,7 +227,6 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
 
     func updateIndices(after index: Int) {
         // Adjust tags for remaining buttons
-        print("Updating Indicies after \(index)")
         for (idx, button) in tabStackView.arrangedSubviews.enumerated().dropFirst(index) {
             (button as? AXHorizontalTabButton)?.tag = idx
         }
@@ -263,7 +262,6 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func updateTabSelection(from: Int, to index: Int) {
-        print(#function, from, index, "UPDATED SELECTED INDEX")
         let arrangedSubviews = tabStackView.arrangedSubviews
         guard index < arrangedSubviews.count else { return }
 

@@ -13,7 +13,7 @@ private let fallbackURL = URL(string: "https://www.apple.com")!
 class AXSearchQueryToURL {
     static let shared = AXSearchQueryToURL()
     weak var activeProfile: AXProfile?
-    
+
     func convert(query: String) -> URL {
         // Section 1: Handle File URLs
         if query.starts(with: "malvon?") {
@@ -39,7 +39,7 @@ private func searchActionMalvonURL(_ value: String) -> URL {
         // appProperties.tabManager.createNewTab(fileURL: resourceURL)
     }
      */
-    
+
     return fallbackURL
 }
 
@@ -51,13 +51,13 @@ private func searchActionFileURL(_ value: String) -> URL {
 /// URL: https://www.apple.com
 private func searchActionURL(_ value: String, activeProfile: AXProfile?) -> URL {
     guard let url = URL(string: value) else { return fallbackURL }
-    
+
     if let activeProfile, activeProfile.name != "Private" {
         Task(priority: .background) {
             AXSearchDatabase.shared.incrementOccurrence(for: value)
         }
     }
-    
+
     return url.fixURL()
 }
 
@@ -70,6 +70,6 @@ private func searchActionSearchTerm(_ value: String) -> URL {
         string:
             "https://www.google.com/search?client=Malvon&q=\(searchQuery)"
     )!.fixURL()
-    
+
     return searchURL
 }

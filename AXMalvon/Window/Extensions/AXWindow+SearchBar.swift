@@ -17,15 +17,15 @@ extension AXWindow: AXSidebarSearchButtonDelegate {
 
         currentTabGroup.addTab(
             .init(title: webView.title ?? "Untitled Tab", webView: webView))
-        
-        //self.contentView = containerView
+
+        // self.contentView = containerView
     }
 
     func searchBarUpdatesCurrentTab(with url: URL) {
         // Change current webview's url to new url
         layoutManager.containerView.currentWebView?.load(URLRequest(url: url))
 
-        //self.contentView = containerView
+        // self.contentView = containerView
         makeFirstResponder(layoutManager.containerView.currentWebView)
     }
 
@@ -48,7 +48,7 @@ extension AXWindow: AXSidebarSearchButtonDelegate {
             trust: serverTrust, message: "TLS Certificate Details")
     }
 
-    func sidebarSearchButtonRequestsHistoryManager() -> AXHistoryManager {
+    func sidebarSearchButtonRequestsHistoryManager() -> AXHistoryManager? {
         activeProfile.historyManager
     }
 }

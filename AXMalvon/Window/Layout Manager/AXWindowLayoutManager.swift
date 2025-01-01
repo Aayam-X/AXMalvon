@@ -66,13 +66,13 @@ class AXBaseLayoutManager: AXWindowLayoutManaging {
         tabHostingDelegate?.tabHostingViewDisplaysTabGroupCustomizationPanel(
             tabGroupInfoView)
     }
-    
+
     func displayNewTabPage(in window: AXWindow) {
-        
+
     }
-    
+
     func removeNewTabPage(in window: AXWindow) {
-        
+
     }
 }
 
