@@ -15,8 +15,9 @@ extension AXWindow {
     }
 
     @IBAction func toggleSearchBarForNewTab(_ sender: Any?) {
-        currentTabGroup.addEmptyTab(configuration: activeProfile.configuration)
-        makeFirstResponder(layoutManager.searchButton.addressField)
+        let config = activeProfile.configuration
+
+        currentTabGroup.addEmptyTab(configuration: config)
     }
 
     @IBAction func find(_ sender: Any) {

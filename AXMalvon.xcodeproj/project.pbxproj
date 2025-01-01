@@ -267,7 +267,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if which swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			shellScript = "# Check if the MacBook is connected to a charger\npower_source=$(pmset -g batt | grep -o \"AC Power\")\n\nif [ \"$power_source\" == \"AC Power\" ]; then\n  echo \"MacBook is connected to a charger. Running SwiftLint...\"\n  if which swiftlint >/dev/null; then\n    swiftlint --fix && swiftlint\n  else\n    echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\n  fi\nelse\n  echo \"MacBook is not connected to a charger. Script will not run.\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

@@ -16,7 +16,7 @@ class AXTab: Codable {
 
     var titleObserver: Cancellable?
 
-    weak var webConfiguration: WKWebViewConfiguration?
+    var webConfiguration: WKWebViewConfiguration
 
     // swiftlint:disable:next identifier_name
     weak var _webView: AXWebView?
@@ -26,7 +26,7 @@ class AXTab: Codable {
             return existingWebView
         } else {
             let newWebView = AXWebView(
-                frame: .zero, configuration: webConfiguration!)
+                frame: .zero, configuration: webConfiguration)
             if let url = url {
                 newWebView.load(URLRequest(url: url))
             }
@@ -39,6 +39,7 @@ class AXTab: Codable {
         self.url = url
         self.title = title
         self._webView = webView
+        self.webConfiguration = webView.configuration
     }
 
     // MARK: - Codeable Functions
@@ -49,8 +50,16 @@ class AXTab: Codable {
     required init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        self.webConfiguration =
-            decoder.userInfo[.webConfiguration] as? WKWebViewConfiguration
+        #if DEBUG
+        if let configuration = decoder.userInfo[.webConfiguration] as? WKWebViewConfiguration {
+            self.webConfiguration = configuration
+        } else {
+            mxPrint("WKWebViewConfiguration not found in JSON decoding")
+            self.webConfiguration = .init()
+        }
+        #else
+        self.webConfiguration = decoder.userInfo[.webConfiguration] as? WKWebViewConfiguration ?? .init()
+        #endif
 
         self.title = try container.decode(String.self, forKey: .title)
         self.url = try? container.decode(URL.self, forKey: .url)

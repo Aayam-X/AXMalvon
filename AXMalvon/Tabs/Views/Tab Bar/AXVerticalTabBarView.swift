@@ -216,11 +216,11 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func tabButtonDeactivatedWebView(_ tabButton: AXTabButton) {
-        let tab = tabGroup.tabs[tabButton.tag]
+      //  _ = tabGroup.tabs[tabButton.tag]
 
-        if tab.webConfiguration == nil {
-            tab.webConfiguration = delegate?.tabBarDeactivatedTab()
-        }
+//        if tab.webConfiguration == nil {
+//            tab.webConfiguration = delegate?.tabBarDeactivatedTab()
+//        }
     }
 
     private func addButtonToTabView(_ button: NSView) {

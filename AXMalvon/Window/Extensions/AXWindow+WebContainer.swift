@@ -9,6 +9,11 @@ import AppKit
 import WebKit
 
 extension AXWindow: AXWebContainerViewDelegate {
+    func webContainerSwitchedToEmptyWebView() {
+        // TODO: Display Bookmarks View
+        self.makeFirstResponder(layoutManager.searchButton.addressField)
+    }
+
     func webContainerViewChangedURL(to url: URL) {
         layoutManager.searchButton.fullAddress = url
     }

@@ -18,6 +18,8 @@ protocol AXWebContainerViewDelegate: AnyObject {
         -> WKWebView
 
     func webContainerViewRequestsSidebar() -> NSView?
+
+    func webContainerSwitchedToEmptyWebView()
 }
 
 class AXWebContainerView: NSView {
@@ -25,7 +27,7 @@ class AXWebContainerView: NSView {
     weak var sidebar: NSView?
     let isVertical: Bool
 
-    weak var currentWebView: AXWebView?
+    unowned var currentWebView: AXWebView?
 
     let splitViewContainer = NSView()
     private lazy var splitView = AXQuattroProgressSplitView()
@@ -170,7 +172,11 @@ class AXWebContainerView: NSView {
         splitView.addArrangedSubview(webView)
         webView.autoresizingMask = [.height, .width]
 
-        self.window?.makeFirstResponder(currentWebView)
+        if webView.url != nil {
+            self.window?.makeFirstResponder(currentWebView)
+        } else {
+            delegate?.webContainerSwitchedToEmptyWebView()
+        }
 
         progressBarObserver = webView.observe(
             \.estimatedProgress, options: [.new]

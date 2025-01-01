@@ -33,10 +33,13 @@ class AXTabGroup: Codable {
     }
 
     func addEmptyTab(configuration: WKWebViewConfiguration) {
+        let webView = AXWebView(frame: .zero, configuration: configuration)
+       // webView.loadHTMLString("", baseURL: nil)
         let tab = AXTab(
             title: "New Tab",
-            webView: AXWebView(frame: .zero, configuration: configuration))
-        addTab(tab)
+            webView: webView)
+        tabs.append(tab)
+        tabBarView?.addTabButton(for: tab)  // Add button to tab bar view
     }
 
     func switchTab(toIndex: Int) {
@@ -75,6 +78,12 @@ class AXTabGroup: Codable {
         self.tabs = try container.decode([AXTab].self, forKey: .tabs)
         self.selectedIndex = try container.decode(
             Int.self, forKey: .selectedIndex)
+
+        // Check if selectedIndex is safe or not
+        if selectedIndex >= tabs.count {
+            selectedIndex = 0
+        }
+
         self.icon =
             (try? container.decode(String.self, forKey: .icon))
             ?? "square.3.layers.3d"
