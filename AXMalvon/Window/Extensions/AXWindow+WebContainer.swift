@@ -15,13 +15,15 @@ extension AXWindow: AXWebContainerViewDelegate {
         // TODO: Display Bookmarks View
         self.makeFirstResponder(layoutManager.searchButton.addressField)
         self.containerView.removeFromSuperview()
-        
-        let hostingView = NSHostingView(rootView: AXNewTabView())
+
+        var newTabView = AXNewTabView()
+        newTabView.delegate = self
+        let hostingView = NSHostingView(rootView: newTabView)
         hostingView.translatesAutoresizingMaskIntoConstraints = false
-        
+
         // Set the hosting view directly as the content view
         self.contentView = hostingView
-        
+
         // Add constraints to make the hosting view fill the window
         if let contentView = self.contentView {
             NSLayoutConstraint.activate([
@@ -65,5 +67,16 @@ extension AXWindow: AXWebContainerViewDelegate {
 
             historyManager.insert(item: newItem)
         }
+    }
+}
+
+extension AXWindow: AXNewTabViewDelegate {
+    func didClickVisitedSite(_ site: URL) {
+        self.searchBarUpdatesCurrentTab(with: site)
+        self.contentView = containerView
+    }
+
+    func didSearchFor(_ query: String) {
+        mxPrint("Not supported yet")
     }
 }

@@ -10,7 +10,7 @@ import SwiftUI
 
 protocol AXNewTabViewDelegate: AnyObject {
     func didClickVisitedSite(_ site: URL)
-    
+
     // TODO: AXSearchQueryHandler
     // Creating this file will handle any given search query and either show a URL or a string
     func didSearchFor(_ query: String)
