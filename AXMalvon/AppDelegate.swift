@@ -19,7 +19,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     ]
 
     // Main Browser Window + Search Bar
-    weak var window: AXWindow?
+    var window: AXWindow?
 
     let launchedBefore = UserDefaults.standard.bool(
         forKey: "launchedBefore")
@@ -27,7 +27,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         if launchedBefore {
             createNewWindowIfNeeded()
-            window!.makeKeyAndOrderFront(nil)
+            window?.makeKeyAndOrderFront(nil)
 
             #if !DEBUG
                 // Email Validation + Update checking
@@ -41,7 +41,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    // https://github.com/Lord-Kamina/SwiftDefaultApps#usage-notes
     func application(_ application: NSApplication, open urls: [URL]) {
         guard launchedBefore else { return }
         ev()
@@ -53,10 +52,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         } else {
             createNewWindowIfNeeded()
-            window!.makeKeyAndOrderFront(nil)
+            window?.makeKeyAndOrderFront(nil)
 
             for url in urls {
-                window!.searchBarCreatesNewTab(with: url)
+                window?.searchBarCreatesNewTab(with: url)
             }
         }
     }
@@ -79,7 +78,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard launchedBefore else { return false }
         createNewWindowIfNeeded()
 
-        window!.makeKeyAndOrderFront(nil)
+        window?.makeKeyAndOrderFront(nil)
         return true
     }
 
@@ -92,15 +91,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         createNewWindowIfNeeded()
-        window!.makeKeyAndOrderFront(nil)
+        window?.makeKeyAndOrderFront(nil)
     }
 
     @IBAction func newPrivateWindow(_ sender: Any?) {
         guard launchedBefore else { return }
         ev()
 
-        let window = AXWindow(with: [AXPrivateProfile()])
-        window.makeKeyAndOrderFront(nil)
+        let privateWindow = AXWindow(with: [AXPrivateProfile()])
+        privateWindow.makeKeyAndOrderFront(nil)
     }
 
     @IBAction func reportFeedback(_ sender: Any?) {

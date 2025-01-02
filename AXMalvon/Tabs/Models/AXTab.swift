@@ -21,11 +21,13 @@ class AXTab: Codable {
 
     // swiftlint:disable:next identifier_name
     weak var _webView: AXWebView?
+    var isEmpty = false
 
-    var webView: AXWebView {
+    var webView: AXWebView? {
         if let existingWebView = _webView {
             return existingWebView
         } else {
+            guard !isEmpty else { return nil }
             let newWebView = AXWebView(
                 frame: .zero, configuration: webConfiguration)
             if let url = url {
@@ -43,9 +45,16 @@ class AXTab: Codable {
         self.webConfiguration = webView.configuration
     }
 
+    init(creatingEmptyTab: Bool, configuration: WKWebViewConfiguration) {
+        self.isEmpty = creatingEmptyTab
+        self.url = nil
+        self.title = "New Tab"
+        self.webConfiguration = configuration
+    }
+
     // MARK: - Codeable Functions
     enum CodingKeys: String, CodingKey {
-        case title, url
+        case title, url, isEmpty
     }
 
     required init(from decoder: any Decoder) throws {
@@ -64,14 +73,17 @@ class AXTab: Codable {
 
         self.title = try container.decode(String.self, forKey: .title)
         self.url = try? container.decode(URL.self, forKey: .url)
+        self.isEmpty = (try? container.decode(Bool.self, forKey: .isEmpty)) ?? false
     }
 
     func encode(to encoder: any Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(title, forKey: .title)
+        try container.encode(isEmpty, forKey: .isEmpty)
 
-        let myURL = webView.url
-        try container.encode(myURL, forKey: .url)
+        if let webView, let url = webView.url {
+            try container.encode(url, forKey: .url)
+        }
     }
 
     // Method to start observing title changes
@@ -137,7 +149,7 @@ extension AXTab {
     func findFavicon(tabButton: AXTabButton) {
         Task(priority: .low) { @MainActor in
             do {
-                if let faviconURLString = try? await webView.evaluateJavaScript(
+                if let faviconURLString = try? await webView!.evaluateJavaScript(
                     jsFaviconSearchScript) as? String,
                     let faviconURL = URL(string: faviconURLString) {
                     let favicon = try await quickFaviconDownload(

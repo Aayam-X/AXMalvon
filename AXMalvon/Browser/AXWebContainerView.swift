@@ -19,7 +19,7 @@ protocol AXWebContainerViewDelegate: AnyObject {
 
     func webContainerViewRequestsSidebar() -> NSView?
 
-    func webContainerSwitchedToEmptyWebView()
+    func webContainerViewRequestsCurrentTab() -> AXTab
 }
 
 class AXWebContainerView: NSView {
@@ -28,6 +28,7 @@ class AXWebContainerView: NSView {
     let isVertical: Bool
 
     unowned var currentWebView: AXWebView?
+    let newTabView = AXNewTabView(frame: .zero)
 
     let splitViewContainer = NSView()
     private lazy var splitView = AXQuattroProgressSplitView()
@@ -106,6 +107,8 @@ class AXWebContainerView: NSView {
             splitView.bottomAnchor.constraint(
                 equalTo: splitViewContainer.bottomAnchor)
         ])
+
+        newTabView.delegate = self
     }
 
     override func removeFromSuperview() {
@@ -159,9 +162,14 @@ class AXWebContainerView: NSView {
         }
     }
 
-    func updateView(webView: AXWebView) {
+    func updateView(webView: AXWebView?) {
         splitView.cancelAnimations()
         splitView.arrangedSubviews.forEach(splitView.removeArrangedSubview)
+
+        guard let webView = webView else {
+            displayNewTabPage()
+            return
+        }
 
         self.currentWebView = webView
         self.websiteTitleLabel.stringValue = webView.title ?? "Untitled Page"
@@ -172,11 +180,7 @@ class AXWebContainerView: NSView {
         splitView.addArrangedSubview(webView)
         webView.autoresizingMask = [.height, .width]
 
-        if let url = webView.url, let scheme = url.scheme, scheme.hasPrefix("a") {
-            delegate?.webContainerSwitchedToEmptyWebView()
-        } else {
-            self.window?.makeFirstResponder(self.currentWebView)
-        }
+        self.window?.makeFirstResponder(self.currentWebView)
 
         progressBarObserver = webView.observe(
             \.estimatedProgress, options: [.new]
@@ -198,6 +202,15 @@ class AXWebContainerView: NSView {
                 self?.delegate?.webContainerViewChangedURL(to: newURL)
             }
         }
+    }
+
+    func displayNewTabPage() {
+        mxPrint("Displaying Empty Tab Page")
+        self.currentWebView = nil
+
+        newTabView.frame = splitView.frame
+        splitView.addArrangedSubview(newTabView)
+        newTabView.autoresizingMask = [.height, .width]
     }
 
     // MARK: - Collapsed Sidebar Methods
@@ -437,6 +450,19 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate, WKDownloadDele
     //        SecTrustSetExceptions(serverTrust, exceptions)
     //        completionHandler(.useCredential, URLCredential(trust: serverTrust))
     //    }
+}
+
+extension AXWebContainerView: AXNewTabViewDelegate {
+    func didSelectItem(url: URL) {
+        guard let tab = delegate?.webContainerViewRequestsCurrentTab() else { return }
+        tab.url = url
+        tab.isEmpty = false
+
+        // AXTab will automatically handle this code
+        // AXWebView(frame: .zero, configuration: tab.webConfiguration)
+
+        self.updateView(webView: tab.webView!)
+    }
 }
 
 // MARK: - Web Split View

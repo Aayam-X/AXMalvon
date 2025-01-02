@@ -44,15 +44,24 @@ extension AXWindow: NSWindowDelegate {
 
     // MARK: Window Events
     func windowWillClose(_ notification: Notification) {
-        for profile in profiles {
-            profile.saveTabGroups()
+//        mxPrint("Testing")
+//        for profile in profiles {
+//            profile.saveTabGroups()
+//
+//            for tabGroup in profile.tabGroups {
+//                tabGroup.tabs.forEach { tab in
+//                    tab.stopTitleObservation()
+//                }
+//                tabGroup.tabs.removeAll()
+//                tabGroup.tabBarView?.removeFromSuperview()
+//                tabGroup.tabBarView = nil
+//            }
+//        }
+    }
 
-            for tabGroup in profile.tabGroups {
-                tabGroup.tabs.removeAll()
-                tabGroup.tabBarView?.removeFromSuperview()
-                tabGroup.tabBarView = nil
-            }
-        }
+    override func close() {
+        print("CLOSING")
+        super.close()
     }
 
     func windowDidResize(_ notification: Notification) {

@@ -34,12 +34,7 @@ class AXTabGroup: Codable {
     }
 
     func addEmptyTab(configuration: WKWebViewConfiguration) {
-        let webView = AXWebView(frame: .zero, configuration: configuration)
-        webView.loadHTMLString(newTabHTMLString, baseURL: nil)
-
-        let tab = AXTab(
-            title: "New Tab",
-            webView: webView)
+        let tab = AXTab(creatingEmptyTab: true, configuration: configuration)
         tabs.append(tab)
         tabBarView?.addTabButton(for: tab)  // Add button to tab bar view
     }

@@ -37,8 +37,9 @@ extension AXTabButton {
     }
 
     func forceCreateWebview() {
-        let webView = tab.webView
-        createObserver(webView)
+        if let webView = tab.webView {
+            createObserver(webView)
+        }
     }
 
     func createObserver(_ webView: AXWebView) {

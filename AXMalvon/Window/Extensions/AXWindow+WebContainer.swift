@@ -11,8 +11,8 @@ import WebKit
 import SwiftUI
 
 extension AXWindow: AXWebContainerViewDelegate {
-    func webContainerSwitchedToEmptyWebView() {
-        self.makeFirstResponder(layoutManager.searchButton.addressField)
+    func webContainerViewRequestsCurrentTab() -> AXTab {
+        return currentTabGroup.tabs[currentTabGroup.selectedIndex]
     }
 
     func webContainerViewChangedURL(to url: URL) {

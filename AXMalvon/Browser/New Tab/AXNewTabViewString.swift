@@ -23,6 +23,7 @@ let newTabHTMLString = """
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: background 0.3s ease;
         }
 
         .container {
@@ -77,6 +78,36 @@ let newTabHTMLString = """
         .site-link:hover {
             text-decoration: underline;
         }
+
+        /* Dark Mode Styles */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #1f1f1f 0%, #2e2e2e 100%);
+                color: white;
+            }
+
+            .search-input {
+                background: #333;
+                color: white;
+                box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+            }
+
+            .site-link {
+                color: #80c0ff;
+            }
+
+            .site-link:hover {
+                color: #a0d9ff;
+            }
+        }
+
+        /* Light Mode Styles */
+        @media (prefers-color-scheme: light) {
+            body {
+                background: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -89,6 +120,16 @@ let newTabHTMLString = """
             <li class="site-item"><a href="https://app.todoist.com/app/today" class="site-link" rel="noopener noreferrer">Todoist</a></li>
             <li class="site-item"><a href="https://mail.google.com" class="site-link" rel="noopener noreferrer">Gmail</a></li>
             <li class="site-item"><a href="https://github.com" class="site-link" rel="noopener noreferrer">GitHub</a></li>
+        </ul>
+
+        <!-- New School List -->
+        <h2>School</h2>
+        <ul class="sites-list">
+            <li class="site-item"><a href="https://pdsb.elearningontario.ca/d2l/home/26235716" class="site-link" rel="noopener noreferrer">Mathematics</a></li>
+            <li class="site-item"><a href="https://turnerfenton.managebac.com/student" class="site-link" rel="noopener noreferrer">ManageBac</a></li>
+            <li class="site-item"><a href="https://classroom.google.com/" class="site-link" rel="noopener noreferrer">Google Classroom</a></li>
+            <li class="site-item"><a href="https://mail.google.com/mail/u/0/" class="site-link" rel="noopener noreferrer">Mail</a></li>
+            <li class="site-item"><a href="https://app.kognity.com/study/app/dashboard" class="site-link" rel="noopener noreferrer">Kognity</a></li>
         </ul>
     </div>
 

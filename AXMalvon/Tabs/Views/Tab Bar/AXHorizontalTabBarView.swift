@@ -143,18 +143,18 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
         // New debounced scroll method
-        private func debouncedScrollToTab(at index: Int) {
-            // Cancel any pending scroll
-            scrollWorkItem?.cancel()
+    private func debouncedScrollToTab(at index: Int) {
+        // Cancel any pending scroll
+        scrollWorkItem?.cancel()
 
-            // Create new work item for scrolling
-            scrollWorkItem = DispatchWorkItem { [weak self] in
-                self?.performScrollToTab(at: index)
-            }
-
-            // Schedule the scroll after 0.5 seconds
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: scrollWorkItem!)
+        // Create new work item for scrolling
+        scrollWorkItem = DispatchWorkItem { [weak self] in
+            self?.performScrollToTab(at: index)
         }
+
+        // Schedule the scroll after 0.5 seconds
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: scrollWorkItem!)
+    }
 
         // Actual scroll implementation
     private func performScrollToTab(at index: Int) {
@@ -197,24 +197,6 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     // MARK: - Remove Tab Functions
-//    private func removeTabWithAnimation(_ button: AXHorizontalTabButton, index: Int) {
-//        NSAnimationContext.runAnimationGroup({ context in
-//            context.duration = 0.2
-//            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-//            button.animator().frame.origin.x -= button.frame.width
-//            button.animator().alphaValue = 0
-//        }, completionHandler: { [weak self] in
-//            self?.cleanupTab(button)
-//            
-//            NSAnimationContext.runAnimationGroup { context in
-//                context.duration = 0.2
-//                context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-//                self?.updateAllTabWidths()
-//                self?.tabStackView.layoutSubtreeIfNeeded()
-//            }
-//        })
-//    }
-
     private func cleanupTab(_ button: AXHorizontalTabButton) {
         tabConstraints.removeValue(forKey: button)
         button.removeFromSuperview()

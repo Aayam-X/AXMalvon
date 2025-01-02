@@ -224,24 +224,6 @@ extension AXVerticalTabButton {
     }
 }
 
-// MARK: Web View Functions
-extension AXVerticalTabButton {
-    public func startObserving() {
-        guard let webView = tab._webView else { return }
-
-        createObserver(webView)
-    }
-
-    func forceCreateWebview() {
-        let webView = tab.webView
-        createObserver(webView)
-    }
-
-    func createObserver(_ webView: AXWebView) {
-        tab.startTitleObservation(for: self)
-    }
-}
-
 // MARK: Mouse Functions
 extension AXVerticalTabButton {
     func setTrackingArea() {
