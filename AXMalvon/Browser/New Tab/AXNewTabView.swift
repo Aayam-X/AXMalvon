@@ -14,13 +14,11 @@ protocol AXNewTabViewDelegate: AnyObject {
 
 let items = [
     ("Google", "https://www.google.com"),
-    ("Todoist", "https://app.todoist.com/app/today"),
     ("Gmail", "https://mail.google.com"),
-    ("GitHub", "https://github.com"),
-    ("YouTube", "https://www.youtube.com"),
-    ("Reddit", "https://www.reddit.com"),
-    ("Twitter", "https://twitter.com"),
-    ("LinkedIn", "https://www.linkedin.com")
+    ("Mathematics", "https://pdsb.elearningontario.ca/d2l/home/26235716"),
+    ("ManageBac", "https://turnerfenton.managebac.com/student"),
+    ("Classroom", "https://classroom.google.com/"),
+    ("Kognity", "https://app.kognity.com/study/app/dashboard")
 ]
 
 class AXNewTabView: NSView {
@@ -148,6 +146,7 @@ class AXNewTabTopSiteCardCollectionView: NSCollectionViewItem {
         myImageView.layer?.shadowOpacity = 0.2
         myImageView.layer?.shadowOffset = CGSize(width: 0, height: -2)
         myImageView.layer?.shadowRadius = 4
+        myImageView.layer?.cornerRadius = 9
 
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = NSFont.systemFont(ofSize: 14)
@@ -172,19 +171,75 @@ class AXNewTabTopSiteCardCollectionView: NSCollectionViewItem {
         titleLabel.stringValue = title
         self.url = url
 
-        // Async image loading
-        if let url = URL(string: "https://www.google.com/s2/favicons?sz=64&domain_url=\(url)") {
-            URLSession.shared.dataTask(with: url) { data, _, _ in
-                if let data = data, let image = NSImage(data: data) {
-                    DispatchQueue.main.async {
-                        self.myImageView.image = image
-                    }
-                }
-            }.resume()
+        let cacheKey = "placeholder_\(title)" // Unique key for caching based on the title
+        if let cachedImage = ImageCache.shared.getImage(forKey: cacheKey) {
+            self.myImageView.image = cachedImage
+        } else {
+            let placeholderImage = createPlaceholderImage(for: title)
+            ImageCache.shared.setImage(placeholderImage, forKey: cacheKey)
+            self.myImageView.image = placeholderImage
         }
+    }
+
+    private func createPlaceholderImage(for title: String) -> NSImage {
+        let size = CGSize(width: 60, height: 60)
+        let firstLetter = String(title.prefix(1)).uppercased()
+        let colors: [NSColor] = [
+            .systemRed, .systemBlue, .systemGreen, .systemYellow,
+            .systemOrange, .systemPurple, .systemPink, .systemTeal, .systemPurple, .systemCyan, .systemIndigo
+        ]
+        let backgroundColor = colors.randomElement() ?? .systemGray
+
+        let image = NSImage(size: size)
+        image.lockFocus()
+
+        // Draw background
+        backgroundColor.setFill()
+        let rect = NSRect(origin: .zero, size: size)
+        rect.fill()
+
+        // Draw first letter
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.boldSystemFont(ofSize: 24),
+            .foregroundColor: NSColor.white,
+            .paragraphStyle: {
+                let style = NSMutableParagraphStyle()
+                style.alignment = .center
+                style.lineBreakMode = .byClipping
+                return style
+            }()
+        ]
+
+        let attributedString = NSAttributedString(string: firstLetter, attributes: attributes)
+        let textSize = attributedString.size()
+        let textRect = CGRect(
+            x: (rect.width - textSize.width) / 2,
+            y: (rect.height - textSize.height) / 2,
+            width: textSize.width,
+            height: textSize.height
+        )
+        attributedString.draw(in: textRect)
+
+        image.unlockFocus()
+        return image
     }
 
     override func mouseDown(with event: NSEvent) {
         self.mouseDownSelector?(self.url)
+    }
+}
+
+private class ImageCache {
+    static let shared = ImageCache()
+    private var cache = NSCache<NSString, NSImage>()
+
+    private init() {}
+
+    func getImage(forKey key: String) -> NSImage? {
+        return cache.object(forKey: key as NSString)
+    }
+
+    func setImage(_ image: NSImage, forKey key: String) {
+        cache.setObject(image, forKey: key as NSString)
     }
 }

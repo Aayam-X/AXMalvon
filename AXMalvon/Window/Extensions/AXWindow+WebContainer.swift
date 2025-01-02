@@ -11,6 +11,10 @@ import WebKit
 import SwiftUI
 
 extension AXWindow: AXWebContainerViewDelegate {
+    func webContainerViewDidSwitchToStartPage() {
+        makeFirstResponder(layoutManager.searchButton.addressField)
+    }
+
     func webContainerViewRequestsCurrentTab(_ url: URL?) -> AXTab {
         let currentTabGroup = currentTabGroup
 

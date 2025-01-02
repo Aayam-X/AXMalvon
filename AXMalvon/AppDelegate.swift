@@ -12,11 +12,6 @@ import WebKit
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
-    // Default Profiles
-    static let profiles: [AXProfile] = [
-        .init(name: "Default"),
-        .init(name: "School")
-    ]
 
     // Main Browser Window + Search Bar
     var window: AXWindow?
@@ -62,10 +57,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ aNotification: Notification) {
         // Save profiles
-        for profile in AppDelegate.profiles {
-            profile.saveTabGroups()
-            profile.historyManager?.flushAndClose()
-        }
+//        for profile in AppDelegate.profiles {
+//            profile.saveTabGroups()
+//            profile.historyManager?.flushAndClose()
+//        }
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
@@ -86,19 +81,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard launchedBefore else { return }
         ev()
 
-        for profile in AppDelegate.profiles {
-            profile.loadTabGroups()
-        }
+//        for profile in AppDelegate.profiles {
+//            profile.loadTabGroups()
+//        }
 
         createNewWindowIfNeeded()
         window?.makeKeyAndOrderFront(nil)
     }
 
+//    var privateWindow: AXWindow?
+
     @IBAction func newPrivateWindow(_ sender: Any?) {
         guard launchedBefore else { return }
         ev()
 
-        let privateWindow = AXWindow(with: [AXPrivateProfile()])
+        let privateProfile = AXPrivateProfile()
+        let privateWindow = AXWindow(with: [privateProfile])
+        privateWindow.isReleasedWhenClosed = false
         privateWindow.makeKeyAndOrderFront(nil)
     }
 
@@ -127,7 +126,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Other Functions
     private func createNewWindowIfNeeded() {
         if window == nil {
-            self.window = AXWindow(with: AppDelegate.profiles)
+
+            let profiles: [AXProfile] = [
+                .init(name: "Default"),
+                .init(name: "School")
+            ]
+
+            self.window = AXWindow(with: profiles)
         }
     }
 

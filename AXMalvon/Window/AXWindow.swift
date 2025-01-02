@@ -76,10 +76,6 @@ class AXWindow: NSWindow {
             defer: false
         )
 
-        // Because app delegate references as a weak object already
-        // But it doesn't work for some reason
-        self.isReleasedWhenClosed = false
-
         configureWindow()
         setupComponents()
     }

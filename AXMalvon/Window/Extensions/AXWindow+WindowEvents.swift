@@ -11,9 +11,8 @@ import AppKit
 extension AXWindow: NSWindowDelegate {
     internal func configureWindow() {
         self.animationBehavior = .documentWindow
-        // self.titlebarAppearsTransparent = true
+        self.titlebarAppearsTransparent = true
         self.backgroundColor = .textBackgroundColor
-        self.isReleasedWhenClosed = true
         self.delegate = self
 
         if usesVerticalTabs {
@@ -44,24 +43,34 @@ extension AXWindow: NSWindowDelegate {
 
     // MARK: Window Events
     func windowWillClose(_ notification: Notification) {
-//        mxPrint("Testing")
-//        for profile in profiles {
-//            profile.saveTabGroups()
-//
-//            for tabGroup in profile.tabGroups {
-//                tabGroup.tabs.forEach { tab in
-//                    tab.stopTitleObservation()
-//                }
-//                tabGroup.tabs.removeAll()
-//                tabGroup.tabBarView?.removeFromSuperview()
-//                tabGroup.tabBarView = nil
-//            }
-//        }
-    }
+        mxPrint("Testing")
 
-    override func close() {
-        print("CLOSING")
-        super.close()
+        if profiles.count == 1 {
+            for profile in self.profiles {
+                for tabGroup in profile.tabGroups {
+                    for tab in tabGroup.tabs {
+                        tab.stopTitleObservation()
+                    }
+                    // tabGroup.tabs.removeAll()
+                }
+            }
+
+            return
+        }
+
+        for profile in profiles {
+            profile.saveTabGroups()
+            profile.historyManager?.flushAndClose()
+
+            for tabGroup in profile.tabGroups {
+                tabGroup.tabs.forEach { tab in
+                    tab.stopTitleObservation()
+                }
+                tabGroup.tabs.removeAll()
+                tabGroup.tabBarView?.removeFromSuperview()
+                tabGroup.tabBarView = nil
+            }
+        }
     }
 
     func windowDidResize(_ notification: Notification) {

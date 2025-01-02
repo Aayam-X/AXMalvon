@@ -15,15 +15,6 @@ private struct AXHorizontalTabButtonConstants {
         systemSymbolName: "moon.fill", accessibilityDescription: nil)
     static let defaultCloseButton = NSImage(
         systemSymbolName: "xmark", accessibilityDescription: nil)
-
-    static let animationDuration: CFTimeInterval = 0.2
-    static let shrinkScale: CGFloat = 0.9
-    static let tabHeight: CGFloat = 36
-    static let iconSize = NSSize(width: 16, height: 16)
-    static let closeButtonSize = NSSize(width: 20, height: 16)
-    static let shadowOpacity: Float = 0.3
-    static let shadowRadius: CGFloat = 4.0
-    static let shadowOffset = CGSize(width: 0, height: 0)
 }
 
 class AXHorizontalTabButton: NSButton, AXTabButton {
@@ -71,7 +62,13 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
         setupViews()
         setupTrackingArea()
 
-        tab?.onWebViewInitialization = self.onWebViewInitializationListenerHandler
+        if let tab {
+            tab.onWebViewInitialization = self.onWebViewInitializationListenerHandler
+        }
+
+        if tab?._webView == nil {
+            titleView.stringValue = "New Tab"
+        }
     }
 
     func onWebViewInitializationListenerHandler(webView: AXWebView) {

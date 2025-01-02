@@ -20,6 +20,7 @@ protocol AXWebContainerViewDelegate: AnyObject {
     func webContainerViewRequestsSidebar() -> NSView?
 
     func webContainerViewRequestsCurrentTab(_ url: URL?) -> AXTab
+    func webContainerViewDidSwitchToStartPage()
 }
 
 class AXWebContainerView: NSView {
@@ -240,6 +241,8 @@ class AXWebContainerView: NSView {
         newTabView.frame = splitView.frame
         splitView.addArrangedSubview(newTabView)
         newTabView.autoresizingMask = [.height, .width]
+
+        delegate?.webContainerViewDidSwitchToStartPage()
     }
 
     // MARK: - Collapsed Sidebar Methods
@@ -489,9 +492,6 @@ extension AXWebContainerView: AXNewTabViewDelegate {
 
         // AXTab will automatically handle this code
         // AXWebView(frame: .zero, configuration: tab.webConfiguration)
-
-        // We need to turn on the title listening for the button
-
         self.updateView(webView: tab.webView!)
     }
 }

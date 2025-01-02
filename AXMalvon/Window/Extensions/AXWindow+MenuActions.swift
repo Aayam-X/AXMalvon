@@ -145,6 +145,10 @@ extension AXWindow {
             toggleSearchField(nil)
             return true
         case kVK_ANSI_W:
+            if currentTabGroup.tabs.isEmpty {
+                self.close()
+                return true
+            }
             currentTabGroup.removeCurrentTab()
             return true
         default:
