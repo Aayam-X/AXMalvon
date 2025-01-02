@@ -11,7 +11,13 @@ import WebKit
 import SwiftUI
 
 extension AXWindow: AXWebContainerViewDelegate {
-    func webContainerViewRequestsCurrentTab() -> AXTab {
+    func webContainerViewRequestsCurrentTab(_ url: URL?) -> AXTab {
+        let currentTabGroup = currentTabGroup
+
+        if currentTabGroup.tabs.isEmpty {
+            return currentTabGroup.addTab(url: url!, currentConfiguration)
+        }
+
         return currentTabGroup.tabs[currentTabGroup.selectedIndex]
     }
 
@@ -38,7 +44,7 @@ extension AXWindow: AXWebContainerViewDelegate {
     }
 
     func webContainerViewFinishedLoading(webView: WKWebView) {
-        layoutManager.searchButton.fullAddress = layoutManager.containerView.currentWebView?.url
+        layoutManager.searchButton.fullAddress = layoutManager.containerView.currentPageAddress
 
         if let historyManager = activeProfile.historyManager, let title = webView.title, let url = webView.url {
             let newItem = AXHistoryItem(

@@ -14,15 +14,15 @@ extension AXWindow: AXTabHostingViewDelegate {
     }
 
     func tabHostingViewReloadCurrentPage() {
-        layoutManager.containerView.currentWebView?.reload()
+        layoutManager.containerView.reload()
     }
 
     func tabHostingViewNavigateForward() {
-        layoutManager.containerView.currentWebView?.goForward()
+        layoutManager.containerView.forward()
     }
 
     func tabHostingViewNavigateBackwards() {
-        layoutManager.containerView.currentWebView?.goBack()
+        layoutManager.containerView.back()
     }
 
     func tabHostingViewDisplaysTabGroupCustomizationPanel(_ sender: NSView) {

@@ -19,7 +19,7 @@ protocol AXWebContainerViewDelegate: AnyObject {
 
     func webContainerViewRequestsSidebar() -> NSView?
 
-    func webContainerViewRequestsCurrentTab() -> AXTab
+    func webContainerViewRequestsCurrentTab(_ url: URL?) -> AXTab
 }
 
 class AXWebContainerView: NSView {
@@ -27,8 +27,37 @@ class AXWebContainerView: NSView {
     weak var sidebar: NSView?
     let isVertical: Bool
 
-    unowned var currentWebView: AXWebView?
+    private unowned var currentWebView: AXWebView?
     let newTabView = AXNewTabView(frame: .zero)
+
+    var currentPageAddress: URL? {
+        currentWebView?.url
+    }
+
+    func reload() {
+        currentWebView?.reload()
+    }
+
+    func back() {
+        currentWebView?.goBack()
+    }
+
+    func forward() {
+        currentWebView?.goForward()
+    }
+
+    func loadURL(url: URL) {
+        if let currentWebView {
+            currentWebView.load(URLRequest(url: url))
+        } else {
+            // Act as if a favourites site was clicked
+            didSelectItem(url: url)
+        }
+    }
+
+    func axWindowFirstResponder(_ window: AXWindow) {
+        window.makeFirstResponder(currentWebView)
+    }
 
     let splitViewContainer = NSView()
     private lazy var splitView = AXQuattroProgressSplitView()
@@ -454,12 +483,14 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate, WKDownloadDele
 
 extension AXWebContainerView: AXNewTabViewDelegate {
     func didSelectItem(url: URL) {
-        guard let tab = delegate?.webContainerViewRequestsCurrentTab() else { return }
+        guard let tab = delegate?.webContainerViewRequestsCurrentTab(url) else { return }
         tab.url = url
         tab.isEmpty = false
 
         // AXTab will automatically handle this code
         // AXWebView(frame: .zero, configuration: tab.webConfiguration)
+
+        // We need to turn on the title listening for the button
 
         self.updateView(webView: tab.webView!)
     }

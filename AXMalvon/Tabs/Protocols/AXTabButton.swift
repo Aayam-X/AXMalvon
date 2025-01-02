@@ -43,6 +43,7 @@ extension AXTabButton {
     }
 
     func createObserver(_ webView: AXWebView) {
+        mxPrint(#function, "CALLEDDDD 1111")
         tab.startTitleObservation(for: self)
     }
 }

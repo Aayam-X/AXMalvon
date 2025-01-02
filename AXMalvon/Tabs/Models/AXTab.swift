@@ -23,17 +23,23 @@ class AXTab: Codable {
     weak var _webView: AXWebView?
     var isEmpty = false
 
+    var onWebViewInitialization: ((AXWebView) -> Void)?
+
     var webView: AXWebView? {
         if let existingWebView = _webView {
             return existingWebView
         } else {
             guard !isEmpty else { return nil }
+
+            // Tell the button to start observing if not already exists
             let newWebView = AXWebView(
                 frame: .zero, configuration: webConfiguration)
             if let url = url {
                 newWebView.load(URLRequest(url: url))
             }
+
             _webView = newWebView
+            onWebViewInitialization?(newWebView)
             return newWebView
         }
     }

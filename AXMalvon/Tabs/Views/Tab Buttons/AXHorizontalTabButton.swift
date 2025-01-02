@@ -70,6 +70,13 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
         setupShadow()
         setupViews()
         setupTrackingArea()
+
+        tab?.onWebViewInitialization = self.onWebViewInitializationListenerHandler
+    }
+
+    func onWebViewInitializationListenerHandler(webView: AXWebView) {
+        mxPrint(#function, "CALLEDDDD")
+        self.createObserver(webView)
     }
 
     override func viewWillDraw() {
