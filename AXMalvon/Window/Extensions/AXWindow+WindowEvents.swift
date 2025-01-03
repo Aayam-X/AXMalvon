@@ -84,7 +84,9 @@ extension AXWindow: NSWindowDelegate {
 
     override func mouseUp(with event: NSEvent) {
         // Double-click in title bar
-        if event.clickCount >= 2 && isPointInTitleBar(point: event.locationInWindow) {
+        if event.clickCount >= 2
+            && isPointInTitleBar(point: event.locationInWindow)
+        {
             self.zoom(nil)
         }
         super.mouseUp(with: event)
@@ -117,11 +119,15 @@ extension AXWindow: NSWindowDelegate {
     }
 
     static internal func updateWindowFrame() -> NSRect {
-        if let savedFrameString = UserDefaults.standard.string(forKey: "windowFrame") {
+        if let savedFrameString = UserDefaults.standard.string(
+            forKey: "windowFrame")
+        {
             return NSRectFromString(savedFrameString)
         } else {
             if let screenFrame = NSScreen.main?.frame {
-                return NSRect(x: 100, y: 100, width: screenFrame.width / 2, height: screenFrame.height / 2)
+                return NSRect(
+                    x: 100, y: 100, width: screenFrame.width / 2,
+                    height: screenFrame.height / 2)
             } else {
                 return NSRect(x: 100, y: 100, width: 800, height: 600)
             }
@@ -133,7 +139,7 @@ extension AXWindow: NSWindowDelegate {
         self.trafficLightButtons = [
             self.standardWindowButton(.closeButton)!,
             self.standardWindowButton(.miniaturizeButton)!,
-            self.standardWindowButton(.zoomButton)!
+            self.standardWindowButton(.zoomButton)!,
         ]
 
         trafficLightsPosition()

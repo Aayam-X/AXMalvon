@@ -17,7 +17,7 @@ struct AXProfileData: Codable {
     func toDictionary() -> [String: Any] {
         return [
             "id": configID,
-            "i": selectedTabGroupIndex
+            "i": selectedTabGroupIndex,
         ]
     }
 
@@ -78,7 +78,10 @@ class AXProfile {
         }
     }
 
-    init(name: String, config: WKWebViewConfiguration, loadsDefaultData: Bool, configID: String? = nil, usingTabGroup: AXTabGroup? = nil) {
+    init(
+        name: String, config: WKWebViewConfiguration, loadsDefaultData: Bool,
+        configID: String? = nil, usingTabGroup: AXTabGroup? = nil
+    ) {
         self.name = name
         self.configuration = config
         self.tabGroups = []
@@ -270,7 +273,7 @@ class AXProfile {
 }
 
 class AXPrivateProfile: AXProfile {
-  //  override var tabGroups: [AXTabGroup] = [.init(name: "Private Tab Group")]
+    //  override var tabGroups: [AXTabGroup] = [.init(name: "Private Tab Group")]
 
     init() {
         let config = WKWebViewConfiguration()
@@ -279,7 +282,9 @@ class AXPrivateProfile: AXProfile {
         let privateTabGroup = AXTabGroup(name: "Private Tab Group")
         privateTabGroup.color = .black
 
-        super.init(name: "Private", config: config, loadsDefaultData: false, usingTabGroup: privateTabGroup)
+        super.init(
+            name: "Private", config: config, loadsDefaultData: false,
+            usingTabGroup: privateTabGroup)
     }
 
     override func saveTabGroups() {
@@ -307,5 +312,5 @@ private let jsAXWebViewConfigurations = [
     "acceleratedDrawingEnabled",
     "animatedImageAsyncDecodingEnabled",
     "developerExtrasEnabled",
-    "canvasUsesAcceleratedDrawing"
+    "canvasUsesAcceleratedDrawing",
 ]

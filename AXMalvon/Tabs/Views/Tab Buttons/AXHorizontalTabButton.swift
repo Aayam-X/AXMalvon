@@ -8,15 +8,6 @@
 
 import AppKit
 
-private struct AXHorizontalTabButtonConstants {
-    static let defaultFavicon = NSImage(
-        systemSymbolName: "square.fill", accessibilityDescription: nil)
-    static let defaultFaviconSleep = NSImage(
-        systemSymbolName: "moon.fill", accessibilityDescription: nil)
-    static let defaultCloseButton = NSImage(
-        systemSymbolName: "xmark", accessibilityDescription: nil)
-}
-
 class AXHorizontalTabButton: NSButton, AXTabButton {
     var tab: AXTab!
     var delegate: (any AXTabButtonDelegate)?
@@ -63,7 +54,8 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
         setupTrackingArea()
 
         if let tab {
-            tab.onWebViewInitialization = self.onWebViewInitializationListenerHandler
+            tab.onWebViewInitialization =
+                self.onWebViewInitializationListenerHandler
         }
 
         if tab?._webView == nil {
@@ -88,13 +80,17 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
         self.heightAnchor.constraint(equalToConstant: 33).isActive = true
 
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.favicon = tab?.icon ?? NSImage(systemSymbolName: "moon.fill", accessibilityDescription: nil)
+        closeButton.favicon =
+            tab?.icon
+            ?? NSImage(
+                systemSymbolName: "moon.fill", accessibilityDescription: nil)
         addSubview(closeButton)
         NSLayoutConstraint.activate([
             closeButton.centerYAnchor.constraint(equalTo: centerYAnchor),
-            closeButton.leftAnchor.constraint(equalTo: leftAnchor, constant: 10),
+            closeButton.leftAnchor.constraint(
+                equalTo: leftAnchor, constant: 10),
             closeButton.widthAnchor.constraint(equalToConstant: 20),
-            closeButton.heightAnchor.constraint(equalToConstant: 20)
+            closeButton.heightAnchor.constraint(equalToConstant: 20),
         ])
         closeButton.target = self
         closeButton.action = #selector(closeTab)
@@ -108,9 +104,11 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
         titleView.textColor = .textColor
         addSubview(titleView)
         NSLayoutConstraint.activate([
-            titleView.leftAnchor.constraint(equalTo: closeButton.rightAnchor, constant: 5),
+            titleView.leftAnchor.constraint(
+                equalTo: closeButton.rightAnchor, constant: 5),
             titleView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            titleView.rightAnchor.constraint(equalTo: rightAnchor, constant: -7)
+            titleView.rightAnchor.constraint(
+                equalTo: rightAnchor, constant: -7),
         ])
     }
 
@@ -127,8 +125,11 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
     }
 
     private func setupTrackingArea() {
-        let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
-        trackingArea = NSTrackingArea(rect: self.bounds, options: options, owner: self, userInfo: nil)
+        let options: NSTrackingArea.Options = [
+            .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
+        ]
+        trackingArea = NSTrackingArea(
+            rect: self.bounds, options: options, owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
     }
 
@@ -136,7 +137,8 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
         closeButton.hideCloseButton()
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.1
-            self.animator().layer?.setAffineTransform(CGAffineTransform(scaleX: 1, y: 0.95))
+            self.animator().layer?.setAffineTransform(
+                CGAffineTransform(scaleX: 1, y: 0.95))
         }
 
         self.switchTab()
@@ -152,7 +154,8 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
 
     override func mouseEntered(with event: NSEvent) {
         if !isSelected {
-            self.layer?.backgroundColor = NSColor.systemGray.withAlphaComponent(0.3).cgColor
+            self.layer?.backgroundColor =
+                NSColor.systemGray.withAlphaComponent(0.3).cgColor
         }
         closeButton.showCloseButton()
     }
@@ -197,10 +200,11 @@ class AXHorizontalTabCloseButton: NSButton {
     var favicon: NSImage? {
         get {
             return _favicon
-        } set {
+        }
+        set {
             self._favicon = newValue
             self.image =
-            newValue ?? AXHorizontalTabButtonConstants.defaultFavicon
+                newValue ?? AXTabButtonConstants.defaultFavicon
         }
     }
 
@@ -210,7 +214,7 @@ class AXHorizontalTabCloseButton: NSButton {
         self.bezelStyle = .smallSquare
 
         self.imagePosition = .imageOnly
-        self.image = AXHorizontalTabButtonConstants.defaultFavicon
+        self.image = AXTabButtonConstants.defaultFavicon
     }
 
     required init?(coder: NSCoder) {
@@ -218,7 +222,7 @@ class AXHorizontalTabCloseButton: NSButton {
     }
 
     func showCloseButton() {
-        self.image = AXHorizontalTabButtonConstants.defaultCloseButton
+        self.image = AXTabButtonConstants.defaultCloseButton
     }
 
     func hideCloseButton() {

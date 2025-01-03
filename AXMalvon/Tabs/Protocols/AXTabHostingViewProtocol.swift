@@ -28,5 +28,8 @@ protocol AXTabHostingViewProtocol: AnyObject {
 
     var tabBarView: AXTabBarViewTemplate { get }
 
-    init(tabBarView: AXTabBarViewTemplate)
+    init(
+        tabBarView: any AXTabBarViewTemplate,
+        searchButton: AXSidebarSearchButton,
+        tabGroupInfoView: AXTabGroupInfoView)
 }

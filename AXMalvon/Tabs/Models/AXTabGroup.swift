@@ -104,7 +104,8 @@ class AXTabGroup: Codable {
 
         // Decode `color` as hex string and convert to `NSColor`
         if let colorHex = try container.decodeIfPresent(
-            String.self, forKey: .color) {
+            String.self, forKey: .color)
+        {
             self.color = NSColor(hex: colorHex)
         } else {
             self.color = .systemMint.withAlphaComponent(0.8)

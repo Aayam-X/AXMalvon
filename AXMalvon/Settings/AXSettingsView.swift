@@ -14,7 +14,8 @@ struct AXSettingsView: View {
     var body: some View {
         NavigationSplitView {
             // Sidebar
-            List(SettingsSection.allCases, selection: $selectedSection) { section in
+            List(SettingsSection.allCases, selection: $selectedSection) {
+                section in
                 Label(section.title, systemImage: section.icon)
                     .tag(section)
             }

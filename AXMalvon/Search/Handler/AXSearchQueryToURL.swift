@@ -49,7 +49,8 @@ private func searchActionFileURL(_ value: String) -> URL {
 }
 
 /// URL: https://www.apple.com
-private func searchActionURL(_ value: String, activeProfile: AXProfile?) -> URL {
+private func searchActionURL(_ value: String, activeProfile: AXProfile?) -> URL
+{
     guard let url = URL(string: value) else { return fallbackURL }
 
     if let activeProfile, activeProfile.name != "Private" {

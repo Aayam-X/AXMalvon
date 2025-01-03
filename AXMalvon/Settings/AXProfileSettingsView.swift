@@ -42,7 +42,8 @@ struct AXProfileSettingsView: View {
         .padding()
         .inspector(isPresented: $showsInspector) {
             if let index = selectedIndex,
-                profileManager.profiles.indices.contains(index) {
+                profileManager.profiles.indices.contains(index)
+            {
                 AXProfileSettingsInspector(
                     profile: $profileManager.profiles[index])
             }

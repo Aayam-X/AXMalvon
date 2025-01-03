@@ -9,7 +9,9 @@
 import AppKit
 import QuartzCore
 
-class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate, CAAnimationDelegate {
+class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
+    CAAnimationDelegate
+{
     private let animationQueue = DispatchQueue(
         label: "com.ayaamx.AXMalvon.progressAnimation",
         qos: .userInitiated
@@ -153,7 +155,8 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate, CAAnimationD
                 }
 
                 if targetProgress >= 0.95 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
+                    DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+                        [weak self] in
                         self?.borderLayers.forEach { layer in
                             layer.opacity = 0.0
                             layer.isHidden = true
@@ -185,33 +188,6 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate, CAAnimationD
     }
 
     // MARK: - NSSplitViewDelegate Methods
-    func splitView(
-        _ splitView: NSSplitView,
-        constrainMinCoordinate proposedMinimumPosition: CGFloat,
-        ofSubviewAt dividerIndex: Int
-    ) -> CGFloat {
-        return 160
-    }
-
-    func splitView(
-        _ splitView: NSSplitView,
-        constrainMaxCoordinate proposedMaximumPosition: CGFloat,
-        ofSubviewAt dividerIndex: Int
-    ) -> CGFloat {
-        return 500
-    }
-
-    func splitView(
-        _ splitView: NSSplitView, shouldAdjustSizeOfSubview view: NSView
-    ) -> Bool {
-        return view.tag != 0x01
-    }
-
-    func splitView(_ splitView: NSSplitView, canCollapseSubview subview: NSView)
-        -> Bool {
-        return false
-    }
-
     override func drawDivider(in rect: NSRect) {
         // Empty Divider
     }

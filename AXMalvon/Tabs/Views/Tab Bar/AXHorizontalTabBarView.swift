@@ -23,6 +23,9 @@ protocol AXHorizontalTabBarViewDelegate: AnyObject {
     func tabBarRemovedTab()
 }
 
+private let minTabWidth: CGFloat = 90
+private let maxTabWidth: CGFloat = 250
+
 // This class will only have the scrollable tabs; not the search bar nor sticky tabs
 // That will be implemented in the hosting view.
 class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
@@ -30,13 +33,12 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     weak var delegate: (any AXTabBarViewDelegate)?
     weak var stickyDelegate: (any AXHorizontalTabBarViewDelegate)?
 
-    private let minTabWidth: CGFloat = 90
-    private let maxTabWidth: CGFloat = 250
     private var currentWidth: CGFloat = 0
     private var currentTabCount: Int = 0
 
     // Store constraints with their associated buttons for better management
-    private var tabConstraints: [AXHorizontalTabButton: NSLayoutConstraint] = [:]
+    private var tabConstraints: [AXHorizontalTabButton: NSLayoutConstraint] =
+        [:]
     private var currentStickyState: TabStickyPosition = .none
     private var lastScrollPosition: CGFloat = 0
     private var firstTabInitialFrame: CGRect?
@@ -59,7 +61,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         scroll.hasHorizontalScroller = false
         scroll.hasVerticalScroller = false
         scroll.usesPredominantAxisScrolling = true
-        scroll.horizontalScrollElasticity = .allowed
+        scroll.horizontalScrollElasticity = .none
         scroll.verticalScrollElasticity = .none
         scroll.autoresizingMask = [.width, .height]
         scroll.translatesAutoresizingMaskIntoConstraints = true
@@ -103,9 +105,12 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     private func setupConstraints() {
         tabStackView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            tabStackView.topAnchor.constraint(equalTo: scrollView.contentView.topAnchor),
-            tabStackView.bottomAnchor.constraint(equalTo: scrollView.contentView.bottomAnchor),
-            tabStackView.leadingAnchor.constraint(equalTo: scrollView.contentView.leadingAnchor)
+            tabStackView.topAnchor.constraint(
+                equalTo: scrollView.contentView.topAnchor),
+            tabStackView.bottomAnchor.constraint(
+                equalTo: scrollView.contentView.bottomAnchor),
+            tabStackView.leadingAnchor.constraint(
+                equalTo: scrollView.contentView.leadingAnchor),
         ])
     }
 
@@ -142,7 +147,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         }
     }
 
-        // New debounced scroll method
+    // New debounced scroll method
     private func debouncedScrollToTab(at index: Int) {
         // Cancel any pending scroll
         scrollWorkItem?.cancel()
@@ -153,27 +158,33 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         }
 
         // Schedule the scroll after 0.5 seconds
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: scrollWorkItem!)
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + 1, execute: scrollWorkItem!)
     }
 
-        // Actual scroll implementation
+    // Actual scroll implementation
     private func performScrollToTab(at index: Int) {
         self.scrollToTab(at: index)
     }
 
-    private func addButtonWithAnimation(_ button: AXHorizontalTabButton, previousIndex: Int, completion: @escaping () -> Void) {
+    private func addButtonWithAnimation(
+        _ button: AXHorizontalTabButton, previousIndex: Int,
+        completion: @escaping () -> Void
+    ) {
         addButtonToStackView(button)
         self.updateTabSelection(from: previousIndex, to: button.tag)
 
         button.alphaValue = 0
         button.frame.origin.x = tabStackView.frame.width
 
-        NSAnimationContext.runAnimationGroup({ context in
-            context.duration = 0.1
-            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            button.animator().frame.origin.x = 0
-            button.animator().alphaValue = 1
-        }, completionHandler: completion)
+        NSAnimationContext.runAnimationGroup(
+            { context in
+                context.duration = 0.1
+                context.timingFunction = CAMediaTimingFunction(
+                    name: .easeInEaseOut)
+                button.animator().frame.origin.x = 0
+                button.animator().alphaValue = 1
+            }, completionHandler: completion)
     }
 
     private func addButtonToStackView(_ button: AXHorizontalTabButton) {
@@ -187,7 +198,9 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         firstTabInitialFrame = nil
     }
 
-    private func createWidthConstraint(for button: AXHorizontalTabButton) -> NSLayoutConstraint {
+    private func createWidthConstraint(for button: AXHorizontalTabButton)
+        -> NSLayoutConstraint
+    {
         let availableWidth = bounds.width - 45
         let tabCount = CGFloat(tabStackView.arrangedSubviews.count)
         let idealWidth = min(maxTabWidth, availableWidth / tabCount)
@@ -208,7 +221,9 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func tabButtonWillClose(_ tabButton: AXTabButton) {
-        guard let tabButton = tabButton as? AXHorizontalTabButton else { fatalError("Incorrect Button Type") }
+        guard let tabButton = tabButton as? AXHorizontalTabButton else {
+            fatalError("Incorrect Button Type")
+        }
         let index = tabButton.tag
         tabGroup.tabs.remove(at: index)
 
@@ -217,7 +232,10 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func removeTabButton(at index: Int) {
-        guard let button = tabStackView.arrangedSubviews[index] as? AXHorizontalTabButton else { return }
+        guard
+            let button = tabStackView.arrangedSubviews[index]
+                as? AXHorizontalTabButton
+        else { return }
 
         // Remove the tab button
         cleanupTab(button)
@@ -231,8 +249,10 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
 
     func updateIndices(after index: Int) {
         // Adjust tags for remaining buttons
-        for (idx, button) in tabStackView.arrangedSubviews.enumerated().dropFirst(index) {
-            (button as? AXHorizontalTabButton)?.tag = idx
+        for case let (idx, button as AXTabButton) in tabStackView
+            .arrangedSubviews.enumerated().dropFirst(index)
+        {
+            button.tag = idx
         }
 
         // Adjust the selected index
@@ -256,7 +276,9 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         }
 
         // Update visuals
-        if let button = tabStackView.arrangedSubviews[tabGroup.selectedIndex] as? AXHorizontalTabButton {
+        if let button = tabStackView.arrangedSubviews[tabGroup.selectedIndex]
+            as? AXHorizontalTabButton
+        {
             button.isSelected = true
         }
 
@@ -295,7 +317,8 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
             constraint.animator().constant = finalWidth
         }
 
-        scrollView.horizontalScrollElasticity = (idealWidth <= 90) ? .allowed : .none
+        scrollView.horizontalScrollElasticity =
+            (idealWidth <= 90) ? .allowed : .none
     }
 
     func addTabButtonInBackground(for tab: AXTab, index: Int) {
@@ -310,14 +333,19 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func scrollToTab(at index: Int) {
-        guard index >= 0, index < tabStackView.arrangedSubviews.count else { return }
+        guard index >= 0, index < tabStackView.arrangedSubviews.count else {
+            return
+        }
 
         let tabView = tabStackView.arrangedSubviews[index]
-        let targetPointX = tabView.frame.origin.x + (tabView.frame.width / 2) - (scrollView.frame.width / 2)
+        let targetPointX =
+            tabView.frame.origin.x + (tabView.frame.width / 2)
+            - (scrollView.frame.width / 2)
 
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.5
-            scrollView.contentView.animator().setBoundsOrigin(NSPoint(x: targetPointX, y: 0))
+            scrollView.contentView.animator().setBoundsOrigin(
+                NSPoint(x: targetPointX, y: 0))
             scrollView.reflectScrolledClipView(scrollView.contentView)
         }
     }
@@ -333,7 +361,9 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         scrollToTab(at: newTag)
     }
 
-    func tabButtonActiveTitleChanged(_ newTitle: String, for tabButton: AXTabButton) {
+    func tabButtonActiveTitleChanged(
+        _ newTitle: String, for tabButton: AXTabButton
+    ) {
         delegate?.tabBarActiveTabTitleChanged(to: newTitle)
     }
 
@@ -350,14 +380,22 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     private func updateStickyTabs() {
         guard !tabGroup.tabs.isEmpty else { return }
 
-        let safeIndex = max(0, min(tabGroup.selectedIndex, tabStackView.arrangedSubviews.count - 1))
-        guard let currentTab = tabStackView.arrangedSubviews[safeIndex] as? AXHorizontalTabButton else { return }
+        let safeIndex = max(
+            0,
+            min(tabGroup.selectedIndex, tabStackView.arrangedSubviews.count - 1)
+        )
+        guard
+            let currentTab = tabStackView.arrangedSubviews[safeIndex]
+                as? AXHorizontalTabButton
+        else { return }
 
         let scrollPosition = scrollView.documentVisibleRect.origin.x
         let visibleWidth = scrollView.documentVisibleRect.width
         let maxVisiblePosition = scrollPosition + visibleWidth
 
-        if firstTabInitialFrame == nil || currentTab.frame != firstTabInitialFrame {
+        if firstTabInitialFrame == nil
+            || currentTab.frame != firstTabInitialFrame
+        {
             firstTabInitialFrame = currentTab.frame
         }
 
@@ -379,18 +417,24 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         if scrollPosition > 0 && tab.frame.minX < scrollPosition {
             return .left
         } else if let documentView = scrollView.documentView,
-                  maxVisiblePosition < documentView.frame.width && tab.frame.maxX > maxVisiblePosition {
+            maxVisiblePosition < documentView.frame.width
+                && tab.frame.maxX > maxVisiblePosition
+        {
             return .right
         }
         return .none
     }
 
-    private func updateStickyState(_ newState: TabStickyPosition, for tab: AXHorizontalTabButton) {
+    private func updateStickyState(
+        _ newState: TabStickyPosition, for tab: AXHorizontalTabButton
+    ) {
         guard newState != currentStickyState else { return }
 
         if newState == .none {
             stickyDelegate?.tabBarShouldRemoveSticky()
-        } else if let constraint = tabConstraints[tab], constraint.constant == minTabWidth {
+        } else if let constraint = tabConstraints[tab],
+            constraint.constant == minTabWidth
+        {
             stickyDelegate?.tabBarShouldMakeTabSticky(tab, position: newState)
         }
 

@@ -18,7 +18,6 @@ class AXWindow: NSWindow {
     internal var trafficLightButtons: [NSButton]!
 
     // Other Views
-    lazy var splitView = NSSplitView()
     internal var layoutManager: AXWindowLayoutManaging!
 
     // Lazy loading to stop unnecesary initilizations
@@ -54,7 +53,7 @@ class AXWindow: NSWindow {
             visualEffectTintView.topAnchor.constraint(
                 equalTo: visualEffectView.topAnchor),
             visualEffectTintView.bottomAnchor.constraint(
-                equalTo: visualEffectView.bottomAnchor)
+                equalTo: visualEffectView.bottomAnchor),
         ])
 
         return visualEffectView
@@ -70,7 +69,7 @@ class AXWindow: NSWindow {
                 .titled,
                 .closable,
                 .miniaturizable,
-                .resizable
+                .resizable,
             ],
             backing: .buffered,
             defer: false

@@ -42,9 +42,11 @@ class AXSearchDatabase {
         // Create the table if it does not exist
         let createTableQuery =
             "CREATE TABLE IF NOT EXISTS SearchOccurrences (url TEXT PRIMARY KEY, occurrences INTEGER)"
-        if sqlite3_exec(dbPointer, createTableQuery, nil, nil, nil) != SQLITE_OK {
+        if sqlite3_exec(dbPointer, createTableQuery, nil, nil, nil) != SQLITE_OK
+        {
             mxPrint(
-                "Error creating table: \(String(cString: sqlite3_errmsg(dbPointer)))")
+                "Error creating table: \(String(cString: sqlite3_errmsg(dbPointer)))"
+            )
         }
     }
 
@@ -58,14 +60,18 @@ class AXSearchDatabase {
         var statement: OpaquePointer?
 
         // Check if the URL exists
-        if sqlite3_prepare_v2(dbPointer, selectQuery, -1, &statement, nil) == SQLITE_OK {
+        if sqlite3_prepare_v2(dbPointer, selectQuery, -1, &statement, nil)
+            == SQLITE_OK
+        {
             sqlite3_bind_text(
                 statement, 1, (url as NSString).utf8String, -1, nil)
             if sqlite3_step(statement) == SQLITE_ROW {
                 // URL exists, update occurrences
                 sqlite3_finalize(statement)
-                if sqlite3_prepare_v2(dbPointer, updateQuery, -1, &statement, nil)
-                    == SQLITE_OK {
+                if sqlite3_prepare_v2(
+                    dbPointer, updateQuery, -1, &statement, nil)
+                    == SQLITE_OK
+                {
                     sqlite3_bind_text(
                         statement, 1, (url as NSString).utf8String, -1, nil)
                     if sqlite3_step(statement) != SQLITE_DONE {
@@ -77,8 +83,10 @@ class AXSearchDatabase {
             } else {
                 // URL does not exist, insert it
                 sqlite3_finalize(statement)
-                if sqlite3_prepare_v2(dbPointer, insertQuery, -1, &statement, nil)
-                    == SQLITE_OK {
+                if sqlite3_prepare_v2(
+                    dbPointer, insertQuery, -1, &statement, nil)
+                    == SQLITE_OK
+                {
                     sqlite3_bind_text(
                         statement, 1, (url as NSString).utf8String, -1, nil)
                     if sqlite3_step(statement) != SQLITE_DONE {
@@ -108,7 +116,9 @@ class AXSearchDatabase {
         var statement: OpaquePointer?
         var suggestions: [String] = []
 
-        if sqlite3_prepare_v2(dbPointer, query, -1, &statement, nil) == SQLITE_OK {
+        if sqlite3_prepare_v2(dbPointer, query, -1, &statement, nil)
+            == SQLITE_OK
+        {
             let prefixWithWildcard = "\(prefix)%"
             sqlite3_bind_text(
                 statement, 1, (prefixWithWildcard as NSString).utf8String, -1,
@@ -123,7 +133,8 @@ class AXSearchDatabase {
             }
         } else {
             mxPrint(
-                "Error preparing query: \(String(cString: sqlite3_errmsg(dbPointer)))")
+                "Error preparing query: \(String(cString: sqlite3_errmsg(dbPointer)))"
+            )
         }
         sqlite3_finalize(statement)
         return suggestions

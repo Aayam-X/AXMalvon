@@ -18,14 +18,14 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
 
     // Views
     var tabStackView = NSStackView()
+    var clipView = AXFlippedClipView()
     var scrollView: AXScrollView!
-    let clipView = AXFlippedClipView()
 
     lazy var divider: NSBox = {
         let box = NSBox()
         box.boxType = .custom
         box.translatesAutoresizingMaskIntoConstraints = false
-        box.heightAnchor.constraint(equalToConstant: 36).isActive = true
+        box.heightAnchor.constraint(equalToConstant: 33).isActive = true
         box.fillColor = NSColor.controlAccentColor
         return box
     }()
@@ -41,44 +41,55 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func setupViews() {
+        // Remove autoresizing mask constraints
         self.translatesAutoresizingMaskIntoConstraints = false
 
+        // Configure stack view
         tabStackView.translatesAutoresizingMaskIntoConstraints = false
         tabStackView.orientation = .vertical
         tabStackView.spacing = 5
         tabStackView.detachesHiddenViews = true
 
-        // Create scrollView
+        // Configure scroll view
         scrollView = AXScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(scrollView)
         scrollView.drawsBackground = false
+        scrollView.hasVerticalScroller = true
+        scrollView.autohidesScrollers = true
+        addSubview(scrollView)
 
-        // Setup clipview
+        // Configure clip view
         clipView.translatesAutoresizingMaskIntoConstraints = false
         clipView.drawsBackground = false
         scrollView.contentView = clipView
 
-        // Setup stackView
+        // Set document view
         scrollView.documentView = tabStackView
 
+        // IMPORTANT: Set hugging and compression resistance
+        tabStackView.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        tabStackView.setContentCompressionResistancePriority(
+            .defaultLow, for: .horizontal)
+
+        // Core layout constraints
         NSLayoutConstraint.activate([
-            scrollView.leftAnchor.constraint(equalTo: leftAnchor),
-            scrollView.rightAnchor.constraint(equalTo: rightAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
+            // Scroll view fills the entire view
+            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
             scrollView.topAnchor.constraint(equalTo: topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
 
-            clipView.leftAnchor.constraint(equalTo: scrollView.leftAnchor),
-            clipView.rightAnchor.constraint(equalTo: scrollView.rightAnchor),
-            clipView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            clipView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            // Stack view dimensions
+            tabStackView.leadingAnchor.constraint(
+                equalTo: clipView.leadingAnchor),
+            tabStackView.trailingAnchor.constraint(
+                equalTo: clipView.trailingAnchor),
+            tabStackView.topAnchor.constraint(equalTo: clipView.topAnchor),
+            // Don't constrain the bottom - let it grow as needed
 
-            tabStackView.topAnchor.constraint(equalTo: topAnchor),
-            tabStackView.leftAnchor.constraint(equalTo: clipView.leftAnchor),
-            tabStackView.rightAnchor.constraint(equalTo: clipView.rightAnchor)
+            // Ensure stack view matches clip view width
+            //tabStackView.widthAnchor.constraint(equalTo: clipView.widthAnchor)
         ])
-
-        registerForDraggedTypes(self.registeredDraggedTypes)
     }
 
     func addTabButton(for tab: AXTab) {
@@ -139,7 +150,8 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
 
     func updateIndices(after index: Int) {
         for case let (index, button as AXTabButton) in tabStackView
-            .arrangedSubviews.enumerated().dropFirst(index) {
+            .arrangedSubviews.enumerated().dropFirst(index)
+        {
             mxPrint("DELETATION START INDEX = \(index)")
             button.tag = index
         }
@@ -216,23 +228,30 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func tabButtonDeactivatedWebView(_ tabButton: AXTabButton) {
-      //  _ = tabGroup.tabs[tabButton.tag]
+        //  _ = tabGroup.tabs[tabButton.tag]
 
-//        if tab.webConfiguration == nil {
-//            tab.webConfiguration = delegate?.tabBarDeactivatedTab()
-//        }
+        //        if tab.webConfiguration == nil {
+        //            tab.webConfiguration = delegate?.tabBarDeactivatedTab()
+        //        }
     }
 
     private func addButtonToTabView(_ button: NSView) {
         // Add the button off-screen by modifying its frame
         button.translatesAutoresizingMaskIntoConstraints = false
+
+        // Configure button layout priorities
+        button.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        button.setContentCompressionResistancePriority(
+            .defaultLow, for: .horizontal)
+
         tabStackView.addArrangedSubview(button)
 
         NSLayoutConstraint.activate([
+            // Only constrain the horizontal margins
             button.leadingAnchor.constraint(
                 equalTo: tabStackView.leadingAnchor, constant: 5),
             button.trailingAnchor.constraint(
-                equalTo: tabStackView.trailingAnchor, constant: -3)
+                equalTo: tabStackView.trailingAnchor, constant: -3),
         ])
 
         // Layout the stack view to update frames
@@ -259,13 +278,20 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     private func addButtonToTabViewWithoutAnimation(_ button: NSView) {
         // Add the button off-screen by modifying its frame
         button.translatesAutoresizingMaskIntoConstraints = false
+
+        // Configure button layout priorities
+        button.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        button.setContentCompressionResistancePriority(
+            .defaultLow, for: .horizontal)
+
         tabStackView.addArrangedSubview(button)
 
         NSLayoutConstraint.activate([
+            // Only constrain the horizontal margins
             button.leadingAnchor.constraint(
                 equalTo: tabStackView.leadingAnchor, constant: 5),
             button.trailingAnchor.constraint(
-                equalTo: tabStackView.trailingAnchor, constant: -3)
+                equalTo: tabStackView.trailingAnchor, constant: -3),
         ])
     }
 
@@ -273,7 +299,8 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         mxPrint("Reordering tabs from \(from) to \(toIndex)")
 
         let firstButton = tabStackView.arrangedSubviews[from] as! AXTabButton
-        let secondButton = tabStackView.arrangedSubviews[toIndex] as! AXTabButton
+        let secondButton =
+            tabStackView.arrangedSubviews[toIndex] as! AXTabButton
 
         firstButton.tag = toIndex
         secondButton.tag = from
@@ -299,30 +326,38 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         }
 
         // If index is out of bounds, select the last tab
-        let tabCountIndex = tabGroup.tabs.count - 1
-
-        if index > tabCountIndex && (tabGroup.selectedIndex >= index) {
-            tabGroup.selectedIndex = tabCountIndex
-        } else if tabGroup.selectedIndex >= index {
-            tabGroup.selectedIndex = max(0, tabGroup.selectedIndex - 1)
-        } else { /* if tabGroup.selectedIndex < index */
-            // Do nothing
+        if tabGroup.selectedIndex == index {
+            // If the removed tab was selected, select the next tab or the last one
+            tabGroup.selectedIndex = min(index, tabGroup.tabs.count - 1)
+        } else if tabGroup.selectedIndex > index {
+            // If a tab before the selected one is removed, shift the selected index
+            tabGroup.selectedIndex -= 1
         }
 
         mxPrint("Updated Tab Index: \(tabGroup.selectedIndex)")
-        (tabStackView.arrangedSubviews[tabGroup.selectedIndex] as! AXTabButton)
-            .isSelected = true
+        if let button = tabStackView.arrangedSubviews[tabGroup.selectedIndex]
+            as? AXVerticalTabButton
+        {
+            button.isSelected = true
+        }
 
         delegate?.tabBarSwitchedTo(tabAt: tabGroup.selectedIndex)
+    }
+
+    override func viewDidEndLiveResize() {
+        super.viewDidEndLiveResize()
+        tabStackView.needsLayout = true
+        layoutSubtreeIfNeeded()
     }
 }
 
 class AXScrollView: NSScrollView {
-    //    override func scrollWheel(with event: NSEvent) {
-    //        // Minimal scroll handling to reduce CPU usage
-    //        guard event.deltaY != 0 else { return }
-    //        super.scrollWheel(with: event)
-    //    }
+    override var isFlipped: Bool { true }
+
+    override func viewDidEndLiveResize() {
+        super.viewDidEndLiveResize()
+        documentView?.needsLayout = true
+    }
 }
 
 final class AXFlippedClipView: NSClipView {

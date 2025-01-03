@@ -64,7 +64,7 @@ class AXAddressBarSuggestionCellView: NSTableCellView {
             subtitleLabel.trailingAnchor.constraint(
                 equalTo: titleLabel.trailingAnchor),
             subtitleLabel.bottomAnchor.constraint(
-                equalTo: bottomAnchor, constant: -2)
+                equalTo: bottomAnchor, constant: -2),
         ])
     }
 

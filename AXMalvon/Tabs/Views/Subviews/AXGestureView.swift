@@ -33,6 +33,7 @@ class AXGestureView: NSView {
     private var userSwipedDirection: AXGestureViewSwipeDirection?
     private var scrollEventFinished: Bool = false
     var scrollWithMice: Bool = false
+    private var trackingArea: NSTrackingArea!
 
     // Other
     var tabGroupInfoViewLeftConstraint: NSLayoutConstraint?
@@ -47,6 +48,7 @@ class AXGestureView: NSView {
         super.init(frame: .zero)
 
         setupViews()
+        setupTrackingArea()
     }
 
     required init?(coder: NSCoder) {
@@ -64,7 +66,7 @@ class AXGestureView: NSView {
             tabGroupInfoView.rightAnchor.constraint(equalTo: rightAnchor),
             tabGroupInfoView.topAnchor.constraint(
                 equalTo: topAnchor, constant: 4),
-            tabGroupInfoViewLeftConstraint!
+            tabGroupInfoViewLeftConstraint!,
         ])
 
         // Search Button
@@ -78,7 +80,7 @@ class AXGestureView: NSView {
                 equalTo: leftAnchor, constant: 5),
             searchButton.rightAnchor.constraint(
                 equalTo: rightAnchor, constant: -7),
-            searchButton.heightAnchor.constraint(equalToConstant: 36)
+            searchButton.heightAnchor.constraint(equalToConstant: 33),
         ])
     }
 
@@ -165,13 +167,21 @@ class AXGestureView: NSView {
             }
         }
     }
+
+    private func setupTrackingArea() {
+        let options: NSTrackingArea.Options = [
+            .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
+        ]
+        trackingArea = NSTrackingArea(
+            rect: self.bounds, options: options, owner: self, userInfo: nil)
+        self.addTrackingArea(trackingArea)
+    }
 }
 
 class AXGestureStackView: NSStackView {
     weak var gestureDelegate: AXGestureViewDelegate?
     private var userSwipedDirection: AXGestureViewSwipeDirection?
     private var scrollEventFinished: Bool = false
-    private var trackingArea: NSTrackingArea!
     var scrollWithMice: Bool = false
 
     override var intrinsicContentSize: NSSize {
@@ -180,20 +190,6 @@ class AXGestureStackView: NSStackView {
 
     override var isFlipped: Bool {
         return true  // Use true for top-to-bottom layout
-    }
-
-    init() {
-        super.init(frame: .zero)
-        setupView()
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        setupView()
-    }
-
-    private func setupView() {
-        updateTrackingAreas()
     }
 
     func handleScrollEnd() {

@@ -59,10 +59,10 @@ struct AXWelcomeView: View {
                     .bold()
 
                 Text(
-                    "Those who have been accepted into the Malvon waitlist will automatically possess " +
-                    "a valid email address needed to use this application. If you are not on the waitlist, " +
-                    "please sign up for the waitlist by clicking the following link: " +
-                    "https://ashp0.github.io/malvon-website/waitlist"
+                    "Those who have been accepted into the Malvon waitlist will automatically possess "
+                        + "a valid email address needed to use this application. If you are not on the waitlist, "
+                        + "please sign up for the waitlist by clicking the following link: "
+                        + "https://ashp0.github.io/malvon-website/waitlist"
                 )
                 .fixedSize(horizontal: false, vertical: true)
                 .lineLimit(10)

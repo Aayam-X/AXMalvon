@@ -55,7 +55,8 @@ struct AXFeedbackReporterView: View {
 
         if let url = URL(
             string: "mailto:\(email)?subject=\(subject)&body=\(body)"),
-            NSWorkspace.shared.open(url) {
+            NSWorkspace.shared.open(url)
+        {
             mxPrint("Mailto link opened successfully.")
         } else {
             mxPrint("Failed to open mailto link.")

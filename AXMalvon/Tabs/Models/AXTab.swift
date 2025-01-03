@@ -67,19 +67,24 @@ class AXTab: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         #if DEBUG
-        if let configuration = decoder.userInfo[.webConfiguration] as? WKWebViewConfiguration {
-            self.webConfiguration = configuration
-        } else {
-            mxPrint("WKWebViewConfiguration not found in JSON decoding")
-            self.webConfiguration = .init()
-        }
+            if let configuration = decoder.userInfo[.webConfiguration]
+                as? WKWebViewConfiguration
+            {
+                self.webConfiguration = configuration
+            } else {
+                mxPrint("WKWebViewConfiguration not found in JSON decoding")
+                self.webConfiguration = .init()
+            }
         #else
-        self.webConfiguration = decoder.userInfo[.webConfiguration] as? WKWebViewConfiguration ?? .init()
+            self.webConfiguration =
+                decoder.userInfo[.webConfiguration] as? WKWebViewConfiguration
+                ?? .init()
         #endif
 
         self.title = try container.decode(String.self, forKey: .title)
         self.url = try? container.decode(URL.self, forKey: .url)
-        self.isEmpty = (try? container.decode(Bool.self, forKey: .isEmpty)) ?? false
+        self.isEmpty =
+            (try? container.decode(Bool.self, forKey: .isEmpty)) ?? false
     }
 
     func encode(to encoder: any Encoder) throws {
@@ -155,9 +160,11 @@ extension AXTab {
     func findFavicon(tabButton: AXTabButton) {
         Task(priority: .low) { @MainActor in
             do {
-                if let faviconURLString = try? await webView!.evaluateJavaScript(
-                    jsFaviconSearchScript) as? String,
-                    let faviconURL = URL(string: faviconURLString) {
+                if let faviconURLString = try? await webView!
+                    .evaluateJavaScript(
+                        jsFaviconSearchScript) as? String,
+                    let faviconURL = URL(string: faviconURLString)
+                {
                     let favicon = try await quickFaviconDownload(
                         from: faviconURL)
                     tabButton.favicon = favicon

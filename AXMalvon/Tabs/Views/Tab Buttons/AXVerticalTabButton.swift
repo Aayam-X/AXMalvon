@@ -8,79 +8,39 @@
 
 import AppKit
 
-// MARK: - Constants
-private struct AXTabButtonConstants {
-    static let defaultFavicon = NSImage(
-        systemSymbolName: "square.fill", accessibilityDescription: nil)
-    static let defaultFaviconSleep = NSImage(
-        systemSymbolName: "moon.fill", accessibilityDescription: nil)
-
-    static let animationDuration: CFTimeInterval = 0.2
-    static let shrinkScale: CGFloat = 0.9
-    static let tabHeight: CGFloat = 36
-    static let iconSize = NSSize(width: 16, height: 16)
-    static let closeButtonSize = NSSize(width: 20, height: 16)
-    static let shadowOpacity: Float = 0.3
-    static let shadowRadius: CGFloat = 4.0
-    static let shadowOffset = CGSize(width: 0, height: 0)
-
-    // Colors
-    static let hoverColor: NSColor = NSColor.systemGray.withAlphaComponent(0.3)
-    static let selectedColor: NSColor = .textBackgroundColor
-    static let backgroundColor: NSColor = .textBackgroundColor
-        .withAlphaComponent(0.0)
-}
-
 class AXVerticalTabButton: NSButton, AXTabButton {
     unowned var tab: AXTab!
     weak var delegate: AXTabButtonDelegate?
 
     // Subviews
-    var titleView: NSTextField! = NSTextField()
     var favIconImageView: NSImageView! = NSImageView()
+    var titleView: NSTextField! = NSTextField()
+    var closeButton: AXSidebarTabCloseButton! = AXSidebarTabCloseButton()
+    var trackingArea: NSTrackingArea!
 
-    // Drag & Drop
-    private var initialMouseDownLocation: NSPoint?
+    var webTitle: String = "Untitled" {
+        didSet {
+            titleView.stringValue = webTitle
+        }
+    }
 
     var favicon: NSImage? {
         get {
             self.favIconImageView.image
-        } set {
+        }
+        set {
             self.favIconImageView.image =
                 newValue == nil ? AXTabButtonConstants.defaultFavicon : newValue
-            tab.icon = newValue
         }
     }
 
-    var closeButton: AXSidebarTabCloseButton! = AXSidebarTabCloseButton()
-
-    // Constraints
-    weak var titleViewRightAnchor: NSLayoutConstraint?
-    weak var heightConstraint: NSLayoutConstraint?
-    var trackingArea: NSTrackingArea!
-
     var isSelected: Bool = false {
         didSet {
-            self.layer?.backgroundColor =
-                isSelected
-                ? AXTabButtonConstants.selectedColor.cgColor
-                : AXTabButtonConstants.backgroundColor.cgColor
-            layer?.shadowOpacity = isSelected ? 0.3 : 0.0
-
-            closeButton.isHidden = !isSelected
-            titleViewRightAnchor?.constant = isSelected ? -6 : 20
+            self.updateAppearance()
 
             if isSelected, tab.titleObserver == nil {
                 forceCreateWebview()
             }
-        }
-    }
-
-    var webTitle: String = "Untitled" {
-        didSet {
-            // if !hasCustomTitle {
-            titleView.stringValue = webTitle
-            // }
         }
     }
 
@@ -103,32 +63,42 @@ class AXVerticalTabButton: NSButton, AXTabButton {
         super.init(frame: .zero)
         self.translatesAutoresizingMaskIntoConstraints = false
         self.isBordered = false
-        self.bezelStyle = .shadowlessSquare
+        self.bezelStyle = .smallSquare
         title = ""
 
         self.wantsLayer = true
         self.layer?.cornerRadius = 10
         layer?.masksToBounds = false
 
-        layer?.shadowColor = NSColor.textColor.cgColor
-        layer?.shadowOpacity = 0.0  // Adjust shadow visibility
-        layer?.shadowRadius = 4.0  // Adjust softness
-        layer?.shadowOffset = CGSize(width: 0, height: 0)  // Shadow below the button
-
         setupViews()
+        setupShadow()
+        setupTrackingArea()
+
+        if let tab {
+            tab.onWebViewInitialization =
+                self.onWebViewInitializationListenerHandler
+        }
+
+        if tab?._webView == nil {
+            titleView.stringValue = "New Tab"
+        }
+    }
+
+    func onWebViewInitializationListenerHandler(webView: AXWebView) {
+        mxPrint(#function, "CALLEDDDD")
+        self.createObserver(webView)
+    }
+
+    override func viewWillDraw() {
+        updateAppearance()
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 
     func setupViews() {
-        // Setup trackingArea
-        self.setTrackingArea()
-
-        if isSelected {
-            self.layer?.backgroundColor =
-                AXTabButtonConstants.selectedColor.cgColor
-            layer?.shadowOpacity = 0.3
-        }
-
-        self.heightAnchor.constraint(equalToConstant: 36).isActive = true
+        self.heightAnchor.constraint(equalToConstant: 33).isActive = true
 
         // Setup imageView
         favIconImageView.translatesAutoresizingMaskIntoConstraints = false
@@ -179,14 +149,13 @@ class AXVerticalTabButton: NSButton, AXTabButton {
         ).isActive = true
         titleView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive =
             true
+        titleView.rightAnchor.constraint(equalTo: closeButton.leftAnchor)
+            .isActive =
+            true
 
-        titleViewRightAnchor = titleView.rightAnchor.constraint(
-            equalTo: closeButton.leftAnchor, constant: isSelected ? -7 : 7)
-        titleViewRightAnchor?.isActive = true
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+        titleView.setContentCompressionResistancePriority(
+            .defaultLow, for: .horizontal)
+        titleView.setContentHuggingPriority(.defaultLow, for: .horizontal)
     }
 
     func faviconNotFound() {
@@ -198,6 +167,7 @@ class AXVerticalTabButton: NSButton, AXTabButton {
 extension AXVerticalTabButton {
     @objc
     func closeTab() {
+        tab?.stopTitleObservation()
         delegate?.tabButtonWillClose(self)
     }
 
@@ -209,47 +179,31 @@ extension AXVerticalTabButton {
         delegate?.tabButtonDeactivatedWebView(self)
     }
 
-    func updateTitle(_ title: String) {
-        self.webTitle = title
-
-        if self.isSelected {
-            self.delegate?.tabButtonActiveTitleChanged(title, for: self)
-        }
-    }
-
     // This would be called directly from a button click
     @objc
     func switchTab() {
         delegate?.tabButtonDidSelect(self)
     }
-}
 
-// MARK: Mouse Functions
-extension AXVerticalTabButton {
-    func setTrackingArea() {
-        let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
-        trackingArea = NSTrackingArea.init(
+    private func setupTrackingArea() {
+        let options: NSTrackingArea.Options = [
+            .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
+        ]
+        trackingArea = NSTrackingArea(
             rect: self.bounds, options: options, owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
     }
 
     override func mouseDown(with event: NSEvent) {
-        initialMouseDownLocation = event.locationInWindow
-
+        closeButton.isHidden = false
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.1
             self.animator().layer?.setAffineTransform(
                 CGAffineTransform(scaleX: 1, y: 0.95))
         }
 
-        if event.clickCount == 1 {
-            self.switchTab()
-            self.isSelected = true
-        } else if event.clickCount == 2 {
-            // Double click: Allow User to Edit the Title
-        }
-
-        self.layer?.backgroundColor = AXTabButtonConstants.selectedColor.cgColor
+        self.switchTab()
+        isSelected = true
     }
 
     override func mouseUp(with event: NSEvent) {
@@ -260,27 +214,51 @@ extension AXVerticalTabButton {
     }
 
     override func mouseEntered(with event: NSEvent) {
-        titleViewRightAnchor?.constant = -6
-        closeButton.isHidden = false
-
         if !isSelected {
             self.layer?.backgroundColor =
-                AXTabButtonConstants.hoverColor.cgColor
+                NSColor.systemGray.withAlphaComponent(0.3).cgColor
         }
+        closeButton.isHidden = false
     }
 
     override func mouseExited(with event: NSEvent) {
         if !isSelected {
             closeButton.isHidden = true
-            titleViewRightAnchor?.constant = 20
         }
-
-        self.layer?.backgroundColor =
-            isSelected
-            ? AXTabButtonConstants.selectedColor.cgColor
-            : AXTabButtonConstants.backgroundColor.cgColor
+        updateAppearance()
     }
 
+    private func updateAppearance() {
+        let backgroundColor: CGColor
+        if isSelected {
+            if effectiveAppearance.name == .darkAqua {
+                backgroundColor = .black
+                layer?.shadowColor = .white
+            } else {
+                backgroundColor = .white
+                layer?.shadowColor = .black
+            }
+            layer?.shadowOpacity = 0.3
+            closeButton.isHidden = false
+        } else {
+            backgroundColor = .clear
+            layer?.shadowOpacity = 0.0
+            closeButton.isHidden = true
+        }
+
+        self.layer?.backgroundColor = backgroundColor
+    }
+
+    private func setupShadow() {
+        layer?.shadowColor = NSColor.textColor.cgColor
+        layer?.shadowOpacity = 0.0
+        layer?.shadowRadius = 4.0
+        layer?.shadowOffset = CGSize(width: 0, height: 0)
+    }
+}
+
+// MARK: Mouse Functions
+extension AXVerticalTabButton {
     override func rightMouseDown(with event: NSEvent) {
         super.rightMouseDown(with: event)
 
@@ -291,94 +269,6 @@ extension AXVerticalTabButton {
         contextMenu.popUp(positioning: nil, at: locationInButton, in: self)
     }
 }
-
-// MARK: - Draging Source
-
-/*
-extension AXTabButton: NSDraggingSource, NSPasteboardWriting {
-    // Define drag operations
-    func draggingSession(
-        _ session: NSDraggingSession,
-        sourceOperationMaskFor context: NSDraggingContext
-    ) -> NSDragOperation {
-        return .move
-    }
-
-    // Provide writable types for the pasteboard
-    func writableTypes(for pasteboard: NSPasteboard) -> [NSPasteboard
-        .PasteboardType]
-    {
-        return [.axTabButton]
-    }
-
-    // Provide the pasteboard property list (button.tag)
-    func pasteboardPropertyList(forType type: NSPasteboard.PasteboardType)
-        -> Any?
-    {
-        guard type == .axTabButton else { return nil }
-        return "\(self.tag)"  // Send tag as a string
-    }
-
-    // Start a dragging session when the mouse is dragged
-    override func mouseDragged(with event: NSEvent) {
-        guard let initialLocation = initialMouseDownLocation else { return }
-
-        // Calculate the distance moved
-        let currentLocation = event.locationInWindow
-        let distance = hypot(
-            currentLocation.x - initialLocation.x,
-            currentLocation.y - initialLocation.y)
-
-        guard distance > 5.0 else { return }
-
-        let draggingItem = NSDraggingItem(pasteboardWriter: self)
-
-        // Define the item's image for the drag session
-        let draggingFrame = self.bounds
-        draggingItem.setDraggingFrame(draggingFrame, contents: self.toImage())
-
-        // Start the dragging session
-        self.beginDraggingSession(
-            with: [draggingItem], event: event, source: self)
-
-        self.isHidden = true
-    }
-
-    override func draggingExited(_ sender: (any NSDraggingInfo)?) {
-        self.isHidden = false
-    }
-
-    override func draggingEnded(_ sender: any NSDraggingInfo) {
-        self.isHidden = false
-    }
-
-    override func concludeDragOperation(_ sender: (any NSDraggingInfo)?) {
-        self.isHidden = false
-    }
-
-    // Helper: Create a snapshot of the button for the dragging image
-    func toImage() -> NSImage? {
-        guard
-            let bitmapImageRepresentation =
-                self.bitmapImageRepForCachingDisplay(in: bounds)
-        else {
-            return nil
-        }
-        bitmapImageRepresentation.size = bounds.size
-        self.cacheDisplay(in: bounds, to: bitmapImageRepresentation)
-
-        let image = NSImage(size: bounds.size)
-        image.addRepresentation(bitmapImageRepresentation)
-
-        return image
-    }
-}
-
-extension NSPasteboard.PasteboardType {
-    static let axTabButton = NSPasteboard.PasteboardType(
-        "com.ayaamx.AXMalvon.tab")
-}
-*/
 
 // MARK: - Close Button
 class AXSidebarTabCloseButton: NSButton {
@@ -403,7 +293,9 @@ class AXSidebarTabCloseButton: NSButton {
     }
 
     func setTrackingArea() {
-        let options: NSTrackingArea.Options = [.activeAlways, .inVisibleRect, .mouseEnteredAndExited]
+        let options: NSTrackingArea.Options = [
+            .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
+        ]
         trackingArea = NSTrackingArea.init(
             rect: self.bounds, options: options, owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
@@ -412,7 +304,8 @@ class AXSidebarTabCloseButton: NSButton {
     override func mouseUp(with event: NSEvent) {
         mouseDown = false
         if self.isMousePoint(
-            self.convert(event.locationInWindow, from: nil), in: self.bounds) {
+            self.convert(event.locationInWindow, from: nil), in: self.bounds)
+        {
             sendAction(action, to: target)
         }
 

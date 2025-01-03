@@ -33,7 +33,7 @@ class AXAddressBarSectionHeaderView: NSTableCellView {
             titleLabel.leadingAnchor.constraint(
                 equalTo: leadingAnchor, constant: 8),
             titleLabel.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -8)
+                equalTo: trailingAnchor, constant: -8),
         ])
     }
 }

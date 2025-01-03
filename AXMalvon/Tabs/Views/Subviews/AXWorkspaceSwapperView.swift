@@ -162,7 +162,7 @@ class AXWorkspaceSwapperView: NSView {
             profileNavigationStackView.leadingAnchor.constraint(
                 equalTo: leadingAnchor, constant: 10),
             profileNavigationStackView.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -10)
+                equalTo: trailingAnchor, constant: -10),
         ])
     }
 
@@ -320,7 +320,7 @@ class AXWorkspaceTabGroupCell: NSTableCellView {
             divider.heightAnchor.constraint(equalToConstant: 1),
             divider.leadingAnchor.constraint(equalTo: leadingAnchor),
             divider.trailingAnchor.constraint(equalTo: trailingAnchor),
-            divider.bottomAnchor.constraint(equalTo: bottomAnchor)
+            divider.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
     }
 

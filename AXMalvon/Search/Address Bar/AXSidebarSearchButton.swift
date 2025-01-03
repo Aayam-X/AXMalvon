@@ -14,11 +14,13 @@ protocol AXSidebarSearchButtonDelegate: AnyObject {
     func sidebarSearchButtonSearchesFor(_ url: URL)
 }
 
-class AXSidebarSearchButton: NSButton {
+class AXToolbarSearchButton: AXSidebarSearchButton {
     override var intrinsicContentSize: NSSize {
         .init(width: 300, height: 36)
     }
+}
 
+class AXSidebarSearchButton: NSButton {
     weak var delegate: AXSidebarSearchButtonDelegate?
 
     var historyManagerExists: Bool = true
@@ -87,7 +89,8 @@ class AXSidebarSearchButton: NSButton {
         super.init(frame: .zero)
         setupViews()
 
-        suggestionsWindowController.suggestionItemClickAction = { [weak self] suggestion in
+        suggestionsWindowController.suggestionItemClickAction = {
+            [weak self] suggestion in
             self?.addressField.stringValue = suggestion
             self?.searchEnterAction()
         }
@@ -196,20 +199,24 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
         if commandSelector == #selector(moveUp(_:)) {
             suggestionsWindowController.moveUp()
             if let currentSuggestion = suggestionsWindowController
-                .currentSuggestion {
+                .currentSuggestion
+            {
                 addressField.stringValue = currentSuggestion
-                addressField.currentEditor()?.selectedRange = NSRange(location: previousStringValueCount,
-                                                                      length: currentSuggestion.count)
+                addressField.currentEditor()?.selectedRange = NSRange(
+                    location: previousStringValueCount,
+                    length: currentSuggestion.count)
             }
             return true
         }
         if commandSelector == #selector(moveDown(_:)) {
             suggestionsWindowController.moveDown()
             if let currentSuggestion = suggestionsWindowController
-                .currentSuggestion {
+                .currentSuggestion
+            {
                 addressField.stringValue = currentSuggestion
-                addressField.currentEditor()?.selectedRange = NSRange(location: previousStringValueCount,
-                                                                      length: currentSuggestion.count)
+                addressField.currentEditor()?.selectedRange = NSRange(
+                    location: previousStringValueCount,
+                    length: currentSuggestion.count)
             }
             return true
         }
@@ -233,7 +240,8 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
     }
 
     func control(_ control: NSControl, textShouldEndEditing fieldEditor: NSText)
-        -> Bool {
+        -> Bool
+    {
         suggestionsWindowController.orderOut()
         addressField.stringValue = fullAddress?.absoluteString ?? "Empty2"
 
@@ -241,7 +249,8 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
     }
 
     private func searchEnterAction() {
-        let url = AXSearchQueryToURL.shared.convert(query: addressField.stringValue)
+        let url = AXSearchQueryToURL.shared.convert(
+            query: addressField.stringValue)
         delegate?.sidebarSearchButtonSearchesFor(url)
     }
 }
@@ -277,7 +286,8 @@ private func fetchGoogleSuggestions(
             // Decode the JSON response
             if let json = try JSONSerialization.jsonObject(
                 with: data, options: []) as? [Any],
-                let suggestions = json[1] as? [String] {
+                let suggestions = json[1] as? [String]
+            {
                 // Return suggestions on the main thread
                 DispatchQueue.main.async {
                     var completionValue = suggestions

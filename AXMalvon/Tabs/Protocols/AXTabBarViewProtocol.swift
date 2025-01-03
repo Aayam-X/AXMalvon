@@ -53,7 +53,8 @@ extension AXTabBarViewTemplate {
             let arrangedSubviewsCount = arragedSubviews.count
 
             guard arrangedSubviewsCount > selectedIndex,
-                  let newButton = arragedSubviews[selectedIndex] as? AXTabButton else { return }
+                let newButton = arragedSubviews[selectedIndex] as? AXTabButton
+            else { return }
             newButton.isSelected = true
         }
 

@@ -9,20 +9,21 @@
 import AppKit
 import WebKit
 
-class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol, AXGestureViewDelegate {
+class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
+    AXGestureViewDelegate
+{
     var tabBarView: any AXTabBarViewTemplate
     var tabHostingDelegate: (any AXTabHostingViewDelegate)?
 
-    var tabGroupInfoView: AXTabGroupInfoView = AXTabGroupInfoView()
-    var searchButton: AXSidebarSearchButton = AXSidebarSearchButton()
-    lazy var gestureView = AXGestureView(
-        tabGroupInfoView: tabGroupInfoView, searchButton: searchButton)
+    var tabGroupInfoView: AXTabGroupInfoView
+    var searchButton: AXSidebarSearchButton
+    var gestureView: AXGestureView
 
     var mouseExitedTrackingArea: NSTrackingArea!
 
-    override var tag: Int {
-        return 0x01
-    }
+    //    override var tag: Int {
+    //        return 0x01
+    //    }
 
     private lazy var bottomLine: NSBox = {
         let line = NSBox()
@@ -43,8 +44,11 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol, AXGestureViewD
     }()
 
     private lazy var workspaceSwapperButton: NSButton = {
-        let buttonImage = NSImage(systemSymbolName: "rectangle.stack", accessibilityDescription: nil)!
-        let button = NSButton(image: buttonImage, target: self, action: #selector(showWorkspaceSwapper))
+        let buttonImage = NSImage(
+            systemSymbolName: "rectangle.stack", accessibilityDescription: nil)!
+        let button = NSButton(
+            image: buttonImage, target: self,
+            action: #selector(showWorkspaceSwapper))
         button.isBordered = false
         button.imagePosition = .imageOnly
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -68,8 +72,17 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol, AXGestureViewD
         return popover
     }()
 
-    required init(tabBarView: any AXTabBarViewTemplate) {
+    required init(
+        tabBarView: any AXTabBarViewTemplate,
+        searchButton: AXSidebarSearchButton,
+        tabGroupInfoView: AXTabGroupInfoView
+    ) {
         self.tabBarView = tabBarView
+        self.tabGroupInfoView = tabGroupInfoView
+        self.searchButton = searchButton
+        self.gestureView = AXGestureView(
+            tabGroupInfoView: tabGroupInfoView, searchButton: searchButton)
+
         super.init(frame: .zero)
         setupView()
     }
@@ -110,8 +123,8 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol, AXGestureViewD
             // Tab Bar View
             tabBarView.topAnchor.constraint(
                 equalTo: bottomLine.bottomAnchor, constant: 2),
-            tabBarView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tabBarView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            tabBarView.leftAnchor.constraint(equalTo: leftAnchor),
+            tabBarView.rightAnchor.constraint(equalTo: rightAnchor),
             tabBarView.bottomAnchor.constraint(
                 equalTo: addNewTabButton.topAnchor, constant: -2),
 
@@ -129,7 +142,7 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol, AXGestureViewD
             addNewTabButton.rightAnchor.constraint(
                 equalTo: rightAnchor, constant: -10),
             addNewTabButton.heightAnchor.constraint(equalToConstant: 30),
-            addNewTabButton.widthAnchor.constraint(equalToConstant: 30)
+            addNewTabButton.widthAnchor.constraint(equalToConstant: 30),
         ])
 
         // Mouse Tracking Area

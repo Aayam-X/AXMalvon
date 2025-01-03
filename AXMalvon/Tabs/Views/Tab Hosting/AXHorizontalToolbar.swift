@@ -8,40 +8,15 @@
 
 import AppKit
 
-class MainWindowToolbar: NSToolbar, NSToolbarDelegate, AXTabHostingViewProtocol {
-    internal var tabBarView: AXTabBarViewTemplate
+class MainWindowToolbar: NSToolbar, NSToolbarDelegate, AXTabHostingViewProtocol
+{
+    var tabBarView: AXTabBarViewTemplate
     var stickyTabBarView: AXStickyHorizontalTabBarView
-
-    required init(tabBarView: any AXTabBarViewTemplate) {
-        guard let tabBarView = tabBarView as? AXHorizontalTabBarView else {
-            fatalError(
-                #function + ": \(tabBarView) is not an AXHorizontalTabBarView")
-        }
-        self.tabBarView = tabBarView
-        self.stickyTabBarView = AXStickyHorizontalTabBarView(
-            tabBarView: tabBarView)
-        super.init(identifier: "AXMalvonBrowserToolbar")
-        self.delegate = self
-        self.allowsUserCustomization = true
-        self.displayMode = .iconOnly
-
-        centeredItemIdentifiers = [tabBarIdentifier]
-    }
 
     weak var tabHostingDelegate: AXTabHostingViewDelegate?
 
-    internal lazy var tabGroupInfoView: AXTabGroupInfoView = {
-        let view = AXTabGroupInfoView()
-        view.onLeftMouseDown = tabGroupInfoViewLeftDown
-        view.onRightMouseDown = tabGroupInfoViewRightDown
-
-        return view
-    }()
-
-    internal lazy var searchButton: AXSidebarSearchButton = {
-        let button = AXSidebarSearchButton()
-        return button
-    }()
+    var tabGroupInfoView: AXTabGroupInfoView
+    var searchButton: AXSidebarSearchButton
 
     private lazy var browserNavigationStackView: AXGestureStackView = {
         let stackView = AXGestureStackView()
@@ -57,7 +32,9 @@ class MainWindowToolbar: NSToolbar, NSToolbarDelegate, AXTabHostingViewProtocol 
     }()
 
     private lazy var addNewTabButton: NSButton = {
-        let button = NSButton(image: NSImage(named: NSImage.addTemplateName)!, target: self, action: #selector(addNewTab))
+        let button = NSButton(
+            image: NSImage(named: NSImage.addTemplateName)!, target: self,
+            action: #selector(addNewTab))
         button.title = ""
         button.bezelStyle = .texturedRounded
         return button
@@ -68,6 +45,34 @@ class MainWindowToolbar: NSToolbar, NSToolbarDelegate, AXTabHostingViewProtocol 
     private let navigationIdentifier = NSToolbarItem.Identifier("navigation")
     private let tabBarIdentifier = NSToolbarItem.Identifier("tabBar")
     private let addNewTabIdentifier = NSToolbarItem.Identifier("addNewTab")
+
+    required init(
+        tabBarView: any AXTabBarViewTemplate,
+        searchButton: AXSidebarSearchButton,
+        tabGroupInfoView: AXTabGroupInfoView
+    ) {
+        guard let tabBarView = tabBarView as? AXHorizontalTabBarView else {
+            fatalError(
+                #function + ": \(tabBarView) is not an AXHorizontalTabBarView")
+        }
+
+        self.tabBarView = tabBarView
+        self.stickyTabBarView = AXStickyHorizontalTabBarView(
+            tabBarView: tabBarView)
+
+        self.searchButton = searchButton
+        self.tabGroupInfoView = tabGroupInfoView
+
+        super.init(identifier: "AXMalvonBrowserToolbar")
+        self.delegate = self
+        self.allowsUserCustomization = true
+        self.displayMode = .iconOnly
+
+        centeredItemIdentifiers = [tabBarIdentifier]
+
+        tabGroupInfoView.onLeftMouseDown = tabGroupInfoViewLeftDown
+        tabGroupInfoView.onRightMouseDown = tabGroupInfoViewRightDown
+    }
 
     // MARK: - NSToolbarDelegate
     func toolbar(
@@ -114,13 +119,21 @@ class MainWindowToolbar: NSToolbar, NSToolbarDelegate, AXTabHostingViewProtocol 
     }
 
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem
-        .Identifier] {
-            return [navigationIdentifier, searchIdentifier, tabBarIdentifier, addNewTabIdentifier]
+        .Identifier]
+    {
+        return [
+            navigationIdentifier, searchIdentifier, tabBarIdentifier,
+            addNewTabIdentifier,
+        ]
     }
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem
-        .Identifier] {
-            return [navigationIdentifier, .space, searchIdentifier, tabBarIdentifier, .flexibleSpace, addNewTabIdentifier]
+        .Identifier]
+    {
+        return [
+            navigationIdentifier, .space, searchIdentifier, tabBarIdentifier,
+            .flexibleSpace, addNewTabIdentifier,
+        ]
     }
 
     @objc

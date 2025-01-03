@@ -79,10 +79,11 @@ class AXBaseLayoutManager: AXWindowLayoutManaging {
 // Horizontal layout manager using NSToolbar
 class AXHorizontalLayoutManager: AXBaseLayoutManager {
     private lazy var toolbar: MainWindowToolbar = {
-        let toolbar = MainWindowToolbar(tabBarView: tabBarView)
+        self.searchButton = AXToolbarSearchButton()
+        let toolbar = MainWindowToolbar(
+            tabBarView: tabBarView, searchButton: searchButton,
+            tabGroupInfoView: tabGroupInfoView)
         toolbar.tabHostingDelegate = tabHostingDelegate
-        self.searchButton = toolbar.searchButton
-        self.tabGroupInfoView = toolbar.tabGroupInfoView
         return toolbar
     }()
 
@@ -96,9 +97,18 @@ class AXHorizontalLayoutManager: AXBaseLayoutManager {
 
 // Vertical layout manager using NSView
 class AXVerticalLayoutManager: AXBaseLayoutManager {
+    private lazy var splitView: AXVerticalTabBarSplitView = {
+        let splitView = AXVerticalTabBarSplitView()
+        splitView.isVertical = true
+        return splitView
+    }()
+
     private lazy var verticalHostingView: AXVerticalTabHostingView = {
-        let view = AXVerticalTabHostingView(tabBarView: tabBarView)
+        let view = AXVerticalTabHostingView(
+            tabBarView: tabBarView, searchButton: searchButton,
+            tabGroupInfoView: tabGroupInfoView)
         view.tabHostingDelegate = tabHostingDelegate
+
         return view
     }()
 
@@ -109,21 +119,26 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
     override func setupLayout(in window: AXWindow) {
         window.styleMask.insert(.fullSizeContentView)
 
-        // guard let splitView = window.splitView else { return }
-        let splitView = window.splitView  // MAKE ME OPTIONAL
+        containerView.isVertical = true
 
-        splitView.frame = window.visualEffectView.bounds
-        splitView.autoresizingMask = [.height, .width]
-        window.visualEffectView.addSubview(splitView)
+        window.contentView = splitView
 
+        // verticalHostingView.translatesAutoresizingMaskIntoConstraints = false
+        // containerView.translatesAutoresizingMaskIntoConstraints = false
+
+        verticalHostingView.widthAnchor.constraint(
+            greaterThanOrEqualToConstant: 210
+        ).isActive = true
         splitView.addArrangedSubview(verticalHostingView)
         splitView.addArrangedSubview(containerView)
 
-        verticalHostingView.frame.size.width = 180
-
         // Configure traffic lights for vertical layout
-        window.configureTrafficLights()
+        window.trafficLightsHide()
         window.titlebarAppearsTransparent = true
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            window.configureTrafficLights()
+        }
     }
 
     func toggleTabSidebar(in window: AXWindow) {
@@ -135,21 +150,55 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
             context.duration = 0.25  // Adjust duration as needed
             context.allowsImplicitAnimation = true
 
-            let sideBarWillCollapsed = window.splitView.subviews.count == 2
+            let sideBarWillCollapsed = splitView.subviews.count == 2
             if sideBarWillCollapsed {
                 window.hiddenSidebarView = true
-                window.splitView.removeArrangedSubview(verticalTabHostingView)
+                splitView.removeArrangedSubview(verticalTabHostingView)
                 containerView.websiteTitleLabel.isHidden = true
             } else {
                 window.hiddenSidebarView = false
-                window.splitView.insertArrangedSubview(verticalTabHostingView, at: 0)
+                splitView.insertArrangedSubview(verticalTabHostingView, at: 0)
                 containerView.websiteTitleLabel.isHidden = false
             }
 
             containerView.sidebarCollapsed(
                 sideBarWillCollapsed,
                 isFullScreen: window.styleMask.contains(.fullScreen))
-            window.splitView.layoutSubtreeIfNeeded()
+            splitView.layoutSubtreeIfNeeded()
         }
+    }
+}
+
+class AXVerticalTabBarSplitView: NSSplitView {
+    func splitView(
+        _ splitView: NSSplitView,
+        constrainMinCoordinate proposedMinimumPosition: CGFloat,
+        ofSubviewAt dividerIndex: Int
+    ) -> CGFloat {
+        return 160
+    }
+
+    func splitView(
+        _ splitView: NSSplitView,
+        constrainMaxCoordinate proposedMaximumPosition: CGFloat,
+        ofSubviewAt dividerIndex: Int
+    ) -> CGFloat {
+        return 500
+    }
+
+    func splitView(
+        _ splitView: NSSplitView, shouldAdjustSizeOfSubview view: NSView
+    ) -> Bool {
+        return view.tag != 0x01
+    }
+
+    func splitView(_ splitView: NSSplitView, canCollapseSubview subview: NSView)
+        -> Bool
+    {
+        return false
+    }
+
+    override func drawDivider(in rect: NSRect) {
+        // Empty Divider
     }
 }

@@ -12,17 +12,10 @@ protocol AXNewTabViewDelegate: AnyObject {
     func didSelectItem(url: URL)
 }
 
-let items = [
-    ("Google", "https://www.google.com"),
-    ("Gmail", "https://mail.google.com"),
-    ("Mathematics", "https://pdsb.elearningontario.ca/d2l/home/26235716"),
-    ("ManageBac", "https://turnerfenton.managebac.com/student"),
-    ("Classroom", "https://classroom.google.com/"),
-    ("Kognity", "https://app.kognity.com/study/app/dashboard")
-]
-
 class AXNewTabView: NSView {
     weak var delegate: AXNewTabViewDelegate?
+
+    var currentlyRightClickedItem: Int?
 
     private let visualEffectView: NSVisualEffectView = {
         let view = NSVisualEffectView()
@@ -37,7 +30,7 @@ class AXNewTabView: NSView {
         let label = NSTextField(labelWithString: "Favourites")
         label.font = NSFont.boldSystemFont(ofSize: 24)
         label.textColor = .labelColor
-        label.alignment = .left // Align header title to the left
+        label.alignment = .left  // Align header title to the left
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -52,8 +45,9 @@ class AXNewTabView: NSView {
 
     private lazy var collectionView: NSCollectionView = {
         let layout = NSCollectionViewFlowLayout()
-        layout.itemSize = NSSize(width: 100, height: 120) // Increased size
-        layout.sectionInset = NSEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        layout.itemSize = NSSize(width: 100, height: 120)  // Increased size
+        layout.sectionInset = NSEdgeInsets(
+            top: 10, left: 10, bottom: 10, right: 10)
         layout.minimumLineSpacing = 10
         layout.minimumInteritemSpacing = 10
 
@@ -62,10 +56,33 @@ class AXNewTabView: NSView {
         view.delegate = self
         view.dataSource = self
         view.backgroundColors = [.clear]
-        view.allowsMultipleSelection = false // Ensure only one item can be selected at a time
-        view.register(AXNewTabTopSiteCardCollectionView.self, forItemWithIdentifier: NSUserInterfaceItemIdentifier("TopSiteCard"))
+        view.allowsMultipleSelection = false  // Ensure only one item can be selected at a time
+        view.register(
+            AXNewTabTopSiteCardCollectionViewItem.self,
+            forItemWithIdentifier: NSUserInterfaceItemIdentifier("TopSiteCard"))
         view.translatesAutoresizingMaskIntoConstraints = false
+        view.menu = contextMenu
         return view
+    }()
+
+    private lazy var contextMenu: NSMenu = {
+        let menu = NSMenu()
+        menu.delegate = self
+
+        menu.addItem(
+            NSMenuItem(
+                title: "Edit", action: #selector(editSite(_:)),
+                keyEquivalent: ""))
+        menu.addItem(
+            NSMenuItem(
+                title: "Delete", action: #selector(deleteSite(_:)),
+                keyEquivalent: ""))
+        menu.addItem(NSMenuItem.separator())
+        menu.addItem(
+            NSMenuItem(
+                title: "Add New Site", action: #selector(addNewSite),
+                keyEquivalent: ""))
+        return menu
     }()
 
     override init(frame frameRect: NSRect) {
@@ -97,149 +114,105 @@ class AXNewTabView: NSView {
 
             // Header Label
             headerLabel.topAnchor.constraint(equalTo: topAnchor, constant: 20),
-            headerLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20), // Align to left
+            headerLabel.leadingAnchor.constraint(
+                equalTo: leadingAnchor, constant: 20),  // Align to left
 
             // Scroll View
-            tabGroupScrollView.topAnchor.constraint(equalTo: headerLabel.bottomAnchor, constant: 20),
+            tabGroupScrollView.topAnchor.constraint(
+                equalTo: headerLabel.bottomAnchor, constant: 20),
             tabGroupScrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
             tabGroupScrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tabGroupScrollView.trailingAnchor.constraint(equalTo: trailingAnchor)
+            tabGroupScrollView.trailingAnchor.constraint(
+                equalTo: trailingAnchor),
         ])
+    }
+
+    @objc
+    private func editSite(_ sender: NSMenuItem) {
+        guard let index = currentlyRightClickedItem else { return }
+        self.currentlyRightClickedItem = nil
+
+        let site = AXNewTabFavouritesManager.shared.getAllSites()[index]
+
+        let sheetVC = AXSiteEditSheet(
+            title: site.title, url: site.url, isNewSite: false, index: index
+        ) { [weak self] title, url in
+            AXNewTabFavouritesManager.shared.updateSite(
+                at: index, with: .init(title: title, url: url))
+            self?.collectionView.reloadItems(at: [
+                IndexPath(item: index, section: 0)
+            ])
+        }
+
+        if let window = self.window {
+            let newWindow = NSWindow(contentViewController: sheetVC)
+
+            window.beginSheet(newWindow)
+        }
+    }
+
+    @objc
+    private func deleteSite(_ sender: NSMenuItem) {
+        guard let index = currentlyRightClickedItem else { return }
+        AXNewTabFavouritesManager.shared.deleteSite(at: index)
+        collectionView.reloadData()
+    }
+
+    @objc
+    private func addNewSite() {
+        let sheetVC = AXSiteEditSheet(isNewSite: true) {
+            [weak self] title, url in
+            AXNewTabFavouritesManager.shared.addSite(
+                .init(title: title, url: url))
+            self?.collectionView.reloadData()
+        }
+
+        if let window = self.window {
+            let newWindow = NSWindow(contentViewController: sheetVC)
+            window.beginSheet(newWindow)
+        }
     }
 }
 
 extension AXNewTabView: NSCollectionViewDelegate, NSCollectionViewDataSource {
-    func collectionView(_ collectionView: NSCollectionView, numberOfItemsInSection section: Int) -> Int {
-        return items.count
+    func collectionView(
+        _ collectionView: NSCollectionView, numberOfItemsInSection section: Int
+    ) -> Int {
+        return AXNewTabFavouritesManager.shared.getAllSites().count
     }
 
-    func collectionView(_ collectionView: NSCollectionView, itemForRepresentedObjectAt indexPath: IndexPath) -> NSCollectionViewItem {
-        let item = collectionView.makeItem(withIdentifier: NSUserInterfaceItemIdentifier("TopSiteCard"), for: indexPath) as? AXNewTabTopSiteCardCollectionView ?? AXNewTabTopSiteCardCollectionView()
-        item.mouseDownSelector = collectionViewMouseDown
+    func collectionView(
+        _ collectionView: NSCollectionView,
+        itemForRepresentedObjectAt indexPath: IndexPath
+    ) -> NSCollectionViewItem {
+        let item =
+            collectionView.makeItem(
+                withIdentifier: NSUserInterfaceItemIdentifier("TopSiteCard"),
+                for: indexPath) as? AXNewTabTopSiteCardCollectionViewItem
+            ?? AXNewTabTopSiteCardCollectionViewItem()
+        item.mouseUpSelector = collectionViewMouseDown
+        item.onRightMouseDown = collectionViewRightMouseDown(index:)
 
-        let site = items[indexPath.item]
-        item.configure(title: site.0, url: site.1)
+        let site = AXNewTabFavouritesManager.shared.getAllSites()[
+            indexPath.item]
+        item.configure(title: site.title, url: site.url, index: indexPath.item)
         return item
     }
 
     func collectionViewMouseDown(url: String) {
         delegate?.didSelectItem(url: URL(string: url)!)
     }
-}
 
-class AXNewTabTopSiteCardCollectionView: NSCollectionViewItem {
-    internal let myImageView = NSImageView()
-    private let titleLabel = NSTextField(labelWithString: "")
-    private var url: String! = nil
-
-    var mouseDownSelector: ((String) -> Void)?
-
-    override func loadView() {
-        view = NSView()
-        view.wantsLayer = true
-        view.layer?.cornerRadius = 9
-        view.layer?.backgroundColor = nil // Removed background color
-
-        myImageView.translatesAutoresizingMaskIntoConstraints = false
-        myImageView.wantsLayer = true
-        myImageView.layer?.shadowColor = NSColor.black.cgColor
-        myImageView.layer?.shadowOpacity = 0.2
-        myImageView.layer?.shadowOffset = CGSize(width: 0, height: -2)
-        myImageView.layer?.shadowRadius = 4
-        myImageView.layer?.cornerRadius = 9
-
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.font = NSFont.systemFont(ofSize: 14)
-        titleLabel.alignment = .center
-
-        view.addSubview(myImageView)
-        view.addSubview(titleLabel)
-
-        NSLayoutConstraint.activate([
-            myImageView.topAnchor.constraint(equalTo: view.topAnchor, constant: 10),
-            myImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            myImageView.widthAnchor.constraint(equalToConstant: 60), // Larger image
-            myImageView.heightAnchor.constraint(equalToConstant: 60),
-
-            titleLabel.topAnchor.constraint(equalTo: myImageView.bottomAnchor, constant: 10),
-            titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 5),
-            titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -5)
-        ])
-    }
-
-    func configure(title: String, url: String) {
-        titleLabel.stringValue = title
-        self.url = url
-
-        let cacheKey = "placeholder_\(title)" // Unique key for caching based on the title
-        if let cachedImage = ImageCache.shared.getImage(forKey: cacheKey) {
-            self.myImageView.image = cachedImage
-        } else {
-            let placeholderImage = createPlaceholderImage(for: title)
-            ImageCache.shared.setImage(placeholderImage, forKey: cacheKey)
-            self.myImageView.image = placeholderImage
-        }
-    }
-
-    private func createPlaceholderImage(for title: String) -> NSImage {
-        let size = CGSize(width: 60, height: 60)
-        let firstLetter = String(title.prefix(1)).uppercased()
-        let colors: [NSColor] = [
-            .systemRed, .systemBlue, .systemGreen, .systemYellow,
-            .systemOrange, .systemPurple, .systemPink, .systemTeal, .systemPurple, .systemCyan, .systemIndigo
-        ]
-        let backgroundColor = colors.randomElement() ?? .systemGray
-
-        let image = NSImage(size: size)
-        image.lockFocus()
-
-        // Draw background
-        backgroundColor.setFill()
-        let rect = NSRect(origin: .zero, size: size)
-        rect.fill()
-
-        // Draw first letter
-        let attributes: [NSAttributedString.Key: Any] = [
-            .font: NSFont.boldSystemFont(ofSize: 24),
-            .foregroundColor: NSColor.white,
-            .paragraphStyle: {
-                let style = NSMutableParagraphStyle()
-                style.alignment = .center
-                style.lineBreakMode = .byClipping
-                return style
-            }()
-        ]
-
-        let attributedString = NSAttributedString(string: firstLetter, attributes: attributes)
-        let textSize = attributedString.size()
-        let textRect = CGRect(
-            x: (rect.width - textSize.width) / 2,
-            y: (rect.height - textSize.height) / 2,
-            width: textSize.width,
-            height: textSize.height
-        )
-        attributedString.draw(in: textRect)
-
-        image.unlockFocus()
-        return image
-    }
-
-    override func mouseDown(with event: NSEvent) {
-        self.mouseDownSelector?(self.url)
+    func collectionViewRightMouseDown(index: Int) {
+        self.currentlyRightClickedItem = index
     }
 }
 
-private class ImageCache {
-    static let shared = ImageCache()
-    private var cache = NSCache<NSString, NSImage>()
-
-    private init() {}
-
-    func getImage(forKey key: String) -> NSImage? {
-        return cache.object(forKey: key as NSString)
-    }
-
-    func setImage(_ image: NSImage, forKey key: String) {
-        cache.setObject(image, forKey: key as NSString)
+extension AXNewTabView: NSMenuDelegate {
+    func menuWillOpen(_ menu: NSMenu) {
+        let isHidden = currentlyRightClickedItem == nil
+        menu.items[0].isHidden = isHidden
+        menu.items[1].isHidden = isHidden
+        menu.items[2].isHidden = isHidden
     }
 }

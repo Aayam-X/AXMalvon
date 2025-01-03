@@ -29,6 +29,15 @@ protocol AXTabButton: AnyObject, NSButton {
     init(tab: AXTab!)
 }
 
+struct AXTabButtonConstants {
+    static let defaultFavicon = NSImage(
+        systemSymbolName: "square.fill", accessibilityDescription: nil)
+    static let defaultFaviconSleep = NSImage(
+        systemSymbolName: "moon.fill", accessibilityDescription: nil)
+    static let defaultCloseButton = NSImage(
+        systemSymbolName: "xmark", accessibilityDescription: nil)
+}
+
 extension AXTabButton {
     public func startObserving() {
         guard let webView = tab._webView else { return }

@@ -26,7 +26,7 @@ protocol AXWebContainerViewDelegate: AnyObject {
 class AXWebContainerView: NSView {
     weak var delegate: AXWebContainerViewDelegate?
     weak var sidebar: NSView?
-    let isVertical: Bool
+    var isVertical: Bool
 
     private unowned var currentWebView: AXWebView?
     let newTabView = AXNewTabView(frame: .zero)
@@ -135,7 +135,7 @@ class AXWebContainerView: NSView {
             splitView.rightAnchor.constraint(
                 equalTo: splitViewContainer.rightAnchor),
             splitView.bottomAnchor.constraint(
-                equalTo: splitViewContainer.bottomAnchor)
+                equalTo: splitViewContainer.bottomAnchor),
         ])
 
         newTabView.delegate = self
@@ -170,7 +170,7 @@ class AXWebContainerView: NSView {
                 splitViewContainer.leftAnchor.constraint(equalTo: leftAnchor),
                 splitViewContainer.rightAnchor.constraint(equalTo: rightAnchor),
                 splitViewContainer.bottomAnchor.constraint(
-                    equalTo: bottomAnchor)
+                    equalTo: bottomAnchor),
             ])
         }
     }
@@ -227,7 +227,8 @@ class AXWebContainerView: NSView {
             self.delegate?.webContainerViewChangedURL(to: url)
         }
 
-        urlObserver = webView.observe(\.url, options: [.new]) { [weak self] _, change in
+        urlObserver = webView.observe(\.url, options: [.new]) {
+            [weak self] _, change in
             if let newURL = change.newValue, let newURL {
                 self?.delegate?.webContainerViewChangedURL(to: newURL)
             }
@@ -343,7 +344,8 @@ extension AXWebContainerView: NSTextFieldDelegate {
         _ control: NSControl, textShouldBeginEditing fieldEditor: NSText
     ) -> Bool {
         // To detect when the text field loses focus
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [self] timer in
+        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) {
+            [self] timer in
             if websiteTitleLabel.currentEditor() == nil {
                 timer.invalidate()
                 webPageFindTextFieldDidLoseFocus()
@@ -355,7 +357,9 @@ extension AXWebContainerView: NSTextFieldDelegate {
 }
 
 // MARK: - Web View Functions
-extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate, WKDownloadDelegate {
+extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
+    WKDownloadDelegate
+{
 
     func updateProgress(_ value: Double) {
         splitView.beginAnimation(with: value)
@@ -411,21 +415,21 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate, WKDownloadDele
         mxPrint("DONWLOAD DOWNLAOD")
     }
 
-//        func webView(
-//            _ webView: WKWebView,
-//            decidePolicyFor navigationAction: WKNavigationAction
-//        ) async -> WKNavigationActionPolicy {
-//            if navigationAction.navigationType == .linkActivated,
-//               navigationAction.modifierFlags.contains(.command)
-//            {
-//                let request = navigationAction.request
-//                
-//                return delegate?.webViewOpenLinkInNewTab(request: request) != nil
-//                ? .cancel : .allow
-//            }
-//            
-//            return .allow
-//        }
+    //        func webView(
+    //            _ webView: WKWebView,
+    //            decidePolicyFor navigationAction: WKNavigationAction
+    //        ) async -> WKNavigationActionPolicy {
+    //            if navigationAction.navigationType == .linkActivated,
+    //               navigationAction.modifierFlags.contains(.command)
+    //            {
+    //                let request = navigationAction.request
+    //
+    //                return delegate?.webViewOpenLinkInNewTab(request: request) != nil
+    //                ? .cancel : .allow
+    //            }
+    //
+    //            return .allow
+    //        }
 
     func webView(
         _ webView: WKWebView,
@@ -486,7 +490,9 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate, WKDownloadDele
 
 extension AXWebContainerView: AXNewTabViewDelegate {
     func didSelectItem(url: URL) {
-        guard let tab = delegate?.webContainerViewRequestsCurrentTab(url) else { return }
+        guard let tab = delegate?.webContainerViewRequestsCurrentTab(url) else {
+            return
+        }
         tab.url = url
         tab.isEmpty = false
 
@@ -514,7 +520,8 @@ private class AXWebContainerSplitView: NSSplitView, NSSplitViewDelegate {
     }
 
     func splitView(_ splitView: NSSplitView, canCollapseSubview subview: NSView)
-        -> Bool {
+        -> Bool
+    {
         return false
     }
 

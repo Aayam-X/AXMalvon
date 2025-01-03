@@ -124,7 +124,7 @@ class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
                 equalTo: colorLabel.bottomAnchor, constant: 5),
             colorWell.leftAnchor.constraint(equalTo: leftAnchor, constant: 10),
             colorWell.rightAnchor.constraint(
-                equalTo: rightAnchor, constant: -10)
+                equalTo: rightAnchor, constant: -10),
         ])
     }
 

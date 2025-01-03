@@ -79,7 +79,7 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
             tableView.trailingAnchor.constraint(
                 equalTo: scrollView.contentView.trailingAnchor),
             tableView.bottomAnchor.constraint(
-                equalTo: scrollView.contentView.bottomAnchor)
+                equalTo: scrollView.contentView.bottomAnchor),
         ])
     }
 
@@ -379,7 +379,8 @@ extension AXAddressBarWindow: NSTableViewDataSource, NSTableViewDelegate {
     }
 
     private func createSuggestionCell(for suggestion: Any, at row: Int)
-        -> NSView {
+        -> NSView
+    {
         let cellIdentifier = NSUserInterfaceItemIdentifier(
             "AddressBarSuggestion")
         let cell =

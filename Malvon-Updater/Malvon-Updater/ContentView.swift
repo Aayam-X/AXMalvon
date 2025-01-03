@@ -84,7 +84,7 @@ struct ContentView: View {
                     Button(action: updateApplication) {
                         Text(
                             isUpdating
-                            ? "Updating..." : "Update and Relaunch"
+                                ? "Updating..." : "Update and Relaunch"
                         )
                         .padding()
                         .frame(maxWidth: .infinity)
@@ -178,7 +178,8 @@ struct ContentView: View {
         let downloadDestination = FileManager.default.temporaryDirectory
             .appendingPathComponent("update-malvon-\(UUID()).zip")
 
-        let downloadTask = URLSession.shared.downloadTask(with: updateURL) { tempURL, _, error in
+        let downloadTask = URLSession.shared.downloadTask(with: updateURL) {
+            tempURL, _, error in
             guard let tempURL = tempURL, error == nil else {
                 DispatchQueue.main.async {
                     statusMessage =
@@ -219,7 +220,7 @@ struct ContentView: View {
 
             process.executableURL = URL(fileURLWithPath: "/usr/bin/unzip")
             process.arguments = [
-                "-o", zipFilePath.path, "-d", unzipDestination.path
+                "-o", zipFilePath.path, "-d", unzipDestination.path,
             ]
             try process.run()
             process.waitUntilExit()

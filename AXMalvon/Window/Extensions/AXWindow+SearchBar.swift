@@ -31,7 +31,8 @@ extension AXWindow: AXSidebarSearchButtonDelegate {
 
     func searchBarCurrentWebsiteURL() -> String {
         // Returns the current web view's url
-        return layoutManager.containerView.currentPageAddress?.absoluteString ?? ""
+        return layoutManager.containerView.currentPageAddress?.absoluteString
+            ?? ""
     }
 
     func sidebarSearchButtonSearchesFor(_ url: URL) {
@@ -39,13 +40,13 @@ extension AXWindow: AXSidebarSearchButtonDelegate {
     }
 
     func lockClicked() {
-//        guard let webView = layoutManager.containerView.currentWebView,
-//            let serverTrust = webView.serverTrust
-//        else { return }
-//
-//        SFCertificateTrustPanel.shared().beginSheet(
-//            for: self, modalDelegate: nil, didEnd: nil, contextInfo: nil,
-//            trust: serverTrust, message: "TLS Certificate Details")
+        //        guard let webView = layoutManager.containerView.currentWebView,
+        //            let serverTrust = webView.serverTrust
+        //        else { return }
+        //
+        //        SFCertificateTrustPanel.shared().beginSheet(
+        //            for: self, modalDelegate: nil, didEnd: nil, contextInfo: nil,
+        //            trust: serverTrust, message: "TLS Certificate Details")
     }
 
     func sidebarSearchButtonRequestsHistoryManager() -> AXHistoryManager? {

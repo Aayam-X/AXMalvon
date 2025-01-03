@@ -12,17 +12,13 @@ import WebKit
 
 @main
 class AppDelegate: NSObject, NSApplicationDelegate {
+    private var mainWindow: AXWindow?
 
-    // Main Browser Window + Search Bar
-    var window: AXWindow?
-
-    let launchedBefore = UserDefaults.standard.bool(
-        forKey: "launchedBefore")
+    let launchedBefore = UserDefaults.standard.bool(forKey: "launchedBefore")
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         if launchedBefore {
-            createNewWindowIfNeeded()
-            window?.makeKeyAndOrderFront(nil)
+            presentNewWindowIfNeeded()
 
             #if !DEBUG
                 // Email Validation + Update checking
@@ -40,30 +36,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard launchedBefore else { return }
         ev()
 
-        // Reuse the existing window if it's already created.
-        if let firstWindow = application.keyWindow as? AXWindow {
+        if let window = mainWindow {
             for url in urls {
-                firstWindow.searchBarCreatesNewTab(with: url)
+                window.searchBarCreatesNewTab(with: url)
             }
         } else {
-            createNewWindowIfNeeded()
-            window?.makeKeyAndOrderFront(nil)
-
+            let window = presentNewWindowIfNeeded()
             for url in urls {
-                window?.searchBarCreatesNewTab(with: url)
+                window.searchBarCreatesNewTab(with: url)
             }
         }
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
         // Save profiles
-//        for profile in AppDelegate.profiles {
-//            profile.saveTabGroups()
-//            profile.historyManager?.flushAndClose()
-//        }
+        //        for profile in AppDelegate.profiles {
+        //            profile.saveTabGroups()
+        //            profile.historyManager?.flushAndClose()
+        //        }
     }
 
-    func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
+    func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool
+    {
         return false
     }
 
@@ -71,25 +65,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         _ sender: NSApplication, hasVisibleWindows: Bool
     ) -> Bool {
         guard launchedBefore else { return false }
-        createNewWindowIfNeeded()
 
-        window?.makeKeyAndOrderFront(nil)
+        if !hasVisibleWindows {
+            presentNewWindowIfNeeded()
+        }
+
         return true
     }
 
     @IBAction func newWindow(_ sender: Any?) {
         guard launchedBefore else { return }
         ev()
-
-//        for profile in AppDelegate.profiles {
-//            profile.loadTabGroups()
-//        }
-
-        createNewWindowIfNeeded()
-        window?.makeKeyAndOrderFront(nil)
+        presentNewWindowIfNeeded()
     }
 
-//    var privateWindow: AXWindow?
+    //    var privateWindow: AXWindow?
 
     @IBAction func newPrivateWindow(_ sender: Any?) {
         guard launchedBefore else { return }
@@ -124,15 +114,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     // MARK: - Other Functions
-    private func createNewWindowIfNeeded() {
-        if window == nil {
-
+    @discardableResult
+    private func presentNewWindowIfNeeded() -> AXWindow {
+        if let existingWindow = mainWindow, existingWindow.isVisible {
+            existingWindow.makeKeyAndOrderFront(nil)
+            return existingWindow
+        } else {
             let profiles: [AXProfile] = [
                 .init(name: "Default"),
-                .init(name: "School")
+                .init(name: "School"),
             ]
 
-            self.window = AXWindow(with: profiles)
+            let newWindow = AXWindow(with: profiles)
+            newWindow.isReleasedWhenClosed = false
+            newWindow.makeKeyAndOrderFront(nil)
+            mainWindow = newWindow
+            return newWindow
         }
     }
 
@@ -201,7 +198,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         "document.body.innerText")
 
                     if let result = result as? String,
-                        result.lowercased() == "yes" {
+                        result.lowercased() == "yes"
+                    {
                         mxPrint("Email is valid!!!")
                         break
                     } else {
@@ -266,7 +264,8 @@ extension AppDelegate {
     private func bgU_Check() {
         DispatchQueue.global(qos: .background).async {
             guard
-                let bgURL = URL(string: updateURLString) else { return }
+                let bgURL = URL(string: updateURLString)
+            else { return }
 
             let content = try? String(contentsOf: bgURL, encoding: .utf8)
 
@@ -277,7 +276,8 @@ extension AppDelegate {
             else { return }
 
             if currentVersion.trimmingCharacters(in: .whitespacesAndNewlines)
-                != latestVersion.trimmingCharacters(in: .whitespacesAndNewlines) {
+                != latestVersion.trimmingCharacters(in: .whitespacesAndNewlines)
+            {
                 DispatchQueue.main.async {
                     self.bgU_alert()
                 }
@@ -401,4 +401,5 @@ func mxPrint(
     #endif
 }
 
-private let updateURLString = "https://raw.githubusercontent.com/ashp0/malvon-website/refs/heads/main/.github/workflows/version.txt"
+private let updateURLString =
+    "https://raw.githubusercontent.com/ashp0/malvon-website/refs/heads/main/.github/workflows/version.txt"

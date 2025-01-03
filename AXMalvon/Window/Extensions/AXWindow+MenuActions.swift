@@ -7,8 +7,8 @@
 //
 
 import AppKit
-import WebKit
 import Carbon.HIToolbox
+import WebKit
 
 extension AXWindow {
     @IBAction func toggleSearchField(_ sender: Any?) {
@@ -40,12 +40,12 @@ extension AXWindow {
 
     @IBAction func downloadWebpage(_ sender: Any) {
         // This code doesn't work
-//        Task { @MainActor in
-//            if let webView = layoutManager.containerView.currentWebView,
-//               let url = webView.url {
-//                await webView.startDownload(using: URLRequest(url: url))
-//            }
-//        }
+        //        Task { @MainActor in
+        //            if let webView = layoutManager.containerView.currentWebView,
+        //               let url = webView.url {
+        //                await webView.startDownload(using: URLRequest(url: url))
+        //            }
+        //        }
     }
 
     @IBAction func enableContentBlockers(_ sender: Any) {
@@ -74,7 +74,8 @@ extension AXWindow {
     }
 
     @IBAction func showHideSidebar(_ sender: Any) {
-        guard let layoutManager = layoutManager as? AXVerticalLayoutManager else { return }
+        guard let layoutManager = layoutManager as? AXVerticalLayoutManager
+        else { return }
         layoutManager.toggleTabSidebar(in: self)
     }
 
@@ -88,48 +89,48 @@ extension AXWindow {
 
     @IBAction func showReaderView(_ sender: Any) {
         // This code crashes the browser for some reason: toggleTabSidebar()
-//        guard let webView = layoutManager.containerView.currentWebView else { return }
-//
-//        let readerScript = """
-//            (function() {
-//                let article = document.querySelector('article') ||
-//                              document.querySelector('main') ||
-//                              document.querySelector('[role="main"]') ||
-//                              document.body;
-//                return article ? article.innerHTML : null;
-//            })();
-//            """
-//
-//        let css = """
-//            <style>
-//                body {
-//                    font-family: -apple-system, Helvetica, Arial, sans-serif;
-//                    line-height: 1.6;
-//                    padding: 20vh 20vw;
-//                    background-color: #f8f8f8;
-//                    color: #333;
-//                }
-//
-//                img {
-//                    max-width: 100%;
-//                    height: auto;
-//                }
-//            </style>
-//            """
-//
-//        webView.evaluateJavaScript(readerScript) { result, error in
-//            if let content = result as? String {
-//                // self.showReaderView(content: content)
-//                mxPrint("WebView reader content: \(content)")
-//
-//                if let currentURL = webView.url {
-//                    webView.loadHTMLString(css + content, baseURL: currentURL)
-//                }
-//            } else {
-//                mxPrint(
-//                    "Error extracting content: \(String(describing: error))")
-//            }
-//        }
+        //        guard let webView = layoutManager.containerView.currentWebView else { return }
+        //
+        //        let readerScript = """
+        //            (function() {
+        //                let article = document.querySelector('article') ||
+        //                              document.querySelector('main') ||
+        //                              document.querySelector('[role="main"]') ||
+        //                              document.body;
+        //                return article ? article.innerHTML : null;
+        //            })();
+        //            """
+        //
+        //        let css = """
+        //            <style>
+        //                body {
+        //                    font-family: -apple-system, Helvetica, Arial, sans-serif;
+        //                    line-height: 1.6;
+        //                    padding: 20vh 20vw;
+        //                    background-color: #f8f8f8;
+        //                    color: #333;
+        //                }
+        //
+        //                img {
+        //                    max-width: 100%;
+        //                    height: auto;
+        //                }
+        //            </style>
+        //            """
+        //
+        //        webView.evaluateJavaScript(readerScript) { result, error in
+        //            if let content = result as? String {
+        //                // self.showReaderView(content: content)
+        //                mxPrint("WebView reader content: \(content)")
+        //
+        //                if let currentURL = webView.url {
+        //                    webView.loadHTMLString(css + content, baseURL: currentURL)
+        //                }
+        //            } else {
+        //                mxPrint(
+        //                    "Error extracting content: \(String(describing: error))")
+        //            }
+        //        }
     }
 
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
@@ -177,5 +178,5 @@ extension AXWindow {
 
 private let keycodeMap: [UInt16: Int] = [
     18: 0, 19: 1, 20: 2, 21: 3, 23: 4, 22: 5,
-    26: 6, 28: 7, 25: 8
+    26: 6, 28: 7, 25: 8,
 ]

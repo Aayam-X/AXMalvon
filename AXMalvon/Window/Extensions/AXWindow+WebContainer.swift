@@ -7,8 +7,8 @@
 //
 
 import AppKit
-import WebKit
 import SwiftUI
+import WebKit
 
 extension AXWindow: AXWebContainerViewDelegate {
     func webContainerViewDidSwitchToStartPage() {
@@ -37,7 +37,9 @@ extension AXWindow: AXWebContainerViewDelegate {
         return layoutManager.layoutView
     }
 
-    func webContainerViewCreatesPopupWebView(config: WKWebViewConfiguration) -> WKWebView {
+    func webContainerViewCreatesPopupWebView(config: WKWebViewConfiguration)
+        -> WKWebView
+    {
         let newWebView = AXWebView(frame: .zero, configuration: config)
         let tab = AXTab(
             title: newWebView.title ?? "Untitled Popup", webView: newWebView)
@@ -48,9 +50,12 @@ extension AXWindow: AXWebContainerViewDelegate {
     }
 
     func webContainerViewFinishedLoading(webView: WKWebView) {
-        layoutManager.searchButton.fullAddress = layoutManager.containerView.currentPageAddress
+        layoutManager.searchButton.fullAddress =
+            layoutManager.containerView.currentPageAddress
 
-        if let historyManager = activeProfile.historyManager, let title = webView.title, let url = webView.url {
+        if let historyManager = activeProfile.historyManager,
+            let title = webView.title, let url = webView.url
+        {
             let newItem = AXHistoryItem(
                 title: title, address: url.absoluteString)
 
