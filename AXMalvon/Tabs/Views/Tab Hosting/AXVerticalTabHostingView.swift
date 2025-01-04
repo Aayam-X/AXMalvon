@@ -21,9 +21,9 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
 
     var mouseExitedTrackingArea: NSTrackingArea!
 
-    //    override var tag: Int {
-    //        return 0x01
-    //    }
+    override var tag: Int {
+        return 0x01
+    }
 
     private lazy var bottomLine: NSBox = {
         let line = NSBox()
@@ -109,22 +109,23 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
             gestureView.topAnchor.constraint(equalTo: topAnchor),
             gestureView.leftAnchor.constraint(equalTo: leftAnchor),
             gestureView.rightAnchor.constraint(
-                equalTo: rightAnchor, constant: 3),
+                equalTo: rightAnchor, constant: 2),
             gestureView.heightAnchor.constraint(equalToConstant: 80),
 
             // Divider between Search Bar and Tab
             bottomLine.topAnchor.constraint(
-                equalTo: gestureView.bottomAnchor, constant: 5),
-            bottomLine.leftAnchor.constraint(equalTo: leftAnchor, constant: 12),
+                equalTo: gestureView.bottomAnchor, constant: 10),
+            bottomLine.leftAnchor.constraint(equalTo: leftAnchor),
             bottomLine.rightAnchor.constraint(
-                equalTo: rightAnchor, constant: -10),
-            bottomLine.heightAnchor.constraint(equalToConstant: 1),
+                equalTo: rightAnchor),
+            bottomLine.heightAnchor.constraint(equalToConstant: 2),
 
             // Tab Bar View
             tabBarView.topAnchor.constraint(
-                equalTo: bottomLine.bottomAnchor, constant: 2),
+                equalTo: bottomLine.bottomAnchor, constant: 8),
             tabBarView.leftAnchor.constraint(equalTo: leftAnchor),
-            tabBarView.rightAnchor.constraint(equalTo: rightAnchor),
+            tabBarView.rightAnchor.constraint(
+                equalTo: rightAnchor, constant: -2),
             tabBarView.bottomAnchor.constraint(
                 equalTo: addNewTabButton.topAnchor, constant: -2),
 

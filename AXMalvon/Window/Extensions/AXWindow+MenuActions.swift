@@ -12,8 +12,7 @@ import WebKit
 
 extension AXWindow {
     @IBAction func toggleSearchField(_ sender: Any?) {
-        makeFirstResponder(
-            layoutManager.searchButton.addressField)
+        makeFirstResponder(layoutManager.searchButton.addressField)
     }
 
     @IBAction func toggleSearchBarForNewTab(_ sender: Any?) {
@@ -76,7 +75,9 @@ extension AXWindow {
     @IBAction func showHideSidebar(_ sender: Any) {
         guard let layoutManager = layoutManager as? AXVerticalLayoutManager
         else { return }
-        layoutManager.toggleTabSidebar(in: self)
+        let sidebarState = layoutManager.toggleTabSidebar(in: self)
+
+        sidebarState ? trafficLightsPositionCompact() : trafficLightsPosition()
     }
 
     //    @IBAction func importCookiesFromChrome(_ sender: Any) {

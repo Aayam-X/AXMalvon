@@ -63,6 +63,17 @@ struct AXAboutView: View {
 
                 HStack {
                     Button {
+                        if let acknowledgementsURL = Bundle.main.url(
+                            forResource: "Acknowledgements",
+                            withExtension: "txt")
+                        {
+                            NSWorkspace.shared.open(acknowledgementsURL)
+                        }
+                    } label: {
+                        Text("Acknowledgements")
+                    }
+
+                    Button {
                         // Contact button action
                     } label: {
                         Text("Contact")

@@ -29,36 +29,6 @@ class AXWindow: NSWindow {
         }
     }()
 
-    internal lazy var visualEffectTintView: NSView = {
-        let tintView = NSView()
-        tintView.translatesAutoresizingMaskIntoConstraints = false
-        tintView.wantsLayer = true
-
-        return tintView
-    }()
-
-    internal lazy var visualEffectView: NSVisualEffectView = {
-        let visualEffectView = NSVisualEffectView()
-        visualEffectView.blendingMode = .behindWindow
-        visualEffectView.material = .popover
-        visualEffectView.wantsLayer = true
-
-        // Add tint view on top of the visual effect view
-        visualEffectView.addSubview(visualEffectTintView)
-        NSLayoutConstraint.activate([
-            visualEffectTintView.leadingAnchor.constraint(
-                equalTo: visualEffectView.leadingAnchor),
-            visualEffectTintView.trailingAnchor.constraint(
-                equalTo: visualEffectView.trailingAnchor),
-            visualEffectTintView.topAnchor.constraint(
-                equalTo: visualEffectView.topAnchor),
-            visualEffectTintView.bottomAnchor.constraint(
-                equalTo: visualEffectView.bottomAnchor),
-        ])
-
-        return visualEffectView
-    }()
-
     init(with profiles: [AXProfile]) {
         self.profiles = profiles
         activeProfile = profiles[profileIndex]  // 0

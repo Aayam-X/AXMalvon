@@ -14,7 +14,7 @@ extension AXWindow: AXTabBarViewDelegate {
         let tabGroup = currentTabGroup
         let tabs = tabGroup.tabs
 
-        layoutManager.searchButton.addressField.stringValue = ""
+        layoutManager.searchButton.fullAddress = nil
 
         if tabAt == -1 {
             layoutManager.containerView.removeAllWebViews()

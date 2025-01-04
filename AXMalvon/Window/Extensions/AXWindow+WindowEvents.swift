@@ -22,9 +22,6 @@ extension AXWindow: NSWindowDelegate {
 
     // MARK: - Content View
     internal func setupComponents() {
-        // Visual Effect View
-        self.contentView = visualEffectView
-
         layoutManager =
             usesVerticalTabs
             ? AXVerticalLayoutManager(tabBarView: tabBarView)
@@ -150,19 +147,20 @@ extension AXWindow: NSWindowDelegate {
         // Update positioning
         for (index, button) in trafficLightButtons.enumerated() {
             button.frame.origin = NSPoint(
-                x: 13.0 + CGFloat(index) * 20.0, y: -0.5)
+                x: 13.0 + CGFloat(index) * 20.0, y: -3.3)
+
+            button.alphaValue = 1
         }
     }
 
-    func trafficLightsHide() {
-        trafficLightButtons?.forEach { button in
-            button.isHidden = true
-        }
-    }
+    func trafficLightsPositionCompact() {
+        guard let trafficLightButtons else { return }
+        // Update positioning
+        for (index, button) in trafficLightButtons.enumerated() {
+            button.frame.origin = NSPoint(
+                x: 6.0 + CGFloat(index) * 20.0, y: 9)
 
-    func trafficLightsShow() {
-        trafficLightButtons?.forEach { button in
-            button.isHidden = false
+            button.alphaValue = 0.2
         }
     }
 }

@@ -222,7 +222,6 @@ class AXWebContainerView: NSView {
             }
         }
 
-        guard !isVertical else { return }
         if let url = webView.url {
             self.delegate?.webContainerViewChangedURL(to: url)
         }

@@ -54,6 +54,7 @@
 		ED3BA1422CE1074A0094F6E9 /* Exceptions for "AXMalvon" folder in "Malvon Debug" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				About/Acknowledgements.txt,
 				AdBlock/contentBlocker.json,
 				Info.plist,
 				Search/readme.txt,
@@ -183,7 +184,10 @@
 				TargetAttributes = {
 					ED3AEFE12CDAED2F002AE6CC = {
 						CreatedOnToolsVersion = 16.1;
-						LastSwiftMigration = 1610;
+						LastSwiftMigration = 1620;
+					};
+					EDA45CC12D17303D00779C51 = {
+						LastSwiftMigration = 1620;
 					};
 				};
 			};
@@ -418,7 +422,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ayaamx.AXMalvon;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ayaamx.AXMalvon-Debug";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -455,7 +459,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ayaamx.AXMalvon;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.ayaamx.AXMalvon-Debug";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;

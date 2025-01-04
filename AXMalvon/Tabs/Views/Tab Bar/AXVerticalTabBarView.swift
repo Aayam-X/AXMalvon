@@ -49,6 +49,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         tabStackView.orientation = .vertical
         tabStackView.spacing = 5
         tabStackView.detachesHiddenViews = true
+        tabStackView.edgeInsets = .init(top: 3, left: 0, bottom: 3, right: 0)
 
         // Configure scroll view
         scrollView = AXScrollView()

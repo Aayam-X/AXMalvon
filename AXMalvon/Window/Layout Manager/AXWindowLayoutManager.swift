@@ -24,6 +24,8 @@ protocol AXWindowLayoutManaging {
     func updateLayout()
     func handleTabGroupInfoViewLeftDown()
     func handleTabGroupInfoViewRightDown()
+
+    func updatedTabGroupColor(in window: AXWindow, color: NSColor)
 }
 
 // Base class implementing common functionality
@@ -74,6 +76,10 @@ class AXBaseLayoutManager: AXWindowLayoutManaging {
     func removeNewTabPage(in window: AXWindow) {
 
     }
+
+    func updatedTabGroupColor(in window: AXWindow, color: NSColor) {
+        window.backgroundColor = color.withAlphaComponent(1)
+    }
 }
 
 // Horizontal layout manager using NSToolbar
@@ -97,9 +103,39 @@ class AXHorizontalLayoutManager: AXBaseLayoutManager {
 
 // Vertical layout manager using NSView
 class AXVerticalLayoutManager: AXBaseLayoutManager {
-    private lazy var splitView: AXVerticalTabBarSplitView = {
-        let splitView = AXVerticalTabBarSplitView()
-        splitView.isVertical = true
+    lazy var visualEffectTintView: NSView = {
+        let tintView = NSView()
+        tintView.translatesAutoresizingMaskIntoConstraints = false
+        tintView.wantsLayer = true
+
+        return tintView
+    }()
+
+    lazy var visualEffectView: NSVisualEffectView = {
+        let visualEffectView = NSVisualEffectView()
+        visualEffectView.blendingMode = .behindWindow
+        visualEffectView.material = .popover
+        visualEffectView.wantsLayer = true
+
+        // Add tint view on top of the visual effect view
+        visualEffectView.addSubview(visualEffectTintView)
+        NSLayoutConstraint.activate([
+            visualEffectTintView.leadingAnchor.constraint(
+                equalTo: visualEffectView.leadingAnchor),
+            visualEffectTintView.trailingAnchor.constraint(
+                equalTo: visualEffectView.trailingAnchor),
+            visualEffectTintView.topAnchor.constraint(
+                equalTo: visualEffectView.topAnchor),
+            visualEffectTintView.bottomAnchor.constraint(
+                equalTo: visualEffectView.bottomAnchor),
+        ])
+
+        return visualEffectView
+    }()
+
+    private lazy var splitView: AXTwoPaneSplitView = {
+        let splitView = AXTwoPaneSplitView(
+            leftView: verticalHostingView, rightView: containerView)
         return splitView
     }()
 
@@ -121,84 +157,32 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
 
         containerView.isVertical = true
 
-        window.contentView = splitView
+        window.contentView = visualEffectView
+        visualEffectView.addSubview(splitView)
+        splitView.translatesAutoresizingMaskIntoConstraints = false
 
-        // verticalHostingView.translatesAutoresizingMaskIntoConstraints = false
-        // containerView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            splitView.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
+            splitView.leftAnchor.constraint(
+                equalTo: visualEffectView.leftAnchor),
+            splitView.bottomAnchor.constraint(
+                equalTo: visualEffectView.bottomAnchor),
+            splitView.rightAnchor.constraint(
+                equalTo: visualEffectView.rightAnchor),
+        ])
 
-        verticalHostingView.widthAnchor.constraint(
-            greaterThanOrEqualToConstant: 210
-        ).isActive = true
-        splitView.addArrangedSubview(verticalHostingView)
-        splitView.addArrangedSubview(containerView)
-
-        // Configure traffic lights for vertical layout
-        window.trafficLightsHide()
         window.titlebarAppearsTransparent = true
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             window.configureTrafficLights()
         }
     }
 
-    func toggleTabSidebar(in window: AXWindow) {
-        guard let verticalTabHostingView = layoutView else {
-            return
-        }
-
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.25  // Adjust duration as needed
-            context.allowsImplicitAnimation = true
-
-            let sideBarWillCollapsed = splitView.subviews.count == 2
-            if sideBarWillCollapsed {
-                window.hiddenSidebarView = true
-                splitView.removeArrangedSubview(verticalTabHostingView)
-                containerView.websiteTitleLabel.isHidden = true
-            } else {
-                window.hiddenSidebarView = false
-                splitView.insertArrangedSubview(verticalTabHostingView, at: 0)
-                containerView.websiteTitleLabel.isHidden = false
-            }
-
-            containerView.sidebarCollapsed(
-                sideBarWillCollapsed,
-                isFullScreen: window.styleMask.contains(.fullScreen))
-            splitView.layoutSubtreeIfNeeded()
-        }
-    }
-}
-
-class AXVerticalTabBarSplitView: NSSplitView {
-    func splitView(
-        _ splitView: NSSplitView,
-        constrainMinCoordinate proposedMinimumPosition: CGFloat,
-        ofSubviewAt dividerIndex: Int
-    ) -> CGFloat {
-        return 160
+    /// Returns the Boolean if the left view is hidden
+    func toggleTabSidebar(in window: AXWindow) -> Bool {
+        return splitView.toggleLeftView()
     }
 
-    func splitView(
-        _ splitView: NSSplitView,
-        constrainMaxCoordinate proposedMaximumPosition: CGFloat,
-        ofSubviewAt dividerIndex: Int
-    ) -> CGFloat {
-        return 500
-    }
-
-    func splitView(
-        _ splitView: NSSplitView, shouldAdjustSizeOfSubview view: NSView
-    ) -> Bool {
-        return view.tag != 0x01
-    }
-
-    func splitView(_ splitView: NSSplitView, canCollapseSubview subview: NSView)
-        -> Bool
-    {
-        return false
-    }
-
-    override func drawDivider(in rect: NSRect) {
-        // Empty Divider
+    override func updatedTabGroupColor(in window: AXWindow, color: NSColor) {
+        visualEffectTintView.layer?.backgroundColor = color.cgColor
     }
 }

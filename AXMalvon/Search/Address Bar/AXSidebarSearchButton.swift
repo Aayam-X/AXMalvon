@@ -46,7 +46,7 @@ class AXSidebarSearchButton: NSButton {
 
     var fullAddress: URL? {
         didSet {
-            addressField.stringValue = fullAddress?.absoluteString ?? "Empty"
+            updateAddressFieldAttributedString()
 
             if fullAddress?.scheme?.last != "s" {
                 lockView.image = NSImage(
@@ -123,24 +123,52 @@ class AXSidebarSearchButton: NSButton {
         lockView.widthAnchor.constraint(equalToConstant: 16).isActive = true
         lockView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive =
             true
-        lockView.leftAnchor.constraint(equalTo: leftAnchor, constant: 10)
+        lockView.leftAnchor.constraint(equalTo: leftAnchor, constant: 6)
             .isActive = true
 
         // Add the title view
-
         addSubview(addressField)
         addressField.leftAnchor.constraint(
-            equalTo: lockView.rightAnchor, constant: 6
+            equalTo: lockView.rightAnchor, constant: 4
         ).isActive = true
         addressField.centerYAnchor.constraint(equalTo: centerYAnchor).isActive =
             true
         addressField.rightAnchor.constraint(
-            equalToSystemSpacingAfter: rightAnchor, multiplier: 0.5
+            equalTo: rightAnchor
         ).isActive = true
+        //addressField.alphaValue = 0.6
 
         // Configure lock button action
         lockView.target = self
         lockView.action = #selector(lockClicked)
+    }
+
+    private func updateAddressFieldAttributedString() {
+        guard let url = fullAddress else {
+            addressField.attributedStringValue = NSAttributedString(string: "")
+            return
+        }
+
+        let components = url.host?.split(separator: ".") ?? []
+        let domainName = components.suffix(2).joined(separator: ".")
+        let path = url.path + (url.query.map { "?\($0)" } ?? "")
+
+        let attributedString = NSMutableAttributedString(
+            string: domainName,
+            attributes: [
+                .foregroundColor: NSColor.labelColor.withAlphaComponent(0.8)
+            ])
+
+        if !path.isEmpty {
+            let pathAttributedString = NSAttributedString(
+                string: path,
+                attributes: [
+                    .foregroundColor: NSColor.labelColor.withAlphaComponent(0.3)
+                ])
+            attributedString.append(pathAttributedString)
+        }
+
+        addressField.attributedStringValue = attributedString
     }
 
     @objc
@@ -243,7 +271,7 @@ extension AXSidebarSearchButton: NSTextFieldDelegate {
         -> Bool
     {
         suggestionsWindowController.orderOut()
-        addressField.stringValue = fullAddress?.absoluteString ?? "Empty2"
+        addressField.stringValue = fullAddress?.absoluteString ?? ""
 
         return true
     }

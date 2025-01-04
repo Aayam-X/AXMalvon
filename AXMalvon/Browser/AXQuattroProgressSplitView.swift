@@ -60,6 +60,7 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
         super.init(frame: .zero)
 
         wantsLayer = true
+        self.layer?.masksToBounds = true
         setupLayers()
 
         delegate = self

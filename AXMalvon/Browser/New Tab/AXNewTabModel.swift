@@ -47,17 +47,6 @@ class AXNewTabFavouritesManager {
                     title: "Google", url: "https://www.google.com"),
                 AXNewTabFavouriteSite(
                     title: "Gmail", url: "https://mail.google.com"),
-                AXNewTabFavouriteSite(
-                    title: "Mathematics",
-                    url: "https://pdsb.elearningontario.ca/d2l/home/26235716"),
-                AXNewTabFavouriteSite(
-                    title: "ManageBac",
-                    url: "https://turnerfenton.managebac.com/student"),
-                AXNewTabFavouriteSite(
-                    title: "Classroom", url: "https://classroom.google.com/"),
-                AXNewTabFavouriteSite(
-                    title: "Kognity",
-                    url: "https://app.kognity.com/study/app/dashboard"),
             ]
             saveSites()
             return

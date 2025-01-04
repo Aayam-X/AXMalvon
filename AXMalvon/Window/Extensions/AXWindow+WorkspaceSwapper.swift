@@ -56,8 +56,6 @@ extension AXWindow: AXWorkspaceSwapperViewDelegate {
         let tabGroup = self.activeProfile.tabGroups[index]
         self.currentTabGroupIndex = index
 
-        visualEffectTintView.layer?.backgroundColor = tabGroup.color.cgColor
-
         self.switchToTabGroup(tabGroup)
     }
 

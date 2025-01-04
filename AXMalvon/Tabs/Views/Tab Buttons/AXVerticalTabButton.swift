@@ -252,7 +252,7 @@ extension AXVerticalTabButton {
     private func setupShadow() {
         layer?.shadowColor = NSColor.textColor.cgColor
         layer?.shadowOpacity = 0.0
-        layer?.shadowRadius = 4.0
+        layer?.shadowRadius = 3.0
         layer?.shadowOffset = CGSize(width: 0, height: 0)
     }
 }
@@ -274,8 +274,10 @@ extension AXVerticalTabButton {
 class AXSidebarTabCloseButton: NSButton {
     var trackingArea: NSTrackingArea!
 
-    var hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
-    var selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
+    let hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
+    let selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
+    let defaultAlphaValue: CGFloat = 0.3
+
     var defaultColor: CGColor? = .none
     var mouseDown: Bool = false
 
@@ -285,6 +287,7 @@ class AXSidebarTabCloseButton: NSButton {
         self.layer?.cornerRadius = 5
         self.isBordered = false
         self.bezelStyle = .smallSquare
+        self.alphaValue = defaultAlphaValue
         self.setTrackingArea()
     }
 
@@ -321,6 +324,8 @@ class AXSidebarTabCloseButton: NSButton {
         if isEnabled {
             self.layer?.backgroundColor = hoverColor.cgColor
         }
+
+        self.alphaValue = 1
     }
 
     override func mouseDragged(with event: NSEvent) {
@@ -329,5 +334,6 @@ class AXSidebarTabCloseButton: NSButton {
 
     override func mouseExited(with event: NSEvent) {
         self.layer?.backgroundColor = defaultColor
+        self.alphaValue = defaultAlphaValue
     }
 }

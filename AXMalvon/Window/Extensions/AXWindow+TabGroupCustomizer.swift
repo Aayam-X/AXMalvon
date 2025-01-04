@@ -19,8 +19,7 @@ extension AXWindow: AXTabGroupCustomizerViewDelegate {
     }
 
     func tabGroupCustomizerDidUpdateColor(_ tabGroup: AXTabGroup) {
-        visualEffectTintView.layer?.backgroundColor = tabGroup.color.cgColor
-        self.backgroundColor = tabGroup.color.withAlphaComponent(1)
+        layoutManager.updatedTabGroupColor(in: self, color: tabGroup.color)
     }
 
     func tabGroupCustomizerDidUpdateIcon(_ tabGroup: AXTabGroup) {

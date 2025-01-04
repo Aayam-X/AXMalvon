@@ -55,17 +55,21 @@ class AXGestureView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    deinit {
+        removeFullScreenNotifications()
+    }
+
     private func setupViews() {
         // Tab Group Information View
         tabGroupInfoView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(tabGroupInfoView)
 
         tabGroupInfoViewLeftConstraint = tabGroupInfoView.leftAnchor.constraint(
-            equalTo: leftAnchor, constant: 8)
+            equalTo: leftAnchor, constant: 72)
         NSLayoutConstraint.activate([
             tabGroupInfoView.rightAnchor.constraint(equalTo: rightAnchor),
             tabGroupInfoView.topAnchor.constraint(
-                equalTo: topAnchor, constant: 4),
+                equalTo: topAnchor, constant: 8),
             tabGroupInfoViewLeftConstraint!,
         ])
 
@@ -84,8 +88,43 @@ class AXGestureView: NSView {
         ])
     }
 
-    override var intrinsicContentSize: NSSize {
-        return NSSize(width: 100, height: 44)  // Adjust based on your needs
+    // MARK: - Full Screen Functions
+
+    private func setupFullScreenNotifications() {
+        if let window = self.window {
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(willEnterFullScreen(_:)),
+                name: NSWindow.willEnterFullScreenNotification,
+                object: window
+            )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(willExitFullScreen(_:)),
+                name: NSWindow.willExitFullScreenNotification,
+                object: window
+            )
+        }
+    }
+
+    private func removeFullScreenNotifications() {
+        NotificationCenter.default.removeObserver(
+            self, name: NSWindow.willEnterFullScreenNotification, object: nil)
+        NotificationCenter.default.removeObserver(
+            self, name: NSWindow.willExitFullScreenNotification, object: nil)
+    }
+
+    @objc private func willEnterFullScreen(_ notification: Notification) {
+        tabGroupInfoViewLeftConstraint?.animator().constant = 5
+    }
+
+    @objc private func willExitFullScreen(_ notification: Notification) {
+        tabGroupInfoViewLeftConstraint?.animator().constant = 72
+    }
+
+    override func viewDidMoveToWindow() {
+        removeFullScreenNotifications()
+        setupFullScreenNotifications()
     }
 
     // MARK: - Gesture/Mouse Functions
@@ -119,53 +158,17 @@ class AXGestureView: NSView {
         }
     }
 
-    override func mouseEntered(with event: NSEvent) {
-        updateConstraintsWhenMouse(
-            window: event.window as? AXWindow, entered: true)
-    }
-
     override func mouseExited(with event: NSEvent) {
         if scrollWithMice {
             handleScrollEnd()
             scrollEventFinished = false
         }
-
-        updateConstraintsWhenMouse(
-            window: event.window as? AXWindow, entered: false)
     }
 
     func handleScrollEnd() {
         scrollEventFinished = true
         delegate?.gestureView(didSwipe: userSwipedDirection)
         userSwipedDirection = nil
-    }
-
-    func updateConstraintsWhenMouse(
-        window: AXWindow?, entered: Bool
-    ) {
-        guard let window else { return }
-        var entered = entered
-
-        if window.styleMask.contains(.fullScreen) {
-            entered = false
-        }
-
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = entered ? 0.15 : 0.18
-            context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-
-            // Update constraints and visibility based on the state
-            tabGroupInfoView.imageView.isHidden = entered
-            tabGroupInfoViewLeftConstraint?.animator().constant =
-                entered ? 70 : 5.5
-            tabGroupInfoView.contentStackView.layoutSubtreeIfNeeded()
-
-            if !window.styleMask.contains(.fullScreen), !entered {
-                window.trafficLightsHide()
-            } else {
-                window.trafficLightsShow()
-            }
-        }
     }
 
     private func setupTrackingArea() {

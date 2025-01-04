@@ -12,7 +12,7 @@
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
-        <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Malvon_Debug" customModuleProvider="target"/>
+        <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Malvon" customModuleProvider="target"/>
         <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
         <menu title="Main Menu" systemMenu="main" id="Wvu-2r-zyW">
             <items>
@@ -427,7 +427,7 @@
                             <menuItem title="Toggle Sidebar" keyEquivalent="s" id="eyB-Vj-1wk">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                 <connections>
-                                    <action selector="showHideSidebar:" target="-1" id="ySK-4A-yzh"/>
+                                    <action selector="showHideSidebar:" target="-1" id="uYd-zw-rxw"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Enter Full Screen" keyEquivalent="f" id="S7n-z9-xAq">
