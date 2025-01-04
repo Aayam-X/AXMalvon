@@ -33,6 +33,8 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     weak var delegate: (any AXTabBarViewDelegate)?
     weak var stickyDelegate: (any AXHorizontalTabBarViewDelegate)?
 
+    var previousTabIndex: Int = -1
+
     private var currentWidth: CGFloat = 0
     private var currentTabCount: Int = 0
 
@@ -263,13 +265,15 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         if tabGroup.tabs.isEmpty {
             // No tabs left
             tabGroup.selectedIndex = -1
+            previousTabIndex = -1
             delegate?.tabBarSwitchedTo(tabAt: -1)
             return
         }
 
         if tabGroup.selectedIndex == removedIndex {
             // If the removed tab was selected, select the next tab or the last one
-            tabGroup.selectedIndex = min(removedIndex, tabGroup.tabs.count - 1)
+            tabGroup.selectedIndex = min(
+                previousTabIndex, tabGroup.tabs.count - 1)
         } else if tabGroup.selectedIndex > removedIndex {
             // If a tab before the selected one is removed, shift the selected index
             tabGroup.selectedIndex -= 1
@@ -288,6 +292,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     func updateTabSelection(from: Int, to index: Int) {
+        self.previousTabIndex = from
         let arrangedSubviews = tabStackView.arrangedSubviews
         guard index < arrangedSubviews.count else { return }
 

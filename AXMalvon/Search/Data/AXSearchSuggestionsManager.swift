@@ -13,6 +13,8 @@ class SuggestionsManager {
     private var currentTask: URLSessionDataTask?
     private let localDebounceInterval: TimeInterval = 0.15
     private let googleDebounceInterval: TimeInterval = 0.3  // Longer delay for Google suggestions
+    private var immediateUpdateCount: Int = 0
+    private let maxImmediateUpdates: Int = 3  // Allow immediate updates for the first 3 presses
 
     var historyManager: AXHistoryManager
 
@@ -34,56 +36,65 @@ class SuggestionsManager {
         // Immediately update query
         onQueryUpdated?(query)
 
-        // Create a single work item that handles both local and Google suggestions
-        let workItem = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
-
-            // First, update local suggestions
-            DispatchQueue.global(qos: .background).async {
-                // Update top searches
-                let filteredSuggestions = AXSearchDatabase.shared
-                    .getRelevantSearchSuggestions(
-                        prefix: query,
-                        minOccurrences: 3
-                    )
-                DispatchQueue.main.async {
-                    self.onTopSearchesUpdated?(filteredSuggestions)
-                }
-            }
-
-            DispatchQueue.global(qos: .background).async { [weak self] in
+        // Determine if debounce should be applied
+        if immediateUpdateCount < maxImmediateUpdates {
+            // Perform immediate update without debounce
+            immediateUpdateCount += 1
+            performSuggestionsUpdate(query: query)
+        } else {
+            // Apply debounce for further updates
+            let workItem = DispatchWorkItem { [weak self] in
                 guard let self = self else { return }
-                // Update history
-                let historyResults = self.historyManager.search(query: query)
-                let filteredWebsites = historyResults.map {
-                    ($0.title, $0.address)
-                }
-                DispatchQueue.main.async {
-                    self.onHistoryUpdated?(filteredWebsites)
-                }
+                self.performSuggestionsUpdate(query: query)
             }
 
-            // After local suggestions are handled, wait for the additional delay before fetching Google suggestions
+            debounceWorkItem = workItem
             DispatchQueue.main.asyncAfter(
-                deadline: .now()
-                    + (self.googleDebounceInterval - self.localDebounceInterval)
-            ) {
-                self.fetchGoogleSuggestions(for: query) { suggestions in
-                    DispatchQueue.main.async {
-                        self.onGoogleSuggestionsUpdated?(suggestions)
-                    }
-                }
+                deadline: .now() + localDebounceInterval,
+                execute: workItem
+            )
+        }
+    }
+
+    private func performSuggestionsUpdate(query: String) {
+        // Update local suggestions
+        DispatchQueue.global(qos: .background).async {
+            let filteredSuggestions = AXSearchDatabase.shared
+                .getRelevantSearchSuggestions(
+                    prefix: query,
+                    minOccurrences: 3
+                )
+            DispatchQueue.main.async {
+                self.onTopSearchesUpdated?(filteredSuggestions)
             }
         }
 
-        // Store the work item for cancellation purposes
-        debounceWorkItem = workItem
+        // Update history
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            guard let self = self else { return }
+            let historyResults = self.historyManager.search(query: query)
+            let filteredWebsites = historyResults.map {
+                ($0.title, $0.address)
+            }
+            DispatchQueue.main.async {
+                self.onHistoryUpdated?(filteredWebsites)
+            }
+        }
 
-        // Schedule the work item with the local debounce interval
+        // Fetch Google suggestions after a delay
         DispatchQueue.main.asyncAfter(
-            deadline: .now() + localDebounceInterval, execute: workItem)
+            deadline: .now() + (googleDebounceInterval - localDebounceInterval)
+        ) { [weak self] in
+            guard let self = self else { return }
+            self.fetchGoogleSuggestions(for: query) { suggestions in
+                DispatchQueue.main.async {
+                    self.onGoogleSuggestionsUpdated?(suggestions)
+                }
+            }
+        }
     }
 }
+
 
 extension SuggestionsManager {
     private func fetchGoogleSuggestions(
