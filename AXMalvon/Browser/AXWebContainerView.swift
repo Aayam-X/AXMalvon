@@ -41,10 +41,12 @@ class AXWebContainerView: NSView {
 
     func back() {
         currentWebView?.goBack()
+        splitView.finishAnimation()
     }
 
     func forward() {
         currentWebView?.goForward()
+        splitView.finishAnimation()
     }
 
     func loadURL(url: URL) {

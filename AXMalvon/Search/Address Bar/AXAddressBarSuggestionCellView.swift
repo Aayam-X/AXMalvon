@@ -61,7 +61,6 @@ class AXAddressBarSuggestionCellView: NSTableCellView {
         // Subtitle Label
         subtitleLabel.activateConstraints([
             .centerY: .view(self),
-            .right: .view(self),
             .leftRight: .view(titleLabel, constant: 3),
         ])
     }

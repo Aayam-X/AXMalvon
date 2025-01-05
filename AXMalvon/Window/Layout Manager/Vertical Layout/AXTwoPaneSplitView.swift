@@ -11,7 +11,6 @@ import AppKit
 class AXTwoPaneSplitView: NSView {
     private let leftView: NSView
     private let rightView: NSView
-
     private let dividerView: NSView
     private let dividerWidth: CGFloat = 2
     private var dividerWidthConstraint: NSLayoutConstraint?
@@ -19,7 +18,8 @@ class AXTwoPaneSplitView: NSView {
     private var isDragging = false
     private var lastDragLocation: NSPoint?
     private var leftViewWidthConstraint: NSLayoutConstraint?
-    private var isLeftViewHidden = false  // Track the visibility state of the left view
+    private var isLeftViewHidden = false
+    private var isCursorSet = false  // Track if we've pushed the resize cursor
 
     init(leftView: NSView, rightView: NSView) {
         self.leftView = leftView
@@ -64,25 +64,21 @@ class AXTwoPaneSplitView: NSView {
             ?? 210
         leftViewWidthConstraint = leftView.widthAnchor.constraint(
             equalToConstant: width)
-
         dividerWidthConstraint = dividerView.widthAnchor.constraint(
             equalToConstant: dividerWidth)
 
-        // Left view constraints
         leftView.activateConstraints([
             .left: .view(self),
             .verticalEdges: .view(self),
         ])
         leftViewWidthConstraint!.isActive = true
 
-        // Divider view constraints
         dividerView.activateConstraints([
             .leftRight: .view(leftView),
             .verticalEdges: .view(self),
         ])
         dividerWidthConstraint!.isActive = true
 
-        // Right view constraints
         rightView.activateConstraints([
             .leftRight: .view(dividerView),
             .right: .view(self),
@@ -95,9 +91,8 @@ class AXTwoPaneSplitView: NSView {
             NSPanGestureRecognizer(
                 target: self, action: #selector(handlePanGesture(_:))))
 
-        // Change cursor when hovering over divider
         let trackingArea = NSTrackingArea(
-            rect: .zero,
+            rect: dividerView.bounds,
             options: [
                 .mouseEnteredAndExited, .activeInActiveApp, .inVisibleRect,
             ],
@@ -113,6 +108,10 @@ class AXTwoPaneSplitView: NSView {
         case .began:
             isDragging = true
             lastDragLocation = gestureRecognizer.location(in: self)
+            if !isCursorSet {
+                NSCursor.resizeLeftRight.push()
+                isCursorSet = true
+            }
 
         case .changed:
             guard isDragging, let lastLocation = lastDragLocation else {
@@ -121,13 +120,9 @@ class AXTwoPaneSplitView: NSView {
             let currentLocation = gestureRecognizer.location(in: self)
             let deltaX = currentLocation.x - lastLocation.x
 
-            // Calculate the new width for the left view
             let newWidth = leftView.frame.width + deltaX
-
-            // Clamp the new width to the desired range (180 - 500)
             let clampedWidth = max(180, min(newWidth, 500))
 
-            // Update the left view's width constraint
             if let oldConstraint = leftViewWidthConstraint {
                 oldConstraint.isActive = false
             }
@@ -135,16 +130,16 @@ class AXTwoPaneSplitView: NSView {
                 equalToConstant: clampedWidth)
             leftViewWidthConstraint?.isActive = true
 
-            // Update the layout
             layoutSubtreeIfNeeded()
-
-            // Save the current drag location
             lastDragLocation = currentLocation
 
         case .ended, .cancelled:
             isDragging = false
             lastDragLocation = nil
-            NSCursor.pop()
+            if isCursorSet {
+                NSCursor.pop()
+                isCursorSet = false
+            }
 
         default:
             break
@@ -153,17 +148,22 @@ class AXTwoPaneSplitView: NSView {
 
     override func mouseEntered(with event: NSEvent) {
         super.mouseEntered(with: event)
-        NSCursor.resizeLeftRight.push()
+        if !isDragging && !isCursorSet {
+            NSCursor.resizeLeftRight.push()
+            isCursorSet = true
+        }
     }
 
     override func mouseExited(with event: NSEvent) {
         super.mouseExited(with: event)
-        NSCursor.pop()
+        if isCursorSet && !isDragging {
+            NSCursor.pop()
+            isCursorSet = false
+        }
         UserDefaults.standard.set(
             leftViewWidthConstraint?.constant, forKey: "verticalTabWidth")
     }
 
-    /// Toggles the visibility of the left view with animation
     func toggleLeftView() -> Bool {
         isLeftViewHidden.toggle()
         let targetWidth: CGFloat =
