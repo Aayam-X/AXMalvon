@@ -70,20 +70,23 @@ class AXTabGroupInfoView: NSView {
         // Add content stack view
         addSubview(contentStackView)
 
-        // Set up constraints for the content stack view
-        NSLayoutConstraint.activate([
-            heightAnchor.constraint(equalToConstant: 33),
+        self.activateConstraints([
+            .height: .constant(33)
+        ])
 
-            contentStackView.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 5),
-            contentStackView.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -5),
-            contentStackView.topAnchor.constraint(
-                equalTo: topAnchor),
-            contentStackView.bottomAnchor.constraint(
-                lessThanOrEqualTo: bottomAnchor),
-            imageView.widthAnchor.constraint(equalToConstant: 24),
-            imageView.heightAnchor.constraint(equalToConstant: 24),
+        contentStackView.activateConstraints([
+            .top: .view(self),
+            .left: .view(self, constant: 5),
+            .right: .view(self, constant: -5),
+        ])
+
+        contentStackView.bottomAnchor.constraint(
+            lessThanOrEqualTo: bottomAnchor
+        ).isActive = true
+
+        imageView.activateConstraints([
+            .width: .constant(24),
+            .height: .constant(24),
         ])
     }
 

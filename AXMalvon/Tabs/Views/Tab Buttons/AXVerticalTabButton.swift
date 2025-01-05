@@ -108,16 +108,13 @@ class AXVerticalTabButton: NSButton, AXTabButton {
         favIconImageView.contentTintColor = .textBackgroundColor
             .withAlphaComponent(0.2)
         addSubview(favIconImageView)
-        favIconImageView.centerYAnchor.constraint(equalTo: centerYAnchor)
-            .isActive = true
-        favIconImageView.leftAnchor.constraint(
-            equalTo: leftAnchor, constant: 10
-        )
-        .isActive = true
-        favIconImageView.widthAnchor.constraint(equalToConstant: 16).isActive =
-            true
-        favIconImageView.heightAnchor.constraint(equalToConstant: 16).isActive =
-            true
+
+        favIconImageView.activateConstraints([
+            .centerY: .view(self),
+            .left: .view(self, constant: 10),
+            .width: .constant(16),
+            .height: .constant(16),
+        ])
 
         // Setup closeButton
         closeButton.translatesAutoresizingMaskIntoConstraints = false
@@ -126,12 +123,13 @@ class AXVerticalTabButton: NSButton, AXTabButton {
         addSubview(closeButton)
         closeButton.image = NSImage(
             systemSymbolName: "xmark", accessibilityDescription: nil)
-        closeButton.widthAnchor.constraint(equalToConstant: 20).isActive = true
-        closeButton.heightAnchor.constraint(equalToConstant: 16).isActive = true
-        closeButton.rightAnchor.constraint(equalTo: rightAnchor, constant: -7)
-            .isActive = true
-        closeButton.centerYAnchor.constraint(equalTo: centerYAnchor).isActive =
-            true
+
+        closeButton.activateConstraints([
+            .right: .view(self, constant: -7),
+            .centerY: .view(self),
+            .width: .constant(16),
+            .height: .constant(16),
+        ])
         closeButton.isHidden = !isSelected
 
         // Setup titleView
@@ -144,14 +142,11 @@ class AXVerticalTabButton: NSButton, AXTabButton {
         titleView.lineBreakMode = .byTruncatingTail
         titleView.textColor = .textColor
         addSubview(titleView)
-        titleView.leftAnchor.constraint(
-            equalTo: favIconImageView.rightAnchor, constant: 5
-        ).isActive = true
-        titleView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive =
-            true
-        titleView.rightAnchor.constraint(equalTo: closeButton.leftAnchor)
-            .isActive =
-            true
+        titleView.activateConstraints([
+            .leftRight: .view(favIconImageView, constant: 5),
+            .centerY: .view(self),
+            .rightLeft: .view(closeButton),
+        ])
 
         titleView.setContentCompressionResistancePriority(
             .defaultLow, for: .horizontal)

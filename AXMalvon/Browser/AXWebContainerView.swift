@@ -92,17 +92,12 @@ class AXWebContainerView: NSView {
             updateTrackingArea()
 
             addSubview(websiteTitleLabel)
-            websiteTitleLabel.topAnchor.constraint(
-                equalTo: topAnchor, constant: -1.2
-            ).isActive = true
-            websiteTitleLabel.leftAnchor.constraint(
-                equalTo: leftAnchor, constant: 15
-            )
-            .isActive = true
-            websiteTitleLabel.rightAnchor.constraint(
-                equalTo: rightAnchor, constant: -15
-            )
-            .isActive = true
+
+            websiteTitleLabel.activateConstraints([
+                .top: .view(self, constant: -1.2),
+                .left: .view(self, constant: 15),
+                .right: .view(self, constant: -15),
+            ])
             websiteTitleLabel.stringValue = "Empty Window"
             websiteTitleLabel.delegate = self
 
@@ -127,15 +122,8 @@ class AXWebContainerView: NSView {
         createSplitViewContainerConstraints()
 
         splitViewContainer.addSubview(splitView)
-        NSLayoutConstraint.activate([
-            splitView.topAnchor.constraint(
-                equalTo: splitViewContainer.topAnchor),
-            splitView.leftAnchor.constraint(
-                equalTo: splitViewContainer.leftAnchor),
-            splitView.rightAnchor.constraint(
-                equalTo: splitViewContainer.rightAnchor),
-            splitView.bottomAnchor.constraint(
-                equalTo: splitViewContainer.bottomAnchor),
+        splitView.activateConstraints([
+            .allEdges: .view(splitViewContainer)
         ])
 
         newTabView.delegate = self
@@ -165,12 +153,8 @@ class AXWebContainerView: NSView {
             splitViewRightAnchorConstraint!.isActive = true
             splitViewBottomAnchorConstraint!.isActive = true
         } else {
-            NSLayoutConstraint.activate([
-                splitViewContainer.topAnchor.constraint(equalTo: topAnchor),
-                splitViewContainer.leftAnchor.constraint(equalTo: leftAnchor),
-                splitViewContainer.rightAnchor.constraint(equalTo: rightAnchor),
-                splitViewContainer.bottomAnchor.constraint(
-                    equalTo: bottomAnchor),
+            splitViewContainer.activateConstraints([
+                .allEdges: .view(self)
             ])
         }
     }

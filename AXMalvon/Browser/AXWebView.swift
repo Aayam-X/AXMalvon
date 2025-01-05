@@ -18,6 +18,10 @@ class AXWebView: WKWebView {
 
         self.customUserAgent = safariUserAgent
         allowsMagnification = true
+        
+        
+        widthAnchor.constraint(greaterThanOrEqualToConstant: 200).isActive = true
+        heightAnchor.constraint(greaterThanOrEqualToConstant: 200).isActive = true
     }
 
     required init?(coder: NSCoder) {

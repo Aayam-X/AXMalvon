@@ -31,7 +31,14 @@ class AXSidebarSearchButton: NSButton {
 
     var previousStringValueCount = 0
 
-    let suggestionsWindowController = AXAddressBarWindow()
+    lazy var suggestionsWindowController: AXAddressBarWindow! = {
+        let windowController = AXAddressBarWindow()
+        windowController.suggestionItemClickAction = { [weak self] suggestion in
+            self?.addressField.stringValue = suggestion
+            self?.searchEnterAction()
+        }
+        return windowController
+    }()
 
     lazy var suggestionsManager: SuggestionsManager = {
         let manager = SuggestionsManager(
@@ -88,12 +95,6 @@ class AXSidebarSearchButton: NSButton {
     init() {
         super.init(frame: .zero)
         setupViews()
-
-        suggestionsWindowController.suggestionItemClickAction = {
-            [weak self] suggestion in
-            self?.addressField.stringValue = suggestion
-            self?.searchEnterAction()
-        }
     }
 
     required init?(coder: NSCoder) {
@@ -119,23 +120,20 @@ class AXSidebarSearchButton: NSButton {
 
         // Add the lock button
         addSubview(lockView)
-        lockView.heightAnchor.constraint(equalToConstant: 16).isActive = true
-        lockView.widthAnchor.constraint(equalToConstant: 16).isActive = true
-        lockView.centerYAnchor.constraint(equalTo: centerYAnchor).isActive =
-            true
-        lockView.leftAnchor.constraint(equalTo: leftAnchor, constant: 6)
-            .isActive = true
+        lockView.activateConstraints([
+            .left: .view(self, constant: 5),
+            .centerY: .view(self),
+            .width: .constant(16),
+            .height: .constant(16),
+        ])
 
         // Add the title view
         addSubview(addressField)
-        addressField.leftAnchor.constraint(
-            equalTo: lockView.rightAnchor, constant: 4
-        ).isActive = true
-        addressField.centerYAnchor.constraint(equalTo: centerYAnchor).isActive =
-            true
-        addressField.rightAnchor.constraint(
-            equalTo: rightAnchor
-        ).isActive = true
+        addressField.activateConstraints([
+            .leftRight: .view(lockView, constant: 4),
+            .right: .view(self),
+            .centerY: .view(self),
+        ])
         //addressField.alphaValue = 0.6
 
         // Configure lock button action

@@ -74,24 +74,16 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         tabStackView.setContentCompressionResistancePriority(
             .defaultLow, for: .horizontal)
 
-        // Core layout constraints
-        NSLayoutConstraint.activate([
-            // Scroll view fills the entire view
-            scrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            scrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            scrollView.topAnchor.constraint(equalTo: topAnchor),
-            scrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
+        // Scroll view fills the entire view
+        scrollView.activateConstraints([
+            .allEdges: .view(self)
+        ])
 
-            // Stack view dimensions
-            tabStackView.leadingAnchor.constraint(
-                equalTo: clipView.leadingAnchor),
-            tabStackView.trailingAnchor.constraint(
-                equalTo: clipView.trailingAnchor),
-            tabStackView.topAnchor.constraint(equalTo: clipView.topAnchor),
+        // Stack view dimensions
+        tabStackView.activateConstraints([
+            .horizontalEdges: .view(clipView),
+            .top: .view(clipView),
             // Don't constrain the bottom - let it grow as needed
-
-            // Ensure stack view matches clip view width
-            //tabStackView.widthAnchor.constraint(equalTo: clipView.widthAnchor)
         ])
     }
 
@@ -234,8 +226,12 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         // If index is out of bounds, select the last tab
         if tabGroup.selectedIndex == index {
             // If the removed tab was selected, select the next tab or the last one
-            tabGroup.selectedIndex = min(
-                previousTabIndex, tabGroup.tabs.count - 1)
+            if previousTabIndex == -1 {
+                tabGroup.selectedIndex = tabGroup.tabs.count - 1
+            } else {
+                tabGroup.selectedIndex = min(
+                    previousTabIndex, tabGroup.tabs.count - 1)
+            }
         } else if tabGroup.selectedIndex > index {
             // If a tab before the selected one is removed, shift the selected index
             tabGroup.selectedIndex -= 1
@@ -284,12 +280,10 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
 
         tabStackView.addArrangedSubview(button)
 
-        NSLayoutConstraint.activate([
-            // Only constrain the horizontal margins
-            button.leadingAnchor.constraint(
-                equalTo: tabStackView.leadingAnchor, constant: 5),
-            button.trailingAnchor.constraint(
-                equalTo: tabStackView.trailingAnchor, constant: -3),
+        // Only constrain the horizontal margins
+        button.activateConstraints([
+            .left: .view(tabStackView, constant: 5),
+            .right: .view(tabStackView, constant: -3),
         ])
 
         // Layout the stack view to update frames
@@ -324,12 +318,10 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
 
         tabStackView.addArrangedSubview(button)
 
-        NSLayoutConstraint.activate([
-            // Only constrain the horizontal margins
-            button.leadingAnchor.constraint(
-                equalTo: tabStackView.leadingAnchor, constant: 5),
-            button.trailingAnchor.constraint(
-                equalTo: tabStackView.trailingAnchor, constant: -3),
+        // Only constrain the horizontal margins
+        button.activateConstraints([
+            .left: .view(tabStackView, constant: 5),
+            .right: .view(tabStackView, constant: -3),
         ])
     }
 }

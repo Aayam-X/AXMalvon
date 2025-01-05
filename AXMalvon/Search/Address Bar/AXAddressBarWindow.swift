@@ -71,15 +71,8 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
     }
 
     private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(
-                equalTo: scrollView.contentView.topAnchor),
-            tableView.leadingAnchor.constraint(
-                equalTo: scrollView.contentView.leadingAnchor),
-            tableView.trailingAnchor.constraint(
-                equalTo: scrollView.contentView.trailingAnchor),
-            tableView.bottomAnchor.constraint(
-                equalTo: scrollView.contentView.bottomAnchor),
+        tableView.activateConstraints([
+            .allEdges: .view(scrollView)
         ])
     }
 

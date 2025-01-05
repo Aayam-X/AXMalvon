@@ -44,27 +44,25 @@ class AXAddressBarSuggestionCellView: NSTableCellView {
             addSubview($0)
         }
 
-        NSLayoutConstraint.activate([
-            faviconImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            faviconImageView.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 8),
-            faviconImageView.widthAnchor.constraint(equalToConstant: 16),
-            faviconImageView.heightAnchor.constraint(equalToConstant: 16),
+        // Favicon Image View
+        faviconImageView.activateConstraints([
+            .centerY: .view(self),
+            .left: .view(self, constant: 8),
+            .width: .constant(16),
+            .height: .constant(16),
+        ])
 
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 2),
-            titleLabel.leadingAnchor.constraint(
-                equalTo: faviconImageView.trailingAnchor, constant: 8),
-            titleLabel.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -8),
+        // Title Label
+        titleLabel.activateConstraints([
+            .centerY: .view(self),
+            .leftRight: .view(faviconImageView, constant: 8),
+        ])
 
-            subtitleLabel.topAnchor.constraint(
-                equalTo: titleLabel.bottomAnchor, constant: 0),
-            subtitleLabel.leadingAnchor.constraint(
-                equalTo: titleLabel.leadingAnchor),
-            subtitleLabel.trailingAnchor.constraint(
-                equalTo: titleLabel.trailingAnchor),
-            subtitleLabel.bottomAnchor.constraint(
-                equalTo: bottomAnchor, constant: -2),
+        // Subtitle Label
+        subtitleLabel.activateConstraints([
+            .centerY: .view(self),
+            .right: .view(self),
+            .leftRight: .view(titleLabel, constant: 3),
         ])
     }
 
@@ -83,12 +81,6 @@ class AXAddressBarSuggestionCellView: NSTableCellView {
         titleLabel.stringValue = title
         subtitleLabel.stringValue = subtitle ?? ""
         subtitleLabel.isHidden = subtitle == nil
-
-        // Adjust constraints based on whether we have a subtitle
-        if subtitle == nil {
-            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor)
-                .isActive = true
-        }
     }
 
     // MARK: - Mouse Handling

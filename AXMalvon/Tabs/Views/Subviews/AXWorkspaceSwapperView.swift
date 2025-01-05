@@ -134,35 +134,31 @@ class AXWorkspaceSwapperView: NSView {
     }
 
     private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            // Title constraints
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 10),
-            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
-            titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
+        // Title constraints
+        titleLabel.activateConstraints([
+            .top: .view(self, constant: 10),
+            .horizontalEdges: .view(self),
+        ])
 
-            // Add Button constraints (top right corner)
-            addButton.topAnchor.constraint(equalTo: topAnchor, constant: 10),
-            addButton.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -10),
-            addButton.widthAnchor.constraint(equalToConstant: 30),
-            addButton.heightAnchor.constraint(equalToConstant: 30),
+        // Add Button constraints (top right corner)
+        addButton.activateConstraints([
+            .top: .view(self, constant: 10),
+            .right: .view(self, constant: -10),
+            .width: .constant(30),
+            .height: .constant(30),
+        ])
 
+        tabGroupScrollView.activateConstraints([
             // Table View Scroll View constraints
-            tabGroupScrollView.topAnchor.constraint(
-                equalTo: titleLabel.bottomAnchor, constant: 20),
-            tabGroupScrollView.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 10),
-            tabGroupScrollView.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -10),
-            tabGroupScrollView.heightAnchor.constraint(equalToConstant: 200),  // Adjust height as needed
+            .topBottom: .view(titleLabel, constant: 20),
+            .horizontalEdges: .view(self, constant: 10),
+            .height: .constant(200),
+        ])
 
-            // Profile Navigation Stack View constraints
-            profileNavigationStackView.bottomAnchor.constraint(
-                equalTo: bottomAnchor, constant: -10),
-            profileNavigationStackView.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 10),
-            profileNavigationStackView.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -10),
+        // Profile Navigation Stack View constraints
+        profileNavigationStackView.activateConstraints([
+            .bottom: .view(self, constant: -10),
+            .horizontalEdges: .view(self, constant: 10),
         ])
     }
 
@@ -300,27 +296,26 @@ class AXWorkspaceTabGroupCell: NSTableCellView {
         addSubview(nameLabel)
         addSubview(divider)
 
-        // Set up constraints
-        NSLayoutConstraint.activate([
-            // Icon constraints
-            iconImageView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            iconImageView.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 5),
-            iconImageView.widthAnchor.constraint(equalToConstant: 30),
-            iconImageView.heightAnchor.constraint(equalToConstant: 30),
+        // Icon constraints
+        iconImageView.activateConstraints([
+            .centerY: .view(self),
+            .left: .view(self, constant: 5),
+            .width: .constant(30),
+            .height: .constant(30),
+        ])
 
-            // Label constraints
-            nameLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-            nameLabel.leadingAnchor.constraint(
-                equalTo: iconImageView.trailingAnchor, constant: 5),
-            nameLabel.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -5),
+        // Label constraints
+        nameLabel.activateConstraints([
+            .centerY: .view(self),
+            .leftRight: .view(iconImageView, constant: 5),
+            .right: .view(self, constant: -5),
+        ])
 
-            // Divider constraints
-            divider.heightAnchor.constraint(equalToConstant: 1),
-            divider.leadingAnchor.constraint(equalTo: leadingAnchor),
-            divider.trailingAnchor.constraint(equalTo: trailingAnchor),
-            divider.bottomAnchor.constraint(equalTo: bottomAnchor),
+        // Divider constraints
+        divider.activateConstraints([
+            .horizontalEdges: .view(self),
+            .bottom: .view(self),
+            .height: .constant(1),
         ])
     }
 

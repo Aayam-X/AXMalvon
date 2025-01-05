@@ -85,12 +85,12 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
             ?? NSImage(
                 systemSymbolName: "moon.fill", accessibilityDescription: nil)
         addSubview(closeButton)
-        NSLayoutConstraint.activate([
-            closeButton.centerYAnchor.constraint(equalTo: centerYAnchor),
-            closeButton.leftAnchor.constraint(
-                equalTo: leftAnchor, constant: 10),
-            closeButton.widthAnchor.constraint(equalToConstant: 20),
-            closeButton.heightAnchor.constraint(equalToConstant: 20),
+
+        closeButton.activateConstraints([
+            .centerY: .view(self),
+            .left: .view(self, constant: 10),
+            .width: .constant(20),
+            .height: .constant(20),
         ])
         closeButton.target = self
         closeButton.action = #selector(closeTab)
@@ -103,12 +103,11 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
         titleView.lineBreakMode = .byTruncatingTail
         titleView.textColor = .textColor
         addSubview(titleView)
-        NSLayoutConstraint.activate([
-            titleView.leftAnchor.constraint(
-                equalTo: closeButton.rightAnchor, constant: 5),
-            titleView.centerYAnchor.constraint(equalTo: centerYAnchor),
-            titleView.rightAnchor.constraint(
-                equalTo: rightAnchor, constant: -7),
+
+        titleView.activateConstraints([
+            .leftRight: .view(closeButton, constant: 5),
+            .centerY: .view(self),
+            .right: .view(self, constant: -7),
         ])
     }
 

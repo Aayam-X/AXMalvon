@@ -66,25 +66,24 @@ class AXGestureView: NSView {
 
         tabGroupInfoViewLeftConstraint = tabGroupInfoView.leftAnchor.constraint(
             equalTo: leftAnchor, constant: 72)
-        NSLayoutConstraint.activate([
-            tabGroupInfoView.rightAnchor.constraint(equalTo: rightAnchor),
-            tabGroupInfoView.topAnchor.constraint(
-                equalTo: topAnchor, constant: 8),
-            tabGroupInfoViewLeftConstraint!,
+
+        tabGroupInfoView.activateConstraints([
+            .right: .view(self),
+            .top: .view(self, constant: 8),
         ])
+        tabGroupInfoViewLeftConstraint!.isActive = true
 
         // Search Button
         searchButton.translatesAutoresizingMaskIntoConstraints = false
         searchButton.title = ""
         searchButton.target = self
         addSubview(searchButton)
-        NSLayoutConstraint.activate([
-            searchButton.bottomAnchor.constraint(equalTo: bottomAnchor),
-            searchButton.leftAnchor.constraint(
-                equalTo: leftAnchor, constant: 5),
-            searchButton.rightAnchor.constraint(
-                equalTo: rightAnchor, constant: -7),
-            searchButton.heightAnchor.constraint(equalToConstant: 33),
+
+        searchButton.activateConstraints([
+            .bottom: .view(self),
+            .left: .view(self, constant: 5),
+            .right: .view(self, constant: -7),
+            .height: .constant(33),
         ])
     }
 

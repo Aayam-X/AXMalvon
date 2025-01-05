@@ -54,38 +54,36 @@ class AXSiteEditSheet: NSViewController {
                 view.addSubview($0)
             }
 
-        NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(
-                equalTo: view.topAnchor, constant: 20),
-            titleLabel.leadingAnchor.constraint(
-                equalTo: view.leadingAnchor, constant: 20),
+        titleLabel.activateConstraints([
+            .top: .view(view, constant: 20),
+            .left: .view(view, constant: 20),
+        ])
 
-            titleField.topAnchor.constraint(equalTo: titleLabel.topAnchor),
-            titleField.leadingAnchor.constraint(
-                equalTo: titleLabel.trailingAnchor, constant: 10),
-            titleField.trailingAnchor.constraint(
-                equalTo: view.trailingAnchor, constant: -20),
+        titleField.activateConstraints([
+            .top: .view(titleLabel),
+            .leftRight: .view(titleLabel, constant: 10),
+            .right: .view(view, constant: -20),
+        ])
 
-            urlLabel.topAnchor.constraint(
-                equalTo: titleField.bottomAnchor, constant: 20),
-            urlLabel.leadingAnchor.constraint(
-                equalTo: titleLabel.leadingAnchor),
+        urlLabel.activateConstraints([
+            .left: .view(view, constant: 20),
+            .topBottom: .view(titleField, constant: 20),
+        ])
 
-            urlField.topAnchor.constraint(equalTo: urlLabel.topAnchor),
-            urlField.leadingAnchor.constraint(
-                equalTo: urlLabel.trailingAnchor, constant: 10),
-            urlField.trailingAnchor.constraint(
-                equalTo: titleField.trailingAnchor),
+        urlField.activateConstraints([
+            .top: .view(urlLabel),
+            .leftRight: .view(urlLabel, constant: 10),
+            .right: .view(titleField),
+        ])
 
-            saveButton.topAnchor.constraint(
-                equalTo: urlField.bottomAnchor, constant: 20),
-            saveButton.trailingAnchor.constraint(
-                equalTo: view.trailingAnchor, constant: -20),
+        saveButton.activateConstraints([
+            .topBottom: .view(urlField, constant: 20),
+            .right: .view(view, constant: -20),
+        ])
 
-            cancelButton.centerYAnchor.constraint(
-                equalTo: saveButton.centerYAnchor),
-            cancelButton.trailingAnchor.constraint(
-                equalTo: saveButton.leadingAnchor, constant: -10),
+        cancelButton.activateConstraints([
+            .centerY: .view(saveButton),
+            .rightLeft: .view(saveButton, constant: -10),
         ])
     }
 

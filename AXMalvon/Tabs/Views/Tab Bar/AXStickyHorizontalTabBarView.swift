@@ -49,24 +49,24 @@ class AXStickyHorizontalTabBarView: NSView {
         leftStickyTab.translatesAutoresizingMaskIntoConstraints = false
         rightStickyTab.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.activate([
-            self.heightAnchor.constraint(equalToConstant: 40),
+        self.activateConstraints([
+            .height: .constant(40)
+        ])
 
-            // Fill entire superview
-            tabBarView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tabBarView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            tabBarView.topAnchor.constraint(equalTo: topAnchor),
-            tabBarView.bottomAnchor.constraint(equalTo: bottomAnchor),
+        tabBarView.activateConstraints([
+            .allEdges: .view(self)
+        ])
 
-            // Configure left sticky tab
-            leftStickyTab.leadingAnchor.constraint(equalTo: leadingAnchor),
-            leftStickyTab.centerYAnchor.constraint(equalTo: centerYAnchor),
-            leftStickyTab.widthAnchor.constraint(equalToConstant: 90),
+        leftStickyTab.activateConstraints([
+            .left: .view(self),
+            .centerY: .view(self),
+            .width: .constant(90),
+        ])
 
-            // Configure right sticky tab
-            rightStickyTab.trailingAnchor.constraint(equalTo: trailingAnchor),
-            rightStickyTab.centerYAnchor.constraint(equalTo: centerYAnchor),
-            rightStickyTab.widthAnchor.constraint(equalToConstant: 90),
+        rightStickyTab.activateConstraints([
+            .right: .view(self),
+            .centerY: .view(self),
+            .width: .constant(90),
         ])
 
         tabBarView.stickyDelegate = self

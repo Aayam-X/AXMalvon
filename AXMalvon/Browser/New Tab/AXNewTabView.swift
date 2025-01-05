@@ -105,25 +105,22 @@ class AXNewTabView: NSView {
     }
 
     private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            // Visual Effect View
-            visualEffectView.topAnchor.constraint(equalTo: topAnchor),
-            visualEffectView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            visualEffectView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            visualEffectView.trailingAnchor.constraint(equalTo: trailingAnchor),
+        // Visual Effect View
+        visualEffectView.activateConstraints([
+            .allEdges: .view(self)
+        ])
 
-            // Header Label
-            headerLabel.topAnchor.constraint(equalTo: topAnchor, constant: 20),
-            headerLabel.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 20),  // Align to left
+        // Header Label
+        headerLabel.activateConstraints([
+            .top: .view(self, constant: 20),
+            .left: .view(self, constant: 20),
+        ])
 
-            // Scroll View
-            tabGroupScrollView.topAnchor.constraint(
-                equalTo: headerLabel.bottomAnchor, constant: 20),
-            tabGroupScrollView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            tabGroupScrollView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tabGroupScrollView.trailingAnchor.constraint(
-                equalTo: trailingAnchor),
+        // Scroll View
+        tabGroupScrollView.activateConstraints([
+            .top: .view(headerLabel, constant: 20),
+            .bottom: .view(self),
+            .horizontalEdges: .view(self),
         ])
     }
 

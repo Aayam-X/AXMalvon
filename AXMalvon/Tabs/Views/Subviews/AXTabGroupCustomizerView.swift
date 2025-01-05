@@ -90,41 +90,37 @@ class AXTabGroupCustomizerView: NSView, NSTextFieldDelegate {
     }
 
     private func setupConstraints() {
-        NSLayoutConstraint.activate([
-            tabGroupLabel.topAnchor.constraint(
-                equalTo: topAnchor, constant: 10),
-            tabGroupLabel.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 10),
+        tabGroupLabel.activateConstraints([
+            .top: .view(self, constant: 10),
+            .left: .view(self, constant: 10),
+        ])
 
-            tabGroupNameTextField.topAnchor.constraint(
-                equalTo: tabGroupLabel.bottomAnchor, constant: 5),
-            tabGroupNameTextField.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 10),
-            tabGroupNameTextField.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -10),
+        tabGroupNameTextField.activateConstraints([
+            .topBottom: .view(tabGroupLabel, constant: 5),
+            .left: .view(self, constant: 10),
+            .right: .view(self, constant: -10),
+        ])
 
-            iconLabel.topAnchor.constraint(
-                equalTo: tabGroupNameTextField.bottomAnchor, constant: 10),
-            iconLabel.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 10),
+        iconLabel.activateConstraints([
+            .topBottom: .view(tabGroupNameTextField, constant: 10),
+            .left: .view(self, constant: 10),
+        ])
 
-            iconDropdown.topAnchor.constraint(
-                equalTo: iconLabel.bottomAnchor, constant: 5),
-            iconDropdown.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 10),
-            iconDropdown.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -10),
+        iconDropdown.activateConstraints([
+            .topBottom: .view(iconLabel, constant: 5),
+            .left: .view(self, constant: 10),
+            .right: .view(self, constant: -10),
+        ])
 
-            colorLabel.topAnchor.constraint(
-                equalTo: iconDropdown.bottomAnchor, constant: 10),
-            colorLabel.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 10),
+        colorLabel.activateConstraints([
+            .topBottom: .view(iconDropdown, constant: 10),
+            .left: .view(self, constant: 10),
+        ])
 
-            colorWell.topAnchor.constraint(
-                equalTo: colorLabel.bottomAnchor, constant: 5),
-            colorWell.leftAnchor.constraint(equalTo: leftAnchor, constant: 10),
-            colorWell.rightAnchor.constraint(
-                equalTo: rightAnchor, constant: -10),
+        colorWell.activateConstraints([
+            .topBottom: .view(colorLabel, constant: 5),
+            .left: .view(self, constant: 10),
+            .right: .view(self, constant: -10),
         ])
     }
 

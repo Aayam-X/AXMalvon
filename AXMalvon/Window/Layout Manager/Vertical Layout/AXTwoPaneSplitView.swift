@@ -68,26 +68,25 @@ class AXTwoPaneSplitView: NSView {
         dividerWidthConstraint = dividerView.widthAnchor.constraint(
             equalToConstant: dividerWidth)
 
-        NSLayoutConstraint.activate([
-            // Left view constraints
-            leftView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            leftView.topAnchor.constraint(equalTo: topAnchor),
-            leftView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            leftViewWidthConstraint!,
+        // Left view constraints
+        leftView.activateConstraints([
+            .left: .view(self),
+            .verticalEdges: .view(self),
+        ])
+        leftViewWidthConstraint!.isActive = true
 
-            // Divider view constraints
-            dividerView.leadingAnchor.constraint(
-                equalTo: leftView.trailingAnchor),
-            dividerView.topAnchor.constraint(equalTo: topAnchor),
-            dividerView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            dividerWidthConstraint!,
+        // Divider view constraints
+        dividerView.activateConstraints([
+            .leftRight: .view(leftView),
+            .verticalEdges: .view(self),
+        ])
+        dividerWidthConstraint!.isActive = true
 
-            // Right view constraints
-            rightView.leadingAnchor.constraint(
-                equalTo: dividerView.trailingAnchor),
-            rightView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            rightView.topAnchor.constraint(equalTo: topAnchor),
-            rightView.bottomAnchor.constraint(equalTo: bottomAnchor),
+        // Right view constraints
+        rightView.activateConstraints([
+            .leftRight: .view(dividerView),
+            .right: .view(self),
+            .verticalEdges: .view(self),
         ])
     }
 

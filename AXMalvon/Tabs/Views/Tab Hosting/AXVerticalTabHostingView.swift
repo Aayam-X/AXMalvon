@@ -104,46 +104,41 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
         addSubview(tabBarView)
         addSubview(bottomLine)
 
-        NSLayoutConstraint.activate([
-            // Gesture View
-            gestureView.topAnchor.constraint(equalTo: topAnchor),
-            gestureView.leftAnchor.constraint(equalTo: leftAnchor),
-            gestureView.rightAnchor.constraint(
-                equalTo: rightAnchor, constant: 2),
-            gestureView.heightAnchor.constraint(equalToConstant: 80),
+        gestureView.activateConstraints([
+            .top: .view(self),
+            .left: .view(self),
+            .right: .view(self, constant: 2),
+            .height: .constant(80),
+        ])
 
-            // Divider between Search Bar and Tab
-            bottomLine.topAnchor.constraint(
-                equalTo: gestureView.bottomAnchor, constant: 10),
-            bottomLine.leftAnchor.constraint(equalTo: leftAnchor),
-            bottomLine.rightAnchor.constraint(
-                equalTo: rightAnchor),
-            bottomLine.heightAnchor.constraint(equalToConstant: 2),
+        bottomLine.activateConstraints([
+            .horizontalEdges: .view(self),
+            .bottom: .view(gestureView, constant: 10),
+            .height: .constant(2),
+        ])
 
-            // Tab Bar View
-            tabBarView.topAnchor.constraint(
-                equalTo: bottomLine.bottomAnchor, constant: 8),
-            tabBarView.leftAnchor.constraint(equalTo: leftAnchor),
-            tabBarView.rightAnchor.constraint(
-                equalTo: rightAnchor, constant: -2),
-            tabBarView.bottomAnchor.constraint(
-                equalTo: addNewTabButton.topAnchor, constant: -2),
+        // Tab Bar View
+        tabBarView.activateConstraints([
+            .left: .view(self),
+            .right: .view(self, constant: -2),
+            .top: .view(bottomLine, constant: 8),
+            .bottom: .view(addNewTabButton, constant: -2),
+        ])
 
-            // Workspace Swapper Button
-            workspaceSwapperButton.bottomAnchor.constraint(
-                equalTo: bottomAnchor, constant: -9),
-            workspaceSwapperButton.leftAnchor.constraint(
-                equalTo: leftAnchor, constant: 10),
-            workspaceSwapperButton.heightAnchor.constraint(equalToConstant: 30),
-            workspaceSwapperButton.widthAnchor.constraint(equalToConstant: 30),
+        // Workspace Swapper Button
+        workspaceSwapperButton.activateConstraints([
+            .bottom: .view(self, constant: -9),
+            .left: .view(self, constant: 10),
+            .height: .constant(30),
+            .width: .constant(30),
+        ])
 
-            // New Tab Button
-            addNewTabButton.bottomAnchor.constraint(
-                equalTo: bottomAnchor, constant: -9),
-            addNewTabButton.rightAnchor.constraint(
-                equalTo: rightAnchor, constant: -10),
-            addNewTabButton.heightAnchor.constraint(equalToConstant: 30),
-            addNewTabButton.widthAnchor.constraint(equalToConstant: 30),
+        // New Tab Button
+        addNewTabButton.activateConstraints([
+            .right: .view(self, constant: -10),
+            .bottom: .view(self, constant: -9),
+            .height: .constant(30),
+            .width: .constant(30),
         ])
 
         // Mouse Tracking Area

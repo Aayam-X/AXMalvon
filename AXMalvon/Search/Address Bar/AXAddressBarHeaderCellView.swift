@@ -28,12 +28,9 @@ class AXAddressBarSectionHeaderView: NSTableCellView {
 
         addSubview(titleLabel)
 
-        NSLayoutConstraint.activate([
-            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
-            titleLabel.leadingAnchor.constraint(
-                equalTo: leadingAnchor, constant: 8),
-            titleLabel.trailingAnchor.constraint(
-                equalTo: trailingAnchor, constant: -8),
+        titleLabel.activateConstraints([
+            .centerY: .view(self),
+            .horizontalEdges: .view(self, constant: 8),
         ])
     }
 }

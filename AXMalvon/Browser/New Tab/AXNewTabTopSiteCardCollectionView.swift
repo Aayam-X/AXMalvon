@@ -39,19 +39,17 @@ class AXNewTabTopSiteCardCollectionViewItem: NSCollectionViewItem {
         view.addSubview(myImageView)
         view.addSubview(titleLabel)
 
-        NSLayoutConstraint.activate([
-            myImageView.topAnchor.constraint(
-                equalTo: view.topAnchor, constant: 10),
-            myImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            myImageView.widthAnchor.constraint(equalToConstant: 60),  // Larger image
-            myImageView.heightAnchor.constraint(equalToConstant: 60),
+        myImageView.activateConstraints([
+            .top: .view(view, constant: 10),
+            .centerX: .view(view),
+            .width: .constant(60),
+            .height: .constant(60),
+        ])
 
-            titleLabel.topAnchor.constraint(
-                equalTo: myImageView.bottomAnchor, constant: 10),
-            titleLabel.leadingAnchor.constraint(
-                equalTo: view.leadingAnchor, constant: 5),
-            titleLabel.trailingAnchor.constraint(
-                equalTo: view.trailingAnchor, constant: -5),
+        titleLabel.activateConstraints([
+            .topBottom: .view(myImageView, constant: 10),
+            .left: .view(view, constant: 5),
+            .right: .view(view, constant: -5),
         ])
     }
 
