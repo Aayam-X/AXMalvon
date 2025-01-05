@@ -72,6 +72,36 @@ extension AXWindow {
         self.close()
     }
 
+    @IBAction func switchViewLayout(_ sender: Any?) {
+        usesVerticalTabs.toggle()
+
+        layoutManager.removeLayout(in: self)
+
+        let newTabBarView: AXTabBarViewTemplate =
+            usesVerticalTabs
+            ? AXVerticalTabBarView(tabGroup: currentTabGroup)
+            : AXHorizontalTabBarView(tabGroup: currentTabGroup)
+        self.tabBarView = newTabBarView
+
+        let newLayoutManager =
+            usesVerticalTabs
+            ? AXVerticalLayoutManager(tabBarView: newTabBarView)
+            : AXHorizontalLayoutManager(tabBarView: newTabBarView)
+        self.layoutManager = newLayoutManager
+
+        layoutManager.tabHostingDelegate = self
+        layoutManager.setupLayout(in: self)
+        layoutManager.searchButton.delegate = self
+        tabBarView.delegate = self
+        layoutManager.containerView.delegate = self
+
+        self.setFrame(
+            AXWindow.updateWindowFrame(), display: true, animate: true)
+
+        currentTabGroupIndex = 0
+        self.switchToTabGroup(currentTabGroup)
+    }
+
     @IBAction func showHideSidebar(_ sender: Any) {
         guard let layoutManager = layoutManager as? AXVerticalLayoutManager
         else { return }

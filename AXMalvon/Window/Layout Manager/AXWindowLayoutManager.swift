@@ -25,6 +25,8 @@ protocol AXWindowLayoutManaging {
     func handleTabGroupInfoViewLeftDown()
     func handleTabGroupInfoViewRightDown()
 
+    func removeLayout(in window: AXWindow)
+
     func updatedTabGroupColor(in window: AXWindow, color: NSColor)
 }
 
@@ -56,6 +58,10 @@ class AXBaseLayoutManager: AXWindowLayoutManaging {
     }
 
     func updateLayout() {
+        // Base implementation does nothing
+    }
+
+    func removeLayout(in window: AXWindow) {
         // Base implementation does nothing
     }
 
@@ -99,6 +105,12 @@ class AXHorizontalLayoutManager: AXBaseLayoutManager {
 
         window.contentView = containerView
     }
+
+    override func removeLayout(in window: AXWindow) {
+        window.toolbar = nil
+
+        containerView.removeFromSuperview()
+    }
 }
 
 // Vertical layout manager using NSView
@@ -119,15 +131,9 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
 
         // Add tint view on top of the visual effect view
         visualEffectView.addSubview(visualEffectTintView)
-        NSLayoutConstraint.activate([
-            visualEffectTintView.leadingAnchor.constraint(
-                equalTo: visualEffectView.leadingAnchor),
-            visualEffectTintView.trailingAnchor.constraint(
-                equalTo: visualEffectView.trailingAnchor),
-            visualEffectTintView.topAnchor.constraint(
-                equalTo: visualEffectView.topAnchor),
-            visualEffectTintView.bottomAnchor.constraint(
-                equalTo: visualEffectView.bottomAnchor),
+
+        visualEffectTintView.activateConstraints([
+            .allEdges: .view(visualEffectView)
         ])
 
         return visualEffectView
@@ -152,6 +158,19 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
         verticalHostingView
     }
 
+    override func removeLayout(in window: AXWindow) {
+        window.styleMask.remove(.fullSizeContentView)
+        containerView.isVertical = false
+
+        containerView.removeFromSuperview()
+        searchButton.removeFromSuperview()
+        tabGroupInfoView.removeFromSuperview()
+        tabBarView.removeFromSuperview()
+        verticalHostingView.removeFromSuperview()
+
+        visualEffectView.removeFromSuperview()
+    }
+
     override func setupLayout(in window: AXWindow) {
         window.styleMask.insert(.fullSizeContentView)
 
@@ -161,15 +180,11 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
         visualEffectView.addSubview(splitView)
         splitView.translatesAutoresizingMaskIntoConstraints = false
 
-        NSLayoutConstraint.activate([
-            splitView.topAnchor.constraint(equalTo: visualEffectView.topAnchor),
-            splitView.leftAnchor.constraint(
-                equalTo: visualEffectView.leftAnchor),
-            splitView.bottomAnchor.constraint(
-                equalTo: visualEffectView.bottomAnchor),
-            splitView.rightAnchor.constraint(
-                equalTo: visualEffectView.rightAnchor),
+        splitView.activateConstraints([
+            .allEdges: .view(visualEffectView)
         ])
+
+        mxPrint("Container View \(containerView)")
 
         window.titlebarAppearsTransparent = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {

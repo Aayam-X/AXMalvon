@@ -430,6 +430,12 @@
                                     <action selector="showHideSidebar:" target="-1" id="uYd-zw-rxw"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Switch View Layout" id="xHT-wj-GRB">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="switchViewLayout:" target="-1" id="kGN-5K-Bmu"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Enter Full Screen" keyEquivalent="f" id="S7n-z9-xAq">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES" command="YES"/>
                                 <connections>

@@ -85,21 +85,6 @@ struct GeneralSettingsView: View {
     }
 }
 
-struct AppearanceSettingsView: View {
-    @AppStorage("verticalTabs")
-    private var verticalTabs = false
-
-    var body: some View {
-        Text("Appearance Settings")
-            .font(.largeTitle)
-            .padding()
-
-        Toggle(isOn: $verticalTabs) {
-            Text("Vertical Tabs (Relaunch Required)")
-        }
-    }
-}
-
 struct NotificationsSettingsView: View {
     var body: some View {
         Text("Notifications Settings")
