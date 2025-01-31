@@ -15,14 +15,23 @@ extension AXWindow: AXWebContainerViewDelegate {
         makeFirstResponder(layoutManager.searchButton.addressField)
     }
 
-    func webContainerViewRequestsCurrentTab(_ url: URL?) -> AXTab {
+    func webContainerUserDidClickStartPageItem(with url: URL?) {
         let currentTabGroup = currentTabGroup
+        let tab: AXTab
 
         if currentTabGroup.tabs.isEmpty {
-            return currentTabGroup.addTab(url: url!, currentConfiguration)
+            tab = currentTabGroup.addTab(url: url!, currentConfiguration)
+        } else {
+            tab = currentTabGroup.tabs[currentTabGroup.selectedIndex]
+            tab.url = url!
+            tab.isEmpty = false
+            let webView = AXWebView(
+                frame: .zero, configuration: tab.webConfiguration)
+            tab.view = webView
+            webView.load(URLRequest(url: url!))
         }
 
-        return currentTabGroup.tabs[currentTabGroup.selectedIndex]
+        layoutManager.containerView.removeStartPageThenSelect(tab: tab)
     }
 
     func webContainerViewChangedURL(to url: URL) {

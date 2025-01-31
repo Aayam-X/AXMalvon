@@ -79,7 +79,7 @@ class AXVerticalTabButton: NSButton, AXTabButton {
                 self.onWebViewInitializationListenerHandler
         }
 
-        if tab?._webView == nil {
+        if tab?.titleObserver == nil {
             titleView.stringValue = "New Tab"
         }
     }

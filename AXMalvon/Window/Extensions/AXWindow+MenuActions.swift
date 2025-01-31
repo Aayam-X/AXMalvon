@@ -11,6 +11,10 @@ import Carbon.HIToolbox
 import WebKit
 
 extension AXWindow {
+    @IBAction func testMenuButton(_ sender: Any?) {
+        layoutManager.containerView.updateView(tabGroup: self.currentTabGroup)
+    }
+
     @IBAction func toggleSearchField(_ sender: Any?) {
         makeFirstResponder(layoutManager.searchButton.addressField)
     }

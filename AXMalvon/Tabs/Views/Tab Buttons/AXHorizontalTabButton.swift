@@ -9,7 +9,7 @@
 import AppKit
 
 class AXHorizontalTabButton: NSButton, AXTabButton {
-    var tab: AXTab!
+    unowned var tab: AXTab!
     var delegate: (any AXTabButtonDelegate)?
 
     private var closeButton = AXHorizontalTabCloseButton()
@@ -58,7 +58,7 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
                 self.onWebViewInitializationListenerHandler
         }
 
-        if tab?._webView == nil {
+        if tab?.titleObserver == nil {
             titleView.stringValue = "New Tab"
         }
     }

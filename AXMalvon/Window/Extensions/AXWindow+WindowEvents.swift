@@ -63,7 +63,7 @@ extension AXWindow: NSWindowDelegate {
                 tabGroup.tabs.forEach { tab in
                     tab.stopTitleObservation()
                 }
-                tabGroup.tabs.removeAll()
+                tabGroup.tabContentView.tabViewItems.removeAll()
                 tabGroup.tabBarView?.removeFromSuperview()
                 tabGroup.tabBarView = nil
             }

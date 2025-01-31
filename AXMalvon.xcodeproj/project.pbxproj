@@ -7,76 +7,31 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		EDA45CC72D17303D00779C51 /* license.txt in Resources */ = {isa = PBXBuildFile; fileRef = ED9D55AD2CF155A1000E6319 /* license.txt */; };
-		EDA45CC92D17303D00779C51 /* Malvon-Updater.app in Copy Malvon-Updater */ = {isa = PBXBuildFile; fileRef = ED1522C12CFABCFE00941684 /* Malvon-Updater.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		EDC895F92D4C613900DC0A68 /* license.txt in Resources */ = {isa = PBXBuildFile; fileRef = EDC895F72D4C613900DC0A68 /* license.txt */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		ED1522C02CFABCFE00941684 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = ED1522BC2CFABCFD00941684 /* Malvon-Updater.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = ED1522AA2CFABCFC00941684;
-			remoteInfo = "Malvon-Updater";
-		};
-		EDA45CC32D17303D00779C51 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = ED1522BC2CFABCFD00941684 /* Malvon-Updater.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = ED1522A92CFABCFC00941684;
-			remoteInfo = "Malvon-Updater";
-		};
-/* End PBXContainerItemProxy section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		EDA45CC82D17303D00779C51 /* Copy Malvon-Updater */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 12;
-			dstPath = "";
-			dstSubfolderSpec = 6;
-			files = (
-				EDA45CC92D17303D00779C51 /* Malvon-Updater.app in Copy Malvon-Updater */,
-			);
-			name = "Copy Malvon-Updater";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		ED1522BC2CFABCFD00941684 /* Malvon-Updater.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Malvon-Updater.xcodeproj"; path = "Malvon-Updater/Malvon-Updater.xcodeproj"; sourceTree = "<group>"; };
-		ED3AEFE22CDAED2F002AE6CC /* Malvon Debug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Malvon Debug.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		ED3BA1482CE11E480094F6E9 /* Checklist.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Checklist.md; sourceTree = "<group>"; };
-		ED9D55AD2CF155A1000E6319 /* license.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = license.txt; sourceTree = "<group>"; };
-		EDA45CCD2D17303D00779C51 /* Malvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Malvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EDC895362D4C5FDA00DC0A68 /* AXMalvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AXMalvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EDC895F62D4C613900DC0A68 /* Checklist.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Checklist.md; sourceTree = "<group>"; };
+		EDC895F72D4C613900DC0A68 /* license.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = license.txt; sourceTree = "<group>"; };
+		EDC896E62D4C620B00DC0A68 /* Malvon-Updater.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "Malvon-Updater.xcodeproj"; path = "Malvon-Updater/Malvon-Updater.xcodeproj"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		ED3BA1422CE1074A0094F6E9 /* Exceptions for "AXMalvon" folder in "Malvon Debug" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				About/Acknowledgements.txt,
-				AdBlock/contentBlocker.json,
-				Info.plist,
-				Search/readme.txt,
-			);
-			target = ED3AEFE12CDAED2F002AE6CC /* Malvon Debug */;
-		};
-		EDA45CD02D17303D00779C51 /* Exceptions for "AXMalvon" folder in "Malvon Release" target */ = {
+		ED28E5052D4C6767009E571E /* Exceptions for "AXMalvon" folder in "AXMalvon" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				Search/readme.txt,
 			);
-			target = EDA45CC12D17303D00779C51 /* Malvon Release */;
+			target = EDC895352D4C5FDA00DC0A68 /* AXMalvon */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		ED3AEFE42CDAED2F002AE6CC /* AXMalvon */ = {
+		EDC895382D4C5FDA00DC0A68 /* AXMalvon */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				ED3BA1422CE1074A0094F6E9 /* Exceptions for "AXMalvon" folder in "Malvon Debug" target */,
-				EDA45CD02D17303D00779C51 /* Exceptions for "AXMalvon" folder in "Malvon Release" target */,
+				ED28E5052D4C6767009E571E /* Exceptions for "AXMalvon" folder in "AXMalvon" target */,
 			);
 			path = AXMalvon;
 			sourceTree = "<group>";
@@ -84,7 +39,7 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		EDA45CC52D17303D00779C51 /* Frameworks */ = {
+		EDC895332D4C5FDA00DC0A68 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -94,30 +49,28 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		ED1522BD2CFABCFD00941684 /* Products */ = {
+		EDC8952D2D4C5FDA00DC0A68 = {
 			isa = PBXGroup;
 			children = (
-				ED1522C12CFABCFE00941684 /* Malvon-Updater.app */,
+				EDC895382D4C5FDA00DC0A68 /* AXMalvon */,
+				EDC895372D4C5FDA00DC0A68 /* Products */,
+				EDC895F62D4C613900DC0A68 /* Checklist.md */,
+				EDC895F72D4C613900DC0A68 /* license.txt */,
+				EDC896E62D4C620B00DC0A68 /* Malvon-Updater.xcodeproj */,
+			);
+			sourceTree = "<group>";
+		};
+		EDC895372D4C5FDA00DC0A68 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				EDC895362D4C5FDA00DC0A68 /* AXMalvon.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		ED3AEFD92CDAED2F002AE6CC = {
+		EDC896E72D4C620B00DC0A68 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				ED1522BC2CFABCFD00941684 /* Malvon-Updater.xcodeproj */,
-				ED3BA1482CE11E480094F6E9 /* Checklist.md */,
-				ED9D55AD2CF155A1000E6319 /* license.txt */,
-				ED3AEFE42CDAED2F002AE6CC /* AXMalvon */,
-				ED3AEFE32CDAED2F002AE6CC /* Products */,
-			);
-			sourceTree = "<group>";
-		};
-		ED3AEFE32CDAED2F002AE6CC /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				ED3AEFE22CDAED2F002AE6CC /* Malvon Debug.app */,
-				EDA45CCD2D17303D00779C51 /* Malvon.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -125,137 +78,81 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		ED3AEFE12CDAED2F002AE6CC /* Malvon Debug */ = {
+		EDC895352D4C5FDA00DC0A68 /* AXMalvon */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = ED3AEFEF2CDAED30002AE6CC /* Build configuration list for PBXNativeTarget "Malvon Debug" */;
+			buildConfigurationList = EDC895432D4C5FDB00DC0A68 /* Build configuration list for PBXNativeTarget "AXMalvon" */;
 			buildPhases = (
-				ED3AEFDE2CDAED2F002AE6CC /* Sources */,
-				ED3AEFE02CDAED2F002AE6CC /* Resources */,
+				EDC895322D4C5FDA00DC0A68 /* Sources */,
+				EDC895332D4C5FDA00DC0A68 /* Frameworks */,
+				EDC895342D4C5FDA00DC0A68 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				ED3AEFE42CDAED2F002AE6CC /* AXMalvon */,
+				EDC895382D4C5FDA00DC0A68 /* AXMalvon */,
 			);
-			name = "Malvon Debug";
+			name = AXMalvon;
 			packageProductDependencies = (
 			);
 			productName = AXMalvon;
-			productReference = ED3AEFE22CDAED2F002AE6CC /* Malvon Debug.app */;
-			productType = "com.apple.product-type.application";
-		};
-		EDA45CC12D17303D00779C51 /* Malvon Release */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = EDA45CCA2D17303D00779C51 /* Build configuration list for PBXNativeTarget "Malvon Release" */;
-			buildPhases = (
-				EDA45CC42D17303D00779C51 /* Sources */,
-				EDA45CC52D17303D00779C51 /* Frameworks */,
-				EDA45CC62D17303D00779C51 /* Resources */,
-				EDA45CC82D17303D00779C51 /* Copy Malvon-Updater */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				EDA45CC22D17303D00779C51 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				ED3AEFE42CDAED2F002AE6CC /* AXMalvon */,
-			);
-			name = "Malvon Release";
-			packageProductDependencies = (
-			);
-			productName = AXMalvon;
-			productReference = EDA45CCD2D17303D00779C51 /* Malvon.app */;
+			productReference = EDC895362D4C5FDA00DC0A68 /* AXMalvon.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		ED3AEFDA2CDAED2F002AE6CC /* Project object */ = {
+		EDC8952E2D4C5FDA00DC0A68 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				CLASSPREFIX = AX;
-				LastSwiftUpdateCheck = 1610;
+				LastSwiftUpdateCheck = 1620;
 				LastUpgradeCheck = 1620;
-				ORGANIZATIONNAME = "Ashwin Paudel, Aayam(X)";
 				TargetAttributes = {
-					ED3AEFE12CDAED2F002AE6CC = {
-						CreatedOnToolsVersion = 16.1;
-						LastSwiftMigration = 1620;
-					};
-					EDA45CC12D17303D00779C51 = {
-						LastSwiftMigration = 1620;
+					EDC895352D4C5FDA00DC0A68 = {
+						CreatedOnToolsVersion = 16.2;
 					};
 				};
 			};
-			buildConfigurationList = ED3AEFDD2CDAED2F002AE6CC /* Build configuration list for PBXProject "AXMalvon" */;
+			buildConfigurationList = EDC895312D4C5FDA00DC0A68 /* Build configuration list for PBXProject "AXMalvon" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = ED3AEFD92CDAED2F002AE6CC;
+			mainGroup = EDC8952D2D4C5FDA00DC0A68;
 			minimizedProjectReferenceProxies = 1;
-			packageReferences = (
-			);
 			preferredProjectObjectVersion = 77;
-			productRefGroup = ED3AEFE32CDAED2F002AE6CC /* Products */;
+			productRefGroup = EDC895372D4C5FDA00DC0A68 /* Products */;
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = ED1522BD2CFABCFD00941684 /* Products */;
-					ProjectRef = ED1522BC2CFABCFD00941684 /* Malvon-Updater.xcodeproj */;
+					ProductGroup = EDC896E72D4C620B00DC0A68 /* Products */;
+					ProjectRef = EDC896E62D4C620B00DC0A68 /* Malvon-Updater.xcodeproj */;
 				},
 			);
 			projectRoot = "";
 			targets = (
-				ED3AEFE12CDAED2F002AE6CC /* Malvon Debug */,
-				EDA45CC12D17303D00779C51 /* Malvon Release */,
+				EDC895352D4C5FDA00DC0A68 /* AXMalvon */,
 			);
 		};
 /* End PBXProject section */
 
-/* Begin PBXReferenceProxy section */
-		ED1522C12CFABCFE00941684 /* Malvon-Updater.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = "Malvon-Updater.app";
-			remoteRef = ED1522C02CFABCFE00941684 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
-
 /* Begin PBXResourcesBuildPhase section */
-		ED3AEFE02CDAED2F002AE6CC /* Resources */ = {
+		EDC895342D4C5FDA00DC0A68 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		EDA45CC62D17303D00779C51 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				EDA45CC72D17303D00779C51 /* license.txt in Resources */,
+				EDC895F92D4C613900DC0A68 /* license.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		ED3AEFDE2CDAED2F002AE6CC /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		EDA45CC42D17303D00779C51 /* Sources */ = {
+		EDC895322D4C5FDA00DC0A68 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -264,16 +161,8 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		EDA45CC22D17303D00779C51 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = "Malvon-Updater";
-			targetProxy = EDA45CC32D17303D00779C51 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin XCBuildConfiguration section */
-		ED3AEFED2CDAED30002AE6CC /* Debug */ = {
+		EDC895412D4C5FDB00DC0A68 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -307,7 +196,6 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -327,7 +215,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.1;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -337,7 +225,7 @@
 			};
 			name = Debug;
 		};
-		ED3AEFEE2CDAED30002AE6CC /* Release */ = {
+		EDC895422D4C5FDB00DC0A68 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -371,7 +259,6 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -385,7 +272,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 15.1;
+				MACOSX_DEPLOYMENT_TARGET = 15.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -393,145 +280,55 @@
 			};
 			name = Release;
 		};
-		ED3AEFF02CDAED30002AE6CC /* Debug */ = {
+		EDC895442D4C5FDB00DC0A68 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 3TJDS4N2C3;
 				ENABLE_HARDENED_RUNTIME = NO;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AXMalvon/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Malvon needs access to your camera";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2025 Ashwin Paudel, Aayam(X). All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Malvon needs access to your microphone";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.ayaamx.AXMalvon-Debug";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
-			};
-			name = Debug;
-		};
-		ED3AEFF12CDAED30002AE6CC /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 3TJDS4N2C3;
-				ENABLE_HARDENED_RUNTIME = NO;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = AXMalvon/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Malvon needs access to your camera";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2025 Ashwin Paudel, Aayam(X). All rights reserved.";
-				INFOPLIST_KEY_NSMainNibFile = MainMenu;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Malvon needs access to your microphone";
-				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.ayaamx.AXMalvon-Debug";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ashwinpaudel.AXMalvon;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
-			name = Release;
-		};
-		EDA45CCB2D17303D00779C51 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_TEAM = 3TJDS4N2C3;
-				ENABLE_HARDENED_RUNTIME = NO;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = AXMalvon/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Malvon needs access to your camera";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2024 Ashwin Paudel, Aayam(X). All rights reserved.";
-				INFOPLIST_KEY_NSMainNibFile = MainMenu;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Malvon needs access to your microphone";
-				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/../Frameworks",
-				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ayaamx.AXMalvon;
-				PRODUCT_NAME = Malvon;
-				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.0;
-			};
 			name = Debug;
 		};
-		EDA45CCC2D17303D00779C51 /* Release */ = {
+		EDC895452D4C5FDB00DC0A68 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = 3TJDS4N2C3;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = AXMalvon/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Malvon;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Malvon needs access to your camera";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022-2024 Ashwin Paudel, Aayam(X). All rights reserved.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainNibFile = MainMenu;
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Malvon needs access to your microphone";
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.0.1;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ayaamx.AXMalvon;
-				PRODUCT_NAME = Malvon;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ashwinpaudel.AXMalvon;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 			};
@@ -540,34 +337,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		ED3AEFDD2CDAED2F002AE6CC /* Build configuration list for PBXProject "AXMalvon" */ = {
+		EDC895312D4C5FDA00DC0A68 /* Build configuration list for PBXProject "AXMalvon" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				ED3AEFED2CDAED30002AE6CC /* Debug */,
-				ED3AEFEE2CDAED30002AE6CC /* Release */,
+				EDC895412D4C5FDB00DC0A68 /* Debug */,
+				EDC895422D4C5FDB00DC0A68 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		ED3AEFEF2CDAED30002AE6CC /* Build configuration list for PBXNativeTarget "Malvon Debug" */ = {
+		EDC895432D4C5FDB00DC0A68 /* Build configuration list for PBXNativeTarget "AXMalvon" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				ED3AEFF02CDAED30002AE6CC /* Debug */,
-				ED3AEFF12CDAED30002AE6CC /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		EDA45CCA2D17303D00779C51 /* Build configuration list for PBXNativeTarget "Malvon Release" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				EDA45CCB2D17303D00779C51 /* Debug */,
-				EDA45CCC2D17303D00779C51 /* Release */,
+				EDC895442D4C5FDB00DC0A68 /* Debug */,
+				EDC895452D4C5FDB00DC0A68 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = ED3AEFDA2CDAED2F002AE6CC /* Project object */;
+	rootObject = EDC8952E2D4C5FDA00DC0A68 /* Project object */;
 }

@@ -47,6 +47,9 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
 
     private var scrollWorkItem: DispatchWorkItem?
 
+    private var lastCalculatedWidth: CGFloat = 0  // Track last tab width
+    private var lastStickyCheckPosition: CGFloat = 0  // Track last scroll position for sticky checks
+
     internal lazy var tabStackView: NSStackView = {
         let stack = NSStackView()
         stack.orientation = .horizontal
@@ -130,7 +133,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     override var intrinsicContentSize: NSSize {
-        NSSize(width: (NSScreen.main?.frame.width ?? 200) / 2.5, height: 44)
+        NSSize(width: (NSScreen.main!.frame.width) / 2.5, height: 44)
     }
 
     func addTabButton(for tab: AXTab) {
@@ -151,17 +154,12 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
 
     // New debounced scroll method
     private func debouncedScrollToTab(at index: Int) {
-        // Cancel any pending scroll
         scrollWorkItem?.cancel()
-
-        // Create new work item for scrolling
-        scrollWorkItem = DispatchWorkItem { [weak self] in
-            self?.performScrollToTab(at: index)
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.scrollToTab(at: index)
         }
-
-        // Schedule the scroll after 0.5 seconds
-        DispatchQueue.main.asyncAfter(
-            deadline: .now() + 1, execute: scrollWorkItem!)
+        scrollWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: workItem)
     }
 
     // Actual scroll implementation
@@ -174,18 +172,20 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         completion: @escaping () -> Void
     ) {
         addButtonToStackView(button)
-        self.updateTabSelection(from: previousIndex, to: button.tag)
+        updateTabSelection(from: previousIndex, to: button.tag)
 
         button.alphaValue = 0
-        button.frame.origin.x = tabStackView.frame.width
+        button.layer?.position = CGPoint(
+            x: tabStackView.frame.width, y: button.layer?.position.y ?? 0)
 
         NSAnimationContext.runAnimationGroup(
             { context in
                 context.duration = 0.1
                 context.timingFunction = CAMediaTimingFunction(
                     name: .easeInEaseOut)
-                button.animator().frame.origin.x = 0
                 button.animator().alphaValue = 1
+                button.layer?.position = CGPoint(
+                    x: 0, y: button.layer?.position.y ?? 0)
             }, completionHandler: completion)
     }
 
@@ -227,9 +227,12 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
             fatalError("Incorrect Button Type")
         }
         let index = tabButton.tag
-        tabGroup.tabs.remove(at: index)
-
+        let tab = tabGroup.tabs[index]
         cleanupTab(tabButton)
+
+        tab.stopTitleObservation()
+        tabGroup.tabContentView.removeTabViewItem(tab)
+
         updateIndices(after: index)
     }
 
@@ -311,19 +314,25 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     private func updateAllTabWidths() {
         let availableWidth = bounds.width - 55
         let tabCount = CGFloat(tabStackView.arrangedSubviews.count)
-
         guard tabCount > 0 else { return }
 
         let idealWidth = min(maxTabWidth, availableWidth / tabCount)
         let finalWidth = max(minTabWidth, idealWidth)
 
-        // Update all constraints with animation
-        for (_, constraint) in tabConstraints {
-            constraint.animator().constant = finalWidth
+        // Skip if width hasn't changed
+        guard finalWidth != lastCalculatedWidth else { return }
+        lastCalculatedWidth = finalWidth
+
+        // Batch constraint updates
+        NSAnimationContext.runAnimationGroup { [weak self] context in
+            context.duration = 0.25
+            self?.tabConstraints.values.forEach {
+                $0.animator().constant = finalWidth
+            }
         }
 
         scrollView.horizontalScrollElasticity =
-            (idealWidth <= 90) ? .allowed : .none
+            (idealWidth <= minTabWidth) ? .allowed : .none
     }
 
     func addTabButtonInBackground(for tab: AXTab, index: Int) {
@@ -377,14 +386,16 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     // MARK: - Sticky Tab Handling
-    @objc
-    private func scrollViewDidScroll(_ notification: Notification) {
+    @objc private func scrollViewDidScroll(_ notification: Notification) {
+        let currentPosition = scrollView.documentVisibleRect.origin.x
+        // Throttle checks to every 2px movement
+        guard abs(currentPosition - lastStickyCheckPosition) > 2 else { return }
+        lastStickyCheckPosition = currentPosition
         updateStickyTabs()
     }
 
     private func updateStickyTabs() {
         guard !tabGroup.tabs.isEmpty else { return }
-
         let safeIndex = max(
             0,
             min(tabGroup.selectedIndex, tabStackView.arrangedSubviews.count - 1)
@@ -398,6 +409,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         let visibleWidth = scrollView.documentVisibleRect.width
         let maxVisiblePosition = scrollPosition + visibleWidth
 
+        // Skip redundant frame checks
         if firstTabInitialFrame == nil
             || currentTab.frame != firstTabInitialFrame
         {
@@ -411,7 +423,6 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         )
 
         updateStickyState(newStickyState, for: currentTab)
-        lastScrollPosition = scrollPosition
     }
 
     private func calculateStickyState(

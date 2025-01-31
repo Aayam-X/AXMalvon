@@ -12,10 +12,18 @@ import WebKit
 class AXTabGroup: Codable {
     // Essentials
     var name: String
-    var tabs: [AXTab] = []
     var selectedIndex: Int = -1
 
+    var tabs: [AXTab] {
+        tabContentView.tabViewItems.compactMap { $0 as? AXTab }
+    }
+
     var tabBarView: AXTabBarViewTemplate?
+    lazy var tabContentView: NSTabView = {
+        let t = NSTabView()
+        t.tabViewType = .noTabsNoBorder
+        return t
+    }()
 
     // Customization
     var color: NSColor
@@ -29,10 +37,11 @@ class AXTabGroup: Codable {
 
     // MARK: - Tab Functions
     func addTab(_ tab: AXTab) {
-        tabs.append(tab)
+        tabContentView.addTabViewItem(tab)
         tabBarView?.addTabButton(for: tab)  // Add button to tab bar view
     }
 
+    @discardableResult
     func addTab(url: URL, _ configuration: WKWebViewConfiguration) -> AXTab {
         let webView = AXWebView(
             frame: .zero, configuration: configuration)
@@ -48,7 +57,7 @@ class AXTabGroup: Codable {
     @discardableResult
     func addEmptyTab(configuration: WKWebViewConfiguration) -> AXTab {
         let tab = AXTab(creatingEmptyTab: true, configuration: configuration)
-        tabs.append(tab)
+        tabContentView.addTabViewItem(tab)
         tabBarView?.addTabButton(for: tab)  // Add button to tab bar view
 
         return tab
@@ -72,7 +81,7 @@ class AXTabGroup: Codable {
     func removeTab(at index: Int) {
         tabs[index].stopTitleObservation()
 
-        tabs.remove(at: index)
+        tabContentView.removeTabViewItem(tabs[index])
         tabBarView?.removeTabButton(at: index)
     }
 
@@ -89,14 +98,8 @@ class AXTabGroup: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         self.name = try container.decode(String.self, forKey: .name)
-        self.tabs = try container.decode([AXTab].self, forKey: .tabs)
         self.selectedIndex = try container.decode(
             Int.self, forKey: .selectedIndex)
-
-        // Check if selectedIndex is safe or not
-        if selectedIndex >= tabs.count {
-            selectedIndex = 0
-        }
 
         self.icon =
             (try? container.decode(String.self, forKey: .icon))
@@ -109,6 +112,14 @@ class AXTabGroup: Codable {
             self.color = NSColor(hex: colorHex)
         } else {
             self.color = .systemMint.withAlphaComponent(0.8)
+        }
+
+        tabContentView.tabViewItems = try container.decode(
+            [AXTab].self, forKey: .tabs)
+
+        // Check if selectedIndex is safe or not
+        if selectedIndex >= tabs.count {
+            selectedIndex = 0
         }
 
         mxPrint("DECODED TAB VIEW WITH \(tabs.count)")

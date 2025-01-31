@@ -40,7 +40,7 @@ struct AXTabButtonConstants {
 
 extension AXTabButton {
     public func startObserving() {
-        guard let webView = tab._webView else { return }
+        guard let webView = tab?.view as? AXWebView else { return }
 
         createObserver(webView)
     }

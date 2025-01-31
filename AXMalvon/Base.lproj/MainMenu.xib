@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="23504" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
-        <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="23504"/>
     </dependencies>
     <objects>
@@ -12,7 +11,7 @@
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
-        <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="Malvon" customModuleProvider="target"/>
+        <customObject id="Voe-Tx-rLC" customClass="AppDelegate" customModule="AXMalvon" customModuleProvider="target"/>
         <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
         <menu title="Main Menu" systemMenu="main" id="Wvu-2r-zyW">
             <items>
@@ -381,9 +380,16 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="View" id="ZdR-mQ-XQT">
                         <items>
-                            <menuItem title="Reload Page" keyEquivalent="r" id="T4W-cy-Vi2">
+                            <menuItem title="Test Menu Button" id="T4W-cy-Vi2">
+                                <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="reloadWebpage:" target="-1" id="STs-v9-WeA"/>
+                                    <action selector="testMenuButton:" target="-1" id="Zx4-hW-9ZB"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="ZHP-jt-aOm"/>
+                            <menuItem title="Reload Page" keyEquivalent="r" id="veq-hC-Xbz">
+                                <connections>
+                                    <action selector="reloadWebpage:" target="-1" id="06u-5b-v4q"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Back" keyEquivalent="[" id="Owf-PI-xGa">

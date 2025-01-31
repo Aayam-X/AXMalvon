@@ -12,14 +12,13 @@ import WebKit
 extension AXWindow: AXTabBarViewDelegate {
     func tabBarSwitchedTo(tabAt: Int) {
         let tabGroup = currentTabGroup
-        let tabs = tabGroup.tabs
 
         layoutManager.searchButton.fullAddress = nil
 
         if tabAt == -1 {
             layoutManager.containerView.removeAllWebViews()
         } else {
-            layoutManager.containerView.updateView(webView: tabs[tabAt].webView)
+            layoutManager.containerView.updateView(tabAt: tabAt)
         }
     }
 

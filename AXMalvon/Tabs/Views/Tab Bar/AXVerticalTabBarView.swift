@@ -133,7 +133,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         let index = tabButton.tag
 
         // Remove the tab from the group
-        tabGroup.tabs.remove(at: index)
+        tabGroup.tabContentView.tabViewItems.remove(at: index)
         tabButton.removeFromSuperview()
 
         mxPrint("DELETED TAB COUNT", tabGroup.tabs.count)
@@ -343,7 +343,7 @@ extension AXVerticalTabBarView {
 
         firstButton.isHidden = false
 
-        self.tabGroup.tabs.swapAt(from, toIndex)
+        tabGroup.tabContentView.tabViewItems.swapAt(from, toIndex)
         tabGroup.selectedIndex = toIndex
         self.updateIndices(after: min(from, toIndex))
     }

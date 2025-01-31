@@ -108,8 +108,8 @@ class MainWindowToolbar: NSToolbar, NSToolbarDelegate, AXTabHostingViewProtocol
             item.paletteLabel = "Add Tab"
             item.isNavigational = false
 
-        case .flexibleSpace:
-            break
+        case .flexibleSpace, .space:
+            return nil
 
         default:
             return nil
