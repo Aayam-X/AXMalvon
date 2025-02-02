@@ -40,13 +40,14 @@ extension AXWindow: NSWindowDelegate {
 
     // MARK: Window Events
     func windowWillClose(_ notification: Notification) {
+        MainMenu.removeAllMainMenuItems()
+
         if profiles.count == 1 {
             for profile in self.profiles {
                 for tabGroup in profile.tabGroups {
                     for tab in tabGroup.tabs {
                         tab.stopAllObservations()
                     }
-                    // tabGroup.tabs.removeAll()
                 }
             }
 

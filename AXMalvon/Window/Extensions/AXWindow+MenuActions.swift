@@ -51,8 +51,17 @@ extension AXWindow {
         //        }
     }
 
-    @IBAction func enableContentBlockers(_ sender: Any) {
-        //activeProfile.enableContentBlockers()
+    @IBAction func disableContentBlockers(_ sender: Any) {
+        guard
+            let tab = currentTabGroup.tabContentView.selectedTabViewItem
+                as? AXTab
+        else { return }
+        
+        mxPrint(
+            tab.label, tab.url ?? .applicationDirectory,
+            "Enabling content blockers")
+        AXContentBlockerLoader.shared.disableAdBlock(
+            for: tab.individualWebConfiguration)
     }
 
     @IBAction func enableYouTubeAdBlocker(_ sender: Any) {

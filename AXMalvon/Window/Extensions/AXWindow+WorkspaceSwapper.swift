@@ -56,7 +56,7 @@ extension AXWindow: AXWorkspaceSwapperViewDelegate {
         let tabGroup = self.activeProfile.tabGroups[index]
         self.currentTabGroupIndex = index
 
-//        self.switchToTabGroup(tabGroup)
+        self.switchToTabGroup(tabGroup)
     }
 
     func didAddTabGroup(_ newGroup: AXTabGroup) {

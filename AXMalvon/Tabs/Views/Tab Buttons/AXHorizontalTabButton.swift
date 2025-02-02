@@ -139,11 +139,6 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
             self.animator().layer?.setAffineTransform(
                 CGAffineTransform(scaleX: 1, y: 0.95))
         }
-        
-        if event.clickCount == 3 {
-            tab.stopAllObservations()
-            tab.startTitleObservation(for: self)
-        }
 
         self.switchTab()
         isSelected = true

@@ -74,11 +74,10 @@ class AXTab: NSTabViewItem, Codable {
         let webView = AXWebView(
             frame: .zero, configuration: self.individualWebConfiguration)
         self.view = webView
-        configureUserContent(for: webView)
 
-        if let url {
-            webView.load(URLRequest(url: url))
-        }
+        configureUserContent(for: webView)
+        AXContentBlockerLoader.shared.enableAdblock(
+            for: self.individualWebConfiguration, handler: self)
     }
 
     init(
@@ -97,6 +96,8 @@ class AXTab: NSTabViewItem, Codable {
         self.individualWebConfiguration.websiteDataStore = websiteDataStore
 
         super.init(identifier: nil)
+        AXContentBlockerLoader.shared.enableAdblock(
+            for: self.individualWebConfiguration, handler: self)
     }
 
     init(createdPopupTab withConfig: WKWebViewConfiguration) {
@@ -105,16 +106,7 @@ class AXTab: NSTabViewItem, Codable {
 
         self.websiteDataStore = withConfig.websiteDataStore
         self.websiteProcessPool = withConfig.processPool
-
         self.individualWebConfiguration.userContentController = .init()
-        //        self.individualWebConfiguration = withConfig
-
-        //        self.individualWebConfiguration = WKWebViewConfiguration()
-        //        self.individualWebConfiguration.websiteDataStore = self.websiteDataStore
-        //        self.individualWebConfiguration.processPool = self.websiteProcessPool
-        //        self.individualWebConfiguration.preferences = withConfig.preferences
-        //        self.individualWebConfiguration.userContentController = withConfig.userContentController
-        //        self.individualWebConfiguration.
 
         super.init(identifier: nil)
 
@@ -123,6 +115,8 @@ class AXTab: NSTabViewItem, Codable {
         self.view = webView
 
         configureUserContent(for: webView)
+        AXContentBlockerLoader.shared.enableAdblock(
+            for: self.individualWebConfiguration, handler: self)
     }
 
     // MARK: - Codable
@@ -151,10 +145,14 @@ class AXTab: NSTabViewItem, Codable {
         }
 
         self.individualWebConfiguration = .init()
+        self.individualWebConfiguration.enableDefaultMalvonPreferences()
         self.individualWebConfiguration.processPool = websiteProcessPool
         self.individualWebConfiguration.websiteDataStore = websiteDataStore
 
         super.init(identifier: nil)
+
+        AXContentBlockerLoader.shared.enableAdblock(
+            for: self.individualWebConfiguration, handler: self)
 
         title = try container.decode(String.self, forKey: .title)
         url = try container.decodeIfPresent(URL.self, forKey: .url)
@@ -195,20 +193,12 @@ class AXTab: NSTabViewItem, Codable {
                 guard let self = self, let tabButton = tabButton else { return }
                 let displayTitle = title ?? "Untitled"
 
-                // Update our URL based on the web view’s current URL.
-                if !displayTitle.isEmpty, self.title != displayTitle {
-                    self.updateTabURL(with: webView)
-                }
-
-                self.title = displayTitle
+                self.label = displayTitle
                 tabButton.webTitle = displayTitle
+                if let updatedURL = webView.url {
+                    self.url = updatedURL
+                }
             }
-    }
-
-    // Update our stored URL.
-    private func updateTabURL(with webView: AXWebView) {
-        guard let newURL = webView.url else { return }
-        self.url = newURL
     }
 
     func stopAllObservations() {
@@ -218,6 +208,8 @@ class AXTab: NSTabViewItem, Codable {
         if let webView = self.view as? AXWebView {
             webView.configuration.userContentController
                 .removeScriptMessageHandler(forName: "faviconChanged")
+            webView.configuration.userContentController
+                .removeScriptMessageHandler(forName: "advancedBlockingData")
         }
     }
 
@@ -253,29 +245,49 @@ class AXTab: NSTabViewItem, Codable {
 
 // MARK: - WKScriptMessageHandler
 // This extension makes AXTab respond to messages from the injected user script.
-
 extension AXTab: WKScriptMessageHandler {
     func userContentController(
-        _ userContentController: WKUserContentController,
-        didReceive message: WKScriptMessage
+        _ uc: WKUserContentController, didReceive message: WKScriptMessage
     ) {
-        // Expect a message from our injected script with the favicon URL.
-        if message.name == "faviconChanged",
-            let faviconURLString = message.body as? String,
-            let faviconURL = URL(string: faviconURLString)
-        {
-            // Download the favicon asynchronously.
+        switch message.name {
+        case "faviconChanged" where message.body is String:
+            guard let url = URL(string: message.body as! String) else { return }
             Task { @MainActor in
+                self.icon = try? await quickFaviconDownload(from: url)
+                self.tabButton?.favicon = self.icon
+            }
+
+        case "advancedBlockingData" where message.body is String:
+            Task {
                 do {
-                    let favicon = try await quickFaviconDownload(
-                        from: faviconURL)
-                    self.icon = favicon
-                    // Update the associated tab button if we have one.
-                    self.tabButton?.favicon = favicon
+                    guard let url = URL(string: message.body as! String) else {
+                        mxPrint("Invalid URL: \(message.body)")
+                        return
+                    }
+
+                    let data = try await ContentBlockerEngineWrapper.shared
+                        .getData(url: url)
+                    let response = [
+                        "url": url.absoluteString, "data": data,
+                        "verbose": true,
+                    ]
+
+                    if let json = try? JSONSerialization.data(
+                        withJSONObject: response),
+                        let js = String(data: json, encoding: .utf8)
+                    {
+                        DispatchQueue.main.async {
+                            self.webView?.evaluateJavaScript(
+                                "(()=>{(handleMessage({name:'advancedBlockingData',message:\(js)}))})();",
+                                completionHandler: nil)
+                        }
+                    }
                 } catch {
-                    self.tabButton?.favicon = nil
+                    mxPrint("BlockingDataError: \(error)")
                 }
             }
+
+        default: return
         }
     }
 }
@@ -300,5 +312,5 @@ extension NSImage {
 // MARK: - The Favicon-Monitoring User Script
 
 private let jsFaviconMonitoringScript = """
-    (()=>{const h=document.head,r=["icon","shortcut icon","apple-touch-icon","mask-icon"],f=()=>{const l=r.map(t=>h.querySelector(`link[rel="${t}"]`)).find(l=>l?.href);return l?new URL(l.href,document.baseURI).href:document.location.origin+"/favicon.ico"},n=()=>window.webkit?.messageHandlers?.faviconChanged?.postMessage(f());n(),new MutationObserver(n).observe(h,{childList:!0,subtree:!0,attributes:!0,attributeFilter:["href"]})})();
+    let l,o=document.head,r=["icon","shortcut icon","apple-touch-icon","mask-icon"],f=_=>(u=(()=>{for(const t of r){const e=o.querySelector(`link[rel="${t}"]`);if(e?.href)return e.href}return location.origin+"/favicon.ico"})(),u!==l&&(l=u,window.webkit?.messageHandlers?.faviconChanged?.postMessage(u)));f(),new MutationObserver(f).observe(o,{childList:1,attributes:1,attributeFilter:["href"]});
     """

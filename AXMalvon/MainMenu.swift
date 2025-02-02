@@ -17,22 +17,44 @@ let applicationName = "Malvon"
     func undo(_ sender:AnyObject)
 }
 
+// Define an array of tuples that contain the menu title and its corresponding population function.
+// Adjust the submenu titles as needed (note that the Application menu might not display its title).
+let menus: [(title: String, localizedTitle: String, populate: (NSMenu) -> Void)] = [
+    ("File", NSLocalizedString("File", comment: "File menu"), MainMenu.populateFileMenu),
+    ("Edit", NSLocalizedString("Edit", comment: "Edit menu"), MainMenu.populateEditMenu),
+    ("View", NSLocalizedString("View", comment: "View menu"), MainMenu.populateViewMenu),
+    ("Window", NSLocalizedString("Window", comment: "Window menu"), MainMenu.populateWindowMenu),
+    ("Help", NSLocalizedString("Help", comment: "Help menu"), MainMenu.populateHelpMenu)
+]
+
 enum MainMenu {
+    static func removeAllMainMenuItems() {
+        NSApp.mainMenu?.removeAllItems()
+        
+        NSApp.mainMenu = createBaseMainMenu()
+    }
+    
+    static func createBaseMainMenu(createsFileMenu: Bool = true) -> NSMenu {
+        let mainMenu = NSMenu(title: "MainMenu")
+        let menuItem = mainMenu.addItem(withTitle: "Application", action: nil, keyEquivalent: "")
+        let submenu = NSMenu(title: "Application")
+        MainMenu.populateApplicationMenu(submenu)
+        mainMenu.setSubmenu(submenu, for: menuItem)
+        
+        if createsFileMenu {
+            let fileItem = mainMenu.addItem(withTitle: "File", action: nil, keyEquivalent: "")
+            let submenuFile = NSMenu(title: "File")
+            MainMenu.populateFileMenu(submenuFile)
+            mainMenu.setSubmenu(submenuFile, for: fileItem)
+        }
+                
+        return mainMenu
+    }
+    
     static func populateMainMenuAnimated() {
         // Create an empty main menu and assign it immediately.
-        let mainMenu = NSMenu(title: "MainMenu")
+        let mainMenu = createBaseMainMenu(createsFileMenu: false)
         NSApp.mainMenu = mainMenu
-        
-        // Define an array of tuples that contain the menu title and its corresponding population function.
-        // Adjust the submenu titles as needed (note that the Application menu might not display its title).
-        let menus: [(title: String, localizedTitle: String, populate: (NSMenu) -> Void)] = [
-            ("Application", "Application", populateApplicationMenu),
-            ("File", NSLocalizedString("File", comment: "File menu"), populateFileMenu),
-            ("Edit", NSLocalizedString("Edit", comment: "Edit menu"), populateEditMenu),
-            ("View", NSLocalizedString("View", comment: "View menu"), populateViewMenu),
-            ("Window", NSLocalizedString("Window", comment: "Window menu"), populateWindowMenu),
-            ("Help", NSLocalizedString("Help", comment: "Help menu"), populateHelpMenu)
-        ]
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             for (index, menuInfo) in menus.enumerated() {
@@ -414,6 +436,10 @@ enum MainMenu {
         title = NSLocalizedString("Forward", comment:"Current webpage will go forward.")
         menuItem = menu.addItem(withTitle:title, action:#selector(AXWindow.forwardWebpage(_:)), keyEquivalent:"]")
         menuItem.keyEquivalentModifierMask = [.command]
+        
+        // Forwards
+        title = NSLocalizedString("Enable Content Blockers", comment:"This will turn on ad blockers for a better browsing experience.")
+        menuItem = menu.addItem(withTitle:title, action:#selector(AXWindow.disableContentBlockers(_:)), keyEquivalent:"")
         
         menu.addItem(NSMenuItem.separator())
         

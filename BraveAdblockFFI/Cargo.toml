@@ -1,0 +1,6 @@
+[lib]
+name = "braveadblockffi"
+crate-type = ["cdylib"]
+
+[dependencies]
+adblock = "0.9.4"

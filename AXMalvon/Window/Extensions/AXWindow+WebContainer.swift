@@ -12,12 +12,15 @@ import WebKit
 
 extension AXWindow: AXWebContainerViewDelegate {
     func webContainerViewCreatesTabWithZeroTabs(with url: URL) -> AXTab {
-        let tab = AXTab(url: url, title: "New Tab", dataStore: activeProfile.websiteDataStore, processPool: activeProfile.websiteProcessPool)
+        let tab = AXTab(
+            url: url, title: "New Tab",
+            dataStore: activeProfile.websiteDataStore,
+            processPool: activeProfile.websiteProcessPool)
         currentTabGroup.addTab(tab)
-        
+
         return tab
     }
-    
+
     func webContainerViewDidSwitchToStartPage() {
         makeFirstResponder(layoutManager.searchButton.addressField)
     }
@@ -46,14 +49,6 @@ extension AXWindow: AXWebContainerViewDelegate {
     func webContainerViewCreatesPopupWebView(config: WKWebViewConfiguration)
         -> WKWebView
     {
-        // Duplicate the configuration of the tab before
-//        let currentTab =
-//            currentTabGroup.tabContentView.selectedTabViewItem as! AXTab
-//        let newConfiguration = WKWebViewConfiguration()
-//        newConfiguration.processPool = currentTab.websiteProcessPool
-//        newConfiguration.websiteDataStore = currentTab.websiteDataStore
-//        currentTab.individualWebConfiguration = newConfiguration
-
         let tab = AXTab(createdPopupTab: config)
         currentTabGroup.addTab(tab)
 

@@ -7,10 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		ED9DEC7A2D4FBE21005A27EC /* ContentBlockerConverter in Frameworks */ = {isa = PBXBuildFile; productRef = ED9DEC792D4FBE21005A27EC /* ContentBlockerConverter */; };
 		EDC895F92D4C613900DC0A68 /* license.txt in Resources */ = {isa = PBXBuildFile; fileRef = EDC895F72D4C613900DC0A68 /* license.txt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		EDBF8D2B2D4F47A100E580E1 /* TODO.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = TODO.txt; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = "<none>"; };
 		EDC895362D4C5FDA00DC0A68 /* AXMalvon.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AXMalvon.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EDC895F62D4C613900DC0A68 /* Checklist.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = Checklist.md; sourceTree = "<group>"; };
 		EDC895F72D4C613900DC0A68 /* license.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = license.txt; sourceTree = "<group>"; };
@@ -43,6 +45,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED9DEC7A2D4FBE21005A27EC /* ContentBlockerConverter in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -52,6 +55,7 @@
 		EDC8952D2D4C5FDA00DC0A68 = {
 			isa = PBXGroup;
 			children = (
+				EDBF8D2B2D4F47A100E580E1 /* TODO.txt */,
 				EDC895382D4C5FDA00DC0A68 /* AXMalvon */,
 				EDC895372D4C5FDA00DC0A68 /* Products */,
 				EDC895F62D4C613900DC0A68 /* Checklist.md */,
@@ -95,6 +99,7 @@
 			);
 			name = AXMalvon;
 			packageProductDependencies = (
+				ED9DEC792D4FBE21005A27EC /* ContentBlockerConverter */,
 			);
 			productName = AXMalvon;
 			productReference = EDC895362D4C5FDA00DC0A68 /* AXMalvon.app */;
@@ -124,6 +129,9 @@
 			);
 			mainGroup = EDC8952D2D4C5FDA00DC0A68;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				ED9DEC782D4FBE21005A27EC /* XCRemoteSwiftPackageReference "SafariConverterLib" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EDC895372D4C5FDA00DC0A68 /* Products */;
 			projectDirPath = "";
@@ -354,6 +362,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		ED9DEC782D4FBE21005A27EC /* XCRemoteSwiftPackageReference "SafariConverterLib" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/AdguardTeam/SafariConverterLib";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		ED9DEC792D4FBE21005A27EC /* ContentBlockerConverter */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ED9DEC782D4FBE21005A27EC /* XCRemoteSwiftPackageReference "SafariConverterLib" */;
+			productName = ContentBlockerConverter;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = EDC8952E2D4C5FDA00DC0A68 /* Project object */;
 }

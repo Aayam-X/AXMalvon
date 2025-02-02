@@ -16,6 +16,7 @@ extension AXWindow: AXSidebarSearchButtonDelegate {
             processPool: activeProfile.websiteProcessPool)
         currentTabGroup.addTab(tab)
 
+        tab.url = url
         tab.webView?.load(URLRequest(url: url))
     }
 

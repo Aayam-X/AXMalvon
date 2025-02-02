@@ -22,7 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             #if !DEBUG
                 // Email Validation + Update checking
                 ev()
-                // FIXME: Change this on actual release versions. bgU_Check()
+            // FIXME: Change this on actual release versions. bgU_Check()
             #endif
         } else {
             // First Launch
@@ -121,6 +121,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             existingWindow.makeKeyAndOrderFront(nil)
             return existingWindow
         } else {
+            MainMenu.populateMainMenuAnimated()
+
             let profiles: [AXProfile] = [
                 .init(name: "Default"),
                 .init(name: "School"),
