@@ -101,8 +101,10 @@ class AXTabGroup: Codable {
             String.self, forKey: .color)
         {
             self.color = NSColor(hex: colorHex)
+            self.color = self.color.systemAppearanceAdjustedColor()
         } else {
             self.color = .systemMint.withAlphaComponent(0.8)
+            self.color = self.color.systemAppearanceAdjustedColor()
         }
 
         tabContentView.tabViewItems = try container.decode(
@@ -188,6 +190,43 @@ extension NSColor {
             return String(format: "%02X%02X%02X%02X", red, green, blue, alpha)
         } else {
             return String(format: "%02X%02X%02X", red, green, blue)
+        }
+    }
+
+    func systemAppearanceAdjustedColor() -> NSColor {
+        // First, try to extract the RGB components.
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        self.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+
+        // Check if the color is (almost) white.
+        if red >= 0.99 && green >= 0.99 && blue >= 0.99 {
+            // Return black with the same alpha.
+            return NSColor.black.withAlphaComponent(alpha)
+        }
+
+        // Check if the color is (almost) black.
+        if red <= 0.01 && green <= 0.01 && blue <= 0.01 {
+            // Return white with the same alpha.
+            return NSColor.white.withAlphaComponent(alpha)
+        }
+
+        // For any other color, adjust based on system appearance.
+        // Determine if the app is in Dark Mode.
+        let isDarkMode =
+            NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua])
+            == .darkAqua
+
+        if isDarkMode {
+            // In dark mode, you might want to darken the color a bit.
+            // Here we use the shadow method. (Note: shadow(withLevel:) returns an optional.)
+            return self.withAlphaComponent(0.9).shadow(withLevel: 0.1) ?? self
+        } else {
+            // In light mode, you might want to lighten the color a bit.
+            return self.withAlphaComponent(0.9).highlight(withLevel: 0.1)
+                ?? self
         }
     }
 }
