@@ -101,10 +101,8 @@ class AXTabGroup: Codable {
             String.self, forKey: .color)
         {
             self.color = NSColor(hex: colorHex)
-            self.color = self.color.systemAppearanceAdjustedColor()
         } else {
             self.color = .systemMint.withAlphaComponent(0.8)
-            self.color = self.color.systemAppearanceAdjustedColor()
         }
 
         tabContentView.tabViewItems = try container.decode(

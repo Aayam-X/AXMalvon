@@ -187,6 +187,9 @@ extension AXWindow {
             }
             currentTabGroup.removeCurrentTab()
             return true
+        case kVK_ANSI_Q:
+            NSApplication.shared.terminate(self)
+            return true
         default:
             if let tabNumber = keycodeMap[event.keyCode] {
                 switchToTab(index: tabNumber)

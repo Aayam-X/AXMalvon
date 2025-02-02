@@ -134,27 +134,21 @@ class AXTab: NSTabViewItem, Codable {
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        #if DEBUG
-            if let dataStore = decoder.userInfo[.websiteDataStore]
-                as? WKWebsiteDataStore
-            {
-                self.websiteDataStore = dataStore
-            } else {
-                fatalError("[AXTab]: Data Store not found in decoder")
-            }
+        if let dataStore = decoder.userInfo[.websiteDataStore]
+            as? WKWebsiteDataStore
+        {
+            self.websiteDataStore = dataStore
+        } else {
+            fatalError("[AXTab]: Data Store not found in decoder")
+        }
 
-            if let processPool = decoder.userInfo[.websiteProcessPool]
-                as? WKProcessPool
-            {
-                self.websiteProcessPool = processPool
-            } else {
-                fatalError("[AXTab]: Process Pool not found in decoder")
-            }
-        #else
-            webConfiguration =
-                (decoder.userInfo[.webConfiguration] as? WKWebViewConfiguration)
-                ?? WKWebViewConfiguration()
-        #endif
+        if let processPool = decoder.userInfo[.websiteProcessPool]
+            as? WKProcessPool
+        {
+            self.websiteProcessPool = processPool
+        } else {
+            fatalError("[AXTab]: Process Pool not found in decoder")
+        }
 
         self.individualWebConfiguration = .init()
         self.individualWebConfiguration.processPool = websiteProcessPool

@@ -85,7 +85,8 @@ class AXBaseLayoutManager: AXWindowLayoutManaging {
     }
 
     func updatedTabGroupColor(in window: AXWindow, color: NSColor) {
-        window.backgroundColor = color.withAlphaComponent(1)
+        let newColor = color.systemAppearanceAdjustedColor()
+        window.backgroundColor = newColor.withAlphaComponent(1)
     }
 }
 
@@ -199,6 +200,7 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
     }
 
     override func updatedTabGroupColor(in window: AXWindow, color: NSColor) {
-        visualEffectTintView.layer?.backgroundColor = color.cgColor
+        let newColor = color.systemAppearanceAdjustedColor()
+        visualEffectTintView.layer?.backgroundColor = newColor.cgColor
     }
 }
