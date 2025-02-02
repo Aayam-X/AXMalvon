@@ -41,7 +41,9 @@ let youtubeAdblockingUserScript = WKUserScript(
 
 class AXProfile {
     var name: String
-    var configuration: WKWebViewConfiguration
+    var websiteDataStore: WKWebsiteDataStore
+    var websiteProcessPool: WKProcessPool = .init()
+
     var tabGroups: [AXTabGroup] = []
     weak var currentTabGroup: AXTabGroup!
 
@@ -61,7 +63,7 @@ class AXProfile {
             let config = AXProfile.createConfig(with: profileData.configID)
 
             self.init(
-                name: name, config: config, loadsDefaultData: true,
+                name: name, dataStore: config, loadsDefaultData: true,
                 configID: profileData.configID)
 
             mxPrint(
@@ -72,25 +74,25 @@ class AXProfile {
             #endif
         } else {
             let newProfile = AXProfile.createNewProfile(name: name)
+
             self.init(
-                name: name, config: newProfile.config, loadsDefaultData: true,
-                configID: newProfile.id)
+                name: name, dataStore: newProfile.dataStore,
+                loadsDefaultData: true, configID: newProfile.id)
         }
     }
 
     init(
-        name: String, config: WKWebViewConfiguration, loadsDefaultData: Bool,
+        name: String, dataStore: WKWebsiteDataStore, loadsDefaultData: Bool,
         configID: String? = nil, usingTabGroup: AXTabGroup? = nil
     ) {
         self.name = name
-        self.configuration = config
+        self.websiteDataStore = dataStore
+
         self.tabGroups = []
 
         if let configID {
             self.historyManager = AXHistoryManager(fileName: configID)
         }
-
-        addOtherConfigs()
 
         if loadsDefaultData, usingTabGroup == nil {
             loadTabGroups()
@@ -99,13 +101,11 @@ class AXProfile {
             self.tabGroups = [usingTabGroup ?? AXTabGroup(name: "NULL")]
             self.currentTabGroup = tabGroups[0]
         }
-
-        enableContentBlockers()
     }
 
     // MARK: - Profile Defaults
     class private func createNewProfile(name: String) -> (
-        id: String, config: WKWebViewConfiguration
+        id: String, dataStore: WKWebsiteDataStore
     ) {
         let defaults = UserDefaults.standard
         var profiles =
@@ -120,10 +120,8 @@ class AXProfile {
         profiles[name] = newProfileData.toDictionary()
         defaults.set(profiles, forKey: "Profiles")
 
-        // Create a new WKWebView configuration
-        let config = WKWebViewConfiguration()
-        config.websiteDataStore = WKWebsiteDataStore(forIdentifier: UUID())
-        return (newProfileData.configID, config)
+        let dataStore = WKWebsiteDataStore(forIdentifier: UUID())
+        return (newProfileData.configID, dataStore)
     }
 
     class func loadProfile(name: String) -> AXProfileData? {
@@ -140,12 +138,12 @@ class AXProfile {
         return nil
     }
 
-    class func createConfig(with id: String) -> WKWebViewConfiguration {
-        let config = WKWebViewConfiguration()
+    class func createConfig(with id: String) -> WKWebsiteDataStore {
         if let uuid = UUID(uuidString: id) {
-            config.websiteDataStore = WKWebsiteDataStore(forIdentifier: uuid)
+            return WKWebsiteDataStore(forIdentifier: uuid)
+        } else {
+            fatalError("Unable to resolve UUID")
         }
-        return config
     }
 
     // MARK: - Tab Groups JSON
@@ -199,7 +197,8 @@ class AXProfile {
         hasLoadedTabs = true
 
         let decoder = JSONDecoder()
-        decoder.userInfo[.webConfiguration] = self.configuration
+        decoder.userInfo[.websiteDataStore] = self.websiteDataStore
+        decoder.userInfo[.websiteProcessPool] = self.websiteProcessPool
 
         do {
             let data = try Data(contentsOf: fileURL)
@@ -212,63 +211,29 @@ class AXProfile {
     }
 
     // MARK: - Configuration Features
-    func addOtherConfigs() {
-        for config in jsAXWebViewConfigurations {
-            configuration.preferences.setValue(true, forKey: config)
-        }
 
-        configuration.preferences.isElementFullscreenEnabled = true
+    //    func enableContentBlockers() {
+    //        AXContentBlockerLoader.shared.enableAdblock(for: configuration)
 
-        configuration.preferences.setValue(
-            false, forKey: "backspaceKeyNavigationEnabled")
+    //        let extensionLoader = AX_wBlockExtension()
+    //
+    //        extensionLoader.getContentBlockerURLPath { blockerListURL in
+    //            guard let blockerListURL else { return }
+    //
+    //            Task(priority: .background) {
+    //                try? self.loadContentBlocker(at: blockerListURL)
+    //            }
+    //        }
+    //    }
 
-        // Usage
-        //        let experimentalFeatures = WKPreferences.value(forKey: "experimentalFeatures")
-        // i have to call - (void)_setEnabled:(BOOL)value forFeature:(_WKFeature *)feature WK_API_AVAILABLE(macos(10.12), ios(10.0));
-        //        // experimentalFeatures is an array of [_WKFeature]
-        //        // how do i do this? i want to set true for all of them
-        //        print(experimentalFeatures)
-
-        //        let preferences = configuration.preferences
-        //
-        //        if let experimentalFeatures = WKPreferences.value(forKey: "experimentalFeatures") as? [AnyObject] {
-        //            for feature in experimentalFeatures {
-        //                // Call the private API method _setEnabled:forFeature: using Objective-C runtime
-        //                if let feature = feature as? NSObject {
-        //                    let selector = NSSelectorFromString("_setEnabled:forFeature:")
-        //                    if preferences.responds(to: selector) {
-        //                        preferences.perform(selector, with: false as NSNumber, with: feature)
-        //                    }
-        //                }
-        //            }
-        //        } else {
-        //            print("Unable to access experimentalFeatures.")
-        //        }
-
-    }
-
-    func enableContentBlockers() {
-        AXContentBlockerLoader.shared.enableAdblock(for: configuration)
-
-        //        let extensionLoader = AX_wBlockExtension()
-        //
-        //        extensionLoader.getContentBlockerURLPath { blockerListURL in
-        //            guard let blockerListURL else { return }
-        //
-        //            Task(priority: .background) {
-        //                try? self.loadContentBlocker(at: blockerListURL)
-        //            }
-        //        }
-    }
-
-    func enableYouTubeAdBlocker() {
-        configuration.userContentController.addUserScript(
-            youtubeAdblockingUserScript)
-    }
-
-    func disableYouTubeAdBlocker() {
-        configuration.userContentController.removeAllUserScripts()
-    }
+    //    func enableYouTubeAdBlocker() {
+    //        configuration.userContentController.addUserScript(
+    //            youtubeAdblockingUserScript)
+    //    }
+    //
+    //    func disableYouTubeAdBlocker() {
+    //        configuration.userContentController.removeAllUserScripts()
+    //    }
 
 }
 
@@ -276,15 +241,12 @@ class AXPrivateProfile: AXProfile {
     //  override var tabGroups: [AXTabGroup] = [.init(name: "Private Tab Group")]
 
     init() {
-        let config = WKWebViewConfiguration()
-        config.websiteDataStore = .nonPersistent()
-
         let privateTabGroup = AXTabGroup(name: "Private Tab Group")
         privateTabGroup.color = .black
 
         super.init(
-            name: "Private", config: config, loadsDefaultData: false,
-            usingTabGroup: privateTabGroup)
+            name: "Private", dataStore: .nonPersistent(),
+            loadsDefaultData: false, usingTabGroup: privateTabGroup)
     }
 
     override func saveTabGroups() {
@@ -302,15 +264,26 @@ let jsYoutubeAdBlockScript = """
     """
 // swiftlint:enable line_length
 
-private let jsAXWebViewConfigurations = [
-    "allowsPictureInPictureMediaPlayback",
-    "appNapEnabled",
-    "acceleratedCompositingEnabled",
-    "webGLEnabled",
-    "largeImageAsyncDecodingEnabled",
-    "mediaSourceEnabled",
-    "acceleratedDrawingEnabled",
-    "animatedImageAsyncDecodingEnabled",
-    "developerExtrasEnabled",
-    "canvasUsesAcceleratedDrawing",
-]
+// Experimental Features
+
+//        let experimentalFeatures = WKPreferences.value(forKey: "experimentalFeatures")
+// i have to call - (void)_setEnabled:(BOOL)value forFeature:(_WKFeature *)feature WK_API_AVAILABLE(macos(10.12), ios(10.0));
+//        // experimentalFeatures is an array of [_WKFeature]
+//        // how do i do this? i want to set true for all of them
+//        print(experimentalFeatures)
+
+//        let preferences = configuration.preferences
+//
+//        if let experimentalFeatures = WKPreferences.value(forKey: "experimentalFeatures") as? [AnyObject] {
+//            for feature in experimentalFeatures {
+//                // Call the private API method _setEnabled:forFeature: using Objective-C runtime
+//                if let feature = feature as? NSObject {
+//                    let selector = NSSelectorFromString("_setEnabled:forFeature:")
+//                    if preferences.responds(to: selector) {
+//                        preferences.perform(selector, with: false as NSNumber, with: feature)
+//                    }
+//                }
+//            }
+//        } else {
+//            print("Unable to access experimentalFeatures.")
+//        }

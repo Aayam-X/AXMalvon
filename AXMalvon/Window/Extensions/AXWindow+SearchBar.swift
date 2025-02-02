@@ -11,14 +11,12 @@ import SecurityInterface
 
 extension AXWindow: AXSidebarSearchButtonDelegate {
     func searchBarCreatesNewTab(with url: URL) {
-        let webView = AXWebView(
-            frame: .zero, configuration: currentConfiguration)
-        webView.load(URLRequest(url: url))
+        let tab = AXTab(
+            title: "New tab", dataStore: activeProfile.websiteDataStore,
+            processPool: activeProfile.websiteProcessPool)
+        currentTabGroup.addTab(tab)
 
-        currentTabGroup.addTab(
-            .init(title: webView.title ?? "Untitled Tab", webView: webView))
-
-        // self.contentView = containerView
+        tab.webView?.load(URLRequest(url: url))
     }
 
     func searchBarUpdatesCurrentTab(with url: URL) {

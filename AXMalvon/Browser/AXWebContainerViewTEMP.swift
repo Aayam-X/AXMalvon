@@ -51,7 +51,7 @@ class AXWebContainerView: NSView {
 
         super.removeFromSuperview()
     }
-    
+
     func selectTabViewItem(at: Int) {
         tabView?.selectTabViewItem(at: at)
     }
@@ -129,8 +129,10 @@ extension AXWebContainerView: NSTabViewDelegate {
         } else {
             self.startPageView.removeFromSuperview()
         }
-        
-        guard let webView = tab.webView else { fatalError("Unable to create webView") }
+
+        guard let webView = tab.webView else {
+            fatalError("Unable to create webView")
+        }
 
         self.currentWebView = webView
         self.currentWebView!.uiDelegate = self
@@ -190,7 +192,8 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
         for navigationAction: WKNavigationAction,
         windowFeatures: WKWindowFeatures
     ) -> WKWebView? {
-        delegate?.webContainerViewCreatesPopupWebView(config: configuration)
+        return delegate?.webContainerViewCreatesPopupWebView(
+            config: configuration)
     }
 
     func webViewDidClose(_ webView: WKWebView) {
@@ -311,11 +314,37 @@ extension AXWebContainerView: AXNewTabViewDelegate {
         currentTabViewItem.isEmpty = false
 
         // Create the webView
-        let webView = AXWebView(
-            frame: .zero, configuration: currentTabViewItem.webConfiguration)
-        currentTabViewItem.view = webView
-        webView.load(URLRequest(url: url))
-        self.currentWebView = webView
+        if let webView = currentTabViewItem.webView {
+            webView.load(URLRequest(url: url))
+            self.currentWebView = webView
+            webView.uiDelegate = self
+            webView.navigationDelegate = self
+            webView.frame = tabView.frame
+            self.window?.makeFirstResponder(webView)
+
+            progressBarObserver = webView.observe(
+                \.estimatedProgress, options: [.new]
+            ) { [weak self] _, change in
+                if let newProgress = change.newValue {
+                    self?.updateProgress(newProgress)
+                } else {
+                    mxPrint("Progress change has no new value.")
+                }
+            }
+
+            if let url = webView.url {
+                self.delegate?.webContainerViewChangedURL(to: url)
+            }
+
+            urlObserver = webView.observe(\.url, options: [.new]) {
+                [weak self] _, change in
+                if let newURL = change.newValue, let newURL {
+                    self?.delegate?.webContainerViewChangedURL(to: newURL)
+                }
+            }
+        } else {
+            fatalError("[Web Container View] WebView could not be created.")
+        }
 
         // Start AXTabButton observation. Called via delegate method.
         delegate?.webContainerUserDidClickStartPageItem(currentTabViewItem)

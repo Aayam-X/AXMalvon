@@ -44,7 +44,7 @@ extension AXWindow: NSWindowDelegate {
             for profile in self.profiles {
                 for tabGroup in profile.tabGroups {
                     for tab in tabGroup.tabs {
-                        tab.stopTitleObservation()
+                        tab.stopAllObservations()
                     }
                     // tabGroup.tabs.removeAll()
                 }
@@ -59,7 +59,7 @@ extension AXWindow: NSWindowDelegate {
 
             for tabGroup in profile.tabGroups {
                 tabGroup.tabs.forEach { tab in
-                    tab.stopTitleObservation()
+                    tab.stopAllObservations()
                 }
                 tabGroup.tabContentView.tabViewItems.removeAll()
                 tabGroup.tabBarView?.removeFromSuperview()

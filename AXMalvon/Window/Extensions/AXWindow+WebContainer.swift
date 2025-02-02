@@ -39,13 +39,18 @@ extension AXWindow: AXWebContainerViewDelegate {
     func webContainerViewCreatesPopupWebView(config: WKWebViewConfiguration)
         -> WKWebView
     {
-        let newWebView = AXWebView(frame: .zero, configuration: config)
-        let tab = AXTab(
-            title: newWebView.title ?? "Untitled Popup", webView: newWebView)
+        // Duplicate the configuration of the tab before
+//        let currentTab =
+//            currentTabGroup.tabContentView.selectedTabViewItem as! AXTab
+//        let newConfiguration = WKWebViewConfiguration()
+//        newConfiguration.processPool = currentTab.websiteProcessPool
+//        newConfiguration.websiteDataStore = currentTab.websiteDataStore
+//        currentTab.individualWebConfiguration = newConfiguration
 
+        let tab = AXTab(createdPopupTab: config)
         currentTabGroup.addTab(tab)
 
-        return newWebView
+        return tab.view! as! WKWebView
     }
 
     func webContainerViewFinishedLoading(webView: WKWebView) {

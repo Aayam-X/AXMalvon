@@ -113,7 +113,7 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
 
     @objc
     func closeTab() {
-        tab?.stopTitleObservation()
+        tab?.stopAllObservations()
         delegate?.tabButtonWillClose(self)
     }
 
@@ -138,6 +138,11 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
             context.duration = 0.1
             self.animator().layer?.setAffineTransform(
                 CGAffineTransform(scaleX: 1, y: 0.95))
+        }
+        
+        if event.clickCount == 3 {
+            tab.stopAllObservations()
+            tab.startTitleObservation(for: self)
         }
 
         self.switchTab()

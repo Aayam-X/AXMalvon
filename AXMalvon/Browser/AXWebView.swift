@@ -18,10 +18,11 @@ class AXWebView: WKWebView {
 
         self.customUserAgent = safariUserAgent
         allowsMagnification = true
-        
-        
-        widthAnchor.constraint(greaterThanOrEqualToConstant: 200).isActive = true
-        heightAnchor.constraint(greaterThanOrEqualToConstant: 200).isActive = true
+
+        widthAnchor.constraint(greaterThanOrEqualToConstant: 200).isActive =
+            true
+        heightAnchor.constraint(greaterThanOrEqualToConstant: 200).isActive =
+            true
     }
 
     required init?(coder: NSCoder) {
@@ -44,3 +45,27 @@ class AXWebView: WKWebView {
         super.otherMouseDown(with: event)
     }
 }
+
+extension WKWebViewConfiguration {
+    func enableDefaultMalvonPreferences() {
+        for pref in STATIC_WebViewPreferences {
+            preferences.setValue(true, forKey: pref)
+        }
+
+        preferences.isElementFullscreenEnabled = true
+        preferences.setValue(false, forKey: "backspaceKeyNavigationEnabled")
+    }
+}
+
+private let STATIC_WebViewPreferences = [
+    "allowsPictureInPictureMediaPlayback",
+    "appNapEnabled",
+    "acceleratedCompositingEnabled",
+    "webGLEnabled",
+    "largeImageAsyncDecodingEnabled",
+    "mediaSourceEnabled",
+    "acceleratedDrawingEnabled",
+    "animatedImageAsyncDecodingEnabled",
+    "developerExtrasEnabled",
+    "canvasUsesAcceleratedDrawing",
+]

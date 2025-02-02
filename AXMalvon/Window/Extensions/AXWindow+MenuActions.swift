@@ -20,9 +20,9 @@ extension AXWindow {
     }
 
     @IBAction func toggleSearchBarForNewTab(_ sender: Any?) {
-        let config = activeProfile.configuration
-
-        currentTabGroup.addEmptyTab(configuration: config)
+        currentTabGroup.addEmptyTab(
+            dataStore: activeProfile.websiteDataStore,
+            processPool: activeProfile.websiteProcessPool)
     }
 
     @IBAction func find(_ sender: Any) {
@@ -52,15 +52,15 @@ extension AXWindow {
     }
 
     @IBAction func enableContentBlockers(_ sender: Any) {
-        activeProfile.enableContentBlockers()
+        //activeProfile.enableContentBlockers()
     }
 
     @IBAction func enableYouTubeAdBlocker(_ sender: Any) {
-        if let sender = sender as? NSMenuItem {
-            sender.title = "Disable YouTube Ad Blocker (Restart App)"
-        }
-
-        activeProfile.enableYouTubeAdBlocker()
+        //        if let sender = sender as? NSMenuItem {
+        //            sender.title = "Disable YouTube Ad Blocker (Restart App)"
+        //        }
+        //
+        //        activeProfile.enableYouTubeAdBlocker()
     }
 
     @IBAction func closeTab(_ sender: Any) {

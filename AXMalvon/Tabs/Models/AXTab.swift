@@ -10,6 +10,8 @@ import AppKit
 import Combine
 import WebKit
 
+// MARK: - AXTab
+
 class AXTab: NSTabViewItem, Codable {
     var url: URL?
     var title: String = "Untitled Tab" {
@@ -19,7 +21,14 @@ class AXTab: NSTabViewItem, Codable {
     }
     var icon: NSImage?
     var titleObserver: Cancellable?
-    var webConfiguration: WKWebViewConfiguration
+
+    unowned var tabButton: AXTabButton?
+
+    var websiteDataStore: WKWebsiteDataStore
+    var websiteProcessPool: WKProcessPool
+
+    var individualWebConfiguration: WKWebViewConfiguration
+
     var isEmpty = false
     var onWebViewInitialization: ((AXWebView) -> Void)?
 
@@ -29,11 +38,15 @@ class AXTab: NSTabViewItem, Codable {
         } else {
             guard !isEmpty else { return nil }
 
+            // Create a new AXWebView with our configuration
             let newWebView = AXWebView(
-                frame: .zero, configuration: webConfiguration)
+                frame: .zero, configuration: self.individualWebConfiguration)
             if let url = url {
                 newWebView.load(URLRequest(url: url))
             }
+
+            // Inject the favicon-monitoring user script and add our message handler.
+            configureUserContent(for: newWebView)
 
             view = newWebView  // Set as NSTabViewItem's view
             onWebViewInitialization?(newWebView)
@@ -42,28 +55,70 @@ class AXTab: NSTabViewItem, Codable {
     }
 
     // MARK: - Initializers
-
-    override init(identifier: Any?) {
-        self.webConfiguration = WKWebViewConfiguration()
-        super.init(identifier: identifier)
-        label = title
-    }
-
-    convenience init(url: URL? = nil, title: String, webView: AXWebView) {
-        self.init(identifier: nil)
+    init(
+        url: URL! = nil, title: String, dataStore: WKWebsiteDataStore,
+        processPool: WKProcessPool
+    ) {
         self.url = url
         self.title = title
+        self.websiteProcessPool = processPool
+        self.websiteDataStore = dataStore
+
+        self.individualWebConfiguration = .init()
+        self.individualWebConfiguration.enableDefaultMalvonPreferences()
+        self.individualWebConfiguration.processPool = websiteProcessPool
+        self.individualWebConfiguration.websiteDataStore = websiteDataStore
+
+        super.init(identifier: nil)
+
+        let webView = AXWebView(
+            frame: .zero, configuration: self.individualWebConfiguration)
         self.view = webView
-        self.webConfiguration = webView.configuration
+        configureUserContent(for: webView)
     }
 
-    convenience init(
-        creatingEmptyTab: Bool, configuration: WKWebViewConfiguration
+    init(
+        creatingEmptyTab: Bool, dataStore: WKWebsiteDataStore,
+        processPool: WKProcessPool
     ) {
-        self.init(identifier: nil)
         self.isEmpty = creatingEmptyTab
+        self.url = nil
         self.title = "New Tab"
-        self.webConfiguration = configuration
+        self.websiteDataStore = dataStore
+        self.websiteProcessPool = processPool
+
+        self.individualWebConfiguration = .init()
+        self.individualWebConfiguration.enableDefaultMalvonPreferences()
+        self.individualWebConfiguration.processPool = websiteProcessPool
+        self.individualWebConfiguration.websiteDataStore = websiteDataStore
+
+        super.init(identifier: nil)
+    }
+
+    init(createdPopupTab withConfig: WKWebViewConfiguration) {
+        self.individualWebConfiguration =
+            withConfig.copy() as! WKWebViewConfiguration
+
+        self.websiteDataStore = withConfig.websiteDataStore
+        self.websiteProcessPool = withConfig.processPool
+
+        self.individualWebConfiguration.userContentController = .init()
+        //        self.individualWebConfiguration = withConfig
+
+        //        self.individualWebConfiguration = WKWebViewConfiguration()
+        //        self.individualWebConfiguration.websiteDataStore = self.websiteDataStore
+        //        self.individualWebConfiguration.processPool = self.websiteProcessPool
+        //        self.individualWebConfiguration.preferences = withConfig.preferences
+        //        self.individualWebConfiguration.userContentController = withConfig.userContentController
+        //        self.individualWebConfiguration.
+
+        super.init(identifier: nil)
+
+        let webView = AXWebView(
+            frame: .zero, configuration: self.individualWebConfiguration)
+        self.view = webView
+
+        configureUserContent(for: webView)
     }
 
     // MARK: - Codable
@@ -75,15 +130,21 @@ class AXTab: NSTabViewItem, Codable {
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        // Get webConfiguration from userInfo
         #if DEBUG
-            if let config = decoder.userInfo[.webConfiguration]
-                as? WKWebViewConfiguration
+            if let dataStore = decoder.userInfo[.websiteDataStore]
+                as? WKWebsiteDataStore
             {
-                webConfiguration = config
+                self.websiteDataStore = dataStore
             } else {
-                print("WKWebViewConfiguration not found in decoder")
-                webConfiguration = WKWebViewConfiguration()
+                fatalError("[AXTab]: Data Store not found in decoder")
+            }
+
+            if let processPool = decoder.userInfo[.websiteProcessPool]
+                as? WKProcessPool
+            {
+                self.websiteProcessPool = processPool
+            } else {
+                fatalError("[AXTab]: Process Pool not found in decoder")
             }
         #else
             webConfiguration =
@@ -91,7 +152,11 @@ class AXTab: NSTabViewItem, Codable {
                 ?? WKWebViewConfiguration()
         #endif
 
-        super.init(identifier: nil)  // Initialize NSTabViewItem
+        self.individualWebConfiguration = .init()
+        self.individualWebConfiguration.processPool = websiteProcessPool
+        self.individualWebConfiguration.websiteDataStore = websiteDataStore
+
+        super.init(identifier: nil)
 
         title = try container.decode(String.self, forKey: .title)
         url = try container.decodeIfPresent(URL.self, forKey: .url)
@@ -114,8 +179,8 @@ class AXTab: NSTabViewItem, Codable {
     }
 
     func deactivateWebView() {
-        stopTitleObservation()
-
+        stopAllObservations()
+        // Remove the web view from its superview and drop the reference.
         self.view?.removeFromSuperview()
         self.view = nil
     }
@@ -124,19 +189,17 @@ class AXTab: NSTabViewItem, Codable {
 
     func startTitleObservation(for tabButton: AXTabButton) {
         guard let webView = self.view as? AXWebView else { return }
+        self.tabButton = tabButton
 
-        // Use a more efficient observation method
+        // Use Combine to observe changes to the web view's title.
         self.titleObserver = webView.publisher(for: \.title)
             .sink { [weak self, weak tabButton] title in
                 guard let self = self, let tabButton = tabButton else { return }
-
-                // Optimize title handling
                 let displayTitle = title ?? "Untitled"
 
-                // Efficiently handle URL and favicon updates
+                // Update our URL based on the web view’s current URL.
                 if !displayTitle.isEmpty, self.title != displayTitle {
-                    self.updateTabURLAndFavicon(
-                        for: webView, tabButton: tabButton)
+                    self.updateTabURL(with: webView)
                 }
 
                 self.title = displayTitle
@@ -144,50 +207,42 @@ class AXTab: NSTabViewItem, Codable {
             }
     }
 
-    // Separate method to handle URL and favicon updates
-    private func updateTabURLAndFavicon(
-        for webView: AXWebView, tabButton: AXTabButton
-    ) {
-        guard let newURL = webView.url else {
-            return
-        }
-
+    // Update our stored URL.
+    private func updateTabURL(with webView: AXWebView) {
+        guard let newURL = webView.url else { return }
         self.url = newURL
-
-        // Perform favicon fetch asynchronously to reduce main thread load
-        DispatchQueue.main.async {
-            self.findFavicon(tabButton: tabButton)
-        }
     }
 
-    func stopTitleObservation() {
+    func stopAllObservations() {
         titleObserver?.cancel()
         titleObserver = nil
-    }
 
-    // MARK: - Favicon Handling
-
-    func findFavicon(tabButton: AXTabButton) {
-        Task(priority: .low) { @MainActor in
-            do {
-                if let faviconURLString = try? await webView!
-                    .evaluateJavaScript(
-                        jsFaviconSearchScript) as? String,
-                    let faviconURL = URL(string: faviconURLString)
-                {
-                    let favicon = try await quickFaviconDownload(
-                        from: faviconURL)
-                    tabButton.favicon = favicon
-                    self.icon = favicon
-                } else {
-                    tabButton.favicon = nil
-                }
-            } catch {
-                tabButton.favicon = nil
-            }
+        if let webView = self.view as? AXWebView {
+            webView.configuration.userContentController
+                .removeScriptMessageHandler(forName: "faviconChanged")
         }
     }
 
+    // MARK: - Favicon Handling via User Script
+
+    /// Call this when creating or reusing the web view. It injects the monitoring user script and
+    /// sets up our message handler.
+    private func configureUserContent(for webView: AXWebView) {
+        let contentController = webView.configuration.userContentController
+
+        // Add the user script that monitors for favicon changes.
+        let userScript = WKUserScript(
+            source: jsFaviconMonitoringScript,
+            injectionTime: .atDocumentEnd,
+            forMainFrameOnly: true)
+        contentController.addUserScript(userScript)
+
+        // Add self as the message handler for favicon changes.
+        // (Be sure to remove it when the web view is deallocated.)
+        contentController.add(self, name: "faviconChanged")
+    }
+
+    /// Download a favicon image from the given URL.
     private func quickFaviconDownload(from url: URL) async throws -> NSImage {
         let (data, _) = try await URLSession.shared.data(from: url)
         guard let image = NSImage(data: data)?.downsizedIcon() else {
@@ -195,26 +250,56 @@ class AXTab: NSTabViewItem, Codable {
         }
         return image
     }
+}
 
-    // MARK: - Cleanup
+// MARK: - WKScriptMessageHandler
+// This extension makes AXTab respond to messages from the injected user script.
 
-    deinit {
-        titleObserver?.cancel()
+extension AXTab: WKScriptMessageHandler {
+    func userContentController(
+        _ userContentController: WKUserContentController,
+        didReceive message: WKScriptMessage
+    ) {
+        // Expect a message from our injected script with the favicon URL.
+        if message.name == "faviconChanged",
+            let faviconURLString = message.body as? String,
+            let faviconURL = URL(string: faviconURLString)
+        {
+            // Download the favicon asynchronously.
+            Task { @MainActor in
+                do {
+                    let favicon = try await quickFaviconDownload(
+                        from: faviconURL)
+                    self.icon = favicon
+                    // Update the associated tab button if we have one.
+                    self.tabButton?.favicon = favicon
+                } catch {
+                    self.tabButton?.favicon = nil
+                }
+            }
+        }
     }
 }
 
-// Helper extension for image resizing
+// MARK: - Helper extension for image resizing
+
 extension NSImage {
     func downsizedIcon() -> NSImage? {
         let targetSize = NSSize(width: 16, height: 16)
         let resizedImage = NSImage(size: targetSize)
         resizedImage.lockFocus()
-        draw(in: NSRect(origin: .zero, size: targetSize))
+        draw(
+            in: NSRect(origin: .zero, size: targetSize),
+            from: NSRect(origin: .zero, size: self.size),
+            operation: .copy,
+            fraction: 1.0)
         resizedImage.unlockFocus()
         return resizedImage
     }
 }
 
-private let jsFaviconSearchScript = """
-        (d=>{const h=d.head,l=["icon","shortcut icon","apple-touch-icon","mask-icon"];for(let r of l)if((r=h.querySelector(`link[rel=\"${r}\"]`))&&r.href)return r.href;return d.location.origin+"/favicon.ico"})(document)
+// MARK: - The Favicon-Monitoring User Script
+
+private let jsFaviconMonitoringScript = """
+    (function(){function s(u){window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.faviconChanged&&window.webkit.messageHandlers.faviconChanged.postMessage(u)}function f(){var l=document.getElementsByTagName('link');for(var i=0;i<l.length;i++){var r=l[i].getAttribute('rel');if(r&&r.toLowerCase().indexOf('icon')!==-1)return l[i].href}return document.location.origin+'/favicon.ico'}s(f());var o=new MutationObserver(function(){s(f())}),h=document.getElementsByTagName('head')[0];h&&o.observe(h,{childList:!0,subtree:!0})})();
     """

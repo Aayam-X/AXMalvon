@@ -230,7 +230,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         let tab = tabGroup.tabs[index]
         cleanupTab(tabButton)
 
-        tab.stopTitleObservation()
+        tab.stopAllObservations()
         tabGroup.tabContentView.removeTabViewItem(tab)
 
         updateIndices(after: index)

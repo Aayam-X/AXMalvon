@@ -162,7 +162,7 @@ class AXVerticalTabButton: NSButton, AXTabButton {
 extension AXVerticalTabButton {
     @objc
     func closeTab() {
-        tab?.stopTitleObservation()
+        tab?.stopAllObservations()
         delegate?.tabButtonWillClose(self)
     }
 

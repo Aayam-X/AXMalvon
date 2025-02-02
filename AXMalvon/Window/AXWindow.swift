@@ -60,10 +60,6 @@ class AXWindow: NSWindow {
         }
     }
 
-    var currentConfiguration: WKWebViewConfiguration {
-        activeProfile.configuration
-    }
-
     var tabGroups: [AXTabGroup] {
         activeProfile.tabGroups
     }
