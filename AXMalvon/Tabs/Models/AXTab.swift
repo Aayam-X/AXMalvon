@@ -301,5 +301,5 @@ extension NSImage {
 // MARK: - The Favicon-Monitoring User Script
 
 private let jsFaviconMonitoringScript = """
-    (function(){function s(u){window.webkit&&window.webkit.messageHandlers&&window.webkit.messageHandlers.faviconChanged&&window.webkit.messageHandlers.faviconChanged.postMessage(u)}function f(){var l=document.getElementsByTagName('link');for(var i=0;i<l.length;i++){var r=l[i].getAttribute('rel');if(r&&r.toLowerCase().indexOf('icon')!==-1)return l[i].href}return document.location.origin+'/favicon.ico'}s(f());var o=new MutationObserver(function(){s(f())}),h=document.getElementsByTagName('head')[0];h&&o.observe(h,{childList:!0,subtree:!0})})();
+    (()=>{const h=document.head,r=["icon","shortcut icon","apple-touch-icon","mask-icon"],f=()=>{const l=r.map(t=>h.querySelector(`link[rel="${t}"]`)).find(l=>l?.href);return l?new URL(l.href,document.baseURI).href:document.location.origin+"/favicon.ico"},n=()=>window.webkit?.messageHandlers?.faviconChanged?.postMessage(f());n(),new MutationObserver(n).observe(h,{childList:!0,subtree:!0,attributes:!0,attributeFilter:["href"]})})();
     """
