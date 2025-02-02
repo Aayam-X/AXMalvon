@@ -11,6 +11,13 @@ import SwiftUI
 import WebKit
 
 extension AXWindow: AXWebContainerViewDelegate {
+    func webContainerViewCreatesTabWithZeroTabs(with url: URL) -> AXTab {
+        let tab = AXTab(url: url, title: "New Tab", dataStore: activeProfile.websiteDataStore, processPool: activeProfile.websiteProcessPool)
+        currentTabGroup.addTab(tab)
+        
+        return tab
+    }
+    
     func webContainerViewDidSwitchToStartPage() {
         makeFirstResponder(layoutManager.searchButton.addressField)
     }

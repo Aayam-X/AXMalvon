@@ -16,6 +16,7 @@ protocol AXWebContainerViewDelegate: AnyObject {
 
     func webContainerViewCreatesPopupWebView(config: WKWebViewConfiguration)
         -> WKWebView
+    func webContainerViewCreatesTabWithZeroTabs(with url: URL) -> AXTab
 
     func webContainerViewRequestsSidebar() -> NSView?
 
@@ -70,7 +71,11 @@ class AXWebContainerView: NSView {
                 .allEdges: .view(self)
             ])
 
-            tabView.selectTabViewItem(at: tabGroup.selectedIndex)
+            if tabGroup.selectedIndex == -1 {
+                // Do nothing...
+            } else {
+                tabView.selectTabViewItem(at: tabGroup.selectedIndex)
+            }
         }
     }
 
@@ -301,12 +306,17 @@ extension AXWebContainerView: AXNewTabViewDelegate {
     func newTabViewDidSelectItem(url: URL) {
         guard let tabView else { return }
 
-        guard !tabView.tabViewItems.isEmpty,
-            let currentTabViewItem = tabView.selectedTabViewItem as? AXTab
-        else {
-            fatalError(
-                "\(#function) called when tab view is empty or no current tab view item"
-            )
+        let currentTabViewItem: AXTab?
+
+        if tabView.tabViewItems.isEmpty {
+            currentTabViewItem = delegate?
+                .webContainerViewCreatesTabWithZeroTabs(with: url)
+        } else {
+            currentTabViewItem = tabView.selectedTabViewItem as? AXTab
+        }
+
+        guard let currentTabViewItem = currentTabViewItem else {
+            fatalError("\(#function) Failed to create new tab.")
         }
 
         // Update the AXTab properties

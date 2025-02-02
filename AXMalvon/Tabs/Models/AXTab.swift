@@ -75,6 +75,10 @@ class AXTab: NSTabViewItem, Codable {
             frame: .zero, configuration: self.individualWebConfiguration)
         self.view = webView
         configureUserContent(for: webView)
+
+        if let url {
+            webView.load(URLRequest(url: url))
+        }
     }
 
     init(
@@ -243,6 +247,7 @@ class AXTab: NSTabViewItem, Codable {
     }
 
     /// Download a favicon image from the given URL.
+    @MainActor
     private func quickFaviconDownload(from url: URL) async throws -> NSImage {
         let (data, _) = try await URLSession.shared.data(from: url)
         guard let image = NSImage(data: data)?.downsizedIcon() else {

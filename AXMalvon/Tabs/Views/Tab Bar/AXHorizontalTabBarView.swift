@@ -276,7 +276,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         if tabGroup.selectedIndex == removedIndex {
             // If the removed tab was selected, select the next tab or the last one
             tabGroup.selectedIndex = min(
-                previousTabIndex, tabGroup.tabs.count - 1)
+                abs(previousTabIndex), tabGroup.tabs.count - 1)
         } else if tabGroup.selectedIndex > removedIndex {
             // If a tab before the selected one is removed, shift the selected index
             tabGroup.selectedIndex -= 1
