@@ -53,19 +53,27 @@ class AXSidebarSearchButton: NSButton {
 
     var fullAddress: URL? {
         didSet {
+            // Only proceed if the value has actually changed
+            guard fullAddress != oldValue else { return }
+
             updateAddressFieldAttributedString()
 
-            if fullAddress?.scheme?.last != "s" {
+            // Update the lock view image based on the scheme
+            if let scheme = fullAddress?.scheme {
+                let isSecure = scheme.hasSuffix("s")
+                lockView.image = NSImage(
+                    named: isSecure
+                        ? NSImage.lockLockedTemplateName
+                        : NSImage.lockUnlockedTemplateName)
+            } else {
                 lockView.image = NSImage(
                     named: NSImage.lockUnlockedTemplateName)
-            } else {
-                lockView.image = NSImage(named: NSImage.lockLockedTemplateName)
             }
         }
     }
 
-    lazy var addressField: NSTextField = {
-        let field = NSTextField()
+    lazy var addressField: ZSearchField = {
+        let field = ZSearchField()
 
         field.placeholderString = "Search or Enter URL..."
         field.textColor = .secondaryLabelColor
@@ -134,6 +142,7 @@ class AXSidebarSearchButton: NSButton {
             .right: .view(self),
             .centerY: .view(self),
         ])
+        addressField.stringValue = "HELLO WORLD"
         //addressField.alphaValue = 0.6
 
         // Configure lock button action
@@ -147,26 +156,32 @@ class AXSidebarSearchButton: NSButton {
             return
         }
 
-        let components = url.host?.split(separator: ".") ?? []
-        let domainName = components.suffix(2).joined(separator: ".")
+        // Use the full host name instead of trimming to the last two components
+        let domainName = url.host ?? ""
         let path = url.path + (url.query.map { "?\($0)" } ?? "")
 
-        let attributedString = NSMutableAttributedString(
-            string: domainName,
-            attributes: [
-                .foregroundColor: NSColor.labelColor.withAlphaComponent(0.8)
-            ])
-
-        if !path.isEmpty {
-            let pathAttributedString = NSAttributedString(
-                string: path,
+        // Create attributed string only if necessary
+        if !domainName.isEmpty || !path.isEmpty {
+            let attributedString = NSMutableAttributedString(
+                string: domainName,
                 attributes: [
-                    .foregroundColor: NSColor.labelColor.withAlphaComponent(0.3)
+                    .foregroundColor: NSColor.labelColor.withAlphaComponent(0.8)
                 ])
-            attributedString.append(pathAttributedString)
-        }
 
-        addressField.attributedStringValue = attributedString
+            if !path.isEmpty {
+                let pathAttributedString = NSAttributedString(
+                    string: path,
+                    attributes: [
+                        .foregroundColor: NSColor.labelColor.withAlphaComponent(
+                            0.3)
+                    ])
+                attributedString.append(pathAttributedString)
+            }
+
+            addressField.attributedStringValue = attributedString
+        } else {
+            addressField.attributedStringValue = NSAttributedString(string: "")
+        }
     }
 
     @objc
@@ -190,7 +205,15 @@ class AXSidebarSearchButton: NSButton {
 }
 
 // MARK: - Search Suggestions
-extension AXSidebarSearchButton: NSTextFieldDelegate {
+extension AXSidebarSearchButton: ZSearchFieldDelegate, NSTextFieldDelegate {
+    func searchFieldDidBecomeFirstResponder(textField: ZSearchField) {
+        textField.stringValue = fullAddress?.absoluteString ?? ""
+    }
+
+    func searchFieldDidResignFirstResponder(textField: ZSearchField) {
+        updateAddressFieldAttributedString()
+    }
+
     // Split callback functions for each type of update
     func onQueryUpdated(_ query: String) {
         suggestionsWindowController.currentQuery = query
@@ -335,4 +358,61 @@ private func fetchGoogleSuggestions(
     }
 
     task.resume()  // Start the network request
+}
+
+protocol ZSearchFieldDelegate: NSTextFieldDelegate {
+    func searchFieldDidBecomeFirstResponder(textField: ZSearchField)
+    func searchFieldDidResignFirstResponder(textField: ZSearchField)
+}
+
+// https://stackoverflow.com/questions/25692122/how-to-detect-when-nstextfield-has-the-focus-or-is-its-content-selected-cocoa
+class ZSearchField: NSTextField, NSTextDelegate {
+    var expectingCurrentEditor: Bool = false
+
+    // When you clicked on serach field, it will get becomeFirstResponder(),
+    // and preparing NSText and focus will be taken by the NSText.
+    // Problem is that self.currentEditor() hasn't been ready yet here.
+    // So we have to wait resignFirstResponder() to get call and make sure
+    // self.currentEditor() is ready.
+    override func becomeFirstResponder() -> Bool {
+        let status = super.becomeFirstResponder()
+        if let delegate = self.delegate as? ZSearchFieldDelegate, status == true
+        {
+            expectingCurrentEditor = true
+            delegate.searchFieldDidBecomeFirstResponder(textField: self)
+        }
+        return status
+    }
+
+    // It is pretty strange to detect search field get focused in resignFirstResponder()
+    // method.  But otherwise, it is hard to tell if self.currentEditor() is available.
+    // Once self.currentEditor() is there, that means the focus is moved from
+    // serach feild to NSText. So, tell it's delegate that the search field got focused.
+
+    override func resignFirstResponder() -> Bool {
+        let status = super.resignFirstResponder()
+        if let delegate = self.delegate as? ZSearchFieldDelegate, status == true
+        {
+            if self.currentEditor() != nil, expectingCurrentEditor {
+                delegate.searchFieldDidBecomeFirstResponder(textField: self)
+                // currentEditor.delegate = self
+            }
+        }
+        self.expectingCurrentEditor = false
+        return status
+    }
+
+    // This method detect whether NSText lost it's focus or not.  Make sure
+    // self.currentEditor() is nil, then that means the search field lost its focus,
+    // and tell it's delegate that the search field lost its focus.
+    override func textDidEndEditing(_ notification: Notification) {
+        super.textDidEndEditing(notification)
+
+        if let delegate = self.delegate as? ZSearchFieldDelegate {
+            if self.currentEditor() == nil {
+                delegate.searchFieldDidResignFirstResponder(textField: self)
+            }
+        }
+    }
+
 }
