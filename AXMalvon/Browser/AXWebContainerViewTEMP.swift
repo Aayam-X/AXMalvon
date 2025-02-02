@@ -315,6 +315,7 @@ extension AXWebContainerView: AXNewTabViewDelegate {
             frame: .zero, configuration: currentTabViewItem.webConfiguration)
         currentTabViewItem.view = webView
         webView.load(URLRequest(url: url))
+        self.currentWebView = webView
 
         // Start AXTabButton observation. Called via delegate method.
         delegate?.webContainerUserDidClickStartPageItem(currentTabViewItem)

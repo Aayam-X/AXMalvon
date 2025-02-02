@@ -22,7 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             #if !DEBUG
                 // Email Validation + Update checking
                 ev()
-                bgU_Check()
+                // FIXME: Change this on actual release versions. bgU_Check()
             #endif
         } else {
             // First Launch
