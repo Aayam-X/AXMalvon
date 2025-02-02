@@ -9,7 +9,7 @@
 import AppKit
 
 extension AXWindow: NSWindowDelegate {
-    internal func configureWindow() {
+    internal func setupNSWindowStyle() {
         self.animationBehavior = .documentWindow
         self.titlebarAppearsTransparent = true
         self.backgroundColor = .textBackgroundColor
@@ -21,7 +21,7 @@ extension AXWindow: NSWindowDelegate {
     }
 
     // MARK: - Content View
-    internal func setupComponents() {
+    internal func setupBrowserElements() {
         layoutManager =
             usesVerticalTabs
             ? AXVerticalLayoutManager(tabBarView: tabBarView)
@@ -40,8 +40,6 @@ extension AXWindow: NSWindowDelegate {
 
     // MARK: Window Events
     func windowWillClose(_ notification: Notification) {
-        mxPrint("Testing")
-
         if profiles.count == 1 {
             for profile in self.profiles {
                 for tabGroup in profile.tabGroups {

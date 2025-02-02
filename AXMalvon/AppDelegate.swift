@@ -10,7 +10,6 @@ import AppKit
 import SwiftUI
 import WebKit
 
-@main
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var mainWindow: AXWindow?
 
@@ -30,6 +29,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             showWelcomeView()
             UserDefaults.standard.set(true, forKey: "launchedBefore")
         }
+
+        MainMenu.populateMainMenuAnimated()
     }
 
     func application(_ application: NSApplication, open urls: [URL]) {

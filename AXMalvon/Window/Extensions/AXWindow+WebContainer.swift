@@ -15,23 +15,13 @@ extension AXWindow: AXWebContainerViewDelegate {
         makeFirstResponder(layoutManager.searchButton.addressField)
     }
 
-    func webContainerUserDidClickStartPageItem(with url: URL?) {
-        let currentTabGroup = currentTabGroup
-        let tab: AXTab
-
-        if currentTabGroup.tabs.isEmpty {
-            tab = currentTabGroup.addTab(url: url!, currentConfiguration)
-        } else {
-            tab = currentTabGroup.tabs[currentTabGroup.selectedIndex]
-            tab.url = url!
-            tab.isEmpty = false
-            let webView = AXWebView(
-                frame: .zero, configuration: tab.webConfiguration)
-            tab.view = webView
-            webView.load(URLRequest(url: url!))
+    func webContainerUserDidClickStartPageItem(_ tab: AXTab) {
+        // Start button observation
+        if let button = tabBarView.tabStackView.arrangedSubviews[
+            currentTabGroup.selectedIndex] as? any AXTabButton
+        {
+            tab.startTitleObservation(for: button)
         }
-
-        layoutManager.containerView.removeStartPageThenSelect(tab: tab)
     }
 
     func webContainerViewChangedURL(to url: URL) {
@@ -59,9 +49,11 @@ extension AXWindow: AXWebContainerViewDelegate {
     }
 
     func webContainerViewFinishedLoading(webView: WKWebView) {
+        // Update the search field address
         layoutManager.searchButton.fullAddress =
             layoutManager.containerView.currentPageAddress
 
+        // Save to history
         if let historyManager = activeProfile.historyManager,
             let title = webView.title, let url = webView.url
         {

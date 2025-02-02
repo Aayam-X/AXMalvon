@@ -19,90 +19,30 @@ protocol AXWebContainerViewDelegate: AnyObject {
 
     func webContainerViewRequestsSidebar() -> NSView?
 
-    func webContainerUserDidClickStartPageItem(with url: URL?)
+    func webContainerUserDidClickStartPageItem(_ tab: AXTab)
+
     func webContainerViewDidSwitchToStartPage()
 }
 
 class AXWebContainerView: NSView {
+    let startPageView = AXStartPageView(frame: .zero)
     weak var delegate: AXWebContainerViewDelegate?
-    weak var sidebar: NSView?
-    var isVertical: Bool
 
     private unowned var tabView: NSTabView?
+
     private unowned var currentWebView: AXWebView?
-    let newTabView = AXNewTabView(frame: .zero)
+
+    // Observers
+    var progressBarObserver: NSKeyValueObservation?
+    var urlObserver: NSKeyValueObservation?
 
     var currentPageAddress: URL? {
         currentWebView?.url
     }
 
-    let splitViewContainer = NSView()
-    private lazy var splitView = AXQuattroProgressSplitView()
-
-    var sidebarTrackingArea: NSTrackingArea!
-    var isAnimating: Bool = false
-    var progressBarObserver: NSKeyValueObservation?
-    var urlObserver: NSKeyValueObservation?
-
-    // Constraints
-    private lazy var splitViewLeftAnchorConstraint: NSLayoutConstraint? = nil
-    private lazy var splitViewTopAnchorConstraint: NSLayoutConstraint? = nil
-    private lazy var splitViewBottomAnchorConstraint: NSLayoutConstraint? = nil
-    private lazy var splitViewRightAnchorConstraint: NSLayoutConstraint? = nil
-
-    var websiteTitleLabel: NSTextField = {
-        let title = NSTextField()
-        title.isEditable = false
-        title.alignment = .center
-        title.isBordered = false
-        title.usesSingleLineMode = true
-        title.drawsBackground = false
-        title.alphaValue = 0.5
-        title.font = .systemFont(ofSize: 9)
-        title.translatesAutoresizingMaskIntoConstraints = false
-        return title
-    }()
-
     func setupViews() {
-        if isVertical {
-            updateTrackingArea()
-
-            addSubview(websiteTitleLabel)
-
-            websiteTitleLabel.activateConstraints([
-                .top: .view(self, constant: -1.2),
-                .left: .view(self, constant: 15),
-                .right: .view(self, constant: -15),
-            ])
-            websiteTitleLabel.stringValue = "Empty Window"
-            websiteTitleLabel.delegate = self
-
-            splitViewContainer.wantsLayer = true
-            splitViewContainer.layer?.masksToBounds = false
-
-            // Add splitView to the container view
-            let shadow = NSShadow()
-            shadow.shadowColor = .textColor.withAlphaComponent(0.6)
-            shadow.shadowBlurRadius = 2.0
-            shadow.shadowOffset = .zero
-            splitViewContainer.shadow = shadow
-
-            splitView.wantsLayer = true
-            splitView.layer?.cornerRadius = 5.0
-        }
-
-        splitViewContainer.translatesAutoresizingMaskIntoConstraints = false
-        splitView.translatesAutoresizingMaskIntoConstraints = false
-
-        addSubview(splitViewContainer)
-        createSplitViewContainerConstraints()
-
-        splitViewContainer.addSubview(splitView)
-        splitView.activateConstraints([
-            .allEdges: .view(splitViewContainer)
-        ])
-
-        newTabView.delegate = self
+        // This is literally all there is to the initialization code.
+        startPageView.delegate = self
     }
 
     override func removeFromSuperview() {
@@ -111,50 +51,12 @@ class AXWebContainerView: NSView {
 
         super.removeFromSuperview()
     }
-
-    func createSplitViewContainerConstraints() {
-        if isVertical {
-            splitViewTopAnchorConstraint = splitViewContainer.topAnchor
-                .constraint(
-                    equalTo: topAnchor, constant: 9.0)
-            splitViewLeftAnchorConstraint = splitViewContainer.leftAnchor
-                .constraint(equalTo: leftAnchor, constant: 2.0)
-            splitViewRightAnchorConstraint = splitViewContainer.rightAnchor
-                .constraint(equalTo: rightAnchor, constant: -9.0)
-            splitViewBottomAnchorConstraint = splitViewContainer.bottomAnchor
-                .constraint(equalTo: bottomAnchor, constant: -9.0)
-
-            splitViewTopAnchorConstraint!.isActive = true
-            splitViewLeftAnchorConstraint!.isActive = true
-            splitViewRightAnchorConstraint!.isActive = true
-            splitViewBottomAnchorConstraint!.isActive = true
-        } else {
-            splitViewContainer.activateConstraints([
-                .allEdges: .view(self)
-            ])
-        }
+    
+    func selectTabViewItem(at: Int) {
+        tabView?.selectTabViewItem(at: at)
     }
 
-    func sidebarCollapsed(_ collapsed: Bool, isFullScreen: Bool) {
-        // If it is fullScreen
-        if isFullScreen && collapsed {
-            splitViewTopAnchorConstraint?.constant = 0
-            splitViewLeftAnchorConstraint?.constant = 0
-            splitViewRightAnchorConstraint?.constant = 0
-            splitViewBottomAnchorConstraint?.constant = 0
-            splitView.layer?.cornerRadius = 0.0
-        } else {
-            splitViewLeftAnchorConstraint?.constant = collapsed ? 9 : 2
-            splitViewTopAnchorConstraint?.constant = 9
-            splitViewRightAnchorConstraint?.constant = -9
-            splitViewBottomAnchorConstraint?.constant = -9
-            splitView.layer?.cornerRadius = 5.0
-        }
-    }
-
-    func updateView(tabGroup: AXTabGroup) {
-        splitView.cancelAnimations()
-
+    func switchTo(tabGroup: AXTabGroup) {
         self.subviews.removeAll()
 
         self.tabView = tabGroup.tabContentView
@@ -168,19 +70,7 @@ class AXWebContainerView: NSView {
                 .allEdges: .view(self)
             ])
 
-            tabView.selectTabViewItem(at: 0)
-        }
-    }
-
-    func updateView(tabAt: Int) {
-        tabView?.selectTabViewItem(at: tabAt)
-    }
-
-    func removeStartPageThenSelect(tab: AXTab) {
-        newTabView.removeFromSuperview()
-
-        if let tabView {
-            self.tabView(tabView, willSelect: tab)
+            tabView.selectTabViewItem(at: tabGroup.selectedIndex)
         }
     }
 
@@ -188,9 +78,9 @@ class AXWebContainerView: NSView {
         mxPrint("Displaying Empty Tab Page")
         self.currentWebView = nil
 
-        newTabView.frame = self.frame
-        addSubview(newTabView)
-        newTabView.autoresizingMask = [.height, .width]
+        startPageView.frame = self.frame
+        addSubview(startPageView)
+        startPageView.autoresizingMask = [.height, .width]
 
         delegate?.webContainerViewDidSwitchToStartPage()
     }
@@ -201,12 +91,10 @@ class AXWebContainerView: NSView {
 
     func back() {
         currentWebView?.goBack()
-        splitView.finishAnimation()
     }
 
     func forward() {
         currentWebView?.goForward()
-        splitView.finishAnimation()
     }
 
     func loadURL(url: URL) {
@@ -214,7 +102,7 @@ class AXWebContainerView: NSView {
             currentWebView.load(URLRequest(url: url))
         } else {
             // Act as if a favourites site was clicked
-            didSelectItem(url: url)
+            newTabViewDidSelectItem(url: url)
         }
     }
 
@@ -222,65 +110,7 @@ class AXWebContainerView: NSView {
         window.makeFirstResponder(currentWebView)
     }
 
-    // MARK: - Collapsed Sidebar Methods
-    func ensureSidebarExists() {
-        if sidebar == nil {
-            sidebar = delegate?.webContainerViewRequestsSidebar()
-        }
-    }
-
-    override func mouseEntered(with event: NSEvent) {
-        guard let window = self.window as? AXWindow, window.hiddenSidebarView
-        else { return }
-        sidebarHover()
-    }
-
-    func sidebarHover() {
-        ensureSidebarExists()
-        guard let sidebar = sidebar, let window = window as? AXWindow else {
-            return
-        }
-        addSubview(sidebar)
-
-        if !isAnimating {
-            sidebar.layer?.backgroundColor =
-                window.currentTabGroup.color.withAlphaComponent(1.0).cgColor
-            NSAnimationContext.runAnimationGroup(
-                { context in
-                    context.duration = 0.1
-                    sidebar.animator().frame.origin.x = 0
-                },
-                completionHandler: {
-                    self.isAnimating = false
-                })
-        }
-    }
-
-    override func mouseExited(with event: NSEvent) {
-        mxPrint("Mouse exited sidebar")
-    }
-
-    override func viewDidEndLiveResize() {
-        super.viewDidEndLiveResize()
-        updateTrackingArea()
-    }
-
-    func updateTrackingArea() {
-        if sidebarTrackingArea != nil {
-            removeTrackingArea(sidebarTrackingArea)
-        }
-        let trackingRect = NSRect(
-            x: bounds.origin.x - 100, y: bounds.origin.y, width: 101,
-            height: bounds.height)
-        sidebarTrackingArea = NSTrackingArea(
-            rect: trackingRect,
-            options: [.activeAlways, .mouseEnteredAndExited], owner: self)
-        addTrackingArea(sidebarTrackingArea)
-    }
-
-    init(isVertical: Bool) {
-        self.isVertical = isVertical
-
+    init() {
         super.init(frame: .zero)
         setupViews()
     }
@@ -292,14 +122,17 @@ class AXWebContainerView: NSView {
 
 extension AXWebContainerView: NSTabViewDelegate {
     func tabView(_ tabView: NSTabView, willSelect tabViewItem: NSTabViewItem?) {
-        guard let webView = (tabViewItem as? AXTab)?.view as? AXWebView else {
+        guard let tab = tabViewItem as? AXTab else { return }
+        if tab.isEmpty {
             displayNewTabPage()
             return
+        } else {
+            self.startPageView.removeFromSuperview()
         }
-        self.newTabView.removeFromSuperview()
+        
+        guard let webView = tab.webView else { fatalError("Unable to create webView") }
 
         self.currentWebView = webView
-        self.websiteTitleLabel.stringValue = webView.title ?? "Untitled Page"
         self.currentWebView!.uiDelegate = self
         self.currentWebView!.navigationDelegate = self
 
@@ -330,66 +163,23 @@ extension AXWebContainerView: NSTabViewDelegate {
     }
 }
 
-// MARK: - Page Find Functions
-extension AXWebContainerView: NSTextFieldDelegate {
-    func webViewPerformSearch() {
-        self.websiteTitleLabel.stringValue = "Find in Page..."
-        self.websiteTitleLabel.placeholderString = "Find in Page..."
-        self.websiteTitleLabel.isEditable = true
-        websiteTitleLabel.alphaValue = 0.8
-
-        window?.makeFirstResponder(websiteTitleLabel)
-    }
-
-    func webPageFindTextFieldDidLoseFocus() {
-        self.websiteTitleLabel.isEditable = false
-        websiteTitleLabel.alphaValue = 0.3
-        self.websiteTitleLabel.stringValue =
-            currentWebView?.title ?? "Empty Window"
-    }
-
-    func controlTextDidEndEditing(_ obj: Notification) {
-        guard let currentWebView else { return }
-
-        Task {
-            _ = try? await currentWebView.find(websiteTitleLabel.stringValue)
-        }
-    }
-
-    func control(
-        _ control: NSControl, textShouldBeginEditing fieldEditor: NSText
-    ) -> Bool {
-        // To detect when the text field loses focus
-        Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) {
-            [self] timer in
-            if websiteTitleLabel.currentEditor() == nil {
-                timer.invalidate()
-                webPageFindTextFieldDidLoseFocus()
-            }
-        }
-
-        return true
-    }
-}
-
 // MARK: - Web View Functions
 extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
     WKDownloadDelegate
 {
 
     func updateProgress(_ value: Double) {
-        splitView.beginAnimation(with: value)
+        //splitView.beginAnimation(with: value)
     }
 
     func removeAllWebViews() {
         currentWebView?.removeFromSuperview()
         self.currentWebView = nil
-        self.websiteTitleLabel.stringValue = "Empty Window"
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         mxPrint("Webview finished loading")
-        splitView.finishAnimation()
+        //splitView.finishAnimation()
 
         delegate?.webContainerViewFinishedLoading(webView: webView)
     }
@@ -505,9 +295,31 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
 }
 
 extension AXWebContainerView: AXNewTabViewDelegate {
-    func didSelectItem(url: URL) {
-        // AXWindow will handle this by creating a new webView
-        delegate?.webContainerUserDidClickStartPageItem(with: url)
+    func newTabViewDidSelectItem(url: URL) {
+        guard let tabView else { return }
+
+        guard !tabView.tabViewItems.isEmpty,
+            let currentTabViewItem = tabView.selectedTabViewItem as? AXTab
+        else {
+            fatalError(
+                "\(#function) called when tab view is empty or no current tab view item"
+            )
+        }
+
+        // Update the AXTab properties
+        currentTabViewItem.url = url
+        currentTabViewItem.isEmpty = false
+
+        // Create the webView
+        let webView = AXWebView(
+            frame: .zero, configuration: currentTabViewItem.webConfiguration)
+        currentTabViewItem.view = webView
+        webView.load(URLRequest(url: url))
+
+        // Start AXTabButton observation. Called via delegate method.
+        delegate?.webContainerUserDidClickStartPageItem(currentTabViewItem)
+
+        startPageView.removeFromSuperview()
     }
 }
 

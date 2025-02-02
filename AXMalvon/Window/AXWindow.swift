@@ -45,8 +45,8 @@ class AXWindow: NSWindow {
             defer: false
         )
 
-        configureWindow()
-        setupComponents()
+        setupNSWindowStyle()
+        setupBrowserElements()
     }
 
     // MARK: - Profile/Groups Tab Functions

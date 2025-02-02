@@ -11,18 +11,17 @@ import WebKit
 
 extension AXWindow: AXTabBarViewDelegate {
     func tabBarSwitchedTo(tabAt: Int) {
-        let tabGroup = currentTabGroup
-
-        layoutManager.searchButton.fullAddress = nil
-
         if tabAt == -1 {
             layoutManager.containerView.removeAllWebViews()
+            layoutManager.searchButton.fullAddress = nil
         } else {
-            layoutManager.containerView.updateView(tabAt: tabAt)
+            let tab = currentTabGroup.tabs[tabAt]
+            layoutManager.searchButton.fullAddress = tab.url ?? nil
+            layoutManager.containerView.selectTabViewItem(at: tabAt)
         }
     }
 
     func tabBarActiveTabTitleChanged(to title: String) {
-        layoutManager.containerView.websiteTitleLabel.stringValue = title
+        //layoutManager.containerView.websiteTitleLabel.stringValue = title
     }
 }

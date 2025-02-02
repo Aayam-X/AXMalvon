@@ -12,7 +12,7 @@ import WebKit
 
 extension AXWindow {
     @IBAction func testMenuButton(_ sender: Any?) {
-        layoutManager.containerView.updateView(tabGroup: self.currentTabGroup)
+        layoutManager.containerView.switchTo(tabGroup: self.currentTabGroup)
     }
 
     @IBAction func toggleSearchField(_ sender: Any?) {
@@ -26,7 +26,7 @@ extension AXWindow {
     }
 
     @IBAction func find(_ sender: Any) {
-        layoutManager.containerView.webViewPerformSearch()
+        //layoutManager.containerView.webViewPerformSearch()
     }
 
     @IBAction func backWebpage(_ sender: Any?) {

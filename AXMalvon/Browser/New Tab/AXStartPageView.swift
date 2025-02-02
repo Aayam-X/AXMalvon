@@ -9,10 +9,10 @@
 import AppKit
 
 protocol AXNewTabViewDelegate: AnyObject {
-    func didSelectItem(url: URL)
+    func newTabViewDidSelectItem(url: URL)
 }
 
-class AXNewTabView: NSView {
+class AXStartPageView: NSView {
     weak var delegate: AXNewTabViewDelegate?
 
     var currentlyRightClickedItem: Int?
@@ -171,7 +171,7 @@ class AXNewTabView: NSView {
     }
 }
 
-extension AXNewTabView: NSCollectionViewDelegate, NSCollectionViewDataSource {
+extension AXStartPageView: NSCollectionViewDelegate, NSCollectionViewDataSource {
     func collectionView(
         _ collectionView: NSCollectionView, numberOfItemsInSection section: Int
     ) -> Int {
@@ -197,7 +197,7 @@ extension AXNewTabView: NSCollectionViewDelegate, NSCollectionViewDataSource {
     }
 
     func collectionViewMouseDown(url: String) {
-        delegate?.didSelectItem(url: URL(string: url)!)
+        delegate?.newTabViewDidSelectItem(url: URL(string: url)!)
     }
 
     func collectionViewRightMouseDown(index: Int) {
@@ -205,7 +205,7 @@ extension AXNewTabView: NSCollectionViewDelegate, NSCollectionViewDataSource {
     }
 }
 
-extension AXNewTabView: NSMenuDelegate {
+extension AXStartPageView: NSMenuDelegate {
     func menuWillOpen(_ menu: NSMenu) {
         let isHidden = currentlyRightClickedItem == nil
         menu.items[0].isHidden = isHidden

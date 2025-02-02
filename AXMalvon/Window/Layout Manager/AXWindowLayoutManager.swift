@@ -43,7 +43,8 @@ class AXBaseLayoutManager: AXWindowLayoutManaging {
         self.tabBarView = tabBarView
         self.searchButton = AXSidebarSearchButton()
         self.tabGroupInfoView = AXTabGroupInfoView()
-        self.containerView = AXWebContainerView(isVertical: false)
+        self.containerView = AXWebContainerView()
+        // self.containerView = AXWebContainerView(isVertical: false)
 
         setupCommonComponents()
     }
@@ -160,7 +161,7 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
 
     override func removeLayout(in window: AXWindow) {
         window.styleMask.remove(.fullSizeContentView)
-        containerView.isVertical = false
+        //containerView.isVertical = false
 
         containerView.removeFromSuperview()
         searchButton.removeFromSuperview()
@@ -174,7 +175,7 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
     override func setupLayout(in window: AXWindow) {
         window.styleMask.insert(.fullSizeContentView)
 
-        containerView.isVertical = true
+        //containerView.isVertical = true
 
         window.contentView = visualEffectView
         visualEffectView.addSubview(splitView)

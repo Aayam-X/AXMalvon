@@ -29,7 +29,7 @@ import WebKit
 //    var isVertical: Bool
 //
 //    private unowned var currentWebView: AXWebView?
-//    let newTabView = AXNewTabView(frame: .zero)
+//    let newTabView = AXStartPageView(frame: .zero)
 //
 //    var currentPageAddress: URL? {
 //        currentWebView?.url
