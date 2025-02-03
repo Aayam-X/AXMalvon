@@ -420,6 +420,10 @@ enum MainMenu {
         title = NSLocalizedString("Customize Toolbar…", comment:"Customize Toolbar… menu item")
         menu.addItem(withTitle:title, action:#selector(NSWindow.runToolbarCustomizationPalette(_:)), keyEquivalent:"")
         
+        title = NSLocalizedString("Toggle Sidebar", comment:"Show sidebar menu item")
+        menuItem = menu.addItem(withTitle:title, action:#selector(NSSplitViewController.toggleSidebar(_:)), keyEquivalent:"s")
+        menuItem.keyEquivalentModifierMask = [.command, .control]
+        
         menu.addItem(NSMenuItem.separator())
         
         // Reload Webpage

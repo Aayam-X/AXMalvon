@@ -192,39 +192,39 @@ extension NSColor {
     }
 
     func systemAppearanceAdjustedColor() -> NSColor {
-        // First, try to extract the RGB components.
+        // Convert color to a color space that supports RGB components.
+        guard let rgbColor = self.usingColorSpace(.sRGB) else {
+            return self  // Return original color if conversion fails
+        }
+
+        // Extract RGB components.
         var red: CGFloat = 0
         var green: CGFloat = 0
         var blue: CGFloat = 0
         var alpha: CGFloat = 0
-        self.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        rgbColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
 
         // Check if the color is (almost) white.
         if red >= 0.99 && green >= 0.99 && blue >= 0.99 {
-            // Return black with the same alpha.
             return NSColor.black.withAlphaComponent(alpha)
         }
 
         // Check if the color is (almost) black.
         if red <= 0.01 && green <= 0.01 && blue <= 0.01 {
-            // Return white with the same alpha.
             return NSColor.white.withAlphaComponent(alpha)
         }
 
-        // For any other color, adjust based on system appearance.
         // Determine if the app is in Dark Mode.
         let isDarkMode =
             NSApp.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua])
             == .darkAqua
 
         if isDarkMode {
-            // In dark mode, you might want to darken the color a bit.
-            // Here we use the shadow method. (Note: shadow(withLevel:) returns an optional.)
-            return self.withAlphaComponent(0.9).shadow(withLevel: 0.1) ?? self
+            return rgbColor.withAlphaComponent(0.9).shadow(withLevel: 0.1)
+                ?? rgbColor
         } else {
-            // In light mode, you might want to lighten the color a bit.
-            return self.withAlphaComponent(0.9).highlight(withLevel: 0.1)
-                ?? self
+            return rgbColor.withAlphaComponent(0.9).highlight(withLevel: 0.1)
+                ?? rgbColor
         }
     }
 }

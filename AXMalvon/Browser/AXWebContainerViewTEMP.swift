@@ -75,6 +75,40 @@ class AXWebContainerView: NSView {
                 // Do nothing...
             } else {
                 tabView.selectTabViewItem(at: tabGroup.selectedIndex)
+
+                // Just to make sure
+                if let webView = tabView.selectedTabViewItem?.view as? AXWebView
+                {
+                    self.currentWebView = webView
+                    self.currentWebView!.uiDelegate = self
+                    self.currentWebView!.navigationDelegate = self
+
+                    webView.frame = tabView.frame
+
+                    self.window?.makeFirstResponder(self.currentWebView)
+
+                    progressBarObserver = webView.observe(
+                        \.estimatedProgress, options: [.new]
+                    ) { [weak self] _, change in
+                        if let newProgress = change.newValue {
+                            self?.updateProgress(newProgress)
+                        } else {
+                            mxPrint("Progress change has no new value.")
+                        }
+                    }
+
+                    if let url = webView.url {
+                        self.delegate?.webContainerViewChangedURL(to: url)
+                    }
+
+                    urlObserver = webView.observe(\.url, options: [.new]) {
+                        [weak self] _, change in
+                        if let newURL = change.newValue, let newURL {
+                            self?.delegate?.webContainerViewChangedURL(
+                                to: newURL)
+                        }
+                    }
+                }
             }
         }
     }

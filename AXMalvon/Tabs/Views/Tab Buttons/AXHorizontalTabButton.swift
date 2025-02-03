@@ -167,7 +167,9 @@ class AXHorizontalTabButton: NSButton, AXTabButton {
     private func updateAppearance() {
         let backgroundColor: CGColor
         if isSelected {
-            if effectiveAppearance.name == .darkAqua {
+            if effectiveAppearance.name == .vibrantDark
+                || effectiveAppearance.name == .darkAqua
+            {
                 backgroundColor = .black
                 layer?.shadowColor = .white
             } else {

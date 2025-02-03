@@ -340,7 +340,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.delegate = self
         button.tag = index
-        button.webTitle = tab.title
+        button.webTitle = tab.label
 
         addButtonToStackView(button)
         button.startObserving()

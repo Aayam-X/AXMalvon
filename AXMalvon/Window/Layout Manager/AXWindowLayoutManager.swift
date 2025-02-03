@@ -117,34 +117,38 @@ class AXHorizontalLayoutManager: AXBaseLayoutManager {
 
 // Vertical layout manager using NSView
 class AXVerticalLayoutManager: AXBaseLayoutManager {
-    lazy var visualEffectTintView: NSView = {
-        let tintView = NSView()
-        tintView.translatesAutoresizingMaskIntoConstraints = false
-        tintView.wantsLayer = true
+    var splitViewResizeObserver: NSKeyValueObservation?
 
-        return tintView
+    private lazy var splitViewController: NSSplitViewController = {
+        let splitVC = NSSplitViewController()
+        splitVC.splitView.isVertical = true
+
+        // Sidebar Split View Item
+        let sidebarItem = NSSplitViewItem(
+            sidebarWithViewController: sidebarViewController)
+        sidebarItem.canCollapse = true
+        sidebarItem.minimumThickness = 200
+        sidebarItem.maximumThickness = 300
+
+        // Main Content Split View Item
+        let mainItem = NSSplitViewItem(viewController: mainViewController)
+
+        splitVC.addSplitViewItem(sidebarItem)
+        splitVC.addSplitViewItem(mainItem)
+
+        return splitVC
     }()
 
-    lazy var visualEffectView: NSVisualEffectView = {
-        let visualEffectView = NSVisualEffectView()
-        visualEffectView.blendingMode = .behindWindow
-        visualEffectView.material = .popover
-        visualEffectView.wantsLayer = true
-
-        // Add tint view on top of the visual effect view
-        visualEffectView.addSubview(visualEffectTintView)
-
-        visualEffectTintView.activateConstraints([
-            .allEdges: .view(visualEffectView)
-        ])
-
-        return visualEffectView
+    private lazy var sidebarViewController: NSViewController = {
+        let vc = NSViewController()
+        vc.view = verticalHostingView
+        return vc
     }()
 
-    private lazy var splitView: AXTwoPaneSplitView = {
-        let splitView = AXTwoPaneSplitView(
-            leftView: verticalHostingView, rightView: containerView)
-        return splitView
+    private lazy var mainViewController: NSViewController = {
+        let vc = NSViewController()
+        vc.view = containerView
+        return vc
     }()
 
     private lazy var verticalHostingView: AXVerticalTabHostingView = {
@@ -162,15 +166,20 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
 
     override func removeLayout(in window: AXWindow) {
         window.styleMask.remove(.fullSizeContentView)
+        window.contentViewController = nil  // Remove splitVC
+        splitViewController.splitViewItems.forEach { item in
+            splitViewController.removeSplitViewItem(item)
+        }
         //containerView.isVertical = false
+
+        splitViewResizeObserver?.invalidate()
+        splitViewResizeObserver = nil
 
         containerView.removeFromSuperview()
         searchButton.removeFromSuperview()
         tabGroupInfoView.removeFromSuperview()
         tabBarView.removeFromSuperview()
         verticalHostingView.removeFromSuperview()
-
-        visualEffectView.removeFromSuperview()
     }
 
     override func setupLayout(in window: AXWindow) {
@@ -178,13 +187,7 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
 
         //containerView.isVertical = true
 
-        window.contentView = visualEffectView
-        visualEffectView.addSubview(splitView)
-        splitView.translatesAutoresizingMaskIntoConstraints = false
-
-        splitView.activateConstraints([
-            .allEdges: .view(visualEffectView)
-        ])
+        window.contentViewController = splitViewController
 
         mxPrint("Container View \(containerView)")
 
@@ -192,15 +195,13 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             window.configureTrafficLights()
         }
-    }
 
-    /// Returns the Boolean if the left view is hidden
-    func toggleTabSidebar(in window: AXWindow) -> Bool {
-        return splitView.toggleLeftView()
-    }
-
-    override func updatedTabGroupColor(in window: AXWindow, color: NSColor) {
-        let newColor = color.systemAppearanceAdjustedColor()
-        visualEffectTintView.layer?.backgroundColor = newColor.cgColor
+        splitViewResizeObserver = verticalHostingView.observe(
+            \.frame, options: [.new]
+        ) { _, _ in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+                window.trafficLightsPosition()
+            }
+        }
     }
 }

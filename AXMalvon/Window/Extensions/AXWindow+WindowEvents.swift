@@ -163,3 +163,9 @@ extension AXWindow: NSWindowDelegate {
         }
     }
 }
+
+extension AXWindow {
+    func splitViewDidResizeSubviews(_ notification: Notification) {
+        trafficLightsPosition()
+    }
+}

@@ -56,7 +56,7 @@ extension AXWindow {
             let tab = currentTabGroup.tabContentView.selectedTabViewItem
                 as? AXTab
         else { return }
-        
+
         mxPrint(
             tab.label, tab.url ?? .applicationDirectory,
             "Enabling content blockers")
@@ -113,14 +113,6 @@ extension AXWindow {
 
         currentTabGroupIndex = 0
         self.switchToTabGroup(currentTabGroup)
-    }
-
-    @IBAction func showHideSidebar(_ sender: Any) {
-        guard let layoutManager = layoutManager as? AXVerticalLayoutManager
-        else { return }
-        let sidebarState = layoutManager.toggleTabSidebar(in: self)
-
-        sidebarState ? trafficLightsPositionCompact() : trafficLightsPosition()
     }
 
     //    @IBAction func importCookiesFromChrome(_ sender: Any) {

@@ -14,11 +14,6 @@ import WebKit
 
 class AXTab: NSTabViewItem, Codable {
     var url: URL?
-    var title: String = "Untitled Tab" {
-        didSet {
-            label = title  // Sync with NSTabViewItem's label
-        }
-    }
     var icon: NSImage?
     var titleObserver: Cancellable?
 
@@ -60,7 +55,6 @@ class AXTab: NSTabViewItem, Codable {
         processPool: WKProcessPool
     ) {
         self.url = url
-        self.title = title
         self.websiteProcessPool = processPool
         self.websiteDataStore = dataStore
 
@@ -70,6 +64,7 @@ class AXTab: NSTabViewItem, Codable {
         self.individualWebConfiguration.websiteDataStore = websiteDataStore
 
         super.init(identifier: nil)
+        self.label = title
 
         let webView = AXWebView(
             frame: .zero, configuration: self.individualWebConfiguration)
@@ -86,7 +81,6 @@ class AXTab: NSTabViewItem, Codable {
     ) {
         self.isEmpty = creatingEmptyTab
         self.url = nil
-        self.title = "New Tab"
         self.websiteDataStore = dataStore
         self.websiteProcessPool = processPool
 
@@ -96,6 +90,8 @@ class AXTab: NSTabViewItem, Codable {
         self.individualWebConfiguration.websiteDataStore = websiteDataStore
 
         super.init(identifier: nil)
+        self.label = "New Tab"
+
         AXContentBlockerLoader.shared.enableAdblock(
             for: self.individualWebConfiguration, handler: self)
     }
@@ -122,7 +118,7 @@ class AXTab: NSTabViewItem, Codable {
     // MARK: - Codable
 
     enum CodingKeys: String, CodingKey {
-        case title, url, isEmpty
+        case label, url, isEmpty
     }
 
     required init(from decoder: Decoder) throws {
@@ -154,8 +150,8 @@ class AXTab: NSTabViewItem, Codable {
         AXContentBlockerLoader.shared.enableAdblock(
             for: self.individualWebConfiguration, handler: self)
 
-        title = try container.decode(String.self, forKey: .title)
-        url = try container.decodeIfPresent(URL.self, forKey: .url)
+        label = try container.decode(String.self, forKey: .label)
+        self.url = try container.decodeIfPresent(URL.self, forKey: .url)
         isEmpty =
             try container.decodeIfPresent(Bool.self, forKey: .isEmpty) ?? false
     }
@@ -166,10 +162,12 @@ class AXTab: NSTabViewItem, Codable {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(title, forKey: .title)
+        try container.encode(label, forKey: .label)
         try container.encode(isEmpty, forKey: .isEmpty)
 
         if let webView = self.view as? AXWebView, let url = webView.url {
+            try container.encode(url, forKey: .url)
+        } else if let url = self.url {
             try container.encode(url, forKey: .url)
         }
     }

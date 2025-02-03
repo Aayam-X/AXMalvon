@@ -69,7 +69,6 @@ class AXVerticalTabButton: NSButton, AXTabButton {
         self.wantsLayer = true
         self.layer?.cornerRadius = 10
         layer?.masksToBounds = false
-
         setupViews()
         setupShadow()
         setupTrackingArea()
@@ -226,7 +225,9 @@ extension AXVerticalTabButton {
     private func updateAppearance() {
         let backgroundColor: CGColor
         if isSelected {
-            if effectiveAppearance.name == .darkAqua {
+            if effectiveAppearance.name == .vibrantDark
+                || effectiveAppearance.name == .darkAqua
+            {
                 backgroundColor = .black
                 layer?.shadowColor = .white
             } else {

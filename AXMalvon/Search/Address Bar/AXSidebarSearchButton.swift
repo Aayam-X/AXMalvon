@@ -142,7 +142,7 @@ class AXSidebarSearchButton: NSButton {
             .right: .view(self),
             .centerY: .view(self),
         ])
-        addressField.stringValue = "HELLO WORLD"
+        addressField.stringValue = "Welcome to Malvon Browser!"
         //addressField.alphaValue = 0.6
 
         // Configure lock button action

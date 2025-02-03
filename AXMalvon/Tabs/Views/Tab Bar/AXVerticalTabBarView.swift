@@ -112,7 +112,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         button.delegate = self
 
         button.tag = index
-        button.webTitle = tab.title
+        button.webTitle = tab.label
 
         addButtonToTabView(button)
         button.startObserving()
