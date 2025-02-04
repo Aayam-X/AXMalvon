@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "EDC895352D4C5FDA00DC0A68"
-               BuildableName = "AXMalvon.app"
+               BuildableName = "Malvon.app"
                BlueprintName = "AXMalvon"
                ReferencedContainer = "container:AXMalvon.xcodeproj">
             </BuildableReference>
@@ -31,7 +31,7 @@
       shouldAutocreateTestPlan = "YES">
    </TestAction>
    <LaunchAction
-      buildConfiguration = "Release"
+      buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       launchStyle = "0"
@@ -45,7 +45,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EDC895352D4C5FDA00DC0A68"
-            BuildableName = "AXMalvon.app"
+            BuildableName = "Malvon.app"
             BlueprintName = "AXMalvon"
             ReferencedContainer = "container:AXMalvon.xcodeproj">
          </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EDC895352D4C5FDA00DC0A68"
-            BuildableName = "AXMalvon.app"
+            BuildableName = "Malvon.app"
             BlueprintName = "AXMalvon"
             ReferencedContainer = "container:AXMalvon.xcodeproj">
          </BuildableReference>

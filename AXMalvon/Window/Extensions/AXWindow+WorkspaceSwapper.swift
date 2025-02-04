@@ -39,7 +39,10 @@ extension AXWindow: AXWorkspaceSwapperViewDelegate {
     }
 
     func didSwitchProfile(to index: Int) {
-        profileIndex = profileIndex == 1 ? 0 : 1
+        self.activeProfileIndex = activeProfileIndex == 1 ? 0 : 1
+        activeProfile = profiles[activeProfileIndex]
+
+        self.switchToTabGroup(activeProfile.currentTabGroupIndex)
 
         // Update to let it know if it's working with a private window or not
         AXSearchQueryToURL.shared.activeProfile = activeProfile

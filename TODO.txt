@@ -2,3 +2,4 @@
 2. Rewrite the entire search suggestions view.
 3. Think of ways to add support for web extensions and content blockers.
 4. Use DispatchQueue.main.async { [weak self] in ||||||| INCLUDE THE WEAK SELF!!!!
+5. NSTabView removing tab defaults to the last one, instead switch to the new tab then delete the old one. 

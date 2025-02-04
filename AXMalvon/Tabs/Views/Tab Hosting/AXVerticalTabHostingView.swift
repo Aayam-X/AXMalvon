@@ -152,18 +152,18 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
 
     // MARK: - Mouse Functions
     override func mouseExited(with event: NSEvent) {
-        guard let window = self.window as? AXWindow, window.hiddenSidebarView
-        else { return }
-
-        NSAnimationContext.runAnimationGroup(
-            { context in
-                context.duration = 0.1
-                self.animator().frame.origin.x = -bounds.width
-            },
-            completionHandler: {
-                self.layer?.backgroundColor = .none
-                self.removeFromSuperview()
-            })
+        //        guard let window = self.window as? AXWindow, window.hiddenSidebarView
+        //        else { return }
+        //
+        //        NSAnimationContext.runAnimationGroup(
+        //            { context in
+        //                context.duration = 0.1
+        //                self.animator().frame.origin.x = -bounds.width
+        //            },
+        //            completionHandler: {
+        //                self.layer?.backgroundColor = .none
+        //                self.removeFromSuperview()
+        //            })
     }
 
     override func viewDidEndLiveResize() {

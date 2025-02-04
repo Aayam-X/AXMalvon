@@ -31,7 +31,7 @@ class AXWindow: NSWindow {
 
     init(with profiles: [AXProfile]) {
         self.profiles = profiles
-        activeProfile = profiles[profileIndex]  // 0
+        activeProfile = profiles[activeProfileIndex]  // 0
 
         super.init(
             contentRect: AXWindow.updateWindowFrame(),
@@ -51,14 +51,9 @@ class AXWindow: NSWindow {
 
     // MARK: - Profile/Groups Tab Functions
     var profiles: [AXProfile]
-    var activeProfile: AXProfile
 
-    var profileIndex = 0 {
-        didSet {
-            activeProfile = profiles[profileIndex]
-            self.switchToTabGroup(activeProfile.currentTabGroupIndex)
-        }
-    }
+    var activeProfile: AXProfile
+    var activeProfileIndex = 0
 
     var tabGroups: [AXTabGroup] {
         activeProfile.tabGroups

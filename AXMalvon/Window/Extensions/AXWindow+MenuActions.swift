@@ -8,14 +8,27 @@
 
 import AppKit
 import Carbon.HIToolbox
+import SwiftUI
 import WebKit
 
 extension AXWindow {
     @IBAction func installChromeExtension(_ sender: Any?) {
-        Task {
-            await CRXDownloader.downloadExtensionAndInstall(
-                crxURL: layoutManager.containerView.currentPageAddress)
+        guard let url = layoutManager.containerView.currentPageAddress,
+            let crxExtension = CRXExtension(crxURL: url)
+        else { return }
+        
+        let sheetWindow = NSWindow()
+
+        let extensionDownloaderView = AXExtensionDownloaderView(crxExtension: crxExtension) {
+            sheetWindow.close()
         }
+        
+        let hostingController = NSHostingController(rootView: extensionDownloaderView)
+        sheetWindow.contentViewController = hostingController
+        sheetWindow.styleMask = [.titled, .closable]
+        sheetWindow.isReleasedWhenClosed = false
+        
+        self.beginSheet(sheetWindow, completionHandler: nil)
     }
 
     @IBAction func toggleSearchField(_ sender: Any?) {
@@ -89,7 +102,7 @@ extension AXWindow {
     }
 
     @IBAction func switchViewLayout(_ sender: Any?) {
-        usesVerticalTabs.toggle()
+        let usesVerticalTabs = self.layoutManager is AXVerticalLayoutManager
 
         layoutManager.removeLayout(in: self)
 
