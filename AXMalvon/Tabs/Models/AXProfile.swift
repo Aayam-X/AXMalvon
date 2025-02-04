@@ -155,7 +155,7 @@ class AXProfile {
 
         #if DEBUG
             let directoryURL = appSupportDirectory.appendingPathComponent(
-                "AXMalvon", isDirectory: true)
+                "Malvon-Debug", isDirectory: true)
         #else
             let directoryURL = appSupportDirectory.appendingPathComponent(
                 "Malvon", isDirectory: true)

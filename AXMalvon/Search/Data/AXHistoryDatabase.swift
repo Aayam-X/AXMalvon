@@ -49,7 +49,7 @@ class AXHistoryManager {
 
         #if DEBUG
             let directoryURL = appSupportURL.appendingPathComponent(
-                "AXMalvon", isDirectory: true)
+                "Malvon-Debug", isDirectory: true)
         #else
             let directoryURL = appSupportURL.appendingPathComponent(
                 "Malvon", isDirectory: true)
