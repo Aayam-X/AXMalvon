@@ -56,6 +56,19 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
         return button
     }()
 
+    private lazy var helloWorldExtensionButton: NSButton = {
+        let buttonImage = NSImage(
+            systemSymbolName: "doc", accessibilityDescription: nil)!
+        let button = NSButton(
+            image: buttonImage, target: self,
+            action: #selector(helloWorldExtensionButtonAction))
+        button.isBordered = false
+        button.imagePosition = .imageOnly
+        button.translatesAutoresizingMaskIntoConstraints = false
+
+        return button
+    }()
+
     // This standalone view is needed for the NSWindow to access its delegate
     lazy var workspaceSwapperView: AXWorkspaceSwapperView = {
         return AXWorkspaceSwapperView()
@@ -101,6 +114,7 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
         addSubview(gestureView)
         addSubview(addNewTabButton)
         addSubview(workspaceSwapperButton)
+        addSubview(helloWorldExtensionButton)
         addSubview(tabBarView)
         addSubview(bottomLine)
 
@@ -129,6 +143,14 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
         workspaceSwapperButton.activateConstraints([
             .bottom: .view(self, constant: -9),
             .left: .view(self, constant: 10),
+            .height: .constant(30),
+            .width: .constant(30),
+        ])
+
+        // Workspace Swapper Button
+        helloWorldExtensionButton.activateConstraints([
+            .bottom: .view(self, constant: -9),
+            .leftRight: .view(workspaceSwapperButton, constant: 2),
             .height: .constant(30),
             .width: .constant(30),
         ])
@@ -187,6 +209,53 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
     func showWorkspaceSwapper() {
         tabHostingDelegate?.tabHostingViewDisplaysWorkspaceSwapperPanel(
             workspaceSwapperButton)
+    }
+
+    var buttonPressCount: Int = 0
+    var helloWorldExtension: CRXExtension?
+    @objc
+    func helloWorldExtensionButtonAction() {
+        if let helloWorldExtension = helloWorldExtension {
+            // NSPopover with AXWebView
+            guard let popupURL = helloWorldExtension.popupURL else { return }
+
+            let popover = NSPopover()
+            popover.contentSize = NSSize(width: 400, height: 300)  // Adjust size as needed
+            popover.behavior = .semitransient
+            popover.contentViewController = ExtensionPopupController(
+                popupURL: popupURL)
+
+            // Show the popover
+            popover.show(
+                relativeTo: helloWorldExtensionButton.bounds,
+                of: helloWorldExtensionButton, preferredEdge: .maxY)
+
+            // FIXME: Next Steps, run the `popup.js` script.
+        } else {
+            helloWorldExtension = CRXExtension(extensionName: "Hello-World")
+            print(helloWorldExtension?.manifest)
+        }
+
+        class ExtensionPopupController: NSViewController {
+            var webView: AXWebView!
+
+            init(popupURL: URL) {
+                super.init(nibName: nil, bundle: nil)
+                self.webView = AXWebView(frame: .zero)
+                self.webView.configuration.enableDefaultMalvonPreferences()
+                self.webView.loadFileURL(
+                    popupURL,
+                    allowingReadAccessTo: popupURL.deletingLastPathComponent())
+            }
+
+            required init?(coder: NSCoder) {
+                fatalError("init(coder:) has not been implemented")
+            }
+
+            override func loadView() {
+                self.view = webView
+            }
+        }
     }
 
     func showTabGroupCustomizer() {

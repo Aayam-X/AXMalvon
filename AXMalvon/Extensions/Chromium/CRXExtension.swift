@@ -8,12 +8,15 @@
 import Foundation
 import WebKit
 
-struct CRXExtension {
+class CRXExtension {
     let id: String
     let name: String
-    let crxURL: URL
+    let crxURL: URL?
 
-    init?(crxURL: URL) {
+    var extensionFolderURL: URL!
+    var manifest: CRXManifest!
+
+    init?(crxURL: URL) async {
         guard
             crxURL.absoluteString.contains("chromewebstore.google.com/detail"),
             let id = Self.extractExtensionID(from: crxURL.absoluteString),
@@ -25,6 +28,33 @@ struct CRXExtension {
         self.crxURL = crxURL
         self.id = id
         self.name = name
+
+        // Parse the manifest.json file
+        await self.download()
+        guard let manifest = self.parseManifest() else { return nil }
+        self.manifest = manifest
+    }
+
+    // This will search for the extension folder
+    init?(extensionName: String) {
+        self.name = extensionName
+        self.id = UUID().uuidString
+        self.crxURL = nil
+
+        self.extensionFolderURL = FileManager.mavlonExtensionsDirectory?
+            .appendingPathComponent(name)
+
+        guard let manifest = self.parseManifest() else { return nil }
+        self.manifest = manifest
+    }
+
+    var popupURL: URL? {
+        // default_popup.html
+        if let popupURL = manifest.action?.defaultPopup {
+            return self.extensionFolderURL.appendingPathComponent(popupURL)
+        } else {
+            return nil
+        }
     }
 }
 
@@ -50,7 +80,7 @@ extension CRXExtension {
             let data = try Data(contentsOf: manifestURL)
             return try JSONDecoder().decode(CRXManifest.self, from: data)
         } catch {
-            print("Error parsing manifest: \(error.localizedDescription)")
+            print("Error parsing manifest: \(error)")
             return nil
         }
     }
@@ -87,6 +117,7 @@ extension CRXExtension {
             print("Download failed: \(error.localizedDescription)")
         }
 
+        self.extensionFolderURL = unzippedFolderURL
         try? FileManager.default.removeItem(at: crxFileURL)
     }
 }
@@ -152,7 +183,7 @@ extension CRXExtension {
                     try process.run()
                     process.waitUntilExit()
 
-                    if process.terminationStatus == 0 {
+                    if process.terminationStatus == 1 {
                         continuation.resume()
                     } else {
                         let error = NSError(

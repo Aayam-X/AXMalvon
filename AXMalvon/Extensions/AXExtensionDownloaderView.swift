@@ -9,11 +9,12 @@ import SwiftUI
 
 struct AXExtensionDownloaderView: View {
     @State var crxExtension: CRXExtension
-    @State var permissions: [String] = []
+    @State private var permissions: [String] = []
 
-    @State var installButtonDisabled: Bool = true
+    @State private var installButtonDisabled: Bool = true
 
     var onDismiss: (() -> Void)
+    var onInstall: (() -> Void)
 
     var body: some View {
         VStack {
@@ -98,6 +99,7 @@ struct AXExtensionDownloaderView: View {
 
                 Button("Install") {
                     // Implement extension installation logic here.
+                    onInstall()
                     print(self.permissions)
                 }
                 .buttonStyle(.borderedProminent)

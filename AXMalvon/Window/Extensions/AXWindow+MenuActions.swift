@@ -13,22 +13,31 @@ import WebKit
 
 extension AXWindow {
     @IBAction func installChromeExtension(_ sender: Any?) {
-        guard let url = layoutManager.containerView.currentPageAddress,
-            let crxExtension = CRXExtension(crxURL: url)
-        else { return }
-        
-        let sheetWindow = NSWindow()
+        Task {
+            guard let url = layoutManager.containerView.currentPageAddress,
+                  let crxExtension = await CRXExtension(crxURL: url)
+            else { return }
+            
+            let sheetWindow = NSWindow()
+            
+            let extensionDownloaderView = AXExtensionDownloaderView(crxExtension: crxExtension) {
+                sheetWindow.close()
+            } onInstall: {
+                sheetWindow.close()
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    //crxExtension.installAndRun()
+                }
+            }
 
-        let extensionDownloaderView = AXExtensionDownloaderView(crxExtension: crxExtension) {
-            sheetWindow.close()
+            
+            let hostingController = NSHostingController(rootView: extensionDownloaderView)
+            sheetWindow.contentViewController = hostingController
+            sheetWindow.styleMask = [.titled, .closable]
+            sheetWindow.isReleasedWhenClosed = false
+            
+            self.beginSheet(sheetWindow, completionHandler: nil)
         }
-        
-        let hostingController = NSHostingController(rootView: extensionDownloaderView)
-        sheetWindow.contentViewController = hostingController
-        sheetWindow.styleMask = [.titled, .closable]
-        sheetWindow.isReleasedWhenClosed = false
-        
-        self.beginSheet(sheetWindow, completionHandler: nil)
     }
 
     @IBAction func toggleSearchField(_ sender: Any?) {

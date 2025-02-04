@@ -7,6 +7,21 @@
 
 import Foundation
 
+/*
+
+ {
+   "name": "Hello Extensions",
+   "description": "Base Level Extension",
+   "version": "1.0",
+   "manifest_version": 3,
+   "action": {
+     "default_popup": "hello.html",
+     "default_icon": "hello_extensions.png"
+   }
+ }
+
+ */
+
 struct CRXManifest: Codable {
     let manifestVersion: Int
     let name: String
@@ -59,7 +74,7 @@ struct CRXManifest: Codable {
 
     // Action (browser or page action) definition
     struct Action: Codable {
-        let defaultIcon: [String: String]?
+        let defaultIcon: DefaultIcon?
         let defaultTitle: String?
         let defaultPopup: String?
 
@@ -67,6 +82,43 @@ struct CRXManifest: Codable {
             case defaultIcon = "default_icon"
             case defaultTitle = "default_title"
             case defaultPopup = "default_popup"
+        }
+
+        enum DefaultIcon: Codable {
+            case string(String)
+            case dictionary([String: String])
+
+            init(from decoder: Decoder) throws {
+                let container = try decoder.singleValueContainer()
+                // Try to decode as dictionary first
+                if let dict = try? container.decode([String: String].self) {
+                    self = .dictionary(dict)
+                    return
+                }
+                // Otherwise, try to decode as string
+                if let str = try? container.decode(String.self) {
+                    self = .string(str)
+                    return
+                }
+                // If neither works, throw an error
+                throw DecodingError.typeMismatch(
+                    DefaultIcon.self,
+                    DecodingError.Context(
+                        codingPath: decoder.codingPath,
+                        debugDescription:
+                            "Expected either a String or a [String: String] for default_icon."
+                    ))
+            }
+
+            func encode(to encoder: Encoder) throws {
+                var container = encoder.singleValueContainer()
+                switch self {
+                case .string(let str):
+                    try container.encode(str)
+                case .dictionary(let dict):
+                    try container.encode(dict)
+                }
+            }
         }
     }
 

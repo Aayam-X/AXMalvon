@@ -302,6 +302,9 @@ extension AXTab: WKScriptMessageHandler {
             }
 
         default:
+            mxPrint(
+                "AXTab.UserContentController: Detected unknown WebKit name: \(message.name), body: \(message.body)"
+            )
             return
         }
     }
