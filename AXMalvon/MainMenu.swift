@@ -47,7 +47,7 @@ enum MainMenu {
             MainMenu.populateFileMenu(submenuFile)
             mainMenu.setSubmenu(submenuFile, for: fileItem)
         }
-                
+        
         return mainMenu
     }
     
@@ -208,8 +208,8 @@ enum MainMenu {
         menuItem.target = nil
         
         // Import from Chrome
-        //    title = NSLocalizedString("Import from Chrome", comment: "Import from Chrome menu item")
-        //    menuItem = menu.addItem(withTitle: title, action: #selector(AXWindow.importCookiesFromChrome(_:)), keyEquivalent: "")
+        title = NSLocalizedString("Install Chrome Extension", comment: "Import from Chrome menu item")
+        menuItem = menu.addItem(withTitle: title, action: #selector(AXWindow.installChromeExtension(_:)), keyEquivalent: "")
     }
     
     static func populateEditMenu(_ menu: NSMenu) {

@@ -11,8 +11,11 @@ import Carbon.HIToolbox
 import WebKit
 
 extension AXWindow {
-    @IBAction func testMenuButton(_ sender: Any?) {
-        layoutManager.containerView.switchTo(tabGroup: self.currentTabGroup)
+    @IBAction func installChromeExtension(_ sender: Any?) {
+        Task {
+            await CRXDownloader.downloadExtensionAndInstall(
+                crxURL: layoutManager.containerView.currentPageAddress)
+        }
     }
 
     @IBAction func toggleSearchField(_ sender: Any?) {

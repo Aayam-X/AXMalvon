@@ -156,7 +156,7 @@ class AXContentBlockerLoader {
         for scriptSource in Self.adguardScriptCache {
             let userScript = WKUserScript(
                 source: scriptSource,
-                injectionTime: .atDocumentEnd,
+                injectionTime: .atDocumentStart,
                 forMainFrameOnly: false
             )
             contentController.addUserScript(userScript)
