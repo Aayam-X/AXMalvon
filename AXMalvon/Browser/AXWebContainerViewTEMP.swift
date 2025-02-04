@@ -85,7 +85,7 @@ class AXWebContainerView: NSView {
 
                     webView.frame = tabView.frame
 
-                    self.window?.makeFirstResponder(self.currentWebView)
+                    currentWebViewFocus(webView: webView)
 
                     progressBarObserver = webView.observe(
                         \.estimatedProgress, options: [.new]
@@ -146,7 +146,19 @@ class AXWebContainerView: NSView {
     }
 
     func axWindowFirstResponder(_ window: AXWindow) {
-        window.makeFirstResponder(currentWebView)
+        //window.makeFirstResponder(currentWebView)
+        if let webView = currentWebView {
+            DispatchQueue.main.async {
+                window.makeFirstResponder(webView)
+            }
+        }
+    }
+
+    func currentWebViewFocus(webView: AXWebView) {
+        DispatchQueue.main.async { [weak self] in
+            guard let window = self?.window else { return }
+            window.makeFirstResponder(webView)
+        }
     }
 
     init() {
@@ -178,8 +190,7 @@ extension AXWebContainerView: NSTabViewDelegate {
         self.currentWebView!.navigationDelegate = self
 
         webView.frame = tabView.frame
-
-        self.window?.makeFirstResponder(self.currentWebView)
+        currentWebViewFocus(webView: webView)
 
         progressBarObserver = webView.observe(
             \.estimatedProgress, options: [.new]
@@ -364,7 +375,8 @@ extension AXWebContainerView: AXNewTabViewDelegate {
             webView.uiDelegate = self
             webView.navigationDelegate = self
             webView.frame = tabView.frame
-            self.window?.makeFirstResponder(webView)
+
+            currentWebViewFocus(webView: webView)
 
             progressBarObserver = webView.observe(
                 \.estimatedProgress, options: [.new]

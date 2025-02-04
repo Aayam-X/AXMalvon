@@ -236,5 +236,9 @@
 		<key>NSAllowsArbitraryLoadsInWebContent</key>
 		<true/>
 	</dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Allowing will enable Microphone related functionality in the WebView</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Allowing will enable Camera related functionality in the WebView</string>
 </dict>
 </plist>

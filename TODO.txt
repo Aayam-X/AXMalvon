@@ -1,3 +1,4 @@
 1. Rewrite the entire logic with NSWindow and activeProfile and currentTabGroupIndex and those variables.
 2. Rewrite the entire search suggestions view.
 3. Think of ways to add support for web extensions and content blockers.
+4. Use DispatchQueue.main.async { [weak self] in ||||||| INCLUDE THE WEAK SELF!!!!

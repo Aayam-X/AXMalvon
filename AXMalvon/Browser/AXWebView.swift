@@ -12,7 +12,7 @@ import WebKit
 private let safariUserAgent =
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.2 Safari/605.1.15"
 
-class AXWebView: WKWebView {
+class AXWebView: WKWebView {    
     override init(frame: CGRect, configuration: WKWebViewConfiguration) {
         super.init(frame: frame, configuration: configuration)
 
