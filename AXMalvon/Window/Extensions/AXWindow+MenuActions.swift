@@ -111,8 +111,8 @@ extension AXWindow {
     }
 
     @IBAction func switchViewLayout(_ sender: Any?) {
-        let usesVerticalTabs = self.layoutManager is AXVerticalLayoutManager
-
+        usesVerticalTabs.toggle()
+        
         layoutManager.removeLayout(in: self)
 
         let newTabBarView: AXTabBarViewTemplate =

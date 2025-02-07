@@ -47,6 +47,11 @@ class AXWindow: NSWindow {
 
         setupNSWindowStyle()
         setupBrowserElements()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            let frame = AXWindow.updateWindowFrame()
+            self?.setFrame(frame, display: true, animate: true)
+        }
     }
 
     // MARK: - Profile/Groups Tab Functions
