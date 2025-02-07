@@ -14,8 +14,7 @@ extension AXWindow: AXWebContainerViewDelegate {
     func webContainerViewCreatesTabWithZeroTabs(with url: URL) -> AXTab {
         let tab = AXTab(
             url: url, title: "New Tab",
-            dataStore: activeProfile.websiteDataStore,
-            processPool: activeProfile.websiteProcessPool)
+            configuration: activeProfile.baseConfiguration)
         currentTabGroup.addTab(tab)
 
         return tab

@@ -42,12 +42,10 @@ class AXTabGroup: Codable {
     }
 
     @discardableResult
-    func addEmptyTab(dataStore: WKWebsiteDataStore, processPool: WKProcessPool)
+    func addEmptyTab(config: WKWebViewConfiguration)
         -> AXTab
     {
-        let tab = AXTab(
-            creatingEmptyTab: true, dataStore: dataStore,
-            processPool: processPool)
+        let tab = AXTab(creatingEmptyTab: true, configuration: config)
         tabContentView.addTabViewItem(tab)
         tabBarView?.addTabButton(for: tab)  // Add button to tab bar view
 
@@ -74,9 +72,9 @@ class AXTabGroup: Codable {
         tab.stopAllObservations()
 
         tabBarView?.delegate?.tabBarWillDelete(tab: tab)
+        tabBarView?.removeTabButton(at: index)
 
         tabContentView.removeTabViewItem(tab)
-        tabBarView?.removeTabButton(at: index)
     }
 
     func removeCurrentTab() {
@@ -133,11 +131,8 @@ class AXTabGroup: Codable {
 
 // Define a custom key for userInfo.
 extension CodingUserInfoKey {
-    static let websiteDataStore = CodingUserInfoKey(
-        rawValue: "webDataStore")!
-
-    static let websiteProcessPool = CodingUserInfoKey(
-        rawValue: "webProcessPool")!
+    static let webviewConfiguration = CodingUserInfoKey(
+        rawValue: "webConfig")!
 }
 
 // MARK: - NSColor Hex Conversion

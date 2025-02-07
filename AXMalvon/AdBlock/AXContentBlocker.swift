@@ -9,6 +9,24 @@
 import ContentBlockerEngine
 import WebKit
 
+#if DEBUG
+class AXContentBlockerLoader {
+    static let shared = AXContentBlockerLoader()
+    func disableAdBlock(for tab: WKWebViewConfiguration) {}
+    func enableAdblock(for config: WKWebViewConfiguration, handler: WKScriptMessageHandler) {}
+}
+
+actor ContentBlockerEngineWrapper {
+    static let shared = ContentBlockerEngineWrapper()
+    private let contentBlockerEngine = try? ContentBlockerEngine("[]")
+
+    private init() {}
+
+    func getData(url: URL) throws -> String {
+        throw NSError(domain: "AXContentBlocker: Should not be enabled when debugging", code: 0, userInfo: nil)
+    }
+}
+#else
 private var ruleStore = WKContentRuleListStore.default()
 private let fileURL = WBFileStorage.shared.cachedContainerURL?.appending(
     path: "blockerList.json")
@@ -189,3 +207,4 @@ actor ContentBlockerEngineWrapper {
         try contentBlockerEngine.getData(url: url)
     }
 }
+#endif

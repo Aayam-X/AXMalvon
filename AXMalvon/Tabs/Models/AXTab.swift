@@ -20,9 +20,6 @@ class AXTab: NSTabViewItem, Codable {
 
     unowned var tabButton: AXTabButton?
 
-    var websiteDataStore: WKWebsiteDataStore
-    var websiteProcessPool: WKProcessPool
-
     var individualWebConfiguration: WKWebViewConfiguration
 
     var isEmpty = false
@@ -50,18 +47,11 @@ class AXTab: NSTabViewItem, Codable {
     // MARK: - Initializers
 
     /// Initializes a new tab with an optional URL and a title.
-    init(
-        url: URL! = nil, title: String, dataStore: WKWebsiteDataStore,
-        processPool: WKProcessPool
-    ) {
+    init(url: URL! = nil, title: String, configuration: WKWebViewConfiguration)
+    {
         self.url = url
-        self.websiteDataStore = dataStore
-        self.websiteProcessPool = processPool
-
-        self.individualWebConfiguration = AXTab.configureWebConfiguration(
-            processPool: processPool,
-            dataStore: dataStore
-        )
+        self.individualWebConfiguration =
+            configuration.copy() as! WKWebViewConfiguration
 
         super.init(identifier: nil)
         self.label = title
@@ -70,37 +60,29 @@ class AXTab: NSTabViewItem, Codable {
             frame: .zero, configuration: individualWebConfiguration)
         self.view = webView
 
-        configureUserContent()
+        initializeUserContentController()
     }
 
     /// Initializes an empty tab.
     init(
-        creatingEmptyTab: Bool, dataStore: WKWebsiteDataStore,
-        processPool: WKProcessPool
+        creatingEmptyTab: Bool, configuration: WKWebViewConfiguration
     ) {
         self.isEmpty = creatingEmptyTab
         self.url = nil
-        self.websiteDataStore = dataStore
-        self.websiteProcessPool = processPool
 
-        self.individualWebConfiguration = AXTab.configureWebConfiguration(
-            processPool: processPool,
-            dataStore: dataStore
-        )
+        self.individualWebConfiguration =
+            configuration.copy() as! WKWebViewConfiguration
 
         super.init(identifier: nil)
         self.label = "New Tab"
 
-        configureUserContent()
+        initializeUserContentController()
     }
 
     /// Initializes a tab created as a popup with a given configuration.
     init(createdPopupTab withConfig: WKWebViewConfiguration) {
         self.individualWebConfiguration =
-            (withConfig.copy() as! WKWebViewConfiguration)
-        self.websiteDataStore = withConfig.websiteDataStore
-        self.websiteProcessPool = withConfig.processPool
-        self.individualWebConfiguration.userContentController = .init()
+            withConfig.copy() as! WKWebViewConfiguration
 
         super.init(identifier: nil)
 
@@ -108,7 +90,7 @@ class AXTab: NSTabViewItem, Codable {
             frame: .zero, configuration: individualWebConfiguration)
         self.view = webView
 
-        configureUserContent()
+        initializeUserContentController()
     }
 
     // MARK: - Codable
@@ -121,29 +103,18 @@ class AXTab: NSTabViewItem, Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         guard
-            let dataStore = decoder.userInfo[.websiteDataStore]
-                as? WKWebsiteDataStore
+            let baseConfiguration = decoder.userInfo[.webviewConfiguration]
+                as? WKWebViewConfiguration
         else {
             fatalError("[AXTab]: Data Store not found in decoder")
         }
-        self.websiteDataStore = dataStore
 
-        guard
-            let processPool = decoder.userInfo[.websiteProcessPool]
-                as? WKProcessPool
-        else {
-            fatalError("[AXTab]: Process Pool not found in decoder")
-        }
-        self.websiteProcessPool = processPool
-
-        self.individualWebConfiguration = AXTab.configureWebConfiguration(
-            processPool: websiteProcessPool,
-            dataStore: websiteDataStore
-        )
+        self.individualWebConfiguration =
+            baseConfiguration.copy() as! WKWebViewConfiguration
 
         super.init(identifier: nil)
 
-        configureUserContent()
+        initializeUserContentController()
 
         self.label = try container.decode(String.self, forKey: .label)
         self.url = try container.decodeIfPresent(URL.self, forKey: .url)
@@ -212,17 +183,13 @@ class AXTab: NSTabViewItem, Codable {
     // MARK: - Favicon Handling via User Script
 
     /// Injects the user script for favicon monitoring and sets up the message handler.
-    private func configureUserContent() {
-        let contentController = self.individualWebConfiguration
-            .userContentController
+    private func initializeUserContentController() {
+        let newContentController = WKUserContentController()
+        self.individualWebConfiguration.userContentController =
+            newContentController
 
-        let userScript = WKUserScript(
-            source: jsFaviconMonitoringScript,
-            injectionTime: .atDocumentEnd,
-            forMainFrameOnly: true
-        )
-        contentController.addUserScript(userScript)
-        contentController.add(self, name: "faviconChanged")
+        newContentController.addUserScript(javaScriptFaviconMonitoringScript)
+        newContentController.add(self, name: "faviconChanged")
 
         AXContentBlockerLoader.shared.enableAdblock(
             for: self.individualWebConfiguration, handler: self)
@@ -311,6 +278,11 @@ extension AXTab: WKScriptMessageHandler {
 }
 
 // MARK: - The Favicon-Monitoring User Script
+let javaScriptFaviconMonitoringScript = WKUserScript(
+    source: jsFaviconMonitoringScript,
+    injectionTime: .atDocumentEnd,
+    forMainFrameOnly: true
+)
 
 private let jsFaviconMonitoringScript = """
     let l,o=document.head,r=["icon","shortcut icon","apple-touch-icon","mask-icon"],f=_=>(u=(()=>{for(const t of r){const e=o.querySelector(`link[rel="${t}"]`);if(e?.href)return e.href}return location.origin+"/favicon.ico"})(),u!==l&&(l=u,window.webkit?.messageHandlers?.faviconChanged?.postMessage(u)));f(),new MutationObserver(f).observe(o,{childList:1,attributes:1,attributeFilter:["href"]});

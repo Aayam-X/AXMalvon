@@ -25,25 +25,16 @@ struct AXProfileData: Codable {
     static func fromDictionary(_ dictionary: [String: Any]) -> AXProfileData? {
         guard let configID = dictionary["id"] as? String,
             let selectedTabGroupIndex = dictionary["i"] as? Int
-        else {
-            return nil
-        }
+        else { return nil }
+
         return AXProfileData(
             configID: configID, selectedTabGroupIndex: selectedTabGroupIndex)
     }
 }
 
-let youtubeAdblockingUserScript = WKUserScript(
-    source: jsYoutubeAdBlockScript,
-    injectionTime: .atDocumentStart,
-    forMainFrameOnly: true
-)
-
 class AXProfile {
     var name: String
-    var websiteDataStore: WKWebsiteDataStore
-    var websiteProcessPool: WKProcessPool = .init()
-
+    var baseConfiguration: WKWebViewConfiguration
     var tabGroups: [AXTabGroup] = []
     weak var currentTabGroup: AXTabGroup!
 
@@ -63,7 +54,7 @@ class AXProfile {
             let config = AXProfile.createConfig(with: profileData.configID)
 
             self.init(
-                name: name, dataStore: config, loadsDefaultData: true,
+                name: name, config: config, loadsDefaultData: true,
                 configID: profileData.configID)
 
             mxPrint(
@@ -74,25 +65,25 @@ class AXProfile {
             #endif
         } else {
             let newProfile = AXProfile.createNewProfile(name: name)
-
             self.init(
-                name: name, dataStore: newProfile.dataStore,
-                loadsDefaultData: true, configID: newProfile.id)
+                name: name, config: newProfile.config, loadsDefaultData: true,
+                configID: newProfile.id)
         }
     }
 
     init(
-        name: String, dataStore: WKWebsiteDataStore, loadsDefaultData: Bool,
+        name: String, config: WKWebViewConfiguration, loadsDefaultData: Bool,
         configID: String? = nil, usingTabGroup: AXTabGroup? = nil
     ) {
         self.name = name
-        self.websiteDataStore = dataStore
-
+        self.baseConfiguration = config
         self.tabGroups = []
 
         if let configID {
             self.historyManager = AXHistoryManager(fileName: configID)
         }
+
+        config.enableDefaultMalvonPreferences()
 
         if loadsDefaultData, usingTabGroup == nil {
             loadTabGroups()
@@ -105,7 +96,7 @@ class AXProfile {
 
     // MARK: - Profile Defaults
     class private func createNewProfile(name: String) -> (
-        id: String, dataStore: WKWebsiteDataStore
+        id: String, config: WKWebViewConfiguration
     ) {
         let defaults = UserDefaults.standard
         var profiles =
@@ -120,8 +111,10 @@ class AXProfile {
         profiles[name] = newProfileData.toDictionary()
         defaults.set(profiles, forKey: "Profiles")
 
-        let dataStore = WKWebsiteDataStore(forIdentifier: UUID())
-        return (newProfileData.configID, dataStore)
+        // Create a new WKWebView configuration
+        let config = WKWebViewConfiguration()
+        config.websiteDataStore = WKWebsiteDataStore(forIdentifier: UUID())
+        return (newProfileData.configID, config)
     }
 
     class func loadProfile(name: String) -> AXProfileData? {
@@ -138,12 +131,12 @@ class AXProfile {
         return nil
     }
 
-    class func createConfig(with id: String) -> WKWebsiteDataStore {
+    class func createConfig(with id: String) -> WKWebViewConfiguration {
+        let config = WKWebViewConfiguration()
         if let uuid = UUID(uuidString: id) {
-            return WKWebsiteDataStore(forIdentifier: uuid)
-        } else {
-            fatalError("Unable to resolve UUID")
+            config.websiteDataStore = WKWebsiteDataStore(forIdentifier: uuid)
         }
+        return config
     }
 
     // MARK: - Tab Groups JSON
@@ -197,8 +190,7 @@ class AXProfile {
         hasLoadedTabs = true
 
         let decoder = JSONDecoder()
-        decoder.userInfo[.websiteDataStore] = self.websiteDataStore
-        decoder.userInfo[.websiteProcessPool] = self.websiteProcessPool
+        decoder.userInfo[.webviewConfiguration] = self.baseConfiguration
 
         do {
             let data = try Data(contentsOf: fileURL)
@@ -209,44 +201,21 @@ class AXProfile {
             tabGroups = [AXTabGroup(name: "Untitled Tab Group")]
         }
     }
-
-    // MARK: - Configuration Features
-
-    //    func enableContentBlockers() {
-    //        AXContentBlockerLoader.shared.enableAdblock(for: configuration)
-
-    //        let extensionLoader = AX_wBlockExtension()
-    //
-    //        extensionLoader.getContentBlockerURLPath { blockerListURL in
-    //            guard let blockerListURL else { return }
-    //
-    //            Task(priority: .background) {
-    //                try? self.loadContentBlocker(at: blockerListURL)
-    //            }
-    //        }
-    //    }
-
-    //    func enableYouTubeAdBlocker() {
-    //        configuration.userContentController.addUserScript(
-    //            youtubeAdblockingUserScript)
-    //    }
-    //
-    //    func disableYouTubeAdBlocker() {
-    //        configuration.userContentController.removeAllUserScripts()
-    //    }
-
 }
 
 class AXPrivateProfile: AXProfile {
     //  override var tabGroups: [AXTabGroup] = [.init(name: "Private Tab Group")]
 
     init() {
+        let config = WKWebViewConfiguration()
+        config.websiteDataStore = .nonPersistent()
+
         let privateTabGroup = AXTabGroup(name: "Private Tab Group")
         privateTabGroup.color = .black
 
         super.init(
-            name: "Private", dataStore: .nonPersistent(),
-            loadsDefaultData: false, usingTabGroup: privateTabGroup)
+            name: "Private", config: config, loadsDefaultData: false,
+            usingTabGroup: privateTabGroup)
     }
 
     override func saveTabGroups() {
@@ -257,12 +226,6 @@ class AXPrivateProfile: AXProfile {
         // Do nothing
     }
 }
-
-// swiftlint:disable line_length
-let jsYoutubeAdBlockScript = """
-    (function(){let ytInitialPlayerResponse=null;Object.defineProperty(window,"ytInitialPlayerResponse",{get:()=>ytInitialPlayerResponse,set:(data)=>{if(data)data.adPlacements=[];ytInitialPlayerResponse=data},configurable:true})})();(function(){const originalFetch=window.fetch;window.fetch=async(...args)=>{const response=await originalFetch(...args);if(response.url.includes("/youtubei/v1/player")){const originalText=response.text.bind(response);response.text=()=>originalText().then((data)=>data.replace(/"adPlacements"/g,'"odPlacements"'))}return response}})();(function(){const skipAds=()=>{const skipButton=document.querySelector(".videoAdUiSkipButton, .ytp-ad-skip-button");if(skipButton)skipButton.click();const adOverlay=document.querySelector(".ad-showing");if(adOverlay){const video=document.querySelector("video");if(video){video.playbackRate=10;video.isMuted=1}}};const removeInlineAds=()=>{const adContainer=document.querySelector("#player-ads");if(adContainer)adContainer.remove()};const adBlockerInterval=setInterval(()=>{skipAds();removeInlineAds()},300);window.addEventListener("unload",()=>clearInterval(adBlockerInterval))})();
-    """
-// swiftlint:enable line_length
 
 // Experimental Features
 

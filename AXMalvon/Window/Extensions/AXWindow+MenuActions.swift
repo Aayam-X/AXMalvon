@@ -47,9 +47,7 @@ extension AXWindow {
     }
 
     @IBAction func toggleSearchBarForNewTab(_ sender: Any?) {
-        currentTabGroup.addEmptyTab(
-            dataStore: activeProfile.websiteDataStore,
-            processPool: activeProfile.websiteProcessPool)
+        currentTabGroup.addEmptyTab(config: activeProfile.baseConfiguration)
     }
 
     @IBAction func find(_ sender: Any) {

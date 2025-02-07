@@ -26,7 +26,7 @@ protocol AXTabBarViewTemplate: AnyObject, NSView, AXTabButtonDelegate {
     func addTabButton(for tab: AXTab)
     func removeTabButton(at index: Int)
     func addTabButtonInBackground(for tab: AXTab, index: Int)
-    func updateIndicesAfterTabDelete(at index: Int)
+    func updateIndicesBeforeTabDelete(at index: Int)
     func updateTabSelection(from: Int, to index: Int)
 }
 

@@ -12,8 +12,7 @@ import SecurityInterface
 extension AXWindow: AXSidebarSearchButtonDelegate {
     func searchBarCreatesNewTab(with url: URL) {
         let tab = AXTab(
-            title: "New tab", dataStore: activeProfile.websiteDataStore,
-            processPool: activeProfile.websiteProcessPool)
+            title: "New tab", configuration: activeProfile.baseConfiguration)
         currentTabGroup.addTab(tab)
 
         tab.url = url

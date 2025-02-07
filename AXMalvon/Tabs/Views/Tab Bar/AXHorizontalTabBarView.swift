@@ -233,9 +233,9 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         tab.stopAllObservations()
 
         delegate?.tabBarWillDelete(tab: tab)
-        tabGroup.tabContentView.removeTabViewItem(tab)
+        updateIndicesBeforeTabDelete(at: index)
 
-        updateIndicesAfterTabDelete(at: index)
+        tabGroup.tabContentView.removeTabViewItem(tab)
     }
 
     func removeTabButton(at index: Int) {
@@ -248,13 +248,13 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         cleanupTab(button)
 
         // Update indices and selected index
-        updateIndicesAfterTabDelete(at: index)
+        updateIndicesBeforeTabDelete(at: index)
 
         // Scroll to the new selected tab
         scrollToTab(at: tabGroup.selectedIndex)
     }
 
-    func updateIndicesAfterTabDelete(at index: Int) {
+    func updateIndicesBeforeTabDelete(at index: Int) {
         // Adjust tags for remaining buttons
         for case let (idx, button as AXTabButton) in tabStackView
             .arrangedSubviews.enumerated().dropFirst(index)
@@ -263,12 +263,13 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         }
 
         // Adjust the selected index
-        updateSelectedItemIndex(after: index)
+        updateSelectedItemIndex(before: index)
     }
 
-    private func updateSelectedItemIndex(after removedIndex: Int) {
+    private func updateSelectedItemIndex(before removedIndex: Int) {
         if tabGroup.tabs.isEmpty {
             // No tabs left
+            mxPrint("No tabs left")
             tabGroup.selectedIndex = -1
             previousTabIndex = -1
             delegate?.tabBarSwitchedTo(tabAt: -1)
@@ -276,9 +277,12 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         }
 
         if tabGroup.selectedIndex == removedIndex {
-            // If the removed tab was selected, select the next tab or the last one
-            tabGroup.selectedIndex = min(
-                abs(previousTabIndex), tabGroup.tabs.count - 1)
+            if previousTabIndex == -1 {
+                tabGroup.selectedIndex = tabGroup.tabs.count - 1
+            } else {
+                tabGroup.selectedIndex = min(
+                    previousTabIndex, tabGroup.tabs.count - 1)
+            }
         } else if tabGroup.selectedIndex > removedIndex {
             // If a tab before the selected one is removed, shift the selected index
             tabGroup.selectedIndex -= 1
@@ -286,7 +290,7 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
 
         // Update visuals
         if let button = tabStackView.arrangedSubviews[tabGroup.selectedIndex]
-            as? AXHorizontalTabButton
+            as? AXTabButton
         {
             button.isSelected = true
         }

@@ -137,13 +137,11 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         }
 
         // Remove the tab from the group
-        tabGroup.tabContentView.tabViewItems.remove(at: index)
         tabButton.removeFromSuperview()
+        updateIndicesBeforeTabDelete(at: index)
 
+        tabGroup.tabContentView.tabViewItems.remove(at: index)
         mxPrint("DELETED TAB COUNT", tabGroup.tabs.count)
-
-        // Update indices of tabs after the removed one
-        updateIndicesAfterTabDelete(at: index)
     }
 
     func removeTabButton(at index: Int) {
@@ -166,7 +164,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
             button.removeFromSuperview()
 
             // Update indices and layout the stack view
-            self.updateIndicesAfterTabDelete(at: index)
+            self.updateIndicesBeforeTabDelete(at: index)
             self.tabStackView.layoutSubtreeIfNeeded()
         }
     }
@@ -206,7 +204,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         //        }
     }
 
-    func updateIndicesAfterTabDelete(at index: Int) {
+    func updateIndicesBeforeTabDelete(at index: Int) {
         for case let (index, button as AXTabButton) in tabStackView
             .arrangedSubviews.enumerated().dropFirst(index)
         {
@@ -214,10 +212,10 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
             button.tag = index
         }
 
-        updateSelectedItemIndex(after: index)
+        updateSelectedItemIndex(before: index)
     }
 
-    private func updateSelectedItemIndex(after index: Int) {
+    private func updateSelectedItemIndex(before index: Int) {
         // Handle when there are no more tabs left
         if tabGroup.tabs.isEmpty {
             mxPrint("No tabs left")
@@ -227,9 +225,9 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
             return
         }
 
-        // If index is out of bounds, select the last tab
+        // If the selected tab is the one being deleted, adjust the index
         if tabGroup.selectedIndex == index {
-            // If the removed tab was selected, select the next tab or the last one
+            // If the removed tab was selected, select the next one or the last one
             if previousTabIndex == -1 {
                 tabGroup.selectedIndex = tabGroup.tabs.count - 1
             } else {
@@ -243,8 +241,9 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
 
         mxPrint("Updated Tab Index: \(tabGroup.selectedIndex)")
 
+        // Select the appropriate tab button
         if let button = tabStackView.arrangedSubviews[tabGroup.selectedIndex]
-            as? AXVerticalTabButton
+            as? AXTabButton
         {
             button.isSelected = true
         }
@@ -331,26 +330,26 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
 }
 
 extension AXVerticalTabBarView {
-    private func reorderTabs(from: Int, toIndex: Int) {
-        mxPrint("Reordering tabs from \(from) to \(toIndex)")
-
-        let firstButton = tabStackView.arrangedSubviews[from] as! AXTabButton
-        let secondButton =
-            tabStackView.arrangedSubviews[toIndex] as! AXTabButton
-
-        firstButton.tag = toIndex
-        secondButton.tag = from
-
-        tabStackView.removeArrangedSubview(firstButton)
-        tabStackView.insertArrangedSubview(firstButton, at: toIndex)
-        tabStackView.insertArrangedSubview(secondButton, at: from)
-
-        firstButton.isHidden = false
-
-        tabGroup.tabContentView.tabViewItems.swapAt(from, toIndex)
-        tabGroup.selectedIndex = toIndex
-        self.updateIndicesAfterTabDelete(at: min(from, toIndex))
-    }
+    //    private func reorderTabs(from: Int, toIndex: Int) {
+    //        mxPrint("Reordering tabs from \(from) to \(toIndex)")
+    //
+    //        let firstButton = tabStackView.arrangedSubviews[from] as! AXTabButton
+    //        let secondButton =
+    //            tabStackView.arrangedSubviews[toIndex] as! AXTabButton
+    //
+    //        firstButton.tag = toIndex
+    //        secondButton.tag = from
+    //
+    //        tabStackView.removeArrangedSubview(firstButton)
+    //        tabStackView.insertArrangedSubview(firstButton, at: toIndex)
+    //        tabStackView.insertArrangedSubview(secondButton, at: from)
+    //
+    //        firstButton.isHidden = false
+    //
+    //        tabGroup.tabContentView.tabViewItems.swapAt(from, toIndex)
+    //        tabGroup.selectedIndex = toIndex
+    //        self.updateIndicesBeforeTabDelete(at: min(from, toIndex))
+    //    }
 }
 
 class AXScrollView: NSScrollView {
