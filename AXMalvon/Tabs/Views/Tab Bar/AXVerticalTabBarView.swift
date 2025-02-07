@@ -132,6 +132,10 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     func tabButtonWillClose(_ tabButton: AXTabButton) {
         let index = tabButton.tag
 
+        if let tab = tabButton.tab {
+            delegate?.tabBarWillDelete(tab: tab)
+        }
+
         // Remove the tab from the group
         tabGroup.tabContentView.tabViewItems.remove(at: index)
         tabButton.removeFromSuperview()
@@ -139,7 +143,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         mxPrint("DELETED TAB COUNT", tabGroup.tabs.count)
 
         // Update indices of tabs after the removed one
-        updateIndices(after: index)
+        updateIndicesAfterTabDelete(at: index)
     }
 
     func removeTabButton(at index: Int) {
@@ -162,7 +166,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
             button.removeFromSuperview()
 
             // Update indices and layout the stack view
-            self.updateIndices(after: index)
+            self.updateIndicesAfterTabDelete(at: index)
             self.tabStackView.layoutSubtreeIfNeeded()
         }
     }
@@ -202,7 +206,7 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         //        }
     }
 
-    func updateIndices(after index: Int) {
+    func updateIndicesAfterTabDelete(at index: Int) {
         for case let (index, button as AXTabButton) in tabStackView
             .arrangedSubviews.enumerated().dropFirst(index)
         {
@@ -345,7 +349,7 @@ extension AXVerticalTabBarView {
 
         tabGroup.tabContentView.tabViewItems.swapAt(from, toIndex)
         tabGroup.selectedIndex = toIndex
-        self.updateIndices(after: min(from, toIndex))
+        self.updateIndicesAfterTabDelete(at: min(from, toIndex))
     }
 }
 

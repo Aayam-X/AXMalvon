@@ -36,6 +36,8 @@ class AXHistoryManager {
     private let queue = DispatchQueue(
         label: "com.axhistorymanager.database", attributes: .concurrent)
 
+    public var recentlyClosedTabs: [URL] = []
+
     lazy var dateString: String = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"

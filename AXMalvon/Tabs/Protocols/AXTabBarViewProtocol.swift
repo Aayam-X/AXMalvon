@@ -12,6 +12,8 @@ import WebKit
 protocol AXTabBarViewDelegate: AnyObject {
     func tabBarSwitchedTo(tabAt: Int)
     func tabBarActiveTabTitleChanged(to title: String)
+
+    func tabBarWillDelete(tab: AXTab)
 }
 
 protocol AXTabBarViewTemplate: AnyObject, NSView, AXTabButtonDelegate {
@@ -24,7 +26,7 @@ protocol AXTabBarViewTemplate: AnyObject, NSView, AXTabButtonDelegate {
     func addTabButton(for tab: AXTab)
     func removeTabButton(at index: Int)
     func addTabButtonInBackground(for tab: AXTab, index: Int)
-    func updateIndices(after index: Int)
+    func updateIndicesAfterTabDelete(at index: Int)
     func updateTabSelection(from: Int, to index: Int)
 }
 

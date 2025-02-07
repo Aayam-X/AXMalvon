@@ -15,27 +15,29 @@ extension AXWindow {
     @IBAction func installChromeExtension(_ sender: Any?) {
         Task {
             guard let url = layoutManager.containerView.currentPageAddress,
-                  let crxExtension = await CRXExtension(crxURL: url)
+                let crxExtension = await CRXExtension(crxURL: url)
             else { return }
-            
+
             let sheetWindow = NSWindow()
-            
-            let extensionDownloaderView = AXExtensionDownloaderView(crxExtension: crxExtension) {
+
+            let extensionDownloaderView = AXExtensionDownloaderView(
+                crxExtension: crxExtension
+            ) {
                 sheetWindow.close()
             } onInstall: {
                 sheetWindow.close()
-                
+
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     //crxExtension.installAndRun()
                 }
             }
 
-            
-            let hostingController = NSHostingController(rootView: extensionDownloaderView)
+            let hostingController = NSHostingController(
+                rootView: extensionDownloaderView)
             sheetWindow.contentViewController = hostingController
             sheetWindow.styleMask = [.titled, .closable]
             sheetWindow.isReleasedWhenClosed = false
-            
+
             self.beginSheet(sheetWindow, completionHandler: nil)
         }
     }
@@ -201,7 +203,17 @@ extension AXWindow {
 
         switch Int(event.keyCode) {
         case kVK_ANSI_T:
-            toggleSearchBarForNewTab(nil)
+            if event.modifierFlags.contains(.shift) {
+                if let recentlyClosedTab = activeProfile.historyManager?
+                    .recentlyClosedTabs.popLast()
+                {
+                    searchBarCreatesNewTab(with: recentlyClosedTab)
+                } else {
+                    break
+                }
+            } else {
+                toggleSearchBarForNewTab(nil)
+            }
             return true
         case kVK_ANSI_L:
             toggleSearchField(nil)

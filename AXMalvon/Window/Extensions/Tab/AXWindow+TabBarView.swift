@@ -10,6 +10,12 @@ import AppKit
 import WebKit
 
 extension AXWindow: AXTabBarViewDelegate {
+    func tabBarWillDelete(tab: AXTab) {
+        if let url = tab.url {
+            activeProfile.historyManager?.recentlyClosedTabs.append(url)
+        }
+    }
+
     func tabBarSwitchedTo(tabAt: Int) {
         if tabAt == -1 {
             layoutManager.containerView.removeAllWebViews()

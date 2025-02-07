@@ -70,9 +70,12 @@ class AXTabGroup: Codable {
     }
 
     func removeTab(at index: Int) {
-        tabs[index].stopAllObservations()
+        let tab = tabs[index]
+        tab.stopAllObservations()
 
-        tabContentView.removeTabViewItem(tabs[index])
+        tabBarView?.delegate?.tabBarWillDelete(tab: tab)
+
+        tabContentView.removeTabViewItem(tab)
         tabBarView?.removeTabButton(at: index)
     }
 

@@ -231,9 +231,11 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         cleanupTab(tabButton)
 
         tab.stopAllObservations()
+
+        delegate?.tabBarWillDelete(tab: tab)
         tabGroup.tabContentView.removeTabViewItem(tab)
 
-        updateIndices(after: index)
+        updateIndicesAfterTabDelete(at: index)
     }
 
     func removeTabButton(at index: Int) {
@@ -246,13 +248,13 @@ class AXHorizontalTabBarView: NSView, AXTabBarViewTemplate {
         cleanupTab(button)
 
         // Update indices and selected index
-        updateIndices(after: index)
+        updateIndicesAfterTabDelete(at: index)
 
         // Scroll to the new selected tab
         scrollToTab(at: tabGroup.selectedIndex)
     }
 
-    func updateIndices(after index: Int) {
+    func updateIndicesAfterTabDelete(at index: Int) {
         // Adjust tags for remaining buttons
         for case let (idx, button as AXTabButton) in tabStackView
             .arrangedSubviews.enumerated().dropFirst(index)
