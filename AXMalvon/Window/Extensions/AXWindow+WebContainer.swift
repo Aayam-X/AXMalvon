@@ -15,6 +15,8 @@ extension AXWindow: AXWebContainerViewDelegate {
         let tab = AXTab(
             url: url, title: "New Tab",
             configuration: activeProfile.baseConfiguration)
+        tab.webView!.load(URLRequest(url: url))
+        
         currentTabGroup.addTab(tab)
 
         return tab

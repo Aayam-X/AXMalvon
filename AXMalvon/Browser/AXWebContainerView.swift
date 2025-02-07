@@ -65,6 +65,7 @@ class AXWebContainerView: NSView {
         addSubview(startPageView)
         startPageView.autoresizingMask = [.height, .width]
 
+        // Makes the search field first responder.
         delegate?.webContainerViewDidSwitchToStartPage()
     }
 
@@ -295,9 +296,9 @@ class AXWebContainerView: NSView {
             tabView.activateConstraints([
                 .allEdges: .view(self)
             ])
-
-            if tabGroup.selectedIndex == -1 {
-                // Do nothing...
+            
+            if tabGroup.tabs.isEmpty || tabGroup.selectedIndex >= tabGroup.tabs.count {
+                displayNewTabPage()
             } else {
                 let tab = tabGroup.tabs[tabGroup.selectedIndex]
                 self.willSwitchTab(tab)
@@ -513,6 +514,7 @@ extension AXWebContainerView: AXNewTabViewDelegate {
 
         // Update the tab
         self.willSwitchTab(currentTabViewItem)
+        tabView.selectTabViewItem(at: 0)
 
         // Start AXTabButton observation. Called via delegate method.
         delegate?.webContainerUserDidClickStartPageItem(currentTabViewItem)

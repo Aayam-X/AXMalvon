@@ -21,10 +21,6 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
 
     var mouseExitedTrackingArea: NSTrackingArea!
 
-    override var tag: Int {
-        return 0x01
-    }
-
     private lazy var bottomLine: NSBox = {
         let line = NSBox()
         line.boxType = .separator
@@ -97,6 +93,7 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
             tabGroupInfoView: tabGroupInfoView, searchButton: searchButton)
 
         super.init(frame: .zero)
+        self.wantsLayer = true
         setupView()
     }
 
@@ -233,7 +230,7 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
             // FIXME: Next Steps, run the `popup.js` script.
         } else {
             helloWorldExtension = CRXExtension(extensionName: "Hello-World")
-            print(helloWorldExtension?.manifest)
+            print(helloWorldExtension?.manifest as Any)
         }
 
         class ExtensionPopupController: NSViewController {

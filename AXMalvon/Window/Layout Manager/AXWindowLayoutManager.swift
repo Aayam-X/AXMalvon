@@ -206,4 +206,8 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
             }
         }
     }
+    
+    override func updatedTabGroupColor(in window: AXWindow, color: NSColor) {
+        verticalHostingView.layer?.backgroundColor = color.cgColor
+    }
 }
