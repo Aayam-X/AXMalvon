@@ -9,13 +9,13 @@
 import AppKit
 
 class AXVerticalTabButton: NSButton, AXTabButton {
-    unowned var tab: AXTab!
     weak var delegate: AXTabButtonDelegate?
 
     // Subviews
     var favIconImageView: NSImageView! = NSImageView()
     var titleView: NSTextField! = NSTextField()
-    var closeButton: AXSidebarTabCloseButton! = AXSidebarTabCloseButton()
+    var closeButton = AXSidebarTabCloseButton()
+
     var trackingArea: NSTrackingArea!
 
     var webTitle: String = "Untitled" {
@@ -24,6 +24,12 @@ class AXVerticalTabButton: NSButton, AXTabButton {
         }
     }
 
+    var isSelected: Bool = false {
+        didSet {
+            self.updateAppearance()
+        }
+    }
+    
     var favicon: NSImage? {
         get {
             self.favIconImageView.image
@@ -34,34 +40,8 @@ class AXVerticalTabButton: NSButton, AXTabButton {
         }
     }
 
-    var isSelected: Bool = false {
-        didSet {
-            self.updateAppearance()
-
-            if isSelected, tab.titleObserver == nil {
-                forceCreateWebview()
-            }
-        }
-    }
-
-    private lazy var contextMenu: NSMenu = {
-        let menu = NSMenu()
-
-        // Add items to the context menu
-        let item = NSMenuItem(
-            title: "Deactivate Tab", action: #selector(deactiveTab),
-            keyEquivalent: "")
-        item.target = self
-
-        menu.addItem(item)
-
-        return menu
-    }()
-
-    required init(tab: AXTab!) {
-        self.tab = tab
+    required init() {
         super.init(frame: .zero)
-        self.translatesAutoresizingMaskIntoConstraints = false
         self.isBordered = false
         self.bezelStyle = .smallSquare
         title = ""
@@ -71,29 +51,11 @@ class AXVerticalTabButton: NSButton, AXTabButton {
         layer?.masksToBounds = false
         setupViews()
         setupShadow()
-        setupTrackingArea()
-
-        if let tab {
-            tab.onWebViewInitialization =
-                self.onWebViewInitializationListenerHandler
-        }
-
-        if tab?.titleObserver == nil {
-            titleView.stringValue = "New Tab"
-        }
+        updateTrackingAreas()
     }
 
-    func onWebViewInitializationListenerHandler(webView: AXWebView) {
-        mxPrint(#function, "CALLEDDDD")
-        self.createObserver(webView)
-    }
-
-    override func viewWillDraw() {
-        updateAppearance()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    required convenience init?(coder: NSCoder) {
+        self.init()
     }
 
     func setupViews() {
@@ -101,9 +63,7 @@ class AXVerticalTabButton: NSButton, AXTabButton {
 
         // Setup imageView
         favIconImageView.translatesAutoresizingMaskIntoConstraints = false
-        favIconImageView.image =
-            tab.icon != nil
-            ? tab.icon : AXTabButtonConstants.defaultFaviconSleep
+        favIconImageView.image = AXTabButtonConstants.defaultFaviconSleep
         favIconImageView.contentTintColor = .textBackgroundColor
             .withAlphaComponent(0.2)
         addSubview(favIconImageView)
@@ -151,40 +111,61 @@ class AXVerticalTabButton: NSButton, AXTabButton {
             .defaultLow, for: .horizontal)
         titleView.setContentHuggingPriority(.defaultLow, for: .horizontal)
     }
+    
+    private func updateAppearance() {
+        let newBackgroundColor: CGColor
+        if isSelected {
+            if effectiveAppearance.name == .vibrantDark
+                || effectiveAppearance.name == .darkAqua
+            {
+                newBackgroundColor = .black
+                layer?.shadowColor = .white
+            } else {
+                newBackgroundColor = .white
+                layer?.shadowColor = .black
+            }
+            layer?.shadowOpacity = 0.3
+            closeButton.isHidden = false
+        } else {
+            newBackgroundColor = .clear
+            layer?.shadowOpacity = 0.0
+            closeButton.isHidden = true
+        }
 
-    func faviconNotFound() {
-        favIconImageView.image = AXTabButtonConstants.defaultFavicon
+        if self.layer?.backgroundColor != newBackgroundColor {
+            self.layer?.backgroundColor = newBackgroundColor
+        }
+    }
+
+    private func setupShadow() {
+        layer?.shadowColor = NSColor.textColor.cgColor
+        layer?.shadowOpacity = 0.0
+        layer?.shadowRadius = 3.0
+        layer?.shadowOffset = CGSize(width: 0, height: 0)
     }
 }
 
 // MARK: Tab Functions
 extension AXVerticalTabButton {
-    @objc
-    func closeTab() {
-        tab?.stopAllObservations()
-        delegate?.tabButtonWillClose(self)
+    @objc func closeTab() {
+        delegate?.tabButtonDidRequestClose(self)
     }
-
-    @objc
-    func deactiveTab() {
-        tab.deactivateWebView()
-
-        favicon = AXTabButtonConstants.defaultFaviconSleep
-        delegate?.tabButtonDeactivatedWebView(self)
-    }
-
+    
     // This would be called directly from a button click
-    @objc
-    func switchTab() {
+    @objc func switchTab() {
         delegate?.tabButtonDidSelect(self)
     }
+}
 
-    private func setupTrackingArea() {
-        let options: NSTrackingArea.Options = [
-            .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
-        ]
-        trackingArea = NSTrackingArea(
-            rect: self.bounds, options: options, owner: self, userInfo: nil)
+// MARK: Mouse Functions
+extension AXVerticalTabButton {
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if trackingArea != nil {
+            self.removeTrackingArea(trackingArea)
+        }
+
+        trackingArea = NSTrackingArea(rect: self.bounds, options: [.activeInKeyWindow, .mouseEnteredAndExited, .inVisibleRect], owner: self, userInfo: nil)
         self.addTrackingArea(trackingArea)
     }
 
@@ -209,127 +190,27 @@ extension AXVerticalTabButton {
 
     override func mouseEntered(with event: NSEvent) {
         if !isSelected {
-            self.layer?.backgroundColor =
-                NSColor.systemGray.withAlphaComponent(0.3).cgColor
+            NSAnimationContext.runAnimationGroup { _ in
+                self.animator().layer?.backgroundColor = NSColor.systemGray.withAlphaComponent(0.3).cgColor
+            }
         }
-        closeButton.isHidden = false
+        // Delay close button appearance
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.closeButton.isHidden = false
+        }
     }
 
     override func mouseExited(with event: NSEvent) {
         if !isSelected {
-            closeButton.isHidden = true
-        }
-        updateAppearance()
-    }
-
-    private func updateAppearance() {
-        let backgroundColor: CGColor
-        if isSelected {
-            if effectiveAppearance.name == .vibrantDark
-                || effectiveAppearance.name == .darkAqua
-            {
-                backgroundColor = .black
-                layer?.shadowColor = .white
-            } else {
-                backgroundColor = .white
-                layer?.shadowColor = .black
+            NSAnimationContext.runAnimationGroup { _ in
+                self.animator().layer?.backgroundColor = NSColor.clear.cgColor
             }
-            layer?.shadowOpacity = 0.3
-            closeButton.isHidden = false
-        } else {
-            backgroundColor = .clear
-            layer?.shadowOpacity = 0.0
-            closeButton.isHidden = true
         }
-
-        self.layer?.backgroundColor = backgroundColor
-    }
-
-    private func setupShadow() {
-        layer?.shadowColor = NSColor.textColor.cgColor
-        layer?.shadowOpacity = 0.0
-        layer?.shadowRadius = 3.0
-        layer?.shadowOffset = CGSize(width: 0, height: 0)
-    }
-}
-
-// MARK: Mouse Functions
-extension AXVerticalTabButton {
-    override func rightMouseDown(with event: NSEvent) {
-        super.rightMouseDown(with: event)
-
-        // Show the context menu at the mouse location
-        let locationInButton = self.convert(event.locationInWindow, from: nil)
-
-        // Show the context menu at the converted location relative to the button
-        contextMenu.popUp(positioning: nil, at: locationInButton, in: self)
-    }
-}
-
-// MARK: - Close Button
-class AXSidebarTabCloseButton: NSButton {
-    var trackingArea: NSTrackingArea!
-
-    let hoverColor: NSColor = NSColor.lightGray.withAlphaComponent(0.3)
-    let selectedColor: NSColor = NSColor.lightGray.withAlphaComponent(0.6)
-    let defaultAlphaValue: CGFloat = 0.3
-
-    var defaultColor: CGColor? = .none
-    var mouseDown: Bool = false
-
-    init(isSelected: Bool = false) {
-        super.init(frame: .zero)
-        self.wantsLayer = true
-        self.layer?.cornerRadius = 5
-        self.isBordered = false
-        self.bezelStyle = .smallSquare
-        self.alphaValue = defaultAlphaValue
-        self.setTrackingArea()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    func setTrackingArea() {
-        let options: NSTrackingArea.Options = [
-            .activeAlways, .inVisibleRect, .mouseEnteredAndExited,
-        ]
-        trackingArea = NSTrackingArea.init(
-            rect: self.bounds, options: options, owner: self, userInfo: nil)
-        self.addTrackingArea(trackingArea)
-    }
-
-    override func mouseUp(with event: NSEvent) {
-        mouseDown = false
-        if self.isMousePoint(
-            self.convert(event.locationInWindow, from: nil), in: self.bounds)
-        {
-            sendAction(action, to: target)
+        // Delay close button hiding
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            if !self.isSelected {
+                self.closeButton.isHidden = true
+            }
         }
-
-        layer?.backgroundColor = defaultColor
-    }
-
-    override func mouseDown(with event: NSEvent) {
-        mouseDown = true
-        self.layer?.backgroundColor = hoverColor.cgColor
-    }
-
-    override func mouseEntered(with event: NSEvent) {
-        if isEnabled {
-            self.layer?.backgroundColor = hoverColor.cgColor
-        }
-
-        self.alphaValue = 1
-    }
-
-    override func mouseDragged(with event: NSEvent) {
-        mouseDown = false
-    }
-
-    override func mouseExited(with event: NSEvent) {
-        self.layer?.backgroundColor = defaultColor
-        self.alphaValue = defaultAlphaValue
     }
 }

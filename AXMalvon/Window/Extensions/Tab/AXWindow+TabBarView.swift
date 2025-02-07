@@ -23,7 +23,7 @@ extension AXWindow: AXTabBarViewDelegate {
         } else {
             let tab = currentTabGroup.tabs[tabAt]
             layoutManager.searchButton.fullAddress = tab.url ?? nil
-            layoutManager.containerView.selectTabViewItem(at: tabAt)
+            layoutManager.containerView.selectTabViewItem(at: tabAt, tab: tab)
         }
     }
 

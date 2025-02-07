@@ -11,17 +11,19 @@ import WebKit
 
 // swiftlint:disable force_cast
 class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
-    var tabGroup: AXTabGroup
-    var delegate: (any AXTabBarViewDelegate)?
-
-    var previousTabIndex: Int = -1
-
-    private var dragTargetIndex: Int?
+    weak var delegate: (any AXTabBarViewDelegate)?
+    
+    // Variables
+    var selectedTabIndex: Int = 0 {
+        didSet {
+            self.updateTabSelection(from: oldValue, to: selectedTabIndex)
+        }
+    }
 
     // Views
-    var tabStackView = NSStackView()
-    var clipView = AXFlippedClipView()
-    var scrollView: AXScrollView!
+    internal var tabStackView = NSStackView()
+    private var clipView = AXFlippedClipView()
+    private var scrollView: AXScrollView!
 
     lazy var divider: NSBox = {
         let box = NSBox()
@@ -32,14 +34,13 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         return box
     }()
 
-    required init(tabGroup: AXTabGroup) {
-        self.tabGroup = tabGroup
+    required init() {
         super.init(frame: .zero)
         setupViews()
     }
 
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    required convenience init?(coder: NSCoder) {
+        self.init()
     }
 
     func setupViews() {
@@ -87,63 +88,19 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         ])
     }
 
-    func addTabButton(for tab: AXTab) {
-        let button = AXVerticalTabButton(tab: tab)
+    func addTabButton() {
+        let button = AXVerticalTabButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.delegate = self
 
-        let newIndex = tabGroup.tabs.count - 1
+        let newIndex = tabStackView.arrangedSubviews.count - 1
         button.tag = newIndex
 
-        let previousIndex = tabGroup.selectedIndex
-        tabGroup.selectedIndex = newIndex
-
-        delegate?.tabBarSwitchedTo(tabAt: newIndex)
-
         addButtonToTabView(button)
-        button.startObserving()
 
-        updateTabSelection(from: previousIndex, to: newIndex)
+        self.selectedTabIndex = newIndex
     }
-
-    func addTabButtonInBackground(for tab: AXTab, index: Int) {
-        let button = AXVerticalTabButton(tab: tab)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.delegate = self
-
-        button.tag = index
-        button.webTitle = tab.label
-
-        addButtonToTabView(button)
-        button.startObserving()
-        button.favicon = tab.icon
-    }
-
-    func tabButtonDidSelect(_ tabButton: AXTabButton) {
-        let previousTag = tabGroup.selectedIndex
-
-        let newTag = tabButton.tag
-        tabGroup.selectedIndex = newTag
-
-        // Update the active tab
-        updateTabSelection(from: previousTag, to: newTag)
-    }
-
-    func tabButtonWillClose(_ tabButton: AXTabButton) {
-        let index = tabButton.tag
-
-        if let tab = tabButton.tab {
-            delegate?.tabBarWillDelete(tab: tab)
-        }
-
-        // Remove the tab from the group
-        tabButton.removeFromSuperview()
-        updateIndicesBeforeTabDelete(at: index)
-
-        tabGroup.tabContentView.tabViewItems.remove(at: index)
-        mxPrint("DELETED TAB COUNT", tabGroup.tabs.count)
-    }
-
+    
     func removeTabButton(at index: Int) {
         let button = tabStackView.arrangedSubviews[index] as! AXTabButton
 
@@ -168,43 +125,31 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
             self.tabStackView.layoutSubtreeIfNeeded()
         }
     }
-
-    func updateTabGroup(_ newTabGroup: AXTabGroup) {
-        newTabGroup.tabBarView = self
-
-        // Clear existing buttons
-        for button in self.tabStackView.arrangedSubviews {
-            button.removeFromSuperview()
-        }
-
-        // Update tab group
-        self.tabGroup = newTabGroup
-        newTabGroup.tabBarView = self
-
-        // Add tab buttons
-        for (index, tab) in newTabGroup.tabs.enumerated() {
-            self.addTabButtonInBackground(for: tab, index: index)
-        }
-
-        guard newTabGroup.selectedIndex != -1 else { return }
-        self.updateTabSelection(from: -1, to: newTabGroup.selectedIndex)
+    
+    func switchToTab(at index: Int) {
+        <#code#>
     }
-
-    func tabButtonActiveTitleChanged(
-        _ newTitle: String, for tabButton: AXTabButton
-    ) {
-        delegate?.tabBarActiveTabTitleChanged(to: newTitle)
+    
+    func updateButton(title: String, at index: Int) {
+        <#code#>
     }
-
-    func tabButtonDeactivatedWebView(_ tabButton: AXTabButton) {
-        //  _ = tabGroup.tabs[tabButton.tag]
-
-        //        if tab.webConfiguration == nil {
-        //            tab.webConfiguration = delegate?.tabBarDeactivatedTab()
-        //        }
+    
+    func updateButton(icon: NSImage, at index: Int) {
+        <#code#>
     }
+    
+    func tabButtonDidSelect(_ tabButton: any AXTabButton) {
+        <#code#>
+    }
+    
+    func tabButtonDidRequestClose(_ tabButton: any AXTabButton) {
+        <#code#>
+    }
+}
 
-    func updateIndicesBeforeTabDelete(at index: Int) {
+// MARK: - Private Methods
+extension AXVerticalTabBarView {
+    private func updateIndicesBeforeTabDelete(at index: Int) {
         for case let (index, button as AXTabButton) in tabStackView
             .arrangedSubviews.enumerated().dropFirst(index)
         {
@@ -216,45 +161,40 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     }
 
     private func updateSelectedItemIndex(before index: Int) {
-        // Handle when there are no more tabs left
-        if tabGroup.tabs.isEmpty {
-            mxPrint("No tabs left")
-            tabGroup.selectedIndex = -1
-            previousTabIndex = -1
-            delegate?.tabBarSwitchedTo(tabAt: -1)
-            return
-        }
-
-        // If the selected tab is the one being deleted, adjust the index
-        if tabGroup.selectedIndex == index {
-            // If the removed tab was selected, select the next one or the last one
-            if previousTabIndex == -1 {
-                tabGroup.selectedIndex = tabGroup.tabs.count - 1
-            } else {
-                tabGroup.selectedIndex = min(
-                    previousTabIndex, tabGroup.tabs.count - 1)
-            }
-        } else if tabGroup.selectedIndex > index {
-            // If a tab before the selected one is removed, shift the selected index
-            tabGroup.selectedIndex -= 1
-        }
-
-        mxPrint("Updated Tab Index: \(tabGroup.selectedIndex)")
-
-        // Select the appropriate tab button
-        if let button = tabStackView.arrangedSubviews[tabGroup.selectedIndex]
-            as? AXTabButton
-        {
-            button.isSelected = true
-        }
-
-        delegate?.tabBarSwitchedTo(tabAt: tabGroup.selectedIndex)
+//        // Handle when there are no more tabs left
+//        if tabGroup.tabs.isEmpty {
+//            mxPrint("No tabs left")
+//            tabGroup.selectedIndex = -1
+//            previousTabIndex = -1
+//            delegate?.tabBarSwitchedTo(tabAt: -1)
+//            return
+//        }
+//
+//        // If the selected tab is the one being deleted, adjust the index
+//        if tabGroup.selectedIndex == index {
+//            // If the removed tab was selected, select the next one or the last one
+//            if previousTabIndex == -1 {
+//                tabGroup.selectedIndex = tabGroup.tabs.count - 1
+//            } else {
+//                tabGroup.selectedIndex = min(
+//                    previousTabIndex, tabGroup.tabs.count - 1)
+//            }
+//        } else if tabGroup.selectedIndex > index {
+//            // If a tab before the selected one is removed, shift the selected index
+//            tabGroup.selectedIndex -= 1
+//        }
+//
+//        mxPrint("Updated Tab Index: \(tabGroup.selectedIndex)")
+//
+//        // Select the appropriate tab button
+//        if let button = tabStackView.arrangedSubviews[tabGroup.selectedIndex]
+//            as? AXTabButton
+//        {
+//            button.isSelected = true
+//        }
     }
 
-    func updateTabSelection(from: Int, to index: Int) {
-        self.previousTabIndex = from
-        mxPrint(#function, "Previous Tab Index \(previousTabIndex)")
-
+    private func updateTabSelection(from: Int, to index: Int) {
         let arragedSubviews = tabStackView.arrangedSubviews
         let arrangedSubviewsCount = arragedSubviews.count
 
@@ -268,8 +208,6 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
 
         let newButton = arragedSubviews[index] as! AXTabButton
         newButton.isSelected = true
-
-        delegate?.tabBarSwitchedTo(tabAt: index)
     }
 
     private func addButtonToTabView(_ button: NSView) {
@@ -309,47 +247,6 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
             button.animator().alphaValue = 1.0  // Optional: Fade in
         }
     }
-
-    private func addButtonToTabViewWithoutAnimation(_ button: NSView) {
-        // Add the button off-screen by modifying its frame
-        button.translatesAutoresizingMaskIntoConstraints = false
-
-        // Configure button layout priorities
-        button.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        button.setContentCompressionResistancePriority(
-            .defaultLow, for: .horizontal)
-
-        tabStackView.addArrangedSubview(button)
-
-        // Only constrain the horizontal margins
-        button.activateConstraints([
-            .left: .view(tabStackView, constant: 5),
-            .right: .view(tabStackView, constant: -3),
-        ])
-    }
-}
-
-extension AXVerticalTabBarView {
-    //    private func reorderTabs(from: Int, toIndex: Int) {
-    //        mxPrint("Reordering tabs from \(from) to \(toIndex)")
-    //
-    //        let firstButton = tabStackView.arrangedSubviews[from] as! AXTabButton
-    //        let secondButton =
-    //            tabStackView.arrangedSubviews[toIndex] as! AXTabButton
-    //
-    //        firstButton.tag = toIndex
-    //        secondButton.tag = from
-    //
-    //        tabStackView.removeArrangedSubview(firstButton)
-    //        tabStackView.insertArrangedSubview(firstButton, at: toIndex)
-    //        tabStackView.insertArrangedSubview(secondButton, at: from)
-    //
-    //        firstButton.isHidden = false
-    //
-    //        tabGroup.tabContentView.tabViewItems.swapAt(from, toIndex)
-    //        tabGroup.selectedIndex = toIndex
-    //        self.updateIndicesBeforeTabDelete(at: min(from, toIndex))
-    //    }
 }
 
 class AXScrollView: NSScrollView {
@@ -367,4 +264,107 @@ final class AXFlippedClipView: NSClipView {
     }
 }
 
-// swiftlint:enable force_cast
+/*
+ func addTabButton(for tab: AXTab) {
+     let button = AXVerticalTabButton()
+     button.translatesAutoresizingMaskIntoConstraints = false
+     button.delegate = self
+
+     let newIndex = tabGroup.tabs.count - 1
+     button.tag = newIndex
+
+     let previousIndex = tabGroup.selectedIndex
+     tabGroup.selectedIndex = newIndex
+
+     delegate?.tabBarSwitchedTo(tabAt: newIndex)
+
+     addButtonToTabView(button)
+     button.startObserving()
+
+     updateTabSelection(from: previousIndex, to: newIndex)
+ }
+
+ func tabButtonDidSelect(_ tabButton: AXTabButton) {
+     let previousTag = tabGroup.selectedIndex
+
+     let newTag = tabButton.tag
+     tabGroup.selectedIndex = newTag
+
+     // Update the active tab
+     updateTabSelection(from: previousTag, to: newTag)
+ }
+
+ func tabButtonWillClose(_ tabButton: AXTabButton) {
+     guard let delegate = self.delegate, delegate.tabBarWillDelete(tabButton: tabButton) else {
+         return
+     }
+     
+     let index = tabButton.tag
+     
+     tabButton.removeFromSuperview()
+     updateIndicesBeforeTabDelete(at: index)
+     
+     tabGroup.tabContentView.tabViewItems.remove(at: index)
+ }
+
+ func removeTabButton(at index: Int) {
+     let button = tabStackView.arrangedSubviews[index] as! AXTabButton
+
+     // Calculate the off-screen position for the slide animation
+     let finalPosition = button.frame.offsetBy(
+         dx: 0, dy: +button.frame.height)
+
+     // Create the slide animation
+     NSAnimationContext.runAnimationGroup { context in
+         context.duration = 0.05
+         context.timingFunction = CAMediaTimingFunction(name: .easeIn)
+
+         // Slide the button down underneath the stack view
+         button.animator().setFrameOrigin(finalPosition.origin)
+         button.animator().alphaValue = 0  // Fade out as it slides
+     } completionHandler: {
+         // Remove the button after the animation completes
+         button.removeFromSuperview()
+
+         // Update indices and layout the stack view
+         self.updateIndicesBeforeTabDelete(at: index)
+         self.tabStackView.layoutSubtreeIfNeeded()
+     }
+ }
+
+ func updateTabGroup(_ newTabGroup: AXTabGroup) {
+     newTabGroup.tabBarView = self
+
+     // Clear existing buttons
+     for button in self.tabStackView.arrangedSubviews {
+         button.removeFromSuperview()
+     }
+
+     // Update tab group
+     self.tabGroup = newTabGroup
+     newTabGroup.tabBarView = self
+
+     // Add tab buttons
+     for (index, tab) in newTabGroup.tabs.enumerated() {
+         self.addTabButtonInBackground(for: tab, index: index)
+     }
+
+     guard newTabGroup.selectedIndex != -1 else { return }
+     self.updateTabSelection(from: -1, to: newTabGroup.selectedIndex)
+ }
+
+ func tabButtonActiveTitleChanged(
+     _ newTitle: String, for tabButton: AXTabButton
+ ) {
+     delegate?.tabBarActiveTabTitleChanged(to: newTitle)
+ }
+
+ func tabButtonDeactivatedWebView(_ tabButton: AXTabButton) {
+     //  _ = tabGroup.tabs[tabButton.tag]
+
+     //        if tab.webConfiguration == nil {
+     //            tab.webConfiguration = delegate?.tabBarDeactivatedTab()
+     //        }
+ }
+
+ */

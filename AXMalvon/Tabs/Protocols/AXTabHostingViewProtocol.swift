@@ -14,7 +14,9 @@ protocol AXTabHostingViewDelegate: AnyObject {
     func tabHostingViewNavigateForward()
     func tabHostingViewNavigateBackwards()
 
+    // Creating new tab
     func tabHostingViewCreatedNewTab()
+    func tabHostingViewWillRemoveTab(tab: AXTab)
 
     // Browsing Functions
     func tabHostingViewDisplaysTabGroupCustomizationPanel(_ sender: NSView)

@@ -9,24 +9,22 @@
 import AppKit
 
 protocol AXTabButtonDelegate: AnyObject {
+    /// Called when the user selects (clicks) a tab button
     func tabButtonDidSelect(_ tabButton: AXTabButton)
-    func tabButtonWillClose(_ tabButton: AXTabButton)
-    func tabButtonActiveTitleChanged(
-        _ newTitle: String, for tabButton: AXTabButton)
 
-    func tabButtonDeactivatedWebView(_ tabButton: AXTabButton)
+    /// Called when the user presses the close button on a tab
+    func tabButtonDidRequestClose(_ tabButton: AXTabButton)
 }
 
 protocol AXTabButton: AnyObject, NSButton {
-    var tab: AXTab! { get set }
     var delegate: AXTabButtonDelegate? { get set }
-
-    var isSelected: Bool { get set }
 
     var favicon: NSImage? { get set }
     var webTitle: String { get set }
 
-    init(tab: AXTab!)
+    var isSelected: Bool { get set }
+
+    init()
 }
 
 struct AXTabButtonConstants {
@@ -36,23 +34,4 @@ struct AXTabButtonConstants {
         systemSymbolName: "moon.fill", accessibilityDescription: nil)
     static let defaultCloseButton = NSImage(
         systemSymbolName: "xmark", accessibilityDescription: nil)
-}
-
-extension AXTabButton {
-    public func startObserving() {
-        guard let webView = tab?.view as? AXWebView else { return }
-
-        createObserver(webView)
-    }
-
-    func forceCreateWebview() {
-        if let webView = tab.webView {
-            createObserver(webView)
-        }
-    }
-
-    func createObserver(_ webView: AXWebView) {
-        mxPrint(#function, "CALLEDDDD 1111")
-        tab.startTitleObservation(for: self)
-    }
 }

@@ -29,9 +29,9 @@ class AXWebContainerView: NSView {
     let startPageView = AXStartPageView(frame: .zero)
     weak var delegate: AXWebContainerViewDelegate?
 
-    private unowned var tabView: NSTabView?
+    private weak var tabView: NSTabView?
 
-    private unowned var currentWebView: AXWebView?
+    private weak var currentWebView: AXWebView?
 
     // Observers
     var progressBarObserver: NSKeyValueObservation?
@@ -53,8 +53,9 @@ class AXWebContainerView: NSView {
         super.removeFromSuperview()
     }
 
-    func selectTabViewItem(at: Int) {
+    func selectTabViewItem(at: Int, tab: AXTab) {
         tabView?.selectTabViewItem(at: at)
+        self.willSwitchTab(tab)
     }
 
     func displayNewTabPage() {
@@ -300,17 +301,19 @@ class AXWebContainerView: NSView {
             if tabGroup.tabs.isEmpty || tabGroup.selectedIndex >= tabGroup.tabs.count {
                 displayNewTabPage()
             } else {
+                self.tabView?.selectTabViewItem(at: tabGroup.selectedIndex)
                 let tab = tabGroup.tabs[tabGroup.selectedIndex]
                 self.willSwitchTab(tab)
             }
         }
     }
-
+    
     func willSwitchTab(_ tab: AXTab) {
         self.cancelAnimations()
         guard let tabView else { return }
 
         if tab.isEmpty {
+            currentWebView = nil
             displayNewTabPage()
             return
         } else {
@@ -352,11 +355,11 @@ class AXWebContainerView: NSView {
 }
 
 extension AXWebContainerView: NSTabViewDelegate {
-    func tabView(_ tabView: NSTabView, willSelect tabViewItem: NSTabViewItem?) {
-        if let tab = tabViewItem as? AXTab {
-            self.willSwitchTab(tab)
-        }
-    }
+//    func tabView(_ tabView: NSTabView, didSelect tabViewItem: NSTabViewItem?) {
+//        if let tab = tabViewItem as? AXTab {
+//            self.willSwitchTab(tab)
+//        }
+//    }
 }
 
 // MARK: - Web View Functions
@@ -514,7 +517,6 @@ extension AXWebContainerView: AXNewTabViewDelegate {
 
         // Update the tab
         self.willSwitchTab(currentTabViewItem)
-        tabView.selectTabViewItem(at: 0)
 
         // Start AXTabButton observation. Called via delegate method.
         delegate?.webContainerUserDidClickStartPageItem(currentTabViewItem)
