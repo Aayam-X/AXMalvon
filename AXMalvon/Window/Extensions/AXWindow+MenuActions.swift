@@ -48,6 +48,7 @@ extension AXWindow {
 
     @IBAction func toggleSearchBarForNewTab(_ sender: Any?) {
         self.malvonTabManager.addEmptyTab(config: activeProfile.baseConfiguration)
+        layoutManager.searchButton.addressField.stringValue = ""
     }
 
     @IBAction func find(_ sender: Any) {

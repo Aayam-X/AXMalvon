@@ -10,6 +10,8 @@ import AppKit
 import WebKit
 
 protocol AXWebContainerViewDelegate: AnyObject {
+    func webContainerViewSelectedTabWithEmptyView() -> AXWebView?
+    
     func webContainerViewFinishedLoading(webView: WKWebView)
     func webContainerViewChangedURL(to url: URL)
     func webContainerViewCloses()
@@ -22,7 +24,7 @@ protocol AXWebContainerViewDelegate: AnyObject {
 
     func webContainerViewDidSwitchToStartPage()
     
-    func webContainerUserDidClickStartPageItem(_ with: URL)
+    func webContainerUserDidClickStartPageItem(_ with: URL) -> AXWebView
     
     func webContainerViewRequestsCurrentTab() -> AXTab
 }
@@ -42,7 +44,7 @@ class AXWebContainerView: NSView {
     func setupViews() {
         // This is literally all there is to the initialization code.
         startPageView.delegate = self
-        startPageView.isHidden = true
+        browserTabView.delegate = self
         
         addSubview(browserTabView)
         browserTabView.activateConstraints([
@@ -80,12 +82,7 @@ class AXWebContainerView: NSView {
             startPageView.removeFromSuperview()
             currentWebView.load(URLRequest(url: url))
         } else {
-            // Create a webView then update it
-            let tab = delegate!.webContainerViewRequestsCurrentTab()
-            tab.url = url
-            
-            //let _ = tab.webView
-            willSwitchTab(tab)
+            newTabViewDidSelectItem(url: url)
         }
     }
     
@@ -130,67 +127,9 @@ class AXWebContainerView: NSView {
     }
     
     // MARK: - View Switching
-    func selectTabViewItem(at: Int, tab: AXTab) {
+    public func selectTabViewItem(at: Int) {
         browserTabView.selectTabViewItem(at: at)
-        willSwitchTab(tab)
     }
-    
-    func displayNewTabPage() {
-        mxPrint("Displaying Empty Tab Page")
-        self.currentWebView = nil
-        
-        startPageView.frame = self.frame
-        addSubview(startPageView)
-        startPageView.autoresizingMask = [.height, .width]
-        
-        // Makes the search field first responder.
-        delegate?.webContainerViewDidSwitchToStartPage()
-    }
-    
-    private func willSwitchTab(_ tab: AXTab) {}
-//    private func willSwitchTab(_ tab: AXTab) {
-//        self.cancelAnimations()
-//
-//        if tab.isTabEmpty {
-//            displayNewTabPage()
-//            mxPrint("TAB IS EMPTY")
-//            return
-//        } else {
-//            self.startPageView.removeFromSuperview()
-//        }
-//
-//        guard let webView = tab.webView else {
-//            fatalError("Unable to create webView")
-//        }
-//
-//        self.currentWebView = webView
-//        self.currentWebView!.uiDelegate = self
-//        self.currentWebView!.navigationDelegate = self
-//
-//        webView.frame = browserTabView.frame
-//        currentWebViewFocus(webView: webView)
-//
-//        progressBarObserver = webView.observe(
-//            \.estimatedProgress, options: [.new]
-//        ) { [weak self] _, change in
-//            if let newProgress = change.newValue {
-//                self?.updateProgress(newProgress)
-//            } else {
-//                mxPrint("Progress change has no new value.")
-//            }
-//        }
-//
-//        if let url = webView.url {
-//            self.delegate?.webContainerViewChangedURL(to: url)
-//        }
-//
-//        urlObserver = webView.observe(\.url, options: [.new]) {
-//            [weak self] _, change in
-//            if let newURL = change.newValue, let newURL {
-//                self?.delegate?.webContainerViewChangedURL(to: newURL)
-//            }
-//        }
-//    }
     
     // MARK: - Progress Bar Animation
     private let borderLayers: [CAShapeLayer] = {
@@ -343,36 +282,86 @@ class AXWebContainerView: NSView {
             }
         }
     }
+    
+    private func didSwitchToNewWebView(_ webView: AXWebView) {
+        self.currentWebView = webView
+        webView.uiDelegate = self
+        webView.navigationDelegate = self
+        
+        // Observers
+        progressBarObserver = webView.observe(
+            \.estimatedProgress, options: [.new]
+        ) { [weak self] _, change in
+            if let newProgress = change.newValue {
+                self?.updateProgress(newProgress)
+            } else {
+                mxPrint("Progress change has no new value.")
+            }
+        }
+
+        if let url = webView.url {
+            self.delegate?.webContainerViewChangedURL(to: url)
+        }
+
+        urlObserver = webView.observe(\.url, options: [.new]) {
+            [weak self] _, change in
+            if let newURL = change.newValue, let newURL {
+                self?.delegate?.webContainerViewChangedURL(to: newURL)
+            }
+        }
+    }
 }
 
-extension AXWebContainerView {
+extension AXWebContainerView: NSTabViewDelegate {
+    func tabView(_ tabView: NSTabView, shouldSelect tabViewItem: NSTabViewItem?) -> Bool {
+        guard let tabViewItem else { return false }
+        
+        if tabViewItem.view == nil {
+            if let newWebView = delegate?.webContainerViewSelectedTabWithEmptyView() {
+                tabViewItem.view = newWebView
+                
+                didSwitchToNewWebView(newWebView)
+                
+                return true
+            } else {
+                tabViewItem.view = startPageView
+                currentWebView = nil
+                return true
+            }
+        } else {
+            if let webView = tabViewItem.view as? AXWebView {
+                didSwitchToNewWebView(webView)
+            }
+            
+            return true
+        }
+    }
+    
+    func tabView(_ tabView: NSTabView, didSelect tabViewItem: NSTabViewItem?) {
+        if let webView = tabViewItem?.view as? AXWebView {
+            self.currentWebViewFocus(webView: webView)
+        }
+    }
+    
     func malvonUpdateTabViewItems(tabGroup: AXTabGroup) {
-        let newItems: [NSTabViewItem] = []
+        var newItems: [NSTabViewItem] = []
         
         for tab in tabGroup.tabs {
             let tabViewItem = NSTabViewItem()
+            mxPrint("Tab View Update: \(tab.isTabEmpty)")
             tabViewItem.view = tab.webView
+            
+            newItems.append(tabViewItem)
         }
         
         self.browserTabView.tabViewItems = newItems
-        
-        if tabGroup.tabs.isEmpty || tabGroup.selectedIndex >= tabGroup.tabs.count {
-            displayNewTabPage()
-        } else {
-            browserTabView.selectTabViewItem(at: tabGroup.selectedIndex)
-            let tab = tabGroup.tabs[tabGroup.selectedIndex]
-            self.willSwitchTab(tab)
-        }
     }
     
     func malvonAddWebView(tab: AXTab) {
         let tabViewItem = NSTabViewItem()
         tabViewItem.view = tab.webView
+        
         browserTabView.addTabViewItem(tabViewItem)
-        
-        browserTabView.selectTabViewItem(tabViewItem)
-        
-        self.willSwitchTab(tab)
     }
     
     func malvonRemoveWebView(at: Int) {
@@ -431,6 +420,7 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
         let result = await panel.begin()
         return result == .OK ? panel.urls : nil
     }
+    
 
     func webView(
         _ webView: WKWebView, navigationAction: WKNavigationAction,
@@ -515,6 +505,12 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
 extension AXWebContainerView: AXNewTabViewDelegate {
     func newTabViewDidSelectItem(url: URL) {
         // Start AXTabButton observation. Called via delegate method.
-        delegate?.webContainerUserDidClickStartPageItem(url)
+        let webView = delegate?.webContainerUserDidClickStartPageItem(url)
+        guard let selectedItem = browserTabView.selectedTabViewItem else { fatalError("Fix me") }
+        selectedItem.view = webView
+        
+        if let webView {
+            didSwitchToNewWebView(webView)
+        }
     }
 }

@@ -11,6 +11,16 @@ import SwiftUI
 import WebKit
 
 extension AXWindow: AXWebContainerViewDelegate {
+    func webContainerViewSelectedTabWithEmptyView() -> AXWebView? {
+        let tab = malvonTabManager.currentTab
+        
+        if tab.isTabEmpty {
+            return nil
+        }
+        
+        return tab.webView
+    }
+    
     func webContainerViewRequestsCurrentTab() -> AXTab {
         return malvonTabManager.currentTab
     }
@@ -30,7 +40,7 @@ extension AXWindow: AXWebContainerViewDelegate {
         makeFirstResponder(layoutManager.searchButton.addressField)
     }
 
-    func webContainerUserDidClickStartPageItem(_ with: URL) {
+    func webContainerUserDidClickStartPageItem(_ with: URL) -> AXWebView {
         if malvonTabManager.isEmpty {
             let tab = AXTab(
                 url: with, title: "New Tab",
@@ -38,15 +48,14 @@ extension AXWindow: AXWebContainerViewDelegate {
             tab.webView!.load(URLRequest(url: with))
             
             malvonTabManager.addTab(tab)
-            return
+            return tab.webView!
         }
         
         let currentTab = malvonTabManager.currentTab
         currentTab.url = with
-        
-        layoutManager.containerView.selectTabViewItem(at: currentTabGroup.selectedIndex, tab: currentTab)
-
         currentTab.webView!.load(URLRequest(url: with))
+        
+        return currentTab.webView!
         
         
         //layoutManager.containerView.selectTabViewItem(tab: currentTab)

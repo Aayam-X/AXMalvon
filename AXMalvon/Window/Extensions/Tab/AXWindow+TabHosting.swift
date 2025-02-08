@@ -11,9 +11,9 @@ import AppKit
 extension AXWindow: AXTabHostingViewDelegate {
     func tabBarSwitchedTo(_ tabButton: any AXTabButton) {
         let index = tabButton.tag
-        let tab = currentTabGroup.tabs[index]
+//        let tab = currentTabGroup.tabs[index]
         
-        layoutManager.containerView.selectTabViewItem(at: index, tab: tab)
+        malvonTabManager.switchTab(toIndex: index)
     }
     
     func tabHostingViewCreatedNewTab() {

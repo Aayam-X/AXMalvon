@@ -37,11 +37,11 @@ protocol AXTabBarViewTemplate: AnyObject, NSView, AXTabButtonDelegate {
 
     init()
     
-    func addTabButton()
+    @discardableResult
+    func addTabButton() -> AXTabButton
     func removeTabButton(at index: Int)
     
-    func updateButton(title: String, at index: Int)
-    func updateButton(icon: NSImage, at index: Int)
+    func tabButton(at index: Int) -> AXTabButton
 }
 
 extension AXTabBarViewTemplate {
@@ -55,24 +55,11 @@ extension AXTabBarViewTemplate {
             button.removeFromSuperview()
         }
 
-        for (index, tab) in newTabGroup.tabs.enumerated() {
+        for _ in newTabGroup.tabs {
             addTabButton()
         }
-        let selectedIndex = newTabGroup.selectedIndex
-
-        // Update Tab Selection as long as the tab index is not -1
-        if selectedIndex != -1 {
-            let arragedSubviews = tabStackView.arrangedSubviews
-            let arrangedSubviewsCount = arragedSubviews.count
-
-            guard arrangedSubviewsCount > selectedIndex,
-                let newButton = arragedSubviews[selectedIndex] as? AXTabButton
-            else { return }
-            newButton.isSelected = true
-        }
         
-        if let lastButton = tabStackView.arrangedSubviews.last as? AXTabButton {
-            delegate?.tabBarSwitchedTo(lastButton)
-        }
+        let button = tabStackView.arrangedSubviews[newTabGroup.selectedIndex] as! AXTabButton
+        button.isSelected = true
     }
 }

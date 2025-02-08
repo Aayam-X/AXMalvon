@@ -9,21 +9,18 @@ import AppKit
 import WebKit
 
 class AXTabsManager {
+    private var browserWebView: AXWebContainerView
+    private var tabBarView: AXTabBarViewTemplate
+    private var tabGroup: AXTabGroup // tabGroup.tabs, tabs.WKWebView
+    
     private var selectedTabIndex = 0 {
         didSet {
-            guard !tabGroup.tabs.isEmpty else {
-                selectedTabIndex = 0
-                return
-            }
             selectedTabIndex = max(0, min(selectedTabIndex, tabGroup.tabs.count - 1))
             tabBarView.selectedTabIndex = selectedTabIndex
             tabGroup.selectedIndex = selectedTabIndex
+            browserWebView.selectTabViewItem(at: selectedTabIndex)
         }
     }
-    
-    private var browserWebView: AXWebContainerView
-    private var tabBarView: AXTabBarViewTemplate
-    private var tabGroup: AXTabGroup
     
     init(browserWebView: AXWebContainerView, tabBarView: AXTabBarViewTemplate, tabGroup: AXTabGroup) {
         self.browserWebView = browserWebView
@@ -34,6 +31,19 @@ class AXTabsManager {
     func update(tabGroup: AXTabGroup) {
         tabBarView.updateTabGroup(tabGroup)
         browserWebView.malvonUpdateTabViewItems(tabGroup: tabGroup)
+        
+        // Setup title observers
+        for (index, tab) in tabGroup.tabs.enumerated() {
+            let button = tabBarView.tabButton(at: index)
+            tab.onTitleChange = { [weak self] newTitle in
+                guard let self = self,
+                        let newTitle = newTitle
+                else { return }
+                
+                button.webTitle = newTitle
+            }
+            tab.startTitleObservation()
+        }
     }
     
     // MARK: - Public Variables
@@ -48,21 +58,28 @@ class AXTabsManager {
     // MARK: - Tab Functions
     func addTab(_ tab: AXTab) {
         tabGroup.tabs.append(tab)
-        tabBarView.addTabButton()
         browserWebView.malvonAddWebView(tab: tab)
         
+        let button = tabBarView.addTabButton()
+        
         selectedTabIndex = tabGroup.tabs.count - 1
-        browserWebView.selectTabViewItem(at: selectedTabIndex, tab: tab)
+        
+        tab.onTitleChange = { [weak self] newTitle in
+            guard let self = self,
+                    let newTitle = newTitle
+            else { return }
+            
+            button.webTitle = newTitle
+        }
+        
+        tab.startTitleObservation()
     }
     
     @discardableResult
     func addEmptyTab(config: WKWebViewConfiguration) -> AXTab {
         let tab = AXTab(creatingEmptyTab: true, configuration: config)
-        tabGroup.tabs.append(tab)
-        tabBarView.addTabButton()
-        browserWebView.malvonAddWebView(tab: tab)
+        addTab(tab)
         
-        selectedTabIndex = tabGroup.tabs.count - 1
         return tab
     }
     
@@ -77,13 +94,15 @@ class AXTabsManager {
         tabGroup.tabs[index].stopAllObservations()
         tabGroup.tabs.remove(at: index)
         tabBarView.removeTabButton(at: index)
-        browserWebView.malvonRemoveWebView(at: index)
         
+        /// Note: Always switch tabs before deleting the tab. As there would be some visual glitch with NSTabView
         if tabGroup.tabs.isEmpty {
             selectedTabIndex = 0
         } else if selectedTabIndex >= tabGroup.tabs.count {
             selectedTabIndex = tabGroup.tabs.count - 1
         }
+        
+        browserWebView.malvonRemoveWebView(at: index)
     }
     
     func removeCurrentTab() {

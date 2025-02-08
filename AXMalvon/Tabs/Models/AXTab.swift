@@ -22,7 +22,8 @@ class AXTab: Codable {
         return _webView == nil
     }
     
-    //var titleObserver: Cancellable?
+    private var titleObserver: Cancellable?
+    var onTitleChange: ((String?) -> Void)?
     
     weak var _webView: AXWebView?
     var individualWebConfiguration: WKWebViewConfiguration
@@ -37,20 +38,10 @@ class AXTab: Codable {
                 newWebView.load(URLRequest(url: url))
                 
                 self._webView = newWebView
+                startTitleObservation()
                 return newWebView
             }
         }
-//        guard !isEmpty else { return nil }
-//        
-//        // Create a new AXWebView with our configuration
-//        let newWebView = AXWebView(
-//            frame: .zero, configuration: individualWebConfiguration)
-//        if let url = url {
-//            newWebView.load(URLRequest(url: url))
-//        }
-//        
-//        self._webView = newWebView
-//        return newWebView
         return nil
     }
     
@@ -139,35 +130,37 @@ class AXTab: Codable {
     
     // MARK: - Title Observation
     
-//    func startTitleObservation(for tabButton: AXTabButton) {
-//        guard let webView = _webView else { return }
-//        
-//        // Use Combine to observe changes to the web view's title.
-//        titleObserver = webView.publisher(for: \.title)
-//            .sink { [weak self, weak tabButton] title in
-//                guard let self = self, let tabButton = tabButton else { return }
-//                let displayTitle = title ?? "Untitled"
-//                
-//                self.title = displayTitle
-//                tabButton.webTitle = displayTitle
-//                if let updatedURL = webView.url {
-//                    self.url = updatedURL
-//                }
-//            }
-//    }
-//    
-    func stopAllObservations() {}
-//        titleObserver?.cancel()
-//        titleObserver = nil
-//        
-//        if let webView = _webView {
-//            let contentController = webView.configuration.userContentController
-//            contentController.removeScriptMessageHandler(
-//                forName: "faviconChanged")
-//            contentController.removeScriptMessageHandler(
-//                forName: "advancedBlockingData")
-//        }
-//    }
+    func startTitleObservation() {
+        guard let webView = _webView else { return }
+        
+        // Use Combine to observe changes to the web view's title.
+        titleObserver = webView.publisher(for: \.title)
+            .sink { [weak self] title in
+                guard let self = self else { return }
+                let displayTitle = title ?? "Untitled"
+                
+                self.title = displayTitle
+                if let updatedURL = webView.url {
+                    self.url = updatedURL
+                }
+                
+                onTitleChange?(displayTitle)
+            }
+    }
+//
+    func stopAllObservations() {
+        titleObserver?.cancel()
+        titleObserver = nil
+        //
+        //        if let webView = _webView {
+        //            let contentController = webView.configuration.userContentController
+        //            contentController.removeScriptMessageHandler(
+        //                forName: "faviconChanged")
+        //            contentController.removeScriptMessageHandler(
+        //                forName: "advancedBlockingData")
+        //        }
+        //    }
+    }
     
     func initializeUserContentController() {}
 }

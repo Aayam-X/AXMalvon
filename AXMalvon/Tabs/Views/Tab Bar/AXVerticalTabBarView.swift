@@ -78,7 +78,8 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         ])
     }
 
-    func addTabButton() {
+    @discardableResult
+    func addTabButton() -> AXTabButton {
         let button = AXVerticalTabButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.delegate = self
@@ -87,6 +88,8 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         button.tag = newIndex
 
         addButtonToTabView(button)
+        
+        return button
     }
     
     func removeTabButton(at index: Int) {
@@ -114,22 +117,8 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         }
     }
     
-    func updateButton(title: String, at index: Int) {
-        for tabButton in tabStackView.arrangedSubviews as! [AXTabButton] {
-            if tabButton.tag == index {
-                tabButton.webTitle = title
-                break
-            }
-        }
-    }
-    
-    func updateButton(icon: NSImage, at index: Int) {
-        for tabButton in tabStackView.arrangedSubviews as! [AXTabButton] {
-            if tabButton.tag == index {
-                tabButton.favicon = icon
-                break
-            }
-        }
+    func tabButton(at index: Int) -> AXTabButton {
+        return tabStackView.arrangedSubviews[index] as! AXTabButton
     }
 }
 

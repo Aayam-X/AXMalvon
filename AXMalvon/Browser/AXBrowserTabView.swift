@@ -10,10 +10,9 @@ import WebKit
 
 class AXBrowserTabView: NSTabView {
     
-    
     init() {
         super.init(frame: .zero)
-        //self.tabViewType = .noTabsNoBorder
+        self.tabViewType = .noTabsNoBorder
     }
     
     required init?(coder: NSCoder) {
