@@ -10,16 +10,26 @@ import AppKit
 import WebKit
 
 class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
-    AXGestureViewDelegate
+                                AXGestureViewDelegate, AXTabBarViewDelegate
 {
-    var tabBarView: any AXTabBarViewTemplate
-    var tabHostingDelegate: (any AXTabHostingViewDelegate)?
+    func tabBarSwitchedTo(_ tabButton: any AXTabButton) {
+        tabHostingDelegate?.tabBarSwitchedTo(tabButton)
+    }
+    
+    func tabBarShouldClose(_ tabButton: any AXTabButton) -> Bool {
+        return tabHostingDelegate?.tabBarShouldClose(tabButton) ?? true
+    }
+    
+    func tabBarDidClose(_ tabAt: Int) {
+        tabHostingDelegate?.tabBarDidClose(tabAt)
+    }
+    
+    internal var tabBarView: any AXTabBarViewTemplate
+    weak var tabHostingDelegate: (any AXTabHostingViewDelegate)?
 
     var tabGroupInfoView: AXTabGroupInfoView
-    var searchButton: AXSidebarSearchButton
-    var gestureView: AXGestureView
-
-    var mouseExitedTrackingArea: NSTrackingArea!
+    internal var searchButton: AXSidebarSearchButton
+    private var gestureView: AXGestureView
 
     private lazy var bottomLine: NSBox = {
         let line = NSBox()
@@ -91,7 +101,7 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
         self.searchButton = searchButton
         self.gestureView = AXGestureView(
             tabGroupInfoView: tabGroupInfoView, searchButton: searchButton)
-
+        
         super.init(frame: .zero)
         self.wantsLayer = true
         setupView()
@@ -102,6 +112,7 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
     }
 
     func setupView() {
+        tabBarView.delegate = self
         gestureView.delegate = self
         tabGroupInfoView.onRightMouseDown = showTabGroupCustomizer
 
@@ -159,47 +170,12 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
             .height: .constant(30),
             .width: .constant(30),
         ])
-
-        // Mouse Tracking Area
-        mouseExitedTrackingArea = NSTrackingArea(
-            rect: .init(
-                x: bounds.origin.x + 1, y: bounds.origin.y,
-                width: bounds.size.width + 100, height: bounds.size.height),
-            options: [.activeAlways, .mouseEnteredAndExited], owner: self)
-        addTrackingArea(mouseExitedTrackingArea)
     }
 
     // MARK: - Mouse Functions
-    override func mouseExited(with event: NSEvent) {
-        //        guard let window = self.window as? AXWindow, window.hiddenSidebarView
-        //        else { return }
-        //
-        //        NSAnimationContext.runAnimationGroup(
-        //            { context in
-        //                context.duration = 0.1
-        //                self.animator().frame.origin.x = -bounds.width
-        //            },
-        //            completionHandler: {
-        //                self.layer?.backgroundColor = .none
-        //                self.removeFromSuperview()
-        //            })
-    }
-
-    override func viewDidEndLiveResize() {
-        removeTrackingArea(mouseExitedTrackingArea)
-        mouseExitedTrackingArea = NSTrackingArea(
-            rect: .init(
-                x: bounds.origin.x - 100, y: bounds.origin.y,
-                width: bounds.size.width + 100, height: bounds.size.height),
-            options: [.activeAlways, .mouseEnteredAndExited], owner: self)
-        addTrackingArea(mouseExitedTrackingArea)
-    }
-
     @objc
     func addNewTab() {
-        guard let window = self.window as? AXWindow else { return }
-
-        window.toggleSearchBarForNewTab(nil)
+        tabHostingDelegate?.tabHostingViewCreatedNewTab()
     }
 
     @objc

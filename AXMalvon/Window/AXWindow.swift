@@ -18,15 +18,18 @@ class AXWindow: NSWindow {
     internal var trafficLightButtons: [NSButton]!
 
     // Other Views
+    internal var malvonTabManager: AXTabsManager!
     internal var layoutManager: AXWindowLayoutManaging!
 
     // Lazy loading to stop unnecesary initilizations
     lazy var tabBarView: AXTabBarViewTemplate = {
-        if usesVerticalTabs {
-            return AXVerticalTabBarView(tabGroup: currentTabGroup)
-        } else {
-            return AXHorizontalTabBarView(tabGroup: currentTabGroup)
-        }
+//        if usesVerticalTabs {
+//            return AXVerticalTabBarView(tabGroup: currentTabGroup)
+//        } else {
+//            return AXHorizontalTabBarView(tabGroup: currentTabGroup)
+//        }
+        
+        return AXVerticalTabBarView()
     }()
 
     init(with profiles: [AXProfile]) {

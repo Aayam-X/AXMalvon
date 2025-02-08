@@ -20,79 +20,75 @@ protocol AXWebContainerViewDelegate: AnyObject {
 
     func webContainerViewRequestsSidebar() -> NSView?
 
-    func webContainerUserDidClickStartPageItem(_ tab: AXTab)
-
     func webContainerViewDidSwitchToStartPage()
+    
+    func webContainerUserDidClickStartPageItem(_ with: URL)
+    
+    func webContainerViewRequestsCurrentTab() -> AXTab
 }
 
 class AXWebContainerView: NSView {
     let startPageView = AXStartPageView(frame: .zero)
     weak var delegate: AXWebContainerViewDelegate?
-
-    private weak var tabView: NSTabView?
-
+    
+    var browserTabView = AXBrowserTabView()
+    
     private weak var currentWebView: AXWebView?
-
+    
     // Observers
-    var progressBarObserver: NSKeyValueObservation?
-    var urlObserver: NSKeyValueObservation?
-
-    var currentPageAddress: URL? {
-        currentWebView?.url
-    }
-
+    private var progressBarObserver: NSKeyValueObservation?
+    private var urlObserver: NSKeyValueObservation?
+    
     func setupViews() {
         // This is literally all there is to the initialization code.
         startPageView.delegate = self
+        startPageView.isHidden = true
+        
+        addSubview(browserTabView)
+        browserTabView.activateConstraints([
+            .allEdges: .view(self)
+        ])
     }
-
+    
     override func removeFromSuperview() {
         progressBarObserver?.invalidate()
         progressBarObserver = nil
-
+        
         super.removeFromSuperview()
     }
-
-    func selectTabViewItem(at: Int, tab: AXTab) {
-        tabView?.selectTabViewItem(at: at)
-        self.willSwitchTab(tab)
+    
+    var currentPageAddress: URL? {
+        currentWebView?.url
     }
-
-    func displayNewTabPage() {
-        mxPrint("Displaying Empty Tab Page")
-        self.currentWebView = nil
-
-        startPageView.frame = self.frame
-        addSubview(startPageView)
-        startPageView.autoresizingMask = [.height, .width]
-
-        // Makes the search field first responder.
-        delegate?.webContainerViewDidSwitchToStartPage()
-    }
-
+    
     func reload() {
         currentWebView?.reload()
     }
-
+    
     func back() {
         currentWebView?.goBack()
         self.finishAnimation()
     }
-
+    
     func forward() {
         currentWebView?.goForward()
         self.finishAnimation()
     }
-
+    
     func loadURL(url: URL) {
         if let currentWebView {
+            startPageView.removeFromSuperview()
             currentWebView.load(URLRequest(url: url))
         } else {
-            // Act as if a favourites site was clicked
-            newTabViewDidSelectItem(url: url)
+            // Create a webView then update it
+            let tab = delegate!.webContainerViewRequestsCurrentTab()
+            tab.url = url
+            
+            //let _ = tab.webView
+            willSwitchTab(tab)
         }
     }
-
+    
     func axWindowFirstResponder(_ window: AXWindow) {
         //window.makeFirstResponder(currentWebView)
         if let webView = currentWebView {
@@ -101,76 +97,141 @@ class AXWebContainerView: NSView {
             }
         }
     }
-
+    
     func currentWebViewFocus(webView: AXWebView) {
         DispatchQueue.main.async { [weak self] in
             guard let window = self?.window else { return }
             window.makeFirstResponder(webView)
         }
     }
-
+    
     private let animationQueue = DispatchQueue(
         label: "com.ayaamx.AXMalvon.progressAnimation",
         qos: .userInitiated
     )
-
+    
     override var isFlipped: Bool {
         true
     }
-
-    private let borderLayers: [CAShapeLayer] = {
-        let layer = CAShapeLayer()
-        layer.lineWidth = 9.0
-        layer.strokeColor =
-            NSColor.controlAccentColor.withAlphaComponent(0.6).cgColor
-        layer.isHidden = true
-        layer.opacity = 0.0
-
-        let layer1 = CAShapeLayer()
-        layer1.lineWidth = 9.0
-        layer1.strokeColor =
-            NSColor.controlAccentColor.withAlphaComponent(0.6).cgColor
-        layer1.isHidden = true
-        layer1.opacity = 0.0
-
-        let layer2 = CAShapeLayer()
-        layer2.lineWidth = 9.0
-        layer2.strokeColor =
-            NSColor.controlAccentColor.withAlphaComponent(0.6).cgColor
-        layer2.isHidden = true
-        layer2.opacity = 0.0
-
-        let layer3 = CAShapeLayer()
-        layer3.lineWidth = 9.0
-        layer3.strokeColor =
-            NSColor.controlAccentColor.withAlphaComponent(0.6).cgColor
-        layer3.isHidden = true
-        layer3.opacity = 0.0
-
-        return [layer, layer1, layer2, layer3]
-    }()
-
-    private var currentProgress: CGFloat = 0.0
-    private var animationToken: UUID?
-
+    
+    
+    
     init() {
         super.init(frame: .zero)
         setupViews()
-
+        
         wantsLayer = true
         self.layer?.masksToBounds = true
         setupLayers()
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
+    // MARK: - View Switching
+    func selectTabViewItem(at: Int, tab: AXTab) {
+        browserTabView.selectTabViewItem(at: at)
+        willSwitchTab(tab)
+    }
+    
+    func displayNewTabPage() {
+        mxPrint("Displaying Empty Tab Page")
+        self.currentWebView = nil
+        
+        startPageView.frame = self.frame
+        addSubview(startPageView)
+        startPageView.autoresizingMask = [.height, .width]
+        
+        // Makes the search field first responder.
+        delegate?.webContainerViewDidSwitchToStartPage()
+    }
+    
+    private func willSwitchTab(_ tab: AXTab) {}
+//    private func willSwitchTab(_ tab: AXTab) {
+//        self.cancelAnimations()
+//
+//        if tab.isTabEmpty {
+//            displayNewTabPage()
+//            mxPrint("TAB IS EMPTY")
+//            return
+//        } else {
+//            self.startPageView.removeFromSuperview()
+//        }
+//
+//        guard let webView = tab.webView else {
+//            fatalError("Unable to create webView")
+//        }
+//
+//        self.currentWebView = webView
+//        self.currentWebView!.uiDelegate = self
+//        self.currentWebView!.navigationDelegate = self
+//
+//        webView.frame = browserTabView.frame
+//        currentWebViewFocus(webView: webView)
+//
+//        progressBarObserver = webView.observe(
+//            \.estimatedProgress, options: [.new]
+//        ) { [weak self] _, change in
+//            if let newProgress = change.newValue {
+//                self?.updateProgress(newProgress)
+//            } else {
+//                mxPrint("Progress change has no new value.")
+//            }
+//        }
+//
+//        if let url = webView.url {
+//            self.delegate?.webContainerViewChangedURL(to: url)
+//        }
+//
+//        urlObserver = webView.observe(\.url, options: [.new]) {
+//            [weak self] _, change in
+//            if let newURL = change.newValue, let newURL {
+//                self?.delegate?.webContainerViewChangedURL(to: newURL)
+//            }
+//        }
+//    }
+    
     // MARK: - Progress Bar Animation
+    private let borderLayers: [CAShapeLayer] = {
+        let layer = CAShapeLayer()
+        layer.lineWidth = 9.0
+        layer.strokeColor =
+        NSColor.controlAccentColor.withAlphaComponent(0.6).cgColor
+        layer.isHidden = true
+        layer.opacity = 0.0
+        
+        let layer1 = CAShapeLayer()
+        layer1.lineWidth = 9.0
+        layer1.strokeColor =
+        NSColor.controlAccentColor.withAlphaComponent(0.6).cgColor
+        layer1.isHidden = true
+        layer1.opacity = 0.0
+        
+        let layer2 = CAShapeLayer()
+        layer2.lineWidth = 9.0
+        layer2.strokeColor =
+        NSColor.controlAccentColor.withAlphaComponent(0.6).cgColor
+        layer2.isHidden = true
+        layer2.opacity = 0.0
+        
+        let layer3 = CAShapeLayer()
+        layer3.lineWidth = 9.0
+        layer3.strokeColor =
+        NSColor.controlAccentColor.withAlphaComponent(0.6).cgColor
+        layer3.isHidden = true
+        layer3.opacity = 0.0
+        
+        return [layer, layer1, layer2, layer3]
+    }()
+    
+    private var currentProgress: CGFloat = 0.0
+    private var animationToken: UUID?
+    
     private func setupLayers() {
         borderLayers.forEach { layer?.addSublayer($0) }
     }
-
+    
     private func createBorderPath(for edge: NSRectEdge) -> NSBezierPath {
         let path = NSBezierPath()
         switch edge {
@@ -191,11 +252,11 @@ class AXWebContainerView: NSView {
         }
         return path
     }
-
+    
     func beginAnimation(with value: Double) {
         let targetProgress: CGFloat
         let duration: CFTimeInterval
-
+        
         switch value {
         case 93...:
             targetProgress = 1.0
@@ -213,24 +274,24 @@ class AXWebContainerView: NSView {
             targetProgress = 0.25
             duration = 0.6
         }
-
+        
         animateProgressAsync(to: targetProgress, duration: duration)
     }
-
+    
     private func animateProgressAsync(
         to targetProgress: CGFloat, duration: CFTimeInterval
     ) {
         let currentToken = UUID()
         animationToken = currentToken
-
+        
         animationQueue.async { [weak self] in
             guard let self = self else { return }
-
+            
             let startProgress = self.currentProgress
-
+            
             DispatchQueue.main.async {
                 guard self.animationToken == currentToken else { return }
-
+                
                 // Prepare and start animation
                 let animation = CABasicAnimation(keyPath: "strokeEnd")
                 animation.fromValue = startProgress
@@ -238,7 +299,7 @@ class AXWebContainerView: NSView {
                 animation.duration = duration
                 animation.timingFunction = CAMediaTimingFunction(
                     name: .easeInEaseOut)
-
+                
                 // Apply animation to each border layer
                 for (index, layer) in self.borderLayers.enumerated() {
                     let path = self.createBorderPath(
@@ -249,7 +310,7 @@ class AXWebContainerView: NSView {
                     layer.isHidden = false
                     layer.add(animation, forKey: "progressAnimation")
                 }
-
+                
                 if targetProgress >= 0.95 {
                     DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
                         [weak self] in
@@ -259,22 +320,22 @@ class AXWebContainerView: NSView {
                         }
                     }
                 }
-
+                
                 self.currentProgress = targetProgress
             }
         }
     }
-
+    
     func finishAnimation() {
         animateProgressAsync(to: 1.0, duration: 0.69)
     }
-
+    
     func cancelAnimations() {
         animationToken = nil
-
+        
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-
+            
             self.borderLayers.forEach { layer in
                 layer.removeAllAnimations()
                 layer.opacity = 0.0
@@ -282,84 +343,41 @@ class AXWebContainerView: NSView {
             }
         }
     }
+}
 
-    // MARK: - View Switching
-    func switchTo(tabGroup: AXTabGroup) {
-        self.subviews.removeAll()
-
-        self.tabView = tabGroup.tabContentView
-
-        if let tabView = tabView {
-            tabView.delegate = self
-            self.addSubview(tabView)
-            tabView.translatesAutoresizingMaskIntoConstraints = false
-
-            tabView.activateConstraints([
-                .allEdges: .view(self)
-            ])
-            
-            if tabGroup.tabs.isEmpty || tabGroup.selectedIndex >= tabGroup.tabs.count {
-                displayNewTabPage()
-            } else {
-                self.tabView?.selectTabViewItem(at: tabGroup.selectedIndex)
-                let tab = tabGroup.tabs[tabGroup.selectedIndex]
-                self.willSwitchTab(tab)
-            }
+extension AXWebContainerView {
+    func malvonUpdateTabViewItems(tabGroup: AXTabGroup) {
+        let newItems: [NSTabViewItem] = []
+        
+        for tab in tabGroup.tabs {
+            let tabViewItem = NSTabViewItem()
+            tabViewItem.view = tab.webView
+        }
+        
+        self.browserTabView.tabViewItems = newItems
+        
+        if tabGroup.tabs.isEmpty || tabGroup.selectedIndex >= tabGroup.tabs.count {
+            displayNewTabPage()
+        } else {
+            browserTabView.selectTabViewItem(at: tabGroup.selectedIndex)
+            let tab = tabGroup.tabs[tabGroup.selectedIndex]
+            self.willSwitchTab(tab)
         }
     }
     
-    func willSwitchTab(_ tab: AXTab) {
-        self.cancelAnimations()
-        guard let tabView else { return }
-
-        if tab.isEmpty {
-            currentWebView = nil
-            displayNewTabPage()
-            return
-        } else {
-            self.startPageView.removeFromSuperview()
-        }
-
-        guard let webView = tab.webView else {
-            fatalError("Unable to create webView")
-        }
-
-        self.currentWebView = webView
-        self.currentWebView!.uiDelegate = self
-        self.currentWebView!.navigationDelegate = self
-
-        webView.frame = tabView.frame
-        currentWebViewFocus(webView: webView)
-
-        progressBarObserver = webView.observe(
-            \.estimatedProgress, options: [.new]
-        ) { [weak self] _, change in
-            if let newProgress = change.newValue {
-                self?.updateProgress(newProgress)
-            } else {
-                mxPrint("Progress change has no new value.")
-            }
-        }
-
-        if let url = webView.url {
-            self.delegate?.webContainerViewChangedURL(to: url)
-        }
-
-        urlObserver = webView.observe(\.url, options: [.new]) {
-            [weak self] _, change in
-            if let newURL = change.newValue, let newURL {
-                self?.delegate?.webContainerViewChangedURL(to: newURL)
-            }
-        }
+    func malvonAddWebView(tab: AXTab) {
+        let tabViewItem = NSTabViewItem()
+        tabViewItem.view = tab.webView
+        browserTabView.addTabViewItem(tabViewItem)
+        
+        browserTabView.selectTabViewItem(tabViewItem)
+        
+        self.willSwitchTab(tab)
     }
-}
-
-extension AXWebContainerView: NSTabViewDelegate {
-//    func tabView(_ tabView: NSTabView, didSelect tabViewItem: NSTabViewItem?) {
-//        if let tab = tabViewItem as? AXTab {
-//            self.willSwitchTab(tab)
-//        }
-//    }
+    
+    func malvonRemoveWebView(at: Int) {
+        browserTabView.tabViewItems.remove(at: at)
+    }
 }
 
 // MARK: - Web View Functions
@@ -496,29 +514,7 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
 
 extension AXWebContainerView: AXNewTabViewDelegate {
     func newTabViewDidSelectItem(url: URL) {
-        guard let tabView else { return }
-
-        let currentTabViewItem: AXTab?
-
-        if tabView.tabViewItems.isEmpty {
-            currentTabViewItem = delegate?
-                .webContainerViewCreatesTabWithZeroTabs(with: url)
-        } else {
-            currentTabViewItem = tabView.selectedTabViewItem as? AXTab
-        }
-
-        guard let currentTabViewItem = currentTabViewItem else {
-            fatalError("\(#function) Failed to create new tab.")
-        }
-
-        // Update the AXTab properties
-        currentTabViewItem.url = url
-        currentTabViewItem.isEmpty = false
-
-        // Update the tab
-        self.willSwitchTab(currentTabViewItem)
-
         // Start AXTabButton observation. Called via delegate method.
-        delegate?.webContainerUserDidClickStartPageItem(currentTabViewItem)
+        delegate?.webContainerUserDidClickStartPageItem(url)
     }
 }

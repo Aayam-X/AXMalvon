@@ -22,17 +22,19 @@ extension AXWindow: NSWindowDelegate {
 
     // MARK: - Content View
     internal func setupBrowserElements() {
-        layoutManager =
-            usesVerticalTabs
-            ? AXVerticalLayoutManager(tabBarView: tabBarView)
-            : AXHorizontalLayoutManager(tabBarView: tabBarView)
+//        layoutManager =
+//            usesVerticalTabs
+//            ? AXVerticalLayoutManager(tabBarView: tabBarView)
+//            : AXHorizontalLayoutManager(tabBarView: tabBarView)
+        
+        layoutManager = AXVerticalLayoutManager(tabBarView: tabBarView)
 
         layoutManager.tabHostingDelegate = self
         layoutManager.setupLayout(in: self)
         layoutManager.searchButton.delegate = self
-
-        tabBarView.delegate = self
         layoutManager.containerView.delegate = self
+        
+        self.malvonTabManager = AXTabsManager(browserWebView: layoutManager.containerView, tabBarView: self.tabBarView, tabGroup: self.currentTabGroup)
 
         currentTabGroupIndex = 0
         self.switchToTabGroup(currentTabGroup)
@@ -62,9 +64,6 @@ extension AXWindow: NSWindowDelegate {
                 tabGroup.tabs.forEach { tab in
                     tab.stopAllObservations()
                 }
-                tabGroup.tabContentView.tabViewItems.removeAll()
-                tabGroup.tabBarView?.removeFromSuperview()
-                tabGroup.tabBarView = nil
             }
         }
     }

@@ -90,30 +90,30 @@ class AXBaseLayoutManager: AXWindowLayoutManaging {
     }
 }
 
-// Horizontal layout manager using NSToolbar
-class AXHorizontalLayoutManager: AXBaseLayoutManager {
-    private lazy var toolbar: MainWindowToolbar = {
-        self.searchButton = AXToolbarSearchButton()
-        let toolbar = MainWindowToolbar(
-            tabBarView: tabBarView, searchButton: searchButton,
-            tabGroupInfoView: tabGroupInfoView)
-        toolbar.tabHostingDelegate = tabHostingDelegate
-        return toolbar
-    }()
-
-    override func setupLayout(in window: AXWindow) {
-        window.toolbar = toolbar
-        window.titlebarAppearsTransparent = true
-
-        window.contentView = containerView
-    }
-
-    override func removeLayout(in window: AXWindow) {
-        window.toolbar = nil
-
-        containerView.removeFromSuperview()
-    }
-}
+//// Horizontal layout manager using NSToolbar
+//class AXHorizontalLayoutManager: AXBaseLayoutManager {
+//    private lazy var toolbar: MainWindowToolbar = {
+//        self.searchButton = AXToolbarSearchButton()
+//        let toolbar = MainWindowToolbar(
+//            tabBarView: tabBarView, searchButton: searchButton,
+//            tabGroupInfoView: tabGroupInfoView)
+//        toolbar.tabHostingDelegate = tabHostingDelegate
+//        return toolbar
+//    }()
+//
+//    override func setupLayout(in window: AXWindow) {
+//        window.toolbar = toolbar
+//        window.titlebarAppearsTransparent = true
+//
+//        window.contentView = containerView
+//    }
+//
+//    override func removeLayout(in window: AXWindow) {
+//        window.toolbar = nil
+//
+//        containerView.removeFromSuperview()
+//    }
+//}
 
 // Vertical layout manager using NSView
 class AXVerticalLayoutManager: AXBaseLayoutManager {

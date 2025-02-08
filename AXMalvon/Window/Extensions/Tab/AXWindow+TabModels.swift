@@ -8,8 +8,7 @@
 
 extension AXWindow {
     func switchToTabGroup(_ tabGroup: AXTabGroup) {
-        self.layoutManager.containerView.switchTo(tabGroup: tabGroup)
-        self.tabBarView.updateTabGroup(tabGroup)
+        self.malvonTabManager.update(tabGroup: tabGroup)
 
         layoutManager.updatedTabGroupColor(in: self, color: tabGroup.color)
         layoutManager.tabGroupInfoView.updateLabels(tabGroup: tabGroup)

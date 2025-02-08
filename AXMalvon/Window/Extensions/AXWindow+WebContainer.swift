@@ -11,13 +11,17 @@ import SwiftUI
 import WebKit
 
 extension AXWindow: AXWebContainerViewDelegate {
+    func webContainerViewRequestsCurrentTab() -> AXTab {
+        return malvonTabManager.currentTab
+    }
+    
     func webContainerViewCreatesTabWithZeroTabs(with url: URL) -> AXTab {
         let tab = AXTab(
             url: url, title: "New Tab",
             configuration: activeProfile.baseConfiguration)
         tab.webView!.load(URLRequest(url: url))
         
-        currentTabGroup.addTab(tab)
+        malvonTabManager.addTab(tab)
 
         return tab
     }
@@ -26,13 +30,33 @@ extension AXWindow: AXWebContainerViewDelegate {
         makeFirstResponder(layoutManager.searchButton.addressField)
     }
 
-    func webContainerUserDidClickStartPageItem(_ tab: AXTab) {
-        // Start button observation
-        if let button = tabBarView.tabStackView.arrangedSubviews[
-            currentTabGroup.selectedIndex] as? any AXTabButton
-        {
-            tab.startTitleObservation(for: button)
+    func webContainerUserDidClickStartPageItem(_ with: URL) {
+        if malvonTabManager.isEmpty {
+            let tab = AXTab(
+                url: with, title: "New Tab",
+                configuration: activeProfile.baseConfiguration)
+            tab.webView!.load(URLRequest(url: with))
+            
+            malvonTabManager.addTab(tab)
+            return
         }
+        
+        let currentTab = malvonTabManager.currentTab
+        currentTab.url = with
+        
+        layoutManager.containerView.selectTabViewItem(at: currentTabGroup.selectedIndex, tab: currentTab)
+
+        currentTab.webView!.load(URLRequest(url: with))
+        
+        
+        //layoutManager.containerView.selectTabViewItem(tab: currentTab)
+        
+        // Start button observation
+//        if let button = tabBarView.tabStackView.arrangedSubviews[
+//            currentTabGroup.selectedIndex] as? any AXTabButton
+//        {
+//            tab.startTitleObservation(for: button)
+//        }
     }
 
     func webContainerViewChangedURL(to url: URL) {
@@ -40,7 +64,7 @@ extension AXWindow: AXWebContainerViewDelegate {
     }
 
     func webContainerViewCloses() {
-        currentTabGroup.removeCurrentTab()
+        malvonTabManager.removeCurrentTab()
     }
 
     func webContainerViewRequestsSidebar() -> NSView? {
@@ -51,9 +75,9 @@ extension AXWindow: AXWebContainerViewDelegate {
         -> WKWebView
     {
         let tab = AXTab(createdPopupTab: config)
-        currentTabGroup.addTab(tab)
+        malvonTabManager.addTab(tab)
 
-        return tab.view! as! WKWebView
+        return tab.webView!
     }
 
     func webContainerViewFinishedLoading(webView: WKWebView) {

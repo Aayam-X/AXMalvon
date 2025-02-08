@@ -13,13 +13,17 @@ extension AXWindow: AXSidebarSearchButtonDelegate {
     func searchBarCreatesNewTab(with url: URL) {
         let tab = AXTab(
             title: "New tab", configuration: activeProfile.baseConfiguration)
-        currentTabGroup.addTab(tab)
+        malvonTabManager.addTab(tab)
 
         tab.url = url
         tab.webView?.load(URLRequest(url: url))
     }
 
     func searchBarUpdatesCurrentTab(with url: URL) {
+        if malvonTabManager.isEmpty {
+            malvonTabManager.addEmptyTab(config: activeProfile.baseConfiguration)
+        }
+        
         // Change current webview's url to new url
         layoutManager.containerView.loadURL(url: url)
 

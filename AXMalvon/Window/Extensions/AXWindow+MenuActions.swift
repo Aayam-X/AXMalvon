@@ -47,7 +47,7 @@ extension AXWindow {
     }
 
     @IBAction func toggleSearchBarForNewTab(_ sender: Any?) {
-        currentTabGroup.addEmptyTab(config: activeProfile.baseConfiguration)
+        self.malvonTabManager.addEmptyTab(config: activeProfile.baseConfiguration)
     }
 
     @IBAction func find(_ sender: Any) {
@@ -77,13 +77,10 @@ extension AXWindow {
     }
 
     @IBAction func disableContentBlockers(_ sender: Any) {
-        guard
-            let tab = currentTabGroup.tabContentView.selectedTabViewItem
-                as? AXTab
-        else { return }
+        let tab = malvonTabManager.currentTab
 
         mxPrint(
-            tab.label, tab.url ?? .applicationDirectory,
+            tab.title, tab.url ?? .applicationDirectory,
             "Enabling content blockers")
         AXContentBlockerLoader.shared.disableAdBlock(
             for: tab.individualWebConfiguration)
@@ -103,7 +100,7 @@ extension AXWindow {
             return
         }
 
-        currentTabGroup.removeCurrentTab()
+        malvonTabManager.removeCurrentTab()
     }
 
     @IBAction func closeWindow(_ sender: Any) {
@@ -115,22 +112,23 @@ extension AXWindow {
         
         layoutManager.removeLayout(in: self)
 
-        let newTabBarView: AXTabBarViewTemplate =
-            usesVerticalTabs
-            ? AXVerticalTabBarView(tabGroup: currentTabGroup)
-            : AXHorizontalTabBarView(tabGroup: currentTabGroup)
+//        let newTabBarView: AXTabBarViewTemplate =
+//            usesVerticalTabs
+//            ? AXVerticalTabBarView()
+//            : AXHorizontalTabBarView()
+        let newTabBarView: AXTabBarViewTemplate = AXVerticalTabBarView()
         self.tabBarView = newTabBarView
 
-        let newLayoutManager =
-            usesVerticalTabs
-            ? AXVerticalLayoutManager(tabBarView: newTabBarView)
-            : AXHorizontalLayoutManager(tabBarView: newTabBarView)
+//        let newLayoutManager =
+//            usesVerticalTabs
+//            ? AXVerticalLayoutManager(tabBarView: newTabBarView)
+//            : AXHorizontalLayoutManager(tabBarView: newTabBarView)
+        let newLayoutManager = AXVerticalLayoutManager(tabBarView: newTabBarView)
         self.layoutManager = newLayoutManager
 
         layoutManager.tabHostingDelegate = self
         layoutManager.setupLayout(in: self)
         layoutManager.searchButton.delegate = self
-        tabBarView.delegate = self
         layoutManager.containerView.delegate = self
 
         self.setFrame(
@@ -221,7 +219,7 @@ extension AXWindow {
                 self.close()
                 return true
             }
-            currentTabGroup.removeCurrentTab()
+            malvonTabManager.removeCurrentTab()
             return true
         case kVK_ANSI_Q:
             NSApplication.shared.terminate(self)
@@ -241,11 +239,11 @@ extension AXWindow {
 
         // Check if the tab index is valid
         if index < count {
-            currentTabGroup.switchTab(toIndex: index)
+            malvonTabManager.switchTab(toIndex: index)
         } else {
             guard count > 0 else { return }
             // Switch to the last tab if the index is out of range
-            currentTabGroup.switchTab(toIndex: count - 1)
+            malvonTabManager.switchTab(toIndex: count - 1)
         }
     }
 }

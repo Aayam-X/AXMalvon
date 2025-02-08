@@ -9,14 +9,13 @@
 import AppKit
 import WebKit
 
-// swiftlint:disable force_cast
 class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     weak var delegate: (any AXTabBarViewDelegate)?
     
     // Variables
     var selectedTabIndex: Int = 0 {
         didSet {
-            self.updateTabSelection(from: oldValue, to: selectedTabIndex)
+            updateTabSelection(from: oldValue, to: selectedTabIndex)
         }
     }
 
@@ -24,15 +23,6 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     internal var tabStackView = NSStackView()
     private var clipView = AXFlippedClipView()
     private var scrollView: AXScrollView!
-
-    lazy var divider: NSBox = {
-        let box = NSBox()
-        box.boxType = .custom
-        box.translatesAutoresizingMaskIntoConstraints = false
-        box.heightAnchor.constraint(equalToConstant: 33).isActive = true
-        box.fillColor = NSColor.controlAccentColor
-        return box
-    }()
 
     required init() {
         super.init(frame: .zero)
@@ -93,12 +83,10 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.delegate = self
 
-        let newIndex = tabStackView.arrangedSubviews.count - 1
+        let newIndex = tabStackView.arrangedSubviews.count
         button.tag = newIndex
 
         addButtonToTabView(button)
-
-        self.selectedTabIndex = newIndex
     }
     
     func removeTabButton(at index: Int) {
@@ -126,24 +114,36 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         }
     }
     
-    func switchToTab(at index: Int) {
-        <#code#>
-    }
-    
     func updateButton(title: String, at index: Int) {
-        <#code#>
+        for tabButton in tabStackView.arrangedSubviews as! [AXTabButton] {
+            if tabButton.tag == index {
+                tabButton.webTitle = title
+                break
+            }
+        }
     }
     
     func updateButton(icon: NSImage, at index: Int) {
-        <#code#>
+        for tabButton in tabStackView.arrangedSubviews as! [AXTabButton] {
+            if tabButton.tag == index {
+                tabButton.favicon = icon
+                break
+            }
+        }
     }
-    
+}
+
+// MARK: - Tab Button Delegate
+extension AXVerticalTabBarView {
     func tabButtonDidSelect(_ tabButton: any AXTabButton) {
-        <#code#>
+        self.delegate?.tabBarSwitchedTo(tabButton)
     }
     
     func tabButtonDidRequestClose(_ tabButton: any AXTabButton) {
-        <#code#>
+        if let delegate, delegate.tabBarShouldClose(tabButton) {
+            self.removeTabButton(at: tabButton.tag)
+            delegate.tabBarDidClose(tabButton.tag)
+        }
     }
 }
 

@@ -9,22 +9,42 @@
 import AppKit
 
 extension AXWindow: AXTabHostingViewDelegate {
+    func tabBarSwitchedTo(_ tabButton: any AXTabButton) {
+        let index = tabButton.tag
+        let tab = currentTabGroup.tabs[index]
+        
+        layoutManager.containerView.selectTabViewItem(at: index, tab: tab)
+    }
+    
     func tabHostingViewCreatedNewTab() {
         toggleSearchBarForNewTab(nil)
     }
-
+    
+    func tabBarShouldClose(_ tabButton: any AXTabButton) -> Bool {
+        return true
+    }
+    
+    func tabBarDidClose(_ tabAt: Int) {
+        // Do nothing
+        malvonTabManager.removeTab(at: tabAt)
+    }
+    
+    func tabHostingViewWillRemoveTab(tab: AXTab) {
+        malvonTabManager.removeCurrentTab()
+    }
+    
     func tabHostingViewReloadCurrentPage() {
         layoutManager.containerView.reload()
     }
-
+    
     func tabHostingViewNavigateForward() {
         layoutManager.containerView.forward()
     }
-
+    
     func tabHostingViewNavigateBackwards() {
         layoutManager.containerView.back()
     }
-
+    
     func tabHostingViewDisplaysTabGroupCustomizationPanel(_ sender: NSView) {
         browserSpaceSharedPopover.contentViewController?.view =
             tabCustomizationView
