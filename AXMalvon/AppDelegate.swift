@@ -18,12 +18,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         if launchedBefore {
             presentNewWindowIfNeeded()
-
-            #if !DEBUG
-                // Email Validation + Update checking
-                ev()
-            // FIXME: Change this on actual release versions. bgU_Check()
-            #endif
         } else {
             // First Launch
             showWelcomeView()
@@ -35,7 +29,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func application(_ application: NSApplication, open urls: [URL]) {
         guard launchedBefore else { return }
-        ev()
 
         if let window = mainWindow {
             for url in urls {
@@ -76,7 +69,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBAction func newWindow(_ sender: Any?) {
         guard launchedBefore else { return }
-        ev()
         presentNewWindowIfNeeded()
     }
 
@@ -84,7 +76,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBAction func newPrivateWindow(_ sender: Any?) {
         guard launchedBefore else { return }
-        ev()
 
         let privateProfile = AXPrivateProfile()
         let privateWindow = AXWindow(with: [privateProfile])
@@ -158,79 +149,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Display the window
         window.center()
         window.makeKeyAndOrderFront(nil)
-    }
-
-    /// Check if email address is valid:
-    @MainActor
-    private func ev() {
-        Task {
-            guard
-                let emailAddress = UserDefaults.standard.string(
-                    forKey: "emailAddress")
-            else {
-                ev_err()
-                return
-            }
-
-            guard
-                let url = URL(
-                    string:
-                        "https://malvon-beta.web.app/?user_exists=\(emailAddress)"
-                )
-            else {
-                mxPrint("Invalid URL")
-                ev_err()
-                return
-            }
-
-            mxPrint("User Email Address is: \(emailAddress)")
-
-            let webView = WKWebView()
-            let request = URLRequest(url: url)
-            webView.load(request)
-
-            let timeout: TimeInterval = 30
-            let startTime = Date()
-
-            do {
-                try await Task.sleep(for: .seconds(2))
-
-                // Perform the checking process asynchronously
-                while true {
-                    let result = try await webView.evaluateJavaScript(
-                        "document.body.innerText")
-
-                    if let result = result as? String,
-                        result.lowercased() == "yes"
-                    {
-                        mxPrint("Email is valid!!!")
-                        break
-                    } else {
-                        mxPrint("Failed to verify email; try again.")
-                    }
-
-                    if Date().timeIntervalSince(startTime) > timeout {
-                        mxPrint("Email Verification Process Timed Out.")
-                        ev_err()
-                        return
-                    }
-
-                    // Pause before trying again
-                    try await Task.sleep(for: .seconds(3))
-                }
-            } catch {
-                mxPrint("Error during JavaScript evaluation: \(error)")
-                ev_err()
-            }
-        }
-    }
-
-    // Helper function to handle the email validation failure
-    private func ev_err() {
-        DispatchQueue.main.async {
-            UserDefaults.standard.set(false, forKey: "launchedBefore")
-            AppDelegate.relaunchApplication()
-        }
     }
 
     @IBAction func checkForUpdates(_ sender: Any?) {
