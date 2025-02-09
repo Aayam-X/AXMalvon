@@ -216,16 +216,19 @@ extension AXSidebarSearchButton: ZSearchFieldDelegate, NSTextFieldDelegate {
 
     // Split callback functions for each type of update
     func onQueryUpdated(_ query: String) {
-        suggestionsWindowController.currentQuery = query
+        suggestionsWindowController.updateCurrentQuery(query)
     }
+    
     func onTopSearchesUpdated(_ searches: [String]) {
-        suggestionsWindowController.topSiteItems = searches
+        suggestionsWindowController.updateTopSiteItems(searches)
     }
+    
     func onHistoryUpdated(_ history: [(title: String, url: String)]) {
-        suggestionsWindowController.historyItems = history
+        suggestionsWindowController.updateHistoryItems(history)
     }
+    
     func onGoogleSuggestionsUpdated(_ suggestions: [String]) {
-        suggestionsWindowController.googleSearchItems = suggestions
+        suggestionsWindowController.updateGoogleSuggestionsItems(suggestions)
     }
 
     func controlTextDidBeginEditing(_ obj: Notification) {
@@ -245,47 +248,47 @@ extension AXSidebarSearchButton: ZSearchFieldDelegate, NSTextFieldDelegate {
         _ control: NSControl, textView: NSTextView,
         doCommandBy commandSelector: Selector
     ) -> Bool {
-        if commandSelector == #selector(moveUp(_:)) {
-            suggestionsWindowController.moveUp()
-            if let currentSuggestion = suggestionsWindowController
-                .currentSuggestion
-            {
-                addressField.stringValue = currentSuggestion
-                addressField.currentEditor()?.selectedRange = NSRange(
-                    location: previousStringValueCount,
-                    length: currentSuggestion.count)
-            }
-            return true
-        }
-        if commandSelector == #selector(moveDown(_:)) {
-            suggestionsWindowController.moveDown()
-            if let currentSuggestion = suggestionsWindowController
-                .currentSuggestion
-            {
-                addressField.stringValue = currentSuggestion
-                addressField.currentEditor()?.selectedRange = NSRange(
-                    location: previousStringValueCount,
-                    length: currentSuggestion.count)
-            }
-            return true
-        }
+//        if commandSelector == #selector(moveUp(_:)) {
+//            suggestionsWindowController.moveUp()
+//            if let currentSuggestion = suggestionsWindowController
+//                .currentSuggestion
+//            {
+//                addressField.stringValue = currentSuggestion
+//                addressField.currentEditor()?.selectedRange = NSRange(
+//                    location: previousStringValueCount,
+//                    length: currentSuggestion.count)
+//            }
+//            return true
+//        }
+//        if commandSelector == #selector(moveDown(_:)) {
+//            suggestionsWindowController.moveDown()
+//            if let currentSuggestion = suggestionsWindowController
+//                .currentSuggestion
+//            {
+//                addressField.stringValue = currentSuggestion
+//                addressField.currentEditor()?.selectedRange = NSRange(
+//                    location: previousStringValueCount,
+//                    length: currentSuggestion.count)
+//            }
+//            return true
+//        }
+//
+//        if commandSelector == #selector(insertNewline(_:)) {
+//            if let suggestion = suggestionsWindowController.currentSuggestion {
+//                addressField.stringValue = suggestion
+//            }
+//            suggestionsWindowController.orderOut()
+//            searchEnterAction()
+//
+//            return true
+//        }
+//
+//        if commandSelector == #selector(NSResponder.cancelOperation(_:)) {
+//            suggestionsWindowController.orderOut()
+//            return true
+//        }
 
-        if commandSelector == #selector(insertNewline(_:)) {
-            if let suggestion = suggestionsWindowController.currentSuggestion {
-                addressField.stringValue = suggestion
-            }
-            suggestionsWindowController.orderOut()
-            searchEnterAction()
-
-            return true
-        }
-
-        if commandSelector == #selector(NSResponder.cancelOperation(_:)) {
-            suggestionsWindowController.orderOut()
-            return true
-        }
-
-        return false
+        return true
     }
 
     func control(_ control: NSControl, textShouldEndEditing fieldEditor: NSText)

@@ -59,7 +59,9 @@ extension AXTabBarViewTemplate {
             addTabButton()
         }
         
-        let button = tabStackView.arrangedSubviews[newTabGroup.selectedIndex] as! AXTabButton
-        button.isSelected = true
+        if !newTabGroup.tabs.isEmpty {
+            let button = tabStackView.arrangedSubviews[newTabGroup.selectedIndex] as! AXTabButton
+            button.isSelected = true
+        }
     }
 }

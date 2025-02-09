@@ -12,9 +12,17 @@ import AppKit
 class AXAddressBarWindow: NSPanel, NSWindowDelegate {
     // MARK: - UI Components
     private let scrollView = NSScrollView()
-    private lazy var tableView: NSTableView = createTableView()
+    
+    let view = NSView()
+    
+    private let currentQueryStackView = NSStackView()
+    private let topSitesStackView = NSStackView()
+    private let googleSearchStackView = NSStackView()
+    private let historyStackView = NSStackView()
 
     var suggestionItemClickAction: ((String) -> Void)?
+
+    private var highlightedCell: AXAddressBarSuggestionCellView?
 
     // MARK: - Initialization
     init() {
@@ -26,8 +34,6 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
         )
 
         setupWindow()
-        setupScrollView()
-        setupConstraints()
     }
 
     required init?(coder: NSCoder) {
@@ -39,71 +45,87 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
         backgroundColor = .clear
         isMovable = false
         delegate = self
-    }
-
-    private func setupScrollView() {
-        scrollView.wantsLayer = true
-        scrollView.layer?.cornerRadius = 10.0
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.documentView = tableView
-        scrollView.drawsBackground = false
-        scrollView.hasVerticalScroller = true
-        contentView = scrollView
-
-        tableView.backgroundColor = .gridColor
-        tableView.usesAlternatingRowBackgroundColors = false
-    }
-
-    private func createTableView() -> NSTableView {
-        let tableView = NSTableView()
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.addTableColumn(
-            NSTableColumn(
-                identifier: NSUserInterfaceItemIdentifier(
-                    "AddressBarSuggestion")))
-        tableView.dataSource = self
-        tableView.delegate = self
-        tableView.headerView = nil
-        tableView.target = self
-        tableView.action = #selector(onItemClicked)
-        tableView.style = .sourceList
-        return tableView
-    }
-
-    private func setupConstraints() {
-        tableView.activateConstraints([
-            .allEdges: .view(scrollView)
+        
+        
+        view.wantsLayer = true
+        view.layer?.cornerRadius = 9.0
+        view.layer?.backgroundColor = .black
+        
+        view.translatesAutoresizingMaskIntoConstraints = false
+        
+        view.activateConstraints([
+            .width: .constant(800),
+            .height: .constant(300),
         ])
+        
+        self.contentView = view
+        
+        setupStackViews()
     }
-
-    // MARK: - Actions
-    @objc
-    private func onItemClicked() {
-        if let suggestion = currentSuggestion {
-            suggestionItemClickAction?(suggestion)
-            orderOut()
+    
+    private func setupStackViews() {
+        for stackView in [currentQueryStackView, topSitesStackView, googleSearchStackView, historyStackView] {
+            stackView.orientation = .vertical
+            stackView.alignment = .left
+            
+            let redView = NSView()
+            redView.wantsLayer = true
+            redView.layer?.backgroundColor = NSColor.red.cgColor
+            
+            stackView.addArrangedSubview(redView)
+            
+            stackView.heightAnchor.constraint(greaterThanOrEqualToConstant: 1).isActive = true
         }
+        
+        setupStackViewsConstraints()
+    }
+    
+    private func setupStackViewsConstraints() {
+        // Current Query
+        currentQueryStackView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(currentQueryStackView)
+        
+        currentQueryStackView.activateConstraints([
+            .top: .view(view),
+            .left: .view(view, constant: 15),
+        ])
+        
+        // Top Sites
+        topSitesStackView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(topSitesStackView)
+        
+        topSitesStackView.activateConstraints([
+            .topBottom: .view(currentQueryStackView, constant: 5),
+            .left: .view(view, constant: 15),
+        ])
+        
+        // Google Suggestions
+        googleSearchStackView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(googleSearchStackView)
+        
+        googleSearchStackView.activateConstraints([
+            .topBottom: .view(topSitesStackView, constant: 5),
+            .left: .view(view, constant: 15),
+        ])
+        
+        // History
+        historyStackView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(historyStackView)
+        
+        historyStackView.activateConstraints([
+            .topBottom: .view(googleSearchStackView, constant: 5),
+            .left: .view(view, constant: 15),
+        ])
     }
 
     // MARK: - Public Methods
     func orderOut() {
-        tableView.deselectAll(nil)
+        highlightedCell = nil
         super.orderOut(nil)
     }
 
     func showSuggestions(for textField: NSTextField) {
-        if !shouldShowWindow {
-            orderOut()
-            return
-        }
-
         updateWindowPosition(for: textField)
-        tableView.reloadData()
-    }
-
-    private var shouldShowWindow: Bool {
-        return 1 + topSiteItems.count + historyItems.count
-            + googleSearchItems.count > 0
     }
 
     private func updateWindowPosition(for textField: NSTextField) {
@@ -111,6 +133,7 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
         var textFieldRect = textField.convert(textField.bounds, to: nil)
         textFieldRect = textFieldWindow.convertToScreen(textFieldRect)
         textFieldRect.origin.y -= 5
+        textFieldRect.origin.x -= 18
 
         setFrameTopLeftPoint(textFieldRect.origin)
 
@@ -120,286 +143,38 @@ class AXAddressBarWindow: NSPanel, NSWindowDelegate {
 
         textFieldWindow.addChildWindow(self, ordered: .above)
     }
-
-    // MARK: - Navigation Methods
-    func moveUp() {
-        var selectedRow = tableView.selectedRow - 1
-        while selectedRow >= 0 && isHeaderRow(selectedRow) {
-            selectedRow -= 1
-        }
-        if selectedRow >= 0 {
-            tableView.selectRowIndexes(
-                IndexSet(integer: selectedRow), byExtendingSelection: false)
-        } else {
-            tableView.deselectAll(nil)
-        }
+    
+    func updateCurrentQuery(_ string: String) {
+        Self.updateSuggestions([string], in: currentQueryStackView)
     }
-
-    func moveDown() {
-        var selectedRow = tableView.selectedRow + 1
-        while selectedRow < totalRows && isHeaderRow(selectedRow) {
-            selectedRow += 1
-        }
-        tableView.selectRowIndexes(
-            IndexSet(integer: min(selectedRow, totalRows - 1)),
-            byExtendingSelection: false)
+    
+    func updateTopSiteItems(_ searches: [String]) {
+        Self.updateSuggestions(searches, in: topSitesStackView)
     }
-
-    func moveTo(position: Int) {
-        tableView.selectRowIndexes(
-            IndexSet(integer: min(position, totalRows - 1)),
-            byExtendingSelection: false)
+    
+    func updateHistoryItems(_ items: [(title: String, url: String)]) {
+        let titles = items.map(\.title)
+        Self.updateSuggestions(titles, in: historyStackView)
     }
-
-    // MARK: - Helper Methods
-    private func isHeaderRow(_ row: Int) -> Bool {
-        var currentIndex = 0
-
-        // Current query section (no header)
-        currentIndex += 1
-
-        // Top sites section
-        if !topSiteItems.isEmpty && row == currentIndex {
-            return true
-        }
-        currentIndex += topSiteItems.count + (topSiteItems.isEmpty ? 0 : 1)
-
-        // History section
-        if !historyItems.isEmpty && row == currentIndex {
-            return true
-        }
-        currentIndex += historyItems.count + (historyItems.isEmpty ? 0 : 1)
-
-        // Google search section
-        if !googleSearchItems.isEmpty && row == currentIndex {
-            return true
-        }
-
-        return false
-    }
-
-    private var totalRows: Int {
-        var count = 1
-
-        if !topSiteItems.isEmpty {
-            count += 1 + topSiteItemCount
-        }
-
-        if !historyItems.isEmpty {
-            count += 1 + historyItemCount
-        }
-
-        if !googleSearchItems.isEmpty {
-            count += 1 + googleSearchItemCount
-        }
-
-        return count
-    }
-
-    var currentSuggestion: String? {
-        let selectedRow = tableView.selectedRow
-        guard selectedRow >= 0 else { return nil }
-
-        var currentIndex = 0
-
-        // Check current query section
-        if selectedRow < 1 {
-            return currentQuery
-        }
-        currentIndex += 1
-
-        // Check top sites section
-        if !topSiteItems.isEmpty {
-            currentIndex += 1  // Header
-            if selectedRow < currentIndex + topSiteItems.count {
-                return topSiteItems[selectedRow - currentIndex]
-            }
-            currentIndex += topSiteItems.count
-        }
-
-        // Check history section
-        if !historyItems.isEmpty {
-            currentIndex += 1  // Header
-            if selectedRow < currentIndex + historyItems.count {
-                return historyItems[selectedRow - currentIndex].url
-            }
-            currentIndex += historyItems.count
-        }
-
-        // Check google search section
-        if !googleSearchItems.isEmpty {
-            currentIndex += 1  // Header
-            if selectedRow < currentIndex + googleSearchItems.count {
-                return googleSearchItems[selectedRow - currentIndex]
-            }
-        }
-
-        return nil
-    }
-
-    private var topSiteItemCount: Int = 0
-    private var historyItemCount: Int = 0
-    private var googleSearchItemCount: Int = 0
-
-    private func reloadTableViewRow(_ row: Int) {
-        guard row < tableView.numberOfRows else { return }
-        tableView.reloadData(
-            forRowIndexes: IndexSet(integer: row), columnIndexes: IndexSet())
-    }
-
-    private func reloadTopSiteItems() {
-        guard topSiteItemCount > 0 else { return }
-        let range = 1..<(1 + topSiteItemCount)
-        guard range.upperBound <= tableView.numberOfRows else { return }
-        tableView.reloadData(
-            forRowIndexes: IndexSet(integersIn: range),
-            columnIndexes: IndexSet())
-    }
-
-    private func reloadHistoryItems() {
-        guard historyItemCount > 0 else { return }
-        let start = 1 + topSiteItemCount
-        let range = start..<(start + historyItemCount)
-        guard range.upperBound <= tableView.numberOfRows else { return }
-        tableView.reloadData(
-            forRowIndexes: IndexSet(integersIn: range),
-            columnIndexes: IndexSet())
-    }
-
-    private func reloadGoogleSearchItems() {
-        guard googleSearchItemCount > 0 else { return }
-        let start = 1 + topSiteItemCount + historyItemCount
-        let range = start..<(start + googleSearchItemCount)
-        guard range.upperBound <= tableView.numberOfRows else { return }
-        tableView.reloadData(
-            forRowIndexes: IndexSet(integersIn: range),
-            columnIndexes: IndexSet())
-    }
-
-    var currentQuery: String = "" {
-        didSet {
-            reloadTableViewRow(0)
-        }
-    }
-
-    var topSiteItems: [String] = [] {
-        didSet {
-            topSiteItemCount = topSiteItems.count
-            reloadTopSiteItems()
-        }
-    }
-
-    var historyItems: [(title: String, url: String)] = [] {
-        didSet {
-            historyItemCount = historyItems.count
-            reloadHistoryItems()
-        }
-    }
-
-    var googleSearchItems: [String] = [] {
-        didSet {
-            googleSearchItemCount = googleSearchItems.count
-            tableView.reloadData()
-        }
+    
+    func updateGoogleSuggestionsItems(_ searches: [String]) {
+        Self.updateSuggestions(searches, in: googleSearchStackView)
     }
 }
 
-// MARK: - TableView DataSource & Delegate
-extension AXAddressBarWindow: NSTableViewDataSource, NSTableViewDelegate {
-    func numberOfRows(in tableView: NSTableView) -> Int {
-        return totalRows
-    }
-
-    func tableView(
-        _ tableView: NSTableView, viewFor tableColumn: NSTableColumn?, row: Int
-    ) -> NSView? {
-        var currentIndex = 0
-
-        // Current query section
-        if row < 1 {
-            return createSuggestionCell(for: currentQuery, at: row)
+// MARK: Private Methods
+private extension AXAddressBarWindow {
+    static func updateSuggestions(_ suggestions: [String], in stackView: NSStackView) {
+        stackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+        
+        suggestions.forEach { suggestion in
+            let cell = AXAddressBarSuggestionCellView()
+            cell.translatesAutoresizingMaskIntoConstraints = false
+            cell.webTitle = suggestion
+            stackView.addArrangedSubview(cell)
+            cell.activateConstraints([
+                .horizontalEdges: .view(stackView)
+            ])
         }
-        currentIndex += 1
-
-        // Top sites section
-        if !topSiteItems.isEmpty {
-            if row == currentIndex {
-                return createHeaderView(with: "Top Sites")
-            }
-            currentIndex += 1
-            if row < currentIndex + topSiteItems.count {
-                return createSuggestionCell(
-                    for: topSiteItems[row - currentIndex], at: row)
-            }
-            currentIndex += topSiteItems.count
-            moveTo(position: 2)
-        } else {
-            moveTo(position: 0)
-        }
-
-        // History section
-        if !historyItems.isEmpty {
-            if row == currentIndex {
-                return createHeaderView(with: "History")
-            }
-            currentIndex += 1
-            if row < currentIndex + historyItems.count {
-                return createSuggestionCell(
-                    for: historyItems[row - currentIndex], at: row)
-            }
-            currentIndex += historyItems.count
-        }
-
-        // Google search section
-        if !googleSearchItems.isEmpty {
-            if row == currentIndex {
-                return createHeaderView(with: "Google Search")
-            }
-            currentIndex += 1
-            if row < currentIndex + googleSearchItems.count {
-                return createSuggestionCell(
-                    for: googleSearchItems[row - currentIndex], at: row)
-            }
-        }
-
-        return nil
-    }
-
-    private func createHeaderView(with name: String) -> NSView {
-        let headerView = AXAddressBarSectionHeaderView(frame: .zero)
-        headerView.titleLabel.stringValue = name
-        return headerView
-    }
-
-    private func createSuggestionCell(for suggestion: Any, at row: Int)
-        -> NSView
-    {
-        let cellIdentifier = NSUserInterfaceItemIdentifier(
-            "AddressBarSuggestion")
-        let cell =
-            tableView.makeView(withIdentifier: cellIdentifier, owner: self)
-            as? AXAddressBarSuggestionCellView
-            ?? AXAddressBarSuggestionCellView(frame: .zero)
-
-        cell.identifier = cellIdentifier
-
-        if let historyItem = suggestion as? (title: String, url: String) {
-            cell.configure(title: historyItem.title, subtitle: historyItem.url)
-        } else if let stringValue = suggestion as? String {
-            cell.configure(title: stringValue)
-        }
-
-        cell.onMouseEnter = { [weak self] in
-            self?.moveTo(position: row)
-        }
-
-        return cell
-    }
-
-    func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {
-        if isHeaderRow(row) {
-            return 30  // Header height
-        }
-        return 24  // Regular cell height
     }
 }

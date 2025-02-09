@@ -8,87 +8,163 @@
 
 import AppKit
 
-class AXAddressBarSuggestionCellView: NSTableCellView {
-    // MARK: - Properties
-    let titleLabel: NSTextField
-    let subtitleLabel: NSTextField
-    let faviconImageView: NSImageView
+class AXAddressBarSuggestionCellView: NSButton {
+    // Subviews
+    var favIconImageView: NSImageView! = NSImageView()
+    var titleView: NSTextField! = NSTextField()
+
     var trackingArea: NSTrackingArea!
-    var onMouseEnter: (() -> Void)?
 
-    // MARK: - Initialization
-    override init(frame frameRect: NSRect) {
-        titleLabel = NSTextField(labelWithString: "")
-        subtitleLabel = NSTextField(labelWithString: "")
-        faviconImageView = NSImageView(
-            image: NSImage(named: NSImage.iconViewTemplateName)!)
-
-        super.init(frame: frameRect)
-
-        setupView()
-        setupTrackingArea()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    // MARK: - Setup
-    private func setupView() {
-        titleLabel.font = NSFont.systemFont(ofSize: 14, weight: .regular)
-        subtitleLabel.font = NSFont.systemFont(ofSize: 12, weight: .regular)
-        subtitleLabel.textColor = .secondaryLabelColor
-
-        [titleLabel, subtitleLabel, faviconImageView].forEach {
-            $0.translatesAutoresizingMaskIntoConstraints = false
-            addSubview($0)
+    var webTitle: String = "Untitled" {
+        didSet {
+            titleView.stringValue = webTitle
         }
+    }
 
-        // Favicon Image View
-        faviconImageView.activateConstraints([
+    var isSelected: Bool = false {
+        didSet {
+            self.updateAppearance()
+        }
+    }
+    
+    var favicon: NSImage? {
+        get {
+            self.favIconImageView.image
+        }
+        set {
+            self.favIconImageView.image =
+                newValue == nil ? AXTabButtonConstants.defaultFavicon : newValue
+        }
+    }
+
+    required init() {
+        super.init(frame: .zero)
+        self.isBordered = false
+        self.bezelStyle = .smallSquare
+        title = ""
+
+        self.wantsLayer = true
+        self.layer?.cornerRadius = 10
+        layer?.masksToBounds = false
+        setupViews()
+        setupShadow()
+        updateTrackingAreas()
+    }
+
+    required convenience init?(coder: NSCoder) {
+        self.init()
+    }
+
+    func setupViews() {
+        self.heightAnchor.constraint(equalToConstant: 16).isActive = true
+
+        // Setup imageView
+        favIconImageView.translatesAutoresizingMaskIntoConstraints = false
+        favIconImageView.image = AXTabButtonConstants.defaultFaviconSleep
+        favIconImageView.contentTintColor = .textBackgroundColor
+            .withAlphaComponent(0.2)
+        addSubview(favIconImageView)
+
+        favIconImageView.activateConstraints([
             .centerY: .view(self),
-            .left: .view(self, constant: 8),
+            .left: .view(self, constant: 10),
             .width: .constant(16),
             .height: .constant(16),
         ])
 
-        // Title Label
-        titleLabel.activateConstraints([
+        // Setup titleView
+        titleView.translatesAutoresizingMaskIntoConstraints = false
+        titleView.isEditable = false  // This should be set to true in a while :)
+        titleView.alignment = .left
+        titleView.isBordered = false
+        titleView.usesSingleLineMode = true
+        titleView.drawsBackground = false
+        titleView.lineBreakMode = .byTruncatingTail
+        titleView.textColor = .textColor
+        addSubview(titleView)
+        titleView.activateConstraints([
+            .leftRight: .view(favIconImageView, constant: 5),
             .centerY: .view(self),
-            .leftRight: .view(faviconImageView, constant: 8),
         ])
 
-        // Subtitle Label
-        subtitleLabel.activateConstraints([
-            .centerY: .view(self),
-            .leftRight: .view(titleLabel, constant: 3),
-        ])
+        titleView.setContentCompressionResistancePriority(
+            .defaultLow, for: .horizontal)
+        titleView.setContentHuggingPriority(.defaultLow, for: .horizontal)
+    }
+    
+    private func updateAppearance() {
+        let newBackgroundColor: CGColor
+        if isSelected {
+            if effectiveAppearance.name == .vibrantDark
+                || effectiveAppearance.name == .darkAqua
+            {
+                newBackgroundColor = .black
+                layer?.shadowColor = .white
+            } else {
+                newBackgroundColor = .white
+                layer?.shadowColor = .black
+            }
+            layer?.shadowOpacity = 0.3
+        } else {
+            newBackgroundColor = .clear
+            layer?.shadowOpacity = 0.0
+        }
+
+        if self.layer?.backgroundColor != newBackgroundColor {
+            self.layer?.backgroundColor = newBackgroundColor
+        }
     }
 
-    private func setupTrackingArea() {
-        trackingArea = NSTrackingArea(
-            rect: bounds,
-            options: [.activeAlways, .inVisibleRect, .mouseEnteredAndExited],
-            owner: self,
-            userInfo: nil
-        )
-        addTrackingArea(trackingArea)
+    private func setupShadow() {
+        layer?.shadowColor = NSColor.textColor.cgColor
+        layer?.shadowOpacity = 0.0
+        layer?.shadowRadius = 3.0
+        layer?.shadowOffset = CGSize(width: 0, height: 0)
+    }
+}
+
+// MARK: Mouse Functions
+extension AXAddressBarSuggestionCellView {
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if trackingArea != nil {
+            self.removeTrackingArea(trackingArea)
+        }
+
+        trackingArea = NSTrackingArea(rect: self.bounds, options: [.activeInKeyWindow, .mouseEnteredAndExited, .inVisibleRect], owner: self, userInfo: nil)
+        self.addTrackingArea(trackingArea)
     }
 
-    // MARK: - Configuration
-    func configure(title: String, subtitle: String? = nil) {
-        titleLabel.stringValue = title
-        subtitleLabel.stringValue = subtitle ?? ""
-        subtitleLabel.isHidden = subtitle == nil
+    override func mouseDown(with event: NSEvent) {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.1
+            self.animator().layer?.setAffineTransform(
+                CGAffineTransform(scaleX: 1, y: 0.95))
+        }
+
+        isSelected = true
     }
 
-    // MARK: - Mouse Handling
+    override func mouseUp(with event: NSEvent) {
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0.1
+            self.animator().layer?.setAffineTransform(.identity)
+        }
+    }
+
     override func mouseEntered(with event: NSEvent) {
-        super.mouseEntered(with: event)
-        onMouseEnter?()
+        if !isSelected {
+            NSAnimationContext.runAnimationGroup { _ in
+                self.animator().layer?.backgroundColor = NSColor.systemGray.withAlphaComponent(0.3).cgColor
+            }
+        }
     }
 
-    deinit {
-        removeTrackingArea(trackingArea)
+    override func mouseExited(with event: NSEvent) {
+        if !isSelected {
+            NSAnimationContext.runAnimationGroup { _ in
+                self.animator().layer?.backgroundColor = NSColor.clear.cgColor
+            }
+        }
     }
 }
