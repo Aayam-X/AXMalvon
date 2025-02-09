@@ -1,8 +1,27 @@
 # Malvon
 > Malvon is a native, lightweight, WebKit-based web browser for macOS.
 
-To see images:
-- **Visit https://ashp0.github.io/Malvon/**
+# Images
+![MainWindow](/README%20Assets/MainWindow.png)
+![WorkspaceSwapper](/README%20Assets/WorkspaceSwapper.png)
+![TabGroupCustomizer](/README%20Assets/Tab%20Group%20Customizer.png)
+![TabGroupCustomizer](/README%20Assets/Tab%20Group%20Customizer.png)
+![SearchSuggestions](/README%20Assets/Search%20Suggestions.png)
+![Extension Install](/README%20Assets/Extension3.png)
+![Extension Running](/README%20Assets/Extension2.png)
+![AdBlocker](/README%20Assets/wBlock%20AdBlocker.png)
+![Horizontal Tabs](/README%20Assets/Horizontal%20Tabs.png)
+![Horizontal Toolbar](/README%20Assets/Horizontal%20Toolbar.png)
+
+Video:
+![Sticky Tabs](/README%20Assets/StickyHorizontalTabs.mov)
+
+# How to build
+1. Open Xcode
+2. Set Scheme to Malvon.
+3. Modify the AppDelegate's applicationDidFinishLaunching to remove the Firebase stuff. 
+4. Build & Run.
+
 
 # Why I am stopping
 I have spent far too much time on making web browsers, almost 5 years just rewriting browser after another. And certainly, this rewrite attempt has gotten me farther than all other rewrites. But I cannot keep doing the same thing again and again. I need to move on. I am discontinuing this web browser project because quite frankly, I dont give a shit about my battery life anymore. I was worrying about the little bits like battery health, CPU usage, RAM usage but after some time I came to the realization that: Who the fuck cares? Why the fuck does that matter? Use technology to your advantage, don't let it take advantage of you.
