@@ -13,9 +13,11 @@ class AXTabsManager {
     private var tabBarView: AXTabBarViewTemplate
     private var tabGroup: AXTabGroup // tabGroup.tabs, tabs.WKWebView
     
+    private var previousTabIndex: Int = -1
+    
     private var selectedTabIndex = 0 {
         didSet {
-            selectedTabIndex = max(0, min(selectedTabIndex, tabGroup.tabs.count - 1))
+            previousTabIndex = oldValue
             tabBarView.selectedTabIndex = selectedTabIndex
             tabGroup.selectedIndex = selectedTabIndex
             browserWebView.selectTabViewItem(at: selectedTabIndex)
@@ -28,26 +30,41 @@ class AXTabsManager {
         self.tabGroup = tabGroup
     }
     
-    func update(tabGroup: AXTabGroup) {
+    /// Base configuration is needed in the case that no tabs exist.
+    func update(tabGroup: AXTabGroup, baseConfiguration: WKWebViewConfiguration) {
+        self.tabGroup = tabGroup
+        
+        if tabGroup.tabs.isEmpty {
+            addEmptyTab(config: baseConfiguration)
+        }
+        
         tabBarView.updateTabGroup(tabGroup)
         browserWebView.malvonUpdateTabViewItems(tabGroup: tabGroup)
+        self.selectedTabIndex = tabGroup.selectedIndex
         
         // Setup title observers
         for (index, tab) in tabGroup.tabs.enumerated() {
             let button = tabBarView.tabButton(at: index)
-            tab.onTitleChange = { [weak self] newTitle in
-                guard let self = self,
-                        let newTitle = newTitle
-                else { return }
+            tab.onTitleChange = { newTitle in
+                guard let newTitle = newTitle else { return }
                 
                 button.webTitle = newTitle
+            }
+            
+            tab.onFaviconChange = { newFavicon in
+                guard let icon = newFavicon else { return }
+                
+                button.favicon = icon
             }
             tab.startTitleObservation()
         }
     }
     
     // MARK: - Public Variables
-    var currentTab: AXTab {
+    var currentTab: AXTab? {
+        if selectedTabIndex >= tabGroup.tabs.count {
+            return nil
+        }
         return tabGroup.tabs[selectedTabIndex]
     }
     
@@ -61,15 +78,21 @@ class AXTabsManager {
         browserWebView.malvonAddWebView(tab: tab)
         
         let button = tabBarView.addTabButton()
+        button.webTitle = "New Tab"
         
         selectedTabIndex = tabGroup.tabs.count - 1
+        print(selectedTabIndex, button.tag)
         
-        tab.onTitleChange = { [weak self] newTitle in
-            guard let self = self,
-                    let newTitle = newTitle
-            else { return }
+        tab.onTitleChange = { newTitle in
+            guard let newTitle = newTitle else { return }
             
             button.webTitle = newTitle
+        }
+        
+        tab.onFaviconChange = { newFavicon in
+            guard let icon = newFavicon else { return }
+            
+            button.favicon = icon
         }
         
         tab.startTitleObservation()
@@ -94,15 +117,19 @@ class AXTabsManager {
         tabGroup.tabs[index].stopAllObservations()
         tabGroup.tabs.remove(at: index)
         tabBarView.removeTabButton(at: index)
+        browserWebView.malvonRemoveWebView(at: index)
         
-        /// Note: Always switch tabs before deleting the tab. As there would be some visual glitch with NSTabView
-        if tabGroup.tabs.isEmpty {
-            selectedTabIndex = 0
-        } else if selectedTabIndex >= tabGroup.tabs.count {
-            selectedTabIndex = tabGroup.tabs.count - 1
+        if selectedTabIndex == index {
+            if previousTabIndex == -1 {
+                selectedTabIndex = tabGroup.tabs.count - 1
+            } else {
+                selectedTabIndex = min(previousTabIndex, tabGroup.tabs.count - 1)
+            }
+        } else if selectedTabIndex > index {
+            selectedTabIndex -= 1
         }
         
-        browserWebView.malvonRemoveWebView(at: index)
+        mxPrint(selectedTabIndex)
     }
     
     func removeCurrentTab() {

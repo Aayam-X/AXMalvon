@@ -25,8 +25,6 @@ protocol AXWebContainerViewDelegate: AnyObject {
     func webContainerViewDidSwitchToStartPage()
     
     func webContainerUserDidClickStartPageItem(_ with: URL) -> AXWebView
-    
-    func webContainerViewRequestsCurrentTab() -> AXTab
 }
 
 class AXWebContainerView: NSView {
@@ -325,7 +323,10 @@ extension AXWebContainerView: NSTabViewDelegate {
                 return true
             } else {
                 tabViewItem.view = startPageView
+                delegate?.webContainerViewDidSwitchToStartPage()
                 currentWebView = nil
+                progressBarObserver = nil
+                urlObserver = nil
                 return true
             }
         } else {
@@ -381,6 +382,9 @@ extension AXWebContainerView: WKNavigationDelegate, WKUIDelegate,
     func removeAllWebViews() {
         currentWebView?.removeFromSuperview()
         self.currentWebView = nil
+        
+        progressBarObserver = nil
+        urlObserver = nil
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {

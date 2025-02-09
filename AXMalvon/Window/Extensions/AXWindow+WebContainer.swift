@@ -12,17 +12,9 @@ import WebKit
 
 extension AXWindow: AXWebContainerViewDelegate {
     func webContainerViewSelectedTabWithEmptyView() -> AXWebView? {
-        let tab = malvonTabManager.currentTab
-        
-        if tab.isTabEmpty {
-            return nil
-        }
+        guard let tab = malvonTabManager.currentTab, !tab.isTabEmpty else { return nil }
         
         return tab.webView
-    }
-    
-    func webContainerViewRequestsCurrentTab() -> AXTab {
-        return malvonTabManager.currentTab
     }
     
     func webContainerViewCreatesTabWithZeroTabs(with url: URL) -> AXTab {
@@ -51,21 +43,11 @@ extension AXWindow: AXWebContainerViewDelegate {
             return tab.webView!
         }
         
-        let currentTab = malvonTabManager.currentTab
+        let currentTab = malvonTabManager.currentTab!
         currentTab.url = with
         currentTab.webView!.load(URLRequest(url: with))
         
         return currentTab.webView!
-        
-        
-        //layoutManager.containerView.selectTabViewItem(tab: currentTab)
-        
-        // Start button observation
-//        if let button = tabBarView.tabStackView.arrangedSubviews[
-//            currentTabGroup.selectedIndex] as? any AXTabButton
-//        {
-//            tab.startTitleObservation(for: button)
-//        }
     }
 
     func webContainerViewChangedURL(to url: URL) {

@@ -55,8 +55,10 @@ extension AXTabBarViewTemplate {
             button.removeFromSuperview()
         }
 
-        for _ in newTabGroup.tabs {
-            addTabButton()
+        for tab in newTabGroup.tabs {
+            let button = addTabButton()
+            button.favicon = tab.icon
+            button.webTitle = tab.title
         }
         
         let button = tabStackView.arrangedSubviews[newTabGroup.selectedIndex] as! AXTabButton

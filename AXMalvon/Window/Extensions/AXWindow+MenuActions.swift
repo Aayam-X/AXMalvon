@@ -48,7 +48,7 @@ extension AXWindow {
 
     @IBAction func toggleSearchBarForNewTab(_ sender: Any?) {
         self.malvonTabManager.addEmptyTab(config: activeProfile.baseConfiguration)
-        layoutManager.searchButton.addressField.stringValue = ""
+        layoutManager.searchButton.fullAddress = nil
     }
 
     @IBAction func find(_ sender: Any) {
@@ -78,11 +78,9 @@ extension AXWindow {
     }
 
     @IBAction func disableContentBlockers(_ sender: Any) {
-        let tab = malvonTabManager.currentTab
+        guard let tab = malvonTabManager.currentTab else { return }
 
-        mxPrint(
-            tab.title, tab.url ?? .applicationDirectory,
-            "Enabling content blockers")
+        mxPrint(tab.title, tab.url ?? .applicationDirectory, "Enabling content blockers")
         AXContentBlockerLoader.shared.disableAdBlock(
             for: tab.individualWebConfiguration)
     }

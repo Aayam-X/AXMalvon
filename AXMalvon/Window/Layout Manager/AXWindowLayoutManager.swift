@@ -132,7 +132,7 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
 
         // Main Content Split View Item
         let mainItem = NSSplitViewItem(viewController: mainViewController)
-        sidebarItem.canCollapse = false
+        mainItem.canCollapse = false
         mainItem.minimumThickness = 200
 
         splitVC.addSplitViewItem(sidebarItem)
