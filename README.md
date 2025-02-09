@@ -25,7 +25,7 @@ I have spent far too much time on making web browsers, almost 5 years just rewri
 # If you would like to continue this project
 Here are a list of tasks you should implement if you wish to continue developing this:
 - Tabs/WIP: I rewrote the entire tab system with even stricter MVC architecture with the `AXTabsManager.swift` managing the state of everything (Tabs, Tab Bar, Tab View).
-    - Removing tabs seem a little buggy..
+    - Removing tabs: When the selectedTabIndex changes, it updates all the views. Only problem is that the VerticalTabBarView has a 0.05 second animation before removing the tabButton from SuperView. Meaning it would have highlighted the incorrect tab. I believe the fix to this is by sending the selectedTabIndex to the tab bar view, who then selects it AFTER the button has been removed from superView.
     - Vertical tab layout works, but you have to uncomment and edit the code for the horizontal tab layout. I also recommend that you resort to auto layout for horizontal tabs because the only way to actually take up the entire space in the NSToolbar is by autolayout. 
 - Search Suggestions: In the `suggestions-rewrite` branch, I had tried to transition from NSTableView into 4 seperate NSStackViews which update independently (which would be even more optimal for battery life, but it's not fully complete)
 - `Extensions`: Adding support for Chrome/Firefox extensions. There is an `File->Install Chrome Extension` button in the menu bar item. This would download and unzip the crx file. It can parse the manifest but cannot run the extension scripts. My suggestion is to inject a WKUserScript that has the same classes and functions as you can normally call in a Google Chrome extension, but reroute those functions to WKWebView. For example, `chrome.activeTab.title` you would talk back and forth between the WKUserContentController and javascript. But there are hundreds of these functions and implementing every single one of them would be a tedious time consuming task. But you can still give it a try to add support for chrome extensions (then firefox).
@@ -33,4 +33,3 @@ Here are a list of tasks you should implement if you wish to continue developing
 - Ability to change icon: The tab group icons do not update properly. It would look nice if you did.
 - Open App Delegate and remove that firebase code. It inccreases the number of times the user launched the app by 1, that's all. There is no other tracking data.
 - Passwords/Keychain: In the SigmaOS browser (another WebKit browser) I saw some keychain-password-autofill.js file, don't copy paste but look at that and do it. I also believe an Apple developer account is needed for passkeys so I didn't bother with this. (Double check to be sure though, I could be wrong).
-- 
