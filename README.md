@@ -19,7 +19,7 @@ Video:
 # How to build
 1. Open Xcode
 2. Set Scheme to Malvon.
-3. Modify the AppDelegate's applicationDidFinishLaunching to remove the Firebase stuff. 
+3. Modify the AppDelegate's applicationDidFinishLaunching if you do not wish to be greeted with a welcome screen. 
 4. Build & Run.
 
 
@@ -50,5 +50,4 @@ Here are a list of tasks you should implement if you wish to continue developing
 - `Extensions`: Adding support for Chrome/Firefox extensions. There is an `File->Install Chrome Extension` button in the menu bar item. This would download and unzip the crx file. It can parse the manifest but cannot run the extension scripts. My suggestion is to inject a WKUserScript that has the same classes and functions as you can normally call in a Google Chrome extension, but reroute those functions to WKWebView. For example, `chrome.activeTab.title` you would talk back and forth between the WKUserContentController and javascript. But there are hundreds of these functions and implementing every single one of them would be a tedious time consuming task. But you can still give it a try to add support for chrome extensions (then firefox).
 - Use Swift.SQLite or some other database: It rarely happens but sometimes when calling the C SQLite library, it would return a nil pointer and crash the entire app. This is a very rare edge case but I don't know anything SQlite related and I had AI code the table stuff for me.
 - Ability to change icon: The tab group icons do not update properly. It would look nice if you did.
-- Open App Delegate and remove that firebase code. It inccreases the number of times the user launched the app by 1, that's all. There is no other tracking data.
 - Passwords/Keychain: In the SigmaOS browser (another WebKit browser) I saw some keychain-password-autofill.js file, don't copy paste but look at that and do it. I also believe an Apple developer account is needed for passkeys so I didn't bother with this. (Double check to be sure though, I could be wrong).
