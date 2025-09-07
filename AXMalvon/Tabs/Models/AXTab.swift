@@ -99,9 +99,6 @@ class AXTab: NSObject, Codable {
         super.init()
         
         newContentController.add(self, name: "faviconChanged")
-        
-        AXContentBlockerLoader.shared.enableAdblock(
-            for: self.individualWebConfiguration, handler: self)
     }
     
     // MARK: - Codable
@@ -187,9 +184,6 @@ class AXTab: NSObject, Codable {
 
         newContentController.addUserScript(javaScriptFaviconMonitoringScript)
         newContentController.add(self, name: "faviconChanged")
-
-        AXContentBlockerLoader.shared.enableAdblock(
-            for: self.individualWebConfiguration, handler: self)
     }
 
     // MARK: - Favicon Handling via User Script
@@ -232,38 +226,6 @@ extension AXTab: WKScriptMessageHandler {
                 self.icon = image
                 mxPrint("Found new favicon for button with tag")
                 onFaviconChange?(image)
-            }
-
-        case "advancedBlockingData" where message.body is String:
-            Task {
-                do {
-                    guard let url = URL(string: message.body as! String) else {
-                        mxPrint("Invalid URL: \(message.body)")
-                        return
-                    }
-
-                    let data = try await ContentBlockerEngineWrapper.shared
-                        .getData(url: url)
-                    let response: [String: Any] = [
-                        "url": url.absoluteString,
-                        "data": data,
-                        "verbose": true,
-                    ]
-
-                    if let jsonData = try? JSONSerialization.data(
-                        withJSONObject: response),
-                        let js = String(data: jsonData, encoding: .utf8)
-                    {
-                        DispatchQueue.main.async {
-                            self.webView?.evaluateJavaScript(
-                                "(()=>{(handleMessage({name:'advancedBlockingData', message:\(js)}))})();",
-                                completionHandler: nil
-                            )
-                        }
-                    }
-                } catch {
-                    mxPrint("BlockingDataError: \(error)")
-                }
             }
 
         default:

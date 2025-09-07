@@ -94,9 +94,14 @@ class AXWebContainerView: NSView {
     }
     
     func currentWebViewFocus(webView: AXWebView) {
-        DispatchQueue.main.async { [weak self] in
+        let updateBlock = { [weak self] in
             guard let window = self?.window else { return }
             window.makeFirstResponder(webView)
+        }
+        if Thread.isMainThread {
+            updateBlock()
+        } else {
+            DispatchQueue.main.async(execute: updateBlock)
         }
     }
     
@@ -518,3 +523,4 @@ extension AXWebContainerView: AXNewTabViewDelegate {
         }
     }
 }
+

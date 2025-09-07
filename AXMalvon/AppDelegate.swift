@@ -16,13 +16,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let launchedBefore = UserDefaults.standard.bool(forKey: "launchedBefore")
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        if launchedBefore {
-            presentNewWindowIfNeeded()
-        } else {
-            // First Launch
-            showWelcomeView()
-            UserDefaults.standard.set(true, forKey: "launchedBefore")
-        }
+        #if RELEASE
+        presentNewWindowIfNeeded()
+        #else
+        showWelcomeView()
+        #endif
+
+//        if launchedBefore {
+//            presentNewWindowIfNeeded()
+//        } else {
+//            // First Launch
+//            showWelcomeView()
+//            UserDefaults.standard.set(true, forKey: "launchedBefore")
+//        }
 
         MainMenu.populateMainMenuAnimated()
     }
@@ -102,12 +108,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func showWelcomeView() {
-        createSwiftUIWindow(with: AXWelcomeView(), title: "Welcome to Malvon")
+            let window = createSwiftUIWindow(
+                with: AXWelcomeView(window: nil), // placeholder
+                title: "Welcome to Malvon",
+                size: CGSize(width: 600, height: 700)
+            )
+            
+            window.contentView = NSHostingView(rootView: AXWelcomeView(window: window))
     }
 
     // MARK: - Other Functions
     @discardableResult
-    private func presentNewWindowIfNeeded() -> AXWindow {
+    func presentNewWindowIfNeeded() -> AXWindow {
         if let existingWindow = mainWindow, existingWindow.isVisible {
             existingWindow.makeKeyAndOrderFront(nil)
             return existingWindow
@@ -127,13 +139,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    @discardableResult
     private func createSwiftUIWindow(
-        with view: some View, title: String,
+        with view: some View,
+        title: String,
         size: CGSize = .init(width: 600, height: 400)
-    ) {
+    ) -> NSWindow {
         // Create the NSWindow
         let window = NSWindow(
-            contentRect: NSRect.init(origin: .zero, size: size),
+            contentRect: NSRect(origin: .zero, size: size),
             styleMask: [.titled, .closable, .resizable],
             backing: .buffered,
             defer: false
@@ -149,7 +163,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Display the window
         window.center()
         window.makeKeyAndOrderFront(nil)
+
+        return window
     }
+
 
     @IBAction func checkForUpdates(_ sender: Any?) {
         ensureUpdaterExists()
