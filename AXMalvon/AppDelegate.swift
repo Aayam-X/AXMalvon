@@ -7,23 +7,16 @@
 //
 
 import AppKit
-import SwiftData
 import SwiftUI
 import WebKit
 
+@MainActor
 class AppDelegate: NSObject, NSApplicationDelegate {
     private var mainWindow: AXWindow?
 
     let launchedBefore = UserDefaults.standard.bool(forKey: "launchedBefore")
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
-        // Import any pre-SwiftData data before opening a window — AXProfile
-        // reads from the SwiftData store on construction, so the migration
-        // has to land first.
-        LegacyMigrator.runIfNeeded(
-            context: PersistenceController.shared.mainContext
-        )
-
         if launchedBefore {
             presentNewWindowIfNeeded()
         } else {

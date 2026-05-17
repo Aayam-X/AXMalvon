@@ -8,6 +8,7 @@
 
 import AppKit
 
+@MainActor
 protocol AXTabButtonDelegate: AnyObject {
     /// Called when the user selects (clicks) a tab button
     func tabButtonDidSelect(_ tabButton: AXTabButton)

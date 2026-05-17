@@ -7,12 +7,14 @@
 
 import WebKit
 
-var userScript: WKUserScript? = nil
+@MainActor
+private var userScript: WKUserScript? = nil
 
+@MainActor
 func loadChromiumRuntime() {
     let filePath = Bundle.main.path(
         forResource: "chromium_runtime", ofType: "js")!
-    var chromiumScript = try? String(contentsOfFile: filePath, encoding: .utf8)
+    let chromiumScript = try? String(contentsOfFile: filePath, encoding: .utf8)
 
     if let chromiumScript = chromiumScript {
         userScript = WKUserScript(
@@ -21,6 +23,7 @@ func loadChromiumRuntime() {
     }
 }
 
+@MainActor
 func enableChromiumAPIs(
     for configuration: WKWebViewConfiguration,
     handler: WKScriptMessageHandler

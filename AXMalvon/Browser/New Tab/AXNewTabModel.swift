@@ -13,6 +13,7 @@ struct AXNewTabFavouriteSite: Codable {
     let url: String
 }
 
+@MainActor
 class AXNewTabFavouritesManager {
     static let shared = AXNewTabFavouritesManager()
     private var sites: [AXNewTabFavouriteSite] = []

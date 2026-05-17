@@ -8,6 +8,7 @@
 import Foundation
 import WebKit
 
+@MainActor
 class CRXExtension {
     let id: String
     let name: String

@@ -8,6 +8,7 @@
 
 import AppKit
 
+@MainActor
 protocol AXNewTabViewDelegate: AnyObject {
     func newTabViewDidSelectItem(url: URL)
 }

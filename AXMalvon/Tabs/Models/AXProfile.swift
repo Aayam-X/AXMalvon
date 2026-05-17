@@ -15,12 +15,20 @@ import WebKit
 /// (with an isolated ``WKWebsiteDataStore``) for the live browser.
 @MainActor
 class AXProfile {
-    let name: String
+    /// SwiftData-backed twin. `nil` for ``AXPrivateProfile`` where everything
+    /// stays in memory. The model owns canonical state — `name`,
+    /// `dataStoreUUID`, `selectedTabGroupIndex` are read through to it.
+    let model: MalvonProfile?
+
     let baseConfiguration: WKWebViewConfiguration
 
-    /// SwiftData-backed twin. `nil` for ``AXPrivateProfile`` where everything
-    /// stays in memory.
-    let model: MalvonProfile?
+    /// Display name. Reads from (and writes through to) the SwiftData model
+    /// so renames are persisted automatically. Private profile is always
+    /// "Private" and ignores writes.
+    var name: String {
+        get { model?.name ?? "Private" }
+        set { model?.name = newValue }
+    }
 
     var tabGroups: [AXTabGroup] = []
     weak var currentTabGroup: AXTabGroup!
@@ -50,7 +58,6 @@ class AXProfile {
         baseConfiguration: WKWebViewConfiguration
     ) {
         self.model = model
-        self.name = model?.name ?? "Private"
         self.baseConfiguration = baseConfiguration
         self.currentTabGroupIndex = model?.selectedTabGroupIndex ?? 0
         self.historyManager = model.map { AXHistoryManager(profile: $0) }

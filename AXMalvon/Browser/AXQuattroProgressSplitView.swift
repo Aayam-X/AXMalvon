@@ -127,46 +127,39 @@ class AXQuattroProgressSplitView: NSSplitView, NSSplitViewDelegate,
     ) {
         let currentToken = UUID()
         animationToken = currentToken
+        let startProgress = self.currentProgress
 
-        animationQueue.async { [weak self] in
-            guard let self = self else { return }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            guard self.animationToken == currentToken else { return }
 
-            let startProgress = self.currentProgress
+            let animation = CABasicAnimation(keyPath: "strokeEnd")
+            animation.fromValue = startProgress
+            animation.toValue = targetProgress
+            animation.duration = duration
+            animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
 
-            DispatchQueue.main.async {
-                guard self.animationToken == currentToken else { return }
+            for (index, layer) in self.borderLayers.enumerated() {
+                let path = self.createBorderPath(
+                    for: NSRectEdge(rawValue: UInt(index))!)
+                layer.path = path.cgPath
+                layer.zPosition = 1
+                layer.opacity = 1.0
+                layer.isHidden = false
+                layer.add(animation, forKey: "progressAnimation")
+            }
 
-                // Prepare and start animation
-                let animation = CABasicAnimation(keyPath: "strokeEnd")
-                animation.fromValue = startProgress
-                animation.toValue = targetProgress
-                animation.duration = duration
-                animation.timingFunction = CAMediaTimingFunction(
-                    name: .easeInEaseOut)
-
-                // Apply animation to each border layer
-                for (index, layer) in self.borderLayers.enumerated() {
-                    let path = self.createBorderPath(
-                        for: NSRectEdge(rawValue: UInt(index))!)
-                    layer.path = path.cgPath
-                    layer.zPosition = 1
-                    layer.opacity = 1.0
-                    layer.isHidden = false
-                    layer.add(animation, forKey: "progressAnimation")
-                }
-
-                if targetProgress >= 0.95 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-                        [weak self] in
-                        self?.borderLayers.forEach { layer in
-                            layer.opacity = 0.0
-                            layer.isHidden = true
-                        }
+            if targetProgress >= 0.95 {
+                Task { @MainActor [weak self] in
+                    try? await Task.sleep(for: .seconds(duration))
+                    self?.borderLayers.forEach { layer in
+                        layer.opacity = 0.0
+                        layer.isHidden = true
                     }
                 }
-
-                self.currentProgress = targetProgress
             }
+
+            self.currentProgress = targetProgress
         }
     }
 

@@ -8,6 +8,7 @@
 
 import AppKit
 
+@MainActor
 protocol AXTabHostingViewDelegate: AnyObject {
     // Tab Functionality
     func tabHostingViewCreatedNewTab()
@@ -29,6 +30,7 @@ protocol AXTabHostingViewDelegate: AnyObject {
     func tabHostingViewDisplaysWorkspaceSwapperPanel(_ sender: NSView)
 }
 
+@MainActor
 protocol AXTabHostingViewProtocol: AnyObject {
     var tabHostingDelegate: AXTabHostingViewDelegate? { get set }
     

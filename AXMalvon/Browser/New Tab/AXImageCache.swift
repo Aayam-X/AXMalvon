@@ -8,6 +8,7 @@
 
 import AppKit
 
+@MainActor
 class ImageCache {
     static let shared = ImageCache()
     private var cache = NSCache<NSString, NSImage>()

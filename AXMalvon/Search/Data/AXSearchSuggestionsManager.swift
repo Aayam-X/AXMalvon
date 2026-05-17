@@ -28,10 +28,10 @@ final class SuggestionsManager {
         self.historyManager = historyManager
     }
 
-    var onQueryUpdated: ((_ query: String) -> Void)?
-    var onTopSearchesUpdated: ((_ searches: [String]) -> Void)?
-    var onHistoryUpdated: ((_ history: [(title: String, url: String)]) -> Void)?
-    var onGoogleSuggestionsUpdated: ((_ suggestions: [String]) -> Void)?
+    var onQueryUpdated: (@MainActor (_ query: String) -> Void)?
+    var onTopSearchesUpdated: (@MainActor (_ searches: [String]) -> Void)?
+    var onHistoryUpdated: (@MainActor (_ history: [(title: String, url: String)]) -> Void)?
+    var onGoogleSuggestionsUpdated: (@MainActor (_ suggestions: [String]) -> Void)?
 
     func updateSuggestions(with query: String) {
         debounceWorkItem?.cancel()

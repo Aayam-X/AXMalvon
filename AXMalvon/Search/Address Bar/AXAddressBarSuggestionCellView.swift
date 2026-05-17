@@ -88,7 +88,6 @@ class AXAddressBarSuggestionCellView: NSTableCellView {
         onMouseEnter?()
     }
 
-    deinit {
-        removeTrackingArea(trackingArea)
-    }
+    // NSView removes its tracking areas automatically on dealloc; no manual
+    // cleanup needed here.
 }

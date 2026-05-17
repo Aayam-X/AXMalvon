@@ -61,6 +61,7 @@ extension NSColor {
         }
     }
 
+    @MainActor
     func systemAppearanceAdjustedColor() -> NSColor {
         // Convert color to a color space that supports RGB components.
         guard let rgbColor = self.usingColorSpace(.sRGB) else {

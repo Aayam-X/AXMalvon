@@ -9,6 +9,7 @@
 import AppKit
 import WebKit
 
+@MainActor
 protocol AXWebContainerViewDelegate: AnyObject {
     func webContainerViewSelectedTabWithEmptyView() -> AXWebView?
     
@@ -220,46 +221,43 @@ class AXWebContainerView: NSView {
     ) {
         let currentToken = UUID()
         animationToken = currentToken
-        
-        animationQueue.async { [weak self] in
-            guard let self = self else { return }
-            
-            let startProgress = self.currentProgress
-            
-            DispatchQueue.main.async {
-                guard self.animationToken == currentToken else { return }
-                
-                // Prepare and start animation
-                let animation = CABasicAnimation(keyPath: "strokeEnd")
-                animation.fromValue = startProgress
-                animation.toValue = targetProgress
-                animation.duration = duration
-                animation.timingFunction = CAMediaTimingFunction(
-                    name: .easeInEaseOut)
-                
-                // Apply animation to each border layer
-                for (index, layer) in self.borderLayers.enumerated() {
-                    let path = self.createBorderPath(
-                        for: NSRectEdge(rawValue: UInt(index))!)
-                    layer.path = path.cgPath
-                    layer.zPosition = 1
-                    layer.opacity = 1.0
-                    layer.isHidden = false
-                    layer.add(animation, forKey: "progressAnimation")
-                }
-                
-                if targetProgress >= 0.95 {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-                        [weak self] in
-                        self?.borderLayers.forEach { layer in
-                            layer.opacity = 0.0
-                            layer.isHidden = true
-                        }
+        let startProgress = self.currentProgress
+
+        // The whole animation chain runs on the main actor — this method is
+        // only invoked from MainActor contexts (KVO + URL handling) and the
+        // layer/animation APIs aren't Sendable. The previous DispatchQueue
+        // hop is unnecessary now that everything is main-isolated.
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            guard self.animationToken == currentToken else { return }
+
+            let animation = CABasicAnimation(keyPath: "strokeEnd")
+            animation.fromValue = startProgress
+            animation.toValue = targetProgress
+            animation.duration = duration
+            animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+
+            for (index, layer) in self.borderLayers.enumerated() {
+                let path = self.createBorderPath(
+                    for: NSRectEdge(rawValue: UInt(index))!)
+                layer.path = path.cgPath
+                layer.zPosition = 1
+                layer.opacity = 1.0
+                layer.isHidden = false
+                layer.add(animation, forKey: "progressAnimation")
+            }
+
+            if targetProgress >= 0.95 {
+                Task { @MainActor [weak self] in
+                    try? await Task.sleep(for: .seconds(duration))
+                    self?.borderLayers.forEach { layer in
+                        layer.opacity = 0.0
+                        layer.isHidden = true
                     }
                 }
-                
-                self.currentProgress = targetProgress
             }
+
+            self.currentProgress = targetProgress
         }
     }
     
@@ -286,12 +284,15 @@ class AXWebContainerView: NSView {
         webView.uiDelegate = self
         webView.navigationDelegate = self
         
-        // Observers
+        // Observers — WKWebView KVO fires on the main thread, so we can
+        // hop to the main actor without scheduling a separate task.
         progressBarObserver = webView.observe(
             \.estimatedProgress, options: [.new]
         ) { [weak self] _, change in
             if let newProgress = change.newValue {
-                self?.updateProgress(newProgress)
+                MainActor.assumeIsolated {
+                    self?.updateProgress(newProgress)
+                }
             } else {
                 mxPrint("Progress change has no new value.")
             }
@@ -303,8 +304,12 @@ class AXWebContainerView: NSView {
 
         urlObserver = webView.observe(\.url, options: [.new]) {
             [weak self] _, change in
+            // WKWebView's KVO callbacks for `url` fire on the main thread, so
+            // we can hop to the main actor without scheduling a new task.
             if let newURL = change.newValue, let newURL {
-                self?.delegate?.webContainerViewChangedURL(to: newURL)
+                MainActor.assumeIsolated {
+                    self?.delegate?.webContainerViewChangedURL(to: newURL)
+                }
             }
         }
     }

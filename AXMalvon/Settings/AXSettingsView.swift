@@ -60,7 +60,7 @@ enum SettingsSection: String, Identifiable, CaseIterable {
     }
 
     // swiftlint:disable attributes
-    @ViewBuilder
+    @ViewBuilder @MainActor
     var contentView: some View {
         // swiftlint:enable attributes
         switch self {

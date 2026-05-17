@@ -19,7 +19,8 @@ let applicationName = "Malvon"
 
 // Define an array of tuples that contain the menu title and its corresponding population function.
 // Adjust the submenu titles as needed (note that the Application menu might not display its title).
-let menus: [(title: String, localizedTitle: String, populate: (NSMenu) -> Void)] = [
+@MainActor
+let menus: [(title: String, localizedTitle: String, populate: @MainActor (NSMenu) -> Void)] = [
     ("File", NSLocalizedString("File", comment: "File menu"), MainMenu.populateFileMenu),
     ("Edit", NSLocalizedString("Edit", comment: "Edit menu"), MainMenu.populateEditMenu),
     ("View", NSLocalizedString("View", comment: "View menu"), MainMenu.populateViewMenu),
@@ -27,6 +28,7 @@ let menus: [(title: String, localizedTitle: String, populate: (NSMenu) -> Void)]
     ("Help", NSLocalizedString("Help", comment: "Help menu"), MainMenu.populateHelpMenu)
 ]
 
+@MainActor
 enum MainMenu {
     static func removeAllMainMenuItems() {
         NSApp.mainMenu?.removeAllItems()

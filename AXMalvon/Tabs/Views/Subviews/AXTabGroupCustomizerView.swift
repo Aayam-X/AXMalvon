@@ -8,6 +8,7 @@
 
 import AppKit
 
+@MainActor
 protocol AXTabGroupCustomizerViewDelegate: AnyObject {
     func tabGroupCustomizerDidUpdateName(_ tabGroup: AXTabGroup)
     func tabGroupCustomizerDidUpdateColor(_ tabGroup: AXTabGroup)

@@ -10,6 +10,7 @@ import AppKit
 import SwiftUI
 
 // Protocol defining common interface for tab layout management
+@MainActor
 protocol AXWindowLayoutManaging {
     var containerView: AXWebContainerView { get }
     var tabBarView: any AXTabBarViewTemplate { get }
@@ -31,6 +32,7 @@ protocol AXWindowLayoutManaging {
 }
 
 // Base class implementing common functionality
+@MainActor
 class AXBaseLayoutManager: AXWindowLayoutManaging {
     var containerView: AXWebContainerView
     let tabBarView: any AXTabBarViewTemplate
@@ -116,6 +118,7 @@ class AXBaseLayoutManager: AXWindowLayoutManaging {
 //}
 
 // Vertical layout manager using NSView
+@MainActor
 class AXVerticalLayoutManager: AXBaseLayoutManager {
     var splitViewResizeObserver: NSKeyValueObservation?
 

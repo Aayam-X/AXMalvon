@@ -9,6 +9,7 @@
 import AppKit
 import WebKit
 
+@MainActor
 protocol AXTabBarViewDelegate: AnyObject {
     /// Called when the user presses on a tab
     func tabBarSwitchedTo(_ tabButton: AXTabButton)

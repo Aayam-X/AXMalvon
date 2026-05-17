@@ -8,6 +8,7 @@
 import AppKit
 import WebKit
 
+@MainActor
 class AXTabsManager {
     private var browserWebView: AXWebContainerView
     private var tabBarView: AXTabBarViewTemplate

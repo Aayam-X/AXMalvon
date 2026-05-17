@@ -8,6 +8,7 @@
 
 import AppKit
 
+@MainActor
 protocol AXSidebarSearchButtonDelegate: AnyObject {
     func lockClicked()
     func sidebarSearchButtonRequestsHistoryManager() -> AXHistoryManager?
@@ -304,62 +305,7 @@ extension AXSidebarSearchButton: ZSearchFieldDelegate, NSTextFieldDelegate {
     }
 }
 
-private func fetchGoogleSuggestions(
-    for query: String, completion: @escaping ([String]) -> Void
-) {
-    let encodedQuery =
-        query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)
-        ?? ""
-    let urlString =
-        "https://suggestqueries.google.com/complete/search?client=firefox&q=\(encodedQuery)"
-
-    guard let url = URL(string: urlString) else {
-        completion([])  // Return an empty list if the URL is invalid
-        return
-    }
-
-    // URLSession runs network requests on a background thread
-    let task = URLSession.shared.dataTask(with: url) { data, _, error in
-        if let error = error {
-            print("Error fetching suggestions: \(error)")
-            completion([])  // Return an empty list on error
-            return
-        }
-
-        guard let data = data else {
-            completion([])  // Return an empty list if there's no data
-            return
-        }
-
-        do {
-            // Decode the JSON response
-            if let json = try JSONSerialization.jsonObject(
-                with: data, options: []) as? [Any],
-                let suggestions = json[1] as? [String]
-            {
-                // Return suggestions on the main thread
-                DispatchQueue.main.async {
-                    var completionValue = suggestions
-                    completionValue.insert(query, at: 0)
-
-                    completion(completionValue)
-                }
-            } else {
-                DispatchQueue.main.async {
-                    completion([])  // Handle unexpected JSON format
-                }
-            }
-        } catch {
-            print("Error decoding JSON: \(error)")
-            DispatchQueue.main.async {
-                completion([])
-            }
-        }
-    }
-
-    task.resume()  // Start the network request
-}
-
+@MainActor
 protocol ZSearchFieldDelegate: NSTextFieldDelegate {
     func searchFieldDidBecomeFirstResponder(textField: ZSearchField)
     func searchFieldDidResignFirstResponder(textField: ZSearchField)

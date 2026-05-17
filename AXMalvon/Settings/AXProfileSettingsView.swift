@@ -9,6 +9,7 @@
 import SwiftUI
 import WebKit
 
+@MainActor
 class AXProfileManager: ObservableObject {
     @Published var profiles: [AXProfile] = []
 

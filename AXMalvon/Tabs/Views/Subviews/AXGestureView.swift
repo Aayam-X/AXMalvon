@@ -9,6 +9,7 @@
 import AppKit
 import SwiftUI
 
+@MainActor
 protocol AXGestureViewDelegate: AnyObject {
     func gestureView(didSwipe direction: AXGestureViewSwipeDirection!)
 }
@@ -106,7 +107,7 @@ class AXGestureView: NSView {
         }
     }
 
-    private func removeFullScreenNotifications() {
+    nonisolated private func removeFullScreenNotifications() {
         NotificationCenter.default.removeObserver(
             self, name: NSWindow.willEnterFullScreenNotification, object: nil)
         NotificationCenter.default.removeObserver(

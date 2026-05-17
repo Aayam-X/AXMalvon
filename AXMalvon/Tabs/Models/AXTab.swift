@@ -177,7 +177,7 @@ final class AXTab: NSObject {
 // MARK: - WKScriptMessageHandler
 
 extension AXTab: WKScriptMessageHandler {
-    nonisolated func userContentController(
+    func userContentController(
         _ userContentController: WKUserContentController,
         didReceive message: WKScriptMessage
     ) {
@@ -187,7 +187,7 @@ extension AXTab: WKScriptMessageHandler {
             return
         }
 
-        Task { @MainActor in
+        Task {
             let image = try? await quickFaviconDownload(from: url)
             self.icon = image
             self.onFaviconChange?(image)
@@ -197,6 +197,7 @@ extension AXTab: WKScriptMessageHandler {
 
 // MARK: - Favicon-monitoring user script
 
+@MainActor
 let javaScriptFaviconMonitoringScript = WKUserScript(
     source: jsFaviconMonitoringScript,
     injectionTime: .atDocumentEnd,

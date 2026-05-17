@@ -114,11 +114,11 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
             button.animator().setFrameOrigin(finalPosition.origin)
             button.animator().alphaValue = 0  // Fade out as it slides
         } completionHandler: {
-            // Remove the button after the animation completes
-            button.removeFromSuperview()
-
-            // Update indices and layout the stack view
-            //self.updateButtonTags(startingAfter: index)
+            // NSAnimationContext completion handlers fire on the main thread,
+            // so we can hop to the main actor synchronously to clean up.
+            MainActor.assumeIsolated {
+                button.removeFromSuperview()
+            }
         }
     }
     

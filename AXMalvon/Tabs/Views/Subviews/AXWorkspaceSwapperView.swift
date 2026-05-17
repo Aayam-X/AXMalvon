@@ -8,6 +8,7 @@
 
 import AppKit
 
+@MainActor
 protocol AXWorkspaceSwapperViewDelegate: AnyObject {
     func didSwitchProfile(to index: Int)
     func didSwitchTabGroup(to index: Int)
