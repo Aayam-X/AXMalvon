@@ -243,13 +243,17 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
     }
 
     func gestureView(didSwipe direction: AXGestureViewSwipeDirection!) {
+        // Horizontal swipes on the sidebar's workspace header cycle through
+        // tab groups (Arc-style). Web nav swipes belong on the web view
+        // itself and will land in a later phase.
         switch direction {
         case .backwards:
-            tabHostingDelegate?.tabHostingViewNavigateBackwards()
+            tabHostingDelegate?.tabHostingViewSwitchToPreviousTabGroup()
         case .forwards:
-            tabHostingDelegate?.tabHostingViewNavigateForward()
+            tabHostingDelegate?.tabHostingViewSwitchToNextTabGroup()
         case .reload:
-            tabHostingDelegate?.tabHostingViewReloadCurrentPage()
+            tabHostingDelegate?.tabHostingViewDisplaysWorkspaceSwapperPanel(
+                tabGroupInfoView)
         case .nothing, nil:
             break
         }

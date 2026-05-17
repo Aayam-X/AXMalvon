@@ -48,6 +48,13 @@ class AXWindow: NSWindow {
             defer: false
         )
 
+        // Seed the search singleton with the active profile so URL
+        // commits (and the search-frequency increment) know which
+        // profile to attribute to. This previously only ran on the
+        // didSwitchProfile path, leaving a freshly-launched window
+        // with no profile context.
+        AXSearchQueryToURL.shared.activeProfile = activeProfile
+
         setupNSWindowStyle()
         setupBrowserElements()
 
@@ -99,4 +106,41 @@ class AXWindow: NSWindow {
         popover.behavior = .transient
         return popover
     }()
+
+    /// Floating command bar (⌘T / ⌘L). Lazily constructed and reused
+    /// across invocations so its layer cache survives between presents.
+    lazy var commandBarPanel: AXCommandBarPanel = {
+        let panel = AXCommandBarPanel()
+        panel.onCommit = { [weak self] url in
+            guard let self else { return }
+            if self.commandBarPrefilledFromCurrentURL {
+                self.searchBarUpdatesCurrentTab(with: url)
+            } else {
+                self.searchBarCreatesNewTab(with: url)
+            }
+        }
+        return panel
+    }()
+
+    private var commandBarPrefilledFromCurrentURL: Bool = false
+
+    /// Present the command bar over this window.
+    /// - Parameter prefillingCurrentURL: ⌘L mode — the input is seeded
+    ///   with the current tab's address (all selected) and committing
+    ///   replaces the current tab's URL instead of opening a new tab.
+    func showCommandBar(prefillingCurrentURL: Bool) {
+        commandBarPrefilledFromCurrentURL = prefillingCurrentURL
+        let prefill: String
+        if prefillingCurrentURL,
+            let url = layoutManager.containerView.currentPageAddress
+        {
+            prefill = url.absoluteString
+        } else {
+            prefill = ""
+        }
+        let suggestions = SuggestionsManager(
+            historyManager: activeProfile.historyManager)
+        commandBarPanel.present(
+            in: self, prefill: prefill, suggestionsManager: suggestions)
+    }
 }

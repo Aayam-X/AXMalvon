@@ -13,13 +13,13 @@ protocol AXTabHostingViewDelegate: AnyObject {
     // Tab Functionality
     func tabHostingViewCreatedNewTab()
     func tabHostingViewWillRemoveTab(tab: AXTab)
-    
+
     // Tab Functionality From AXTabBarViewDelegate
     func tabBarSwitchedTo(_ tabButton: AXTabButton)
     func tabBarShouldClose(_ tabButton: AXTabButton) -> Bool
     func tabBarDidClose(_ tabAt: Int)
-    
-    
+
+
     // WebView Navigation Functions
     func tabHostingViewReloadCurrentPage()
     func tabHostingViewNavigateForward()
@@ -28,6 +28,10 @@ protocol AXTabHostingViewDelegate: AnyObject {
     // Browsing Functions
     func tabHostingViewDisplaysTabGroupCustomizationPanel(_ sender: NSView)
     func tabHostingViewDisplaysWorkspaceSwapperPanel(_ sender: NSView)
+
+    // Tab Group Navigation (horizontal swipe on workspace header)
+    func tabHostingViewSwitchToNextTabGroup()
+    func tabHostingViewSwitchToPreviousTabGroup()
 }
 
 @MainActor

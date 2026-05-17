@@ -191,11 +191,11 @@ extension AXWindow {
                     break
                 }
             } else {
-                toggleSearchBarForNewTab(nil)
+                showCommandBar(prefillingCurrentURL: false)
             }
             return true
         case kVK_ANSI_L:
-            toggleSearchField(nil)
+            showCommandBar(prefillingCurrentURL: true)
             return true
         case kVK_ANSI_W:
             if currentTabGroup.tabs.isEmpty {

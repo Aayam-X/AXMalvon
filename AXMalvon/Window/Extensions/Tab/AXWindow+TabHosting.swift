@@ -61,4 +61,22 @@ extension AXWindow: AXTabHostingViewDelegate {
         browserSpaceSharedPopover.show(
             relativeTo: sender.bounds, of: sender, preferredEdge: .minY)
     }
+
+    // MARK: - Tab Group Swipe Navigation
+
+    func tabHostingViewSwitchToNextTabGroup() {
+        cycleTabGroup(by: +1)
+    }
+
+    func tabHostingViewSwitchToPreviousTabGroup() {
+        cycleTabGroup(by: -1)
+    }
+
+    private func cycleTabGroup(by delta: Int) {
+        let groups = activeProfile.tabGroups
+        guard groups.count > 1 else { return }
+        let nextIndex =
+            (currentTabGroupIndex + delta + groups.count) % groups.count
+        didSwitchTabGroup(to: nextIndex)
+    }
 }

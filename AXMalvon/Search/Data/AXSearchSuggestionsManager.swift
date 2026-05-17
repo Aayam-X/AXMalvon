@@ -22,9 +22,11 @@ final class SuggestionsManager {
     private var immediateUpdateCount = 0
     private let maxImmediateUpdates = 3
 
-    var historyManager: AXHistoryManager
+    /// Nil for private-browsing profiles where history isn't recorded —
+    /// the history-suggestion stream silently skips when this is absent.
+    var historyManager: AXHistoryManager?
 
-    init(historyManager: AXHistoryManager) {
+    init(historyManager: AXHistoryManager?) {
         self.historyManager = historyManager
     }
 
@@ -63,8 +65,9 @@ final class SuggestionsManager {
             .getRelevantSearchSuggestions(prefix: query, minOccurrences: 1)
         onTopSearchesUpdated?(topSearches)
 
-        let historyResults = historyManager.search(query: query)
-        let history = historyResults.map { ($0.title, $0.address) }
+        let history = historyManager
+            .map { $0.search(query: query).map { ($0.title, $0.address) } }
+            ?? []
         onHistoryUpdated?(history)
 
         // Google's autocomplete is a network call — push it off-actor so
