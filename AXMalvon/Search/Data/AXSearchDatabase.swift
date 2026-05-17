@@ -3,144 +3,64 @@
 //  Malvon
 //
 //  Created by Ashwin Paudel on 2024-11-19.
-//  Copyright © 2022-2025 Ashwin Paudel, Aayam(X). All rights reserved.
+//  Copyright © 2022-2026 Ashwin Paudel, Aayam(X). All rights reserved.
 //
 
 import Foundation
-import SQLite3
+import SwiftData
 
-// Perhaps convert this to Core Data rather than SQLite?
-class AXSearchDatabase {
-    private var dbPointer: OpaquePointer?
-    static var shared = AXSearchDatabase()
+/// Cross-profile aggregate of "how often did a typed query resolve to this
+/// URL." Powers the "Top searches" rail in the address bar.
+///
+/// Previously a raw-SQLite singleton; now a thin wrapper over SwiftData's
+/// ``MalvonSearchFrequency`` model. API preserved for call-site compat.
+@MainActor
+final class AXSearchDatabase {
+    static let shared = AXSearchDatabase()
 
-    init() {
-        // Set the path to the Application Support directory
-        let appSupportURL = FileManager.default.urls(
-            for: .applicationSupportDirectory, in: .userDomainMask
-        ).first!
+    private init() {}
 
-        #if DEBUG
-            let directoryURL = appSupportURL.appendingPathComponent(
-                "Malvon-Debug", isDirectory: true)
-        #else
-            let directoryURL = appSupportURL.appendingPathComponent(
-                "Malvon", isDirectory: true)
-        #endif
-        try? FileManager.default.createDirectory(
-            at: directoryURL, withIntermediateDirectories: true)
-        let fileURL = directoryURL.appendingPathComponent("searchData.sqlite")
-        mxPrint("Database file path: \(fileURL)")
-
-        if sqlite3_open(fileURL.path, &dbPointer) != SQLITE_OK {
-            mxPrint(
-                "Error opening database: \(String(cString: sqlite3_errmsg(dbPointer)))"
-            )
-            return
-        }
-
-        // Create the table if it does not exist
-        let createTableQuery =
-            "CREATE TABLE IF NOT EXISTS SearchOccurrences (url TEXT PRIMARY KEY, occurrences INTEGER)"
-        if sqlite3_exec(dbPointer, createTableQuery, nil, nil, nil) != SQLITE_OK
-        {
-            mxPrint(
-                "Error creating table: \(String(cString: sqlite3_errmsg(dbPointer)))"
-            )
-        }
-    }
-
+    /// Increments the visit count for `url`, or inserts a fresh record with
+    /// `occurrences: 1` if this is the first time we've seen it.
     func incrementOccurrence(for url: String) {
-        let selectQuery =
-            "SELECT occurrences FROM SearchOccurrences WHERE url = ?"
-        let updateQuery =
-            "UPDATE SearchOccurrences SET occurrences = occurrences + 1 WHERE url = ?"
-        let insertQuery =
-            "INSERT INTO SearchOccurrences (url, occurrences) VALUES (?, 1)"
-        var statement: OpaquePointer?
+        let context = PersistenceController.shared.mainContext
 
-        // Check if the URL exists
-        if sqlite3_prepare_v2(dbPointer, selectQuery, -1, &statement, nil)
-            == SQLITE_OK
-        {
-            sqlite3_bind_text(
-                statement, 1, (url as NSString).utf8String, -1, nil)
-            if sqlite3_step(statement) == SQLITE_ROW {
-                // URL exists, update occurrences
-                sqlite3_finalize(statement)
-                if sqlite3_prepare_v2(
-                    dbPointer, updateQuery, -1, &statement, nil)
-                    == SQLITE_OK
-                {
-                    sqlite3_bind_text(
-                        statement, 1, (url as NSString).utf8String, -1, nil)
-                    if sqlite3_step(statement) != SQLITE_DONE {
-                        mxPrint(
-                            "Error updating occurrence: \(String(cString: sqlite3_errmsg(dbPointer)))"
-                        )
-                    }
-                }
-            } else {
-                // URL does not exist, insert it
-                sqlite3_finalize(statement)
-                if sqlite3_prepare_v2(
-                    dbPointer, insertQuery, -1, &statement, nil)
-                    == SQLITE_OK
-                {
-                    sqlite3_bind_text(
-                        statement, 1, (url as NSString).utf8String, -1, nil)
-                    if sqlite3_step(statement) != SQLITE_DONE {
-                        mxPrint(
-                            "Error inserting new URL: \(String(cString: sqlite3_errmsg(dbPointer)))"
-                        )
-                    }
-                }
-            }
+        let descriptor = FetchDescriptor<MalvonSearchFrequency>(
+            predicate: #Predicate { $0.url == url }
+        )
+
+        if let existing = try? context.fetch(descriptor).first {
+            existing.occurrences += 1
         } else {
-            mxPrint(
-                "Error preparing select statement: \(String(cString: sqlite3_errmsg(dbPointer)))"
-            )
+            context.insert(MalvonSearchFrequency(url: url, occurrences: 1))
         }
-        sqlite3_finalize(statement)
+
+        do {
+            try context.save()
+        } catch {
+            mxPrint("AXSearchDatabase.incrementOccurrence save failed: \(error)")
+        }
     }
 
+    /// Top URLs whose prefix matches `prefix` and have been visited at least
+    /// `minOccurrences` times, ordered by frequency. Returns at most `limit`.
     func getRelevantSearchSuggestions(
         prefix: String, limit: Int = 4, minOccurrences: Int = 3
     ) -> [String] {
-        let query = """
-                SELECT url FROM SearchOccurrences
-                WHERE url LIKE ? AND occurrences >= ?
-                ORDER BY occurrences DESC
-                LIMIT ?
-            """
-        var statement: OpaquePointer?
-        var suggestions: [String] = []
+        let context = PersistenceController.shared.mainContext
 
-        if sqlite3_prepare_v2(dbPointer, query, -1, &statement, nil)
-            == SQLITE_OK
-        {
-            let prefixWithWildcard = "\(prefix)%"
-            sqlite3_bind_text(
-                statement, 1, (prefixWithWildcard as NSString).utf8String, -1,
-                nil)
-            sqlite3_bind_int(statement, 2, Int32(minOccurrences))
-            sqlite3_bind_int(statement, 3, Int32(limit))
+        var descriptor = FetchDescriptor<MalvonSearchFrequency>(
+            predicate: #Predicate { entry in
+                entry.occurrences >= minOccurrences
+                    && entry.url.starts(with: prefix)
+            },
+            sortBy: [SortDescriptor(\.occurrences, order: .reverse)]
+        )
+        descriptor.fetchLimit = limit
 
-            while sqlite3_step(statement) == SQLITE_ROW {
-                if let urlCStr = sqlite3_column_text(statement, 0) {
-                    suggestions.append(String(cString: urlCStr))
-                }
-            }
-        } else {
-            mxPrint(
-                "Error preparing query: \(String(cString: sqlite3_errmsg(dbPointer)))"
-            )
+        guard let results = try? context.fetch(descriptor) else {
+            return []
         }
-        sqlite3_finalize(statement)
-        return suggestions
-    }
-
-    deinit {
-        sqlite3_close(dbPointer)
+        return results.map(\.url)
     }
 }

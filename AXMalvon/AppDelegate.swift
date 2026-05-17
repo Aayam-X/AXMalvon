@@ -7,6 +7,7 @@
 //
 
 import AppKit
+import SwiftData
 import SwiftUI
 import WebKit
 
@@ -16,6 +17,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     let launchedBefore = UserDefaults.standard.bool(forKey: "launchedBefore")
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        // Import any pre-SwiftData data before opening a window — AXProfile
+        // reads from the SwiftData store on construction, so the migration
+        // has to land first.
+        LegacyMigrator.runIfNeeded(
+            context: PersistenceController.shared.mainContext
+        )
+
         if launchedBefore {
             presentNewWindowIfNeeded()
         } else {
@@ -43,11 +51,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
-        // Save profiles
-        //        for profile in AppDelegate.profiles {
-        //            profile.saveTabGroups()
-        //            profile.historyManager?.flushAndClose()
-        //        }
+        guard let window = mainWindow else { return }
+        for profile in window.profiles {
+            profile.saveTabGroups()
+        }
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool

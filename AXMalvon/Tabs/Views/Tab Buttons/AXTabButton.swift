@@ -17,6 +17,8 @@ protocol AXTabButtonDelegate: AnyObject {
 }
 
 protocol AXTabButton: AnyObject, NSButton {
+    /// Conformers MUST declare this property as `weak` — the delegate is
+    /// the tab bar that owns the button.
     var delegate: AXTabButtonDelegate? { get set }
 
     var favicon: NSImage? { get set }

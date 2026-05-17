@@ -54,7 +54,9 @@ private func searchActionURL(_ value: String, activeProfile: AXProfile?) -> URL
     guard let url = URL(string: value) else { return fallbackURL }
 
     if let activeProfile, activeProfile.name != "Private" {
-        Task(priority: .background) {
+        // The SwiftData-backed search database is @MainActor; fire-and-forget
+        // a tiny main-actor task so we don't block this URL conversion.
+        Task { @MainActor in
             AXSearchDatabase.shared.incrementOccurrence(for: value)
         }
     }

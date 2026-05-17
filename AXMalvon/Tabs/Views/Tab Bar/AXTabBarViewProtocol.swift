@@ -29,6 +29,9 @@ extension AXTabBarViewDelegate {
 }
 
 protocol AXTabBarViewTemplate: AnyObject, NSView, AXTabButtonDelegate {
+    /// Conformers MUST declare this property as `weak` to avoid retain
+    /// cycles — the typical delegate is the owning ``AXWindow``, which
+    /// strongly retains the tab bar.
     var delegate: AXTabBarViewDelegate? { get set }
 
     /// This value represents the currently highlighted tab item.

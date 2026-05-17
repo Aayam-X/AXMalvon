@@ -3,250 +3,187 @@
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2024-12-24.
-//  Copyright © 2022-2025 Ashwin Paudel, Aayam(X). All rights reserved.
+//  Copyright © 2022-2026 Ashwin Paudel, Aayam(X). All rights reserved.
 //
 
 import AppKit
+import SwiftData
 import WebKit
 
-struct AXProfileData: Codable {
-    var configID: String
-    var selectedTabGroupIndex: Int
-
-    // Convert to dictionary for UserDefaults storage
-    func toDictionary() -> [String: Any] {
-        return [
-            "id": configID,
-            "i": selectedTabGroupIndex,
-        ]
-    }
-
-    // Create from a dictionary loaded from UserDefaults
-    static func fromDictionary(_ dictionary: [String: Any]) -> AXProfileData? {
-        guard let configID = dictionary["id"] as? String,
-            let selectedTabGroupIndex = dictionary["i"] as? Int
-        else { return nil }
-
-        return AXProfileData(
-            configID: configID, selectedTabGroupIndex: selectedTabGroupIndex)
-    }
-}
-
+/// Runtime representation of a browsing profile. Wraps a SwiftData
+/// ``MalvonProfile`` for persistent state and a ``WKWebViewConfiguration``
+/// (with an isolated ``WKWebsiteDataStore``) for the live browser.
+@MainActor
 class AXProfile {
-    var name: String
-    var baseConfiguration: WKWebViewConfiguration
+    let name: String
+    let baseConfiguration: WKWebViewConfiguration
+
+    /// SwiftData-backed twin. `nil` for ``AXPrivateProfile`` where everything
+    /// stays in memory.
+    let model: MalvonProfile?
+
     var tabGroups: [AXTabGroup] = []
     weak var currentTabGroup: AXTabGroup!
 
     var historyManager: AXHistoryManager?
-
     var hasLoadedTabs: Bool = false
 
-    var currentTabGroupIndex = 0 {
+    var currentTabGroupIndex: Int {
         didSet {
+            guard currentTabGroupIndex >= 0,
+                  currentTabGroupIndex < tabGroups.count else { return }
             currentTabGroup = tabGroups[currentTabGroupIndex]
+            model?.selectedTabGroupIndex = currentTabGroupIndex
         }
     }
 
+    /// Look up or create a profile by name in the shared SwiftData store.
     convenience init(name: String) {
-        // Check if the profile already exists
-        if let profileData = AXProfile.loadProfile(name: name) {
-            let config = AXProfile.createConfig(with: profileData.configID)
-
-            self.init(
-                name: name, config: config, loadsDefaultData: true,
-                configID: profileData.configID)
-
-            mxPrint(
-                "Current Tab Group Index: \(profileData.selectedTabGroupIndex)")
-
-            #if !DEBUG
-                self.currentTabGroupIndex = profileData.selectedTabGroupIndex
-            #endif
-        } else {
-            let newProfile = AXProfile.createNewProfile(name: name)
-            self.init(
-                name: name, config: newProfile.config, loadsDefaultData: true,
-                configID: newProfile.id)
-        }
+        let context = PersistenceController.shared.mainContext
+        let model = AXProfile.fetchOrCreate(name: name, in: context)
+        self.init(model: model, baseConfiguration: AXProfile.makeConfig(for: model))
     }
 
-    init(
-        name: String, config: WKWebViewConfiguration, loadsDefaultData: Bool,
-        configID: String? = nil, usingTabGroup: AXTabGroup? = nil
+    /// Designated init. Pass `model: nil` from ``AXPrivateProfile``.
+    fileprivate init(
+        model: MalvonProfile?,
+        baseConfiguration: WKWebViewConfiguration
     ) {
-        self.name = name
-        self.baseConfiguration = config
-        self.tabGroups = []
+        self.model = model
+        self.name = model?.name ?? "Private"
+        self.baseConfiguration = baseConfiguration
+        self.currentTabGroupIndex = model?.selectedTabGroupIndex ?? 0
+        self.historyManager = model.map { AXHistoryManager(profile: $0) }
 
-        if let configID {
-            self.historyManager = AXHistoryManager(fileName: configID)
-        }
-
-        config.enableDefaultMalvonPreferences()
-
-        if loadsDefaultData, usingTabGroup == nil {
-            loadTabGroups()
-            self.currentTabGroup = tabGroups[currentTabGroupIndex]
-        } else {
-            self.tabGroups = [usingTabGroup ?? AXTabGroup(name: "NULL")]
-            self.currentTabGroup = tabGroups[0]
-        }
+        loadTabGroups()
     }
 
-    // MARK: - Profile Defaults
-    class private func createNewProfile(name: String) -> (
-        id: String, config: WKWebViewConfiguration
-    ) {
-        let defaults = UserDefaults.standard
-        var profiles =
-            defaults.dictionary(forKey: "Profiles") as? [String: [String: Any]]
-            ?? [:]
+    // MARK: - Tab groups
 
-        // Create new profile data
-        let newProfileData = AXProfileData(
-            configID: UUID().uuidString, selectedTabGroupIndex: 0)
-
-        // Save the new profile data as a dictionary
-        profiles[name] = newProfileData.toDictionary()
-        defaults.set(profiles, forKey: "Profiles")
-
-        // Create a new WKWebView configuration
-        let config = WKWebViewConfiguration()
-        config.websiteDataStore = WKWebsiteDataStore(forIdentifier: UUID())
-        return (newProfileData.configID, config)
-    }
-
-    class func loadProfile(name: String) -> AXProfileData? {
-        let defaults = UserDefaults.standard
-        let profiles =
-            defaults.dictionary(forKey: "Profiles") as? [String: [String: Any]]
-            ?? [:]
-
-        // Load and convert back to AXProfileData
-        if let profileDict = profiles[name] {
-            return AXProfileData.fromDictionary(profileDict)
-        }
-
-        return nil
-    }
-
-    class func createConfig(with id: String) -> WKWebViewConfiguration {
-        let config = WKWebViewConfiguration()
-        if let uuid = UUID(uuidString: id) {
-            config.websiteDataStore = WKWebsiteDataStore(forIdentifier: uuid)
-        }
-        return config
-    }
-
-    // MARK: - Tab Groups JSON
-    private var fileURL: URL {
-        let fileManager = FileManager.default
-        let appSupportDirectory = fileManager.urls(
-            for: .applicationSupportDirectory, in: .userDomainMask
-        ).first!
-
-        #if DEBUG
-            let directoryURL = appSupportDirectory.appendingPathComponent(
-                "Malvon-Debug", isDirectory: true)
-        #else
-            let directoryURL = appSupportDirectory.appendingPathComponent(
-                "Malvon", isDirectory: true)
-        #endif
-
-        if !fileManager.fileExists(atPath: directoryURL.path) {
-            try? fileManager.createDirectory(
-                at: directoryURL, withIntermediateDirectories: true,
-                attributes: nil)
-        }
-
-        return directoryURL.appendingPathComponent("\(name)-TabGroups.json")
-    }
-
-    func saveTabGroups() {
-        guard hasLoadedTabs else { return }
-        hasLoadedTabs = false
-
-        #if !DEBUG
-            let defaults = UserDefaults.standard
-
-            var profiles =
-                defaults.dictionary(forKey: "Profiles")
-                as? [String: [String: Any]] ?? [:]
-            profiles[name, default: [:]]["i"] = currentTabGroupIndex
-            defaults.set(profiles, forKey: "Profiles")
-        #endif
-
-        let encoder = JSONEncoder()
-        do {
-            let data = try encoder.encode(tabGroups)
-            try data.write(to: fileURL)
-        } catch {
-            mxPrint("Failed to save tab groups: \(error)")
-        }
-    }
-
+    /// Reconstruct ``tabGroups`` from the SwiftData store. Subclasses may
+    /// override to provide in-memory-only behavior (e.g. private browsing).
     func loadTabGroups() {
         hasLoadedTabs = true
+        guard let model else { return }
 
-        let decoder = JSONDecoder()
-        decoder.userInfo[.webviewConfiguration] = self.baseConfiguration
+        let sortedGroups = model.tabGroups.sorted { $0.position < $1.position }
+        tabGroups = sortedGroups.map { groupModel in
+            let group = AXTabGroup(name: groupModel.name)
+            group.color = NSColor(hex: groupModel.colorHex)
+            group.icon = groupModel.icon
+            group.selectedIndex = max(0, groupModel.selectedTabIndex)
 
-        do {
-            let data = try Data(contentsOf: fileURL)
-            tabGroups = try decoder.decode([AXTabGroup].self, from: data)
-        } catch {
-            mxPrint(
-                "Failed to load tab groups or file does not exist: \(error)")
+            let sortedTabs = groupModel.tabs.sorted { $0.position < $1.position }
+            group.tabs = sortedTabs.map { tabModel in
+                AXTab(
+                    restoredURL: tabModel.url,
+                    title: tabModel.title,
+                    configuration: baseConfiguration
+                )
+            }
+            return group
+        }
+
+        if tabGroups.isEmpty {
             tabGroups = [AXTabGroup(name: "Untitled Tab Group")]
         }
+
+        let clamped = min(max(0, currentTabGroupIndex), tabGroups.count - 1)
+        currentTabGroupIndex = clamped
+        currentTabGroup = tabGroups[clamped]
+    }
+
+    /// Persist the in-memory ``tabGroups`` to SwiftData. Replaces the previous
+    /// per-profile JSON encoder. Subclasses may override to no-op (private
+    /// browsing).
+    func saveTabGroups() {
+        guard hasLoadedTabs, let model else { return }
+        let context = PersistenceController.shared.mainContext
+
+        // The previous tab groups for this profile are deleted wholesale and
+        // replaced. Tab counts are small (typically < 100) so the simplicity
+        // of a clean rewrite beats diff-tracking individual mutations.
+        for oldGroup in model.tabGroups {
+            context.delete(oldGroup)
+        }
+
+        for (groupPosition, axGroup) in tabGroups.enumerated() {
+            let groupModel = MalvonTabGroup(
+                name: axGroup.name,
+                colorHex: axGroup.color.toHex() ?? "CCCCCCCC",
+                icon: axGroup.icon,
+                position: groupPosition,
+                selectedTabIndex: axGroup.selectedIndex
+            )
+            groupModel.profile = model
+            context.insert(groupModel)
+
+            for (tabPosition, axTab) in axGroup.tabs.enumerated() {
+                let url = axTab.webView?.url ?? axTab.url
+                let tabModel = MalvonTab(
+                    url: url,
+                    title: axTab.title,
+                    position: tabPosition
+                )
+                tabModel.group = groupModel
+                context.insert(tabModel)
+            }
+        }
+
+        model.selectedTabGroupIndex = currentTabGroupIndex
+
+        do {
+            try context.save()
+        } catch {
+            mxPrint("Failed to save profile \(name): \(error)")
+        }
+    }
+
+    // MARK: - Helpers
+
+    private static func fetchOrCreate(
+        name: String, in context: ModelContext
+    ) -> MalvonProfile {
+        let descriptor = FetchDescriptor<MalvonProfile>(
+            predicate: #Predicate { $0.name == name }
+        )
+        if let existing = try? context.fetch(descriptor).first {
+            return existing
+        }
+        let count = (try? context.fetchCount(FetchDescriptor<MalvonProfile>())) ?? 0
+        let new = MalvonProfile(name: name, position: count)
+        context.insert(new)
+        try? context.save()
+        return new
+    }
+
+    private static func makeConfig(for model: MalvonProfile) -> WKWebViewConfiguration {
+        let config = WKWebViewConfiguration()
+        config.websiteDataStore = WKWebsiteDataStore(forIdentifier: model.dataStoreUUID)
+        config.enableDefaultMalvonPreferences()
+        return config
     }
 }
 
-class AXPrivateProfile: AXProfile {
-    //  override var tabGroups: [AXTabGroup] = [.init(name: "Private Tab Group")]
-
+/// Private-browsing profile. Uses a non-persistent ``WKWebsiteDataStore`` and
+/// never touches SwiftData; everything is in-memory and discarded on close.
+@MainActor
+final class AXPrivateProfile: AXProfile {
     init() {
         let config = WKWebViewConfiguration()
         config.websiteDataStore = .nonPersistent()
-
-        let privateTabGroup = AXTabGroup(name: "Private Tab Group")
-        privateTabGroup.color = .black
-
-        super.init(
-            name: "Private", config: config, loadsDefaultData: false,
-            usingTabGroup: privateTabGroup)
-    }
-
-    override func saveTabGroups() {
-        // Do nothing
+        config.enableDefaultMalvonPreferences()
+        super.init(model: nil, baseConfiguration: config)
     }
 
     override func loadTabGroups() {
-        // Do nothing
+        hasLoadedTabs = true
+        let group = AXTabGroup(name: "Private Tab Group")
+        group.color = .black
+        tabGroups = [group]
+        currentTabGroupIndex = 0
+        currentTabGroup = group
     }
+
+    override func saveTabGroups() { /* private mode never persists */ }
 }
-
-// Experimental Features
-
-//        let experimentalFeatures = WKPreferences.value(forKey: "experimentalFeatures")
-// i have to call - (void)_setEnabled:(BOOL)value forFeature:(_WKFeature *)feature WK_API_AVAILABLE(macos(10.12), ios(10.0));
-//        // experimentalFeatures is an array of [_WKFeature]
-//        // how do i do this? i want to set true for all of them
-//        print(experimentalFeatures)
-
-//        let preferences = configuration.preferences
-//
-//        if let experimentalFeatures = WKPreferences.value(forKey: "experimentalFeatures") as? [AnyObject] {
-//            for feature in experimentalFeatures {
-//                // Call the private API method _setEnabled:forFeature: using Objective-C runtime
-//                if let feature = feature as? NSObject {
-//                    let selector = NSSelectorFromString("_setEnabled:forFeature:")
-//                    if preferences.responds(to: selector) {
-//                        preferences.perform(selector, with: false as NSNumber, with: feature)
-//                    }
-//                }
-//            }
-//        } else {
-//            print("Unable to access experimentalFeatures.")
-//        }
