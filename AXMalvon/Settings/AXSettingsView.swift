@@ -38,7 +38,6 @@ enum SettingsSection: String, Identifiable, CaseIterable {
     case appearance
     case profiles
     case notifications
-    case wBlock
 
     var id: String { self.rawValue }
 
@@ -48,7 +47,6 @@ enum SettingsSection: String, Identifiable, CaseIterable {
         case .appearance: return "Appearance"
         case .profiles: return "Profiles"
         case .notifications: return "Notifications"
-        case .wBlock: return "wBlock"
         }
     }
 
@@ -58,7 +56,6 @@ enum SettingsSection: String, Identifiable, CaseIterable {
         case .appearance: return "paintbrush"
         case .profiles: return "person.and.background.dotted"
         case .notifications: return "bell"
-        case .wBlock: return "xmark"
         }
     }
 
@@ -75,8 +72,6 @@ enum SettingsSection: String, Identifiable, CaseIterable {
             AXProfileSettingsView()
         case .notifications:
             NotificationsSettingsView()
-        case .wBlock:
-            AXAdBlockSettingsView()
         }
     }
 }

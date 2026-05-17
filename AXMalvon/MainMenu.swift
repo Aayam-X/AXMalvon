@@ -83,14 +83,9 @@ enum MainMenu {
         var title = NSLocalizedString("About Malvon", comment: "About menu item")
         var menuItem = menu.addItem(withTitle: title, action: #selector(AppDelegate.showAboutView(_:)), keyEquivalent: "")
         menuItem.target = nil
-        
-        // Check for Updates...
-        title = NSLocalizedString("Check for Updates...", comment: "Check for Updates menu item")
-        menuItem = menu.addItem(withTitle: title, action: #selector(AppDelegate.checkForUpdates(_:)), keyEquivalent: "")
-        menuItem.target = nil
-        
+
         menu.addItem(NSMenuItem.separator())
-        
+
         // Preferences…
         title = NSLocalizedString("Preferences…", comment: "Preferences menu item")
         menuItem = menu.addItem(withTitle: title, action: #selector(AppDelegate.showSettings(_:)), keyEquivalent: ",")
@@ -440,11 +435,7 @@ enum MainMenu {
         title = NSLocalizedString("Forward", comment:"Current webpage will go forward.")
         menuItem = menu.addItem(withTitle:title, action:#selector(AXWindow.forwardWebpage(_:)), keyEquivalent:"]")
         menuItem.keyEquivalentModifierMask = [.command]
-        
-        // Forwards
-        title = NSLocalizedString("Enable Content Blockers", comment:"This will turn on ad blockers for a better browsing experience.")
-        menuItem = menu.addItem(withTitle:title, action:#selector(AXWindow.disableContentBlockers(_:)), keyEquivalent:"")
-        
+
         menu.addItem(NSMenuItem.separator())
         
         // Open Location

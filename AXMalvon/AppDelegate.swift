@@ -151,166 +151,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
     }
 
-    @IBAction func checkForUpdates(_ sender: Any?) {
-        ensureUpdaterExists()
-        launchUpdater()
-    }
-}
-
-// MARK: - Malvon Updater
-extension AppDelegate {
-    // Relaunch Malvon
+    /// Re-launches Malvon by spawning a new instance of the current executable
+    /// and terminating this one. Used after settings flows (welcome, cookie import)
+    /// that require a clean process state.
     static func relaunchApplication() {
         guard let executablePath = Bundle.main.executablePath else {
             mxPrint("Could not find the executable path")
             exit(1)
         }
 
-        // Launch a new instance of the app
         let process = Process()
         process.executableURL = URL(fileURLWithPath: executablePath)
 
         do {
-            try process.run()  // Start the new instance
+            try process.run()
         } catch {
             mxPrint("Failed to relaunch the application: \(error)")
             return
         }
 
-        // Terminate the current instance
-        exit(1)
-    }
-
-    /// Background Update Check
-    private func bgU_Check() {
-        DispatchQueue.global(qos: .background).async {
-            guard
-                let bgURL = URL(string: updateURLString)
-            else { return }
-
-            let content = try? String(contentsOf: bgURL, encoding: .utf8)
-
-            guard
-                let currentVersion = Bundle.main.infoDictionary?[
-                    "CFBundleShortVersionString"] as? String,
-                let latestVersion = content
-            else { return }
-
-            if currentVersion.trimmingCharacters(in: .whitespacesAndNewlines)
-                != latestVersion.trimmingCharacters(in: .whitespacesAndNewlines)
-            {
-                DispatchQueue.main.async {
-                    self.bgU_alert()
-                }
-            }
-        }
-    }
-
-    /// Shows an alert asking the user if they would like to update.
-    func bgU_alert() {
-        let alert = NSAlert()
-        alert.messageText = "New Version Available"
-        alert.addButton(withTitle: "Update Now")  // Index 0
-        alert.addButton(withTitle: "Cancel")  // Index 1
-        alert.informativeText =
-            "A new version of Malvon is available. Would you like to update now?"
-
-        let response = alert.runModal()
-
-        if response == .alertFirstButtonReturn {  // First button is "Update Now"
-            launchUpdater()
-        }
-    }
-
-    // Launches the updater app from the Application Support directory
-    private func launchUpdater() {
-        let fileManager = FileManager.default
-        let appSupportDirectory = fileManager.urls(
-            for: .applicationSupportDirectory,
-            in: .userDomainMask
-        ).first!
-        let malvonDirectory = appSupportDirectory.appendingPathComponent(
-            "Malvon",
-            isDirectory: true
-        )
-        let updaterAppURL = malvonDirectory.appendingPathComponent(
-            "Malvon-Updater.app")
-
-        guard fileManager.fileExists(atPath: updaterAppURL.path) else {
-            mxPrint("Updater.app not found in Application Support.")
-            return
-        }
-
-        let workspace = NSWorkspace.shared
-        let configuration = NSWorkspace.OpenConfiguration()
-        configuration.activates = true
-
-        workspace.openApplication(
-            at: updaterAppURL, configuration: configuration
-        ) { success, error in
-            if success != nil {
-                mxPrint("Updater.app launched successfully.")
-            } else if let error = error {
-                mxPrint(
-                    "Failed to launch Updater.app: \(error.localizedDescription)"
-                )
-            }
-        }
-    }
-
-    // Ensures that the Malvon directory and the updater app exist in the Application Support directory
-    private func ensureUpdaterExists() {
-        let fileManager = FileManager.default
-        let appSupportDirectory = fileManager.urls(
-            for: .applicationSupportDirectory,
-            in: .userDomainMask
-        ).first!
-        let malvonDirectory = appSupportDirectory.appendingPathComponent(
-            "Malvon",
-            isDirectory: true
-        )
-
-        // Ensure the Malvon directory exists
-        if !fileManager.fileExists(atPath: malvonDirectory.path) {
-            try? fileManager.createDirectory(
-                at: malvonDirectory,
-                withIntermediateDirectories: true,
-                attributes: nil
-            )
-        }
-
-        let updaterDestination = malvonDirectory.appendingPathComponent(
-            "Malvon-Updater.app",
-            isDirectory: true
-        )
-
-        guard
-            let bundleUpdaterPath = Bundle.main.url(
-                forAuxiliaryExecutable: "Malvon-Updater.app")
-        else {
-            mxPrint("Updater.app not found in bundle.")
-            return
-        }
-
-        do {
-            if !fileManager.fileExists(atPath: updaterDestination.path) {
-                // Copy updater app if it doesn't exist in Application Support
-                try fileManager.copyItem(
-                    at: bundleUpdaterPath, to: updaterDestination)
-                mxPrint("Updater.app copied to Application Support.")
-            } else {
-                // Replace existing updater app
-                _ = try fileManager.replaceItemAt(
-                    updaterDestination, withItemAt: bundleUpdaterPath)
-                mxPrint("Updater.app replaced in Application Support.")
-            }
-
-            // Remove original updater app from bundle
-            try fileManager.removeItem(at: bundleUpdaterPath)
-        } catch {
-            mxPrint(
-                "Failed to manage Updater.app: \(error.localizedDescription)")
-        }
+        exit(0)
     }
 }
 
@@ -321,6 +181,3 @@ func mxPrint(
         Swift.print(items, separator: separator, terminator: terminator)
     #endif
 }
-
-private let updateURLString =
-    "https://raw.githubusercontent.com/ashp0/malvon-website/refs/heads/main/.github/workflows/version.txt"

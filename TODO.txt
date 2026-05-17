@@ -1,4 +1,10 @@
 1. Rewrite the entire logic with NSWindow and activeProfile and currentTabGroupIndex and those variables.
 2. Rewrite the entire search suggestions view.
-3. Think of ways to add support for web extensions and content blockers.
-4. Use DispatchQueue.main.async { [weak self] in ||||||| INCLUDE THE WEAK SELF!!!!
+3. Think of ways to add support for web extensions and content blockers (post-overhaul).
+4. Use modern concurrency for Swift (target Swift 6, strict concurrency).
+5. Migrate persistence to SwiftData (history, search frequency, tab groups).
+6. Sidebar overhaul: collapsible, glass, hover-only close, drag-to-reorder, tab-group color tinting.
+7. Command bar (⌘T / ⌘L): floating NSPanel, scaled-in suggestions, keyboard nav.
+8. Tab group customizer with gradient color slider.
+9. Horizontal tab bar: Chrome-style proportional sizing via Auto Layout.
+10. Polish: mouse buttons 4/5 nav, swipe-to-navigate, ⌘W last-tab-in-group confirm, ⌘⇧T reopen, find-in-page at bottom.

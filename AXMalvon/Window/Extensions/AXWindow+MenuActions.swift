@@ -77,22 +77,6 @@ extension AXWindow {
         //        }
     }
 
-    @IBAction func disableContentBlockers(_ sender: Any) {
-        guard let tab = malvonTabManager.currentTab else { return }
-
-        mxPrint(tab.title, tab.url ?? .applicationDirectory, "Enabling content blockers")
-        AXContentBlockerLoader.shared.disableAdBlock(
-            for: tab.individualWebConfiguration)
-    }
-
-    @IBAction func enableYouTubeAdBlocker(_ sender: Any) {
-        //        if let sender = sender as? NSMenuItem {
-        //            sender.title = "Disable YouTube Ad Blocker (Restart App)"
-        //        }
-        //
-        //        activeProfile.enableYouTubeAdBlocker()
-    }
-
     @IBAction func closeTab(_ sender: Any) {
         guard currentTabGroup.tabs.count != 0 else {
             self.close()
