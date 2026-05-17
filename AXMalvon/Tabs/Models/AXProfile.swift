@@ -52,6 +52,12 @@ class AXProfile {
         self.init(model: model, baseConfiguration: AXProfile.makeConfig(for: model))
     }
 
+    /// Wrap an existing ``MalvonProfile`` already in the store. Used at
+    /// app launch when ``AppDelegate`` enumerates the persisted profiles.
+    convenience init(existing model: MalvonProfile) {
+        self.init(model: model, baseConfiguration: AXProfile.makeConfig(for: model))
+    }
+
     /// Designated init. Pass `model: nil` from ``AXPrivateProfile``.
     fileprivate init(
         model: MalvonProfile?,

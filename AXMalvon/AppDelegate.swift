@@ -7,6 +7,7 @@
 //
 
 import AppKit
+import SwiftData
 import SwiftUI
 import WebKit
 
@@ -91,7 +92,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     @IBAction func showSettings(_ sender: Any?) {
         createSwiftUIWindow(
-            with: AXSettingsView(), title: "Malvon Settings",
+            with: AXSettingsView()
+                .modelContainer(PersistenceController.shared),
+            title: "Malvon Settings",
             size: .init(width: 600, height: 500))
     }
 
@@ -111,20 +114,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let existingWindow = mainWindow, existingWindow.isVisible {
             existingWindow.makeKeyAndOrderFront(nil)
             return existingWindow
-        } else {
-            MainMenu.populateMainMenuAnimated()
-
-            let profiles: [AXProfile] = [
-                .init(name: "Default"),
-                .init(name: "School"),
-            ]
-
-            let newWindow = AXWindow(with: profiles)
-            newWindow.isReleasedWhenClosed = false
-            newWindow.makeKeyAndOrderFront(nil)
-            mainWindow = newWindow
-            return newWindow
         }
+
+        MainMenu.populateMainMenuAnimated()
+
+        let newWindow = AXWindow(with: loadOrCreateProfiles())
+        newWindow.isReleasedWhenClosed = false
+        newWindow.makeKeyAndOrderFront(nil)
+        mainWindow = newWindow
+        return newWindow
+    }
+
+    /// Profiles come from SwiftData on launch. On a fresh install the
+    /// store is empty, so we seed a single "Default" profile and let the
+    /// user add more from Settings.
+    private func loadOrCreateProfiles() -> [AXProfile] {
+        let context = PersistenceController.shared.mainContext
+        let descriptor = FetchDescriptor<MalvonProfile>(
+            sortBy: [SortDescriptor(\.position)]
+        )
+        let models = (try? context.fetch(descriptor)) ?? []
+
+        if models.isEmpty {
+            return [AXProfile(name: "Default")]
+        }
+        return models.map { AXProfile(existing: $0) }
     }
 
     private func createSwiftUIWindow(
