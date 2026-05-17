@@ -1,216 +1,288 @@
 //
-//  AXTabButton.swift
+//  AXVerticalTabButton.swift
 //  AXMalvon
 //
 //  Created by Ashwin Paudel on 2024-11-06.
-//  Copyright © 2022-2025 Ashwin Paudel, Aayam(X). All rights reserved.
+//  Copyright © 2022-2026 Ashwin Paudel, Aayam(X). All rights reserved.
+//
+//  A sidebar tab cell. Layout: 16×16 rounded favicon (with a skeleton
+//  placeholder until the image arrives) + truncating title + hover-only
+//  close button. Selection is rendered with an ``NSGlassEffectView``
+//  backdrop. Hover state can be cleared imperatively by the enclosing
+//  tab bar (used to fix the hover-stuck-during-scroll bug).
 //
 
 import AppKit
 
-class AXVerticalTabButton: NSButton, AXTabButton {
+@MainActor
+final class AXVerticalTabButton: NSButton, AXTabButton {
     weak var delegate: AXTabButtonDelegate?
 
-    // Subviews
-    var favIconImageView: NSImageView! = NSImageView()
-    var titleView: NSTextField! = NSTextField()
-    var closeButton = AXSidebarTabCloseButton()
+    // MARK: - Geometry
+    private static let height: CGFloat = 32
+    private static let cornerRadius: CGFloat = 8
+    private static let faviconSize: CGFloat = 16
+    private static let faviconCornerRadius: CGFloat = 3
 
-    var trackingArea: NSTrackingArea!
+    // MARK: - Subviews
 
-    var webTitle: String = "Untitled" {
+    /// Sits behind the content; opacity animates from 0 → 1 on selection.
+    private let selectionPane: NSGlassEffectView = {
+        let v = NSGlassEffectView()
+        v.style = .regular
+        v.cornerRadius = AXVerticalTabButton.cornerRadius
+        v.translatesAutoresizingMaskIntoConstraints = false
+        v.alphaValue = 0
+        return v
+    }()
+
+    /// Rounded backdrop that doubles as the skeleton placeholder while the
+    /// favicon is loading. Has a faint fill that's visible whenever the
+    /// favicon image hasn't been set.
+    private let faviconBackdrop: NSView = {
+        let v = NSView()
+        v.wantsLayer = true
+        v.layer?.cornerRadius = AXVerticalTabButton.faviconCornerRadius
+        v.layer?.masksToBounds = true
+        v.layer?.backgroundColor = NSColor.tertiaryLabelColor
+            .withAlphaComponent(0.35).cgColor
+        v.translatesAutoresizingMaskIntoConstraints = false
+        return v
+    }()
+
+    private let faviconImageView: NSImageView = {
+        let v = NSImageView()
+        v.imageScaling = .scaleProportionallyUpOrDown
+        v.translatesAutoresizingMaskIntoConstraints = false
+        v.alphaValue = 0
+        v.wantsLayer = true
+        return v
+    }()
+
+    private let titleLabel: NSTextField = {
+        let f = NSTextField(labelWithString: "")
+        f.isEditable = false
+        f.isBordered = false
+        f.drawsBackground = false
+        f.usesSingleLineMode = true
+        f.lineBreakMode = .byTruncatingTail
+        f.alignment = .left
+        f.font = .systemFont(ofSize: 13, weight: .medium)
+        f.textColor = .labelColor
+        f.translatesAutoresizingMaskIntoConstraints = false
+        return f
+    }()
+
+    private let closeButton: AXSidebarTabCloseButton = {
+        let b = AXSidebarTabCloseButton()
+        b.translatesAutoresizingMaskIntoConstraints = false
+        b.image = NSImage(systemSymbolName: "xmark", accessibilityDescription: nil)
+        b.alphaValue = 0
+        return b
+    }()
+
+    // MARK: - State
+
+    private var trackingArea: NSTrackingArea?
+
+    private var isHovering: Bool = false {
         didSet {
-            titleView.stringValue = webTitle
+            guard oldValue != isHovering else { return }
+            applyAppearance(animated: true)
         }
     }
 
     var isSelected: Bool = false {
         didSet {
-            self.updateAppearance()
+            guard oldValue != isSelected else { return }
+            applyAppearance(animated: true)
         }
     }
-    
+
+    var webTitle: String = "Untitled" {
+        didSet { titleLabel.stringValue = webTitle }
+    }
+
     var favicon: NSImage? {
-        get {
-            self.favIconImageView.image
-        }
-        set {
-            self.favIconImageView.image =
-                newValue == nil ? AXTabButtonConstants.defaultFavicon : newValue
+        didSet {
+            applyFavicon(animated: oldValue != favicon)
         }
     }
+
+    /// Tab-group color applied as a subtle tint behind the selection glass.
+    /// Set when the button is created (or when the active tab group
+    /// changes); the glass effect handles its own appearance otherwise.
+    var accentColor: NSColor? {
+        didSet {
+            selectionPane.tintColor = accentColor?.withAlphaComponent(0.35)
+        }
+    }
+
+    // MARK: - Init
 
     required init() {
         super.init(frame: .zero)
-        self.isBordered = false
-        self.bezelStyle = .smallSquare
+        wantsLayer = true
+        isBordered = false
+        bezelStyle = .smallSquare
         title = ""
-
-        self.wantsLayer = true
-        self.layer?.cornerRadius = 10
-        layer?.masksToBounds = false
-        setupViews()
-        setupShadow()
-        updateTrackingAreas()
+        focusRingType = .none
+        layer?.cornerRadius = Self.cornerRadius
+        closeButton.target = self
+        closeButton.action = #selector(handleCloseClick)
+        setupSubviews()
     }
 
     required convenience init?(coder: NSCoder) {
         self.init()
     }
 
-    func setupViews() {
-        self.heightAnchor.constraint(equalToConstant: 33).isActive = true
+    // MARK: - Layout
 
-        // Setup imageView
-        favIconImageView.translatesAutoresizingMaskIntoConstraints = false
-        favIconImageView.image = AXTabButtonConstants.defaultFaviconSleep
-        favIconImageView.contentTintColor = .textBackgroundColor
-            .withAlphaComponent(0.2)
-        addSubview(favIconImageView)
+    private func setupSubviews() {
+        translatesAutoresizingMaskIntoConstraints = false
+        heightAnchor.constraint(equalToConstant: Self.height).isActive = true
 
-        favIconImageView.activateConstraints([
-            .centerY: .view(self),
-            .left: .view(self, constant: 10),
-            .width: .constant(16),
-            .height: .constant(16),
-        ])
-
-        // Setup closeButton
-        closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.target = self
-        closeButton.action = #selector(closeTab)
+        // Selection pane goes in first → backmost.
+        addSubview(selectionPane)
+        addSubview(faviconBackdrop)
+        faviconBackdrop.addSubview(faviconImageView)
+        addSubview(titleLabel)
         addSubview(closeButton)
-        closeButton.image = NSImage(
-            systemSymbolName: "xmark", accessibilityDescription: nil)
 
-        closeButton.activateConstraints([
-            .right: .view(self, constant: -7),
-            .centerY: .view(self),
-            .width: .constant(16),
-            .height: .constant(16),
+        NSLayoutConstraint.activate([
+            // Selection pane fills the cell.
+            selectionPane.leadingAnchor.constraint(equalTo: leadingAnchor),
+            selectionPane.trailingAnchor.constraint(equalTo: trailingAnchor),
+            selectionPane.topAnchor.constraint(equalTo: topAnchor),
+            selectionPane.bottomAnchor.constraint(equalTo: bottomAnchor),
+
+            // Favicon backdrop on the left.
+            faviconBackdrop.leadingAnchor.constraint(
+                equalTo: leadingAnchor, constant: 10),
+            faviconBackdrop.centerYAnchor.constraint(equalTo: centerYAnchor),
+            faviconBackdrop.widthAnchor.constraint(
+                equalToConstant: Self.faviconSize),
+            faviconBackdrop.heightAnchor.constraint(
+                equalToConstant: Self.faviconSize),
+
+            // Favicon image fills its backdrop.
+            faviconImageView.leadingAnchor.constraint(
+                equalTo: faviconBackdrop.leadingAnchor),
+            faviconImageView.trailingAnchor.constraint(
+                equalTo: faviconBackdrop.trailingAnchor),
+            faviconImageView.topAnchor.constraint(
+                equalTo: faviconBackdrop.topAnchor),
+            faviconImageView.bottomAnchor.constraint(
+                equalTo: faviconBackdrop.bottomAnchor),
+
+            // Close button on the right.
+            closeButton.trailingAnchor.constraint(
+                equalTo: trailingAnchor, constant: -7),
+            closeButton.centerYAnchor.constraint(equalTo: centerYAnchor),
+            closeButton.widthAnchor.constraint(equalToConstant: Self.faviconSize),
+            closeButton.heightAnchor.constraint(equalToConstant: Self.faviconSize),
+
+            // Title between favicon and close button.
+            titleLabel.leadingAnchor.constraint(
+                equalTo: faviconBackdrop.trailingAnchor, constant: 8),
+            titleLabel.trailingAnchor.constraint(
+                equalTo: closeButton.leadingAnchor, constant: -6),
+            titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
         ])
-        closeButton.isHidden = !isSelected
 
-        // Setup titleView
-        titleView.translatesAutoresizingMaskIntoConstraints = false
-        titleView.isEditable = false  // This should be set to true in a while :)
-        titleView.alignment = .left
-        titleView.isBordered = false
-        titleView.usesSingleLineMode = true
-        titleView.drawsBackground = false
-        titleView.lineBreakMode = .byTruncatingTail
-        titleView.textColor = .textColor
-        addSubview(titleView)
-        titleView.activateConstraints([
-            .leftRight: .view(favIconImageView, constant: 5),
-            .centerY: .view(self),
-            .rightLeft: .view(closeButton),
-        ])
-
-        titleView.setContentCompressionResistancePriority(
+        titleLabel.setContentCompressionResistancePriority(
             .defaultLow, for: .horizontal)
-        titleView.setContentHuggingPriority(.defaultLow, for: .horizontal)
-    }
-    
-    private func updateAppearance() {
-        let newBackgroundColor: CGColor
-        if isSelected {
-            if effectiveAppearance.name == .vibrantDark
-                || effectiveAppearance.name == .darkAqua
-            {
-                newBackgroundColor = .black
-                layer?.shadowColor = .white
-            } else {
-                newBackgroundColor = .white
-                layer?.shadowColor = .black
-            }
-            layer?.shadowOpacity = 0.3
-            closeButton.isHidden = false
-        } else {
-            newBackgroundColor = .clear
-            layer?.shadowOpacity = 0.0
-            closeButton.isHidden = true
-        }
-
-        if self.layer?.backgroundColor != newBackgroundColor {
-            self.layer?.backgroundColor = newBackgroundColor
-        }
+        titleLabel.setContentHuggingPriority(.defaultLow, for: .horizontal)
     }
 
-    private func setupShadow() {
-        layer?.shadowColor = NSColor.textColor.cgColor
-        layer?.shadowOpacity = 0.0
-        layer?.shadowRadius = 3.0
-        layer?.shadowOffset = CGSize(width: 0, height: 0)
-    }
-}
+    // MARK: - Tracking
 
-// MARK: Tab Functions
-extension AXVerticalTabButton {
-    @objc func closeTab() {
-        delegate?.tabButtonDidRequestClose(self)
-    }
-    
-    // This would be called directly from a button click
-    @objc func switchTab() {
-        delegate?.tabButtonDidSelect(self)
-    }
-}
-
-// MARK: Mouse Functions
-extension AXVerticalTabButton {
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
-        if trackingArea != nil {
-            self.removeTrackingArea(trackingArea)
+        if let trackingArea {
+            removeTrackingArea(trackingArea)
         }
-
-        trackingArea = NSTrackingArea(rect: self.bounds, options: [.activeInKeyWindow, .mouseEnteredAndExited, .inVisibleRect], owner: self, userInfo: nil)
-        self.addTrackingArea(trackingArea)
-    }
-
-    override func mouseDown(with event: NSEvent) {
-        closeButton.isHidden = false
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.1
-            self.animator().layer?.setAffineTransform(
-                CGAffineTransform(scaleX: 1, y: 0.95))
-        }
-
-        self.switchTab()
-        isSelected = true
-    }
-
-    override func mouseUp(with event: NSEvent) {
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.1
-            self.animator().layer?.setAffineTransform(.identity)
-        }
+        let area = NSTrackingArea(
+            rect: bounds,
+            options: [.activeInActiveApp, .mouseEnteredAndExited, .inVisibleRect],
+            owner: self,
+            userInfo: nil
+        )
+        addTrackingArea(area)
+        trackingArea = area
     }
 
     override func mouseEntered(with event: NSEvent) {
-        if !isSelected {
-            NSAnimationContext.runAnimationGroup { _ in
-                self.animator().layer?.backgroundColor = NSColor.systemGray.withAlphaComponent(0.3).cgColor
-            }
-        }
-        // Delay close button appearance
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            self.closeButton.isHidden = false
-        }
+        isHovering = true
     }
 
     override func mouseExited(with event: NSEvent) {
-        if !isSelected {
-            NSAnimationContext.runAnimationGroup { _ in
-                self.animator().layer?.backgroundColor = NSColor.clear.cgColor
-            }
+        isHovering = false
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        delegate?.tabButtonDidSelect(self)
+        isSelected = true
+    }
+
+    /// Forcibly clears hover state. Called by the enclosing tab bar on
+    /// scroll, where AppKit doesn't reliably fire `mouseExited` even
+    /// though the tracking area uses `.inVisibleRect`.
+    func clearHoverState() {
+        guard isHovering else { return }
+        isHovering = false
+    }
+
+    // MARK: - Appearance
+
+    private func applyAppearance(animated: Bool) {
+        let duration: TimeInterval = animated ? 0.15 : 0.0
+        let showClose = isHovering || isSelected
+
+        let nonSelectedHoverColor = NSColor.gray
+            .withAlphaComponent(0.15).cgColor
+        let backgroundColor: CGColor =
+            (!isSelected && isHovering)
+            ? nonSelectedHoverColor
+            : NSColor.clear.cgColor
+
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = duration
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            ctx.allowsImplicitAnimation = true
+            selectionPane.animator().alphaValue = isSelected ? 1 : 0
+            closeButton.animator().alphaValue = showClose ? 1 : 0
+            layer?.backgroundColor = backgroundColor
         }
-        // Delay close button hiding
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            if !self.isSelected {
-                self.closeButton.isHidden = true
-            }
+    }
+
+    private func applyFavicon(animated: Bool) {
+        let duration: TimeInterval = animated ? 0.18 : 0.0
+        let hasFavicon = favicon != nil
+
+        if hasFavicon {
+            faviconImageView.image = favicon
         }
+
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = duration
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            faviconImageView.animator().alphaValue = hasFavicon ? 1 : 0
+        }
+
+        // Skeleton fill is the backdrop layer's background colour; hide it
+        // when the favicon is opaque so transparent favicons don't show a
+        // grey halo.
+        faviconBackdrop.layer?.backgroundColor =
+            hasFavicon
+            ? NSColor.clear.cgColor
+            : NSColor.tertiaryLabelColor.withAlphaComponent(0.35).cgColor
+    }
+
+    // MARK: - Actions
+
+    @objc private func handleCloseClick() {
+        delegate?.tabButtonDidRequestClose(self)
     }
 }

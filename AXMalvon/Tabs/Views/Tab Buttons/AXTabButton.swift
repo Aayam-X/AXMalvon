@@ -27,6 +27,10 @@ protocol AXTabButton: AnyObject, NSButton {
 
     var isSelected: Bool { get set }
 
+    /// Tab-group accent. Used to tint the selection-state glass highlight.
+    /// Nil falls back to a default system glass appearance.
+    var accentColor: NSColor? { get set }
+
     init()
 }
 

@@ -39,12 +39,16 @@ protocol AXTabBarViewTemplate: AnyObject, NSView, AXTabButtonDelegate {
     var selectedTabIndex: Int { get set }
     var tabStackView: NSStackView { get }
 
+    /// Accent color forwarded to newly-created tab buttons; reflects the
+    /// active tab group's `colorHue`.
+    var accentColor: NSColor? { get set }
+
     init()
-    
+
     @discardableResult
     func addTabButton() -> AXTabButton
     func removeTabButton(at index: Int)
-    
+
     func tabButton(at index: Int) -> AXTabButton
 }
 
@@ -52,9 +56,11 @@ extension AXTabBarViewTemplate {
     // Gets rid of all the tabs, and replaces them with new ones
     // I did this so that rather than having 5 different tabViews in the user's memory, there is only a single tabView.
     // And I believe this approach is a really nice one as it helps with battery life and low memory consumption.
-    
+
     /// Similar to NSTableView.reload()
     func updateTabGroup(_ newTabGroup: AXTabGroup) {
+        accentColor = newTabGroup.color
+
         for button in self.tabStackView.arrangedSubviews {
             button.removeFromSuperview()
         }
@@ -63,8 +69,9 @@ extension AXTabBarViewTemplate {
             let button = addTabButton()
             button.favicon = tab.icon
             button.webTitle = tab.title
+            button.accentColor = newTabGroup.color
         }
-        
+
         let button = tabStackView.arrangedSubviews[newTabGroup.selectedIndex] as! AXTabButton
         button.isSelected = true
     }

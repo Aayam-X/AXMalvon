@@ -211,6 +211,10 @@ class AXVerticalLayoutManager: AXBaseLayoutManager {
     }
     
     override func updatedTabGroupColor(in window: AXWindow, color: NSColor) {
-        verticalHostingView.layer?.backgroundColor = color.cgColor
+        // Subtle tint on top of the sidebar's existing glass material.
+        // Full opacity would override the system's sidebar styling and
+        // make the area feel painted-on; ~12% lets the material breathe.
+        verticalHostingView.layer?.backgroundColor =
+            color.withAlphaComponent(0.12).cgColor
     }
 }

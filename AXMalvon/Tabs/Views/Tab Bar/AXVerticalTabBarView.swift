@@ -11,13 +11,19 @@ import WebKit
 
 class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     weak var delegate: (any AXTabBarViewDelegate)?
-    
+
     // Variables
     var selectedTabIndex: Int = 0 {
         didSet {
             updateTabSelection(from: oldValue, to: selectedTabIndex)
         }
     }
+
+    /// Tracks the active tab group's color so newly-created buttons
+    /// (e.g. via ``AXTabsManager/addTab(_:)`` after the user opens a new
+    /// page) pick up the right tint even though they didn't go through
+    /// ``updateTabGroup(_:)``.
+    var accentColor: NSColor?
 
     // Views
     internal var tabStackView = NSStackView()
@@ -76,6 +82,31 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
             .top: .view(clipView),
             // Don't constrain the bottom - let it grow as needed
         ])
+
+        // Bug-3 fix: `.inVisibleRect` tracking areas don't reliably fire
+        // mouseExited when the content scrolls under a stationary cursor,
+        // so hover state could stick on a button that scrolled out from
+        // under the pointer. Listen for live-scroll notifications and
+        // clear hover state on every button. The next mouse move will
+        // re-establish hover on whichever button is actually under the
+        // cursor.
+        clipView.postsBoundsChangedNotifications = true
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(clipViewBoundsDidChange),
+            name: NSView.boundsDidChangeNotification,
+            object: clipView
+        )
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    @objc private func clipViewBoundsDidChange(_ note: Notification) {
+        for case let button as AXVerticalTabButton in tabStackView.arrangedSubviews {
+            button.clearHoverState()
+        }
     }
 
     @discardableResult
@@ -83,12 +114,13 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
         let button = AXVerticalTabButton()
         button.translatesAutoresizingMaskIntoConstraints = false
         button.delegate = self
+        button.accentColor = accentColor
 
         let newIndex = tabStackView.arrangedSubviews.count
         button.tag = newIndex
 
         addButtonToTabView(button)
-        
+
         return button
     }
     
