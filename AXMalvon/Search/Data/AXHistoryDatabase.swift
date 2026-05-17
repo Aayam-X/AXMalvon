@@ -94,23 +94,25 @@ final class AXHistoryManager {
     // MARK: - Search
 
     /// Returns history entries for this profile matching `query` (case-
-    /// insensitive substring in title or address) whose `timesAccessed > 4`,
-    /// sorted by access frequency.
+    /// insensitive substring in title or address), sorted by access
+    /// frequency. Any visited entry is a candidate — the previous "more
+    /// than 4 visits" gate was the reason in-session history never
+    /// appeared in suggestions.
     ///
-    /// SwiftData predicates have limited string-comparison support; we fetch
-    /// the candidate set (filtered by profile + access threshold) and refine
-    /// in Swift. History entry counts per profile are small enough that this
-    /// is fine.
-    func search(query: String) -> [AXHistoryItem] {
+    /// SwiftData predicates have limited string-comparison support; we
+    /// fetch the profile's candidate set and refine in Swift. History
+    /// counts per profile are small enough that this is fine.
+    func search(query: String, limit: Int = 12) -> [AXHistoryItem] {
         let context = PersistenceController.shared.mainContext
         let profileID = profile.id
 
-        let descriptor = FetchDescriptor<MalvonHistoryEntry>(
+        var descriptor = FetchDescriptor<MalvonHistoryEntry>(
             predicate: #Predicate { entry in
-                entry.profile?.id == profileID && entry.timesAccessed > 4
+                entry.profile?.id == profileID
             },
             sortBy: [SortDescriptor(\.timesAccessed, order: .reverse)]
         )
+        descriptor.fetchLimit = 200  // cap candidate set to keep filter cheap
 
         guard let candidates = try? context.fetch(descriptor) else {
             return []
@@ -118,10 +120,12 @@ final class AXHistoryManager {
 
         let needle = query.lowercased()
         return candidates
+            .lazy
             .filter { entry in
                 entry.title.lowercased().contains(needle)
                     || entry.address.lowercased().contains(needle)
             }
+            .prefix(limit)
             .map { entry in
                 AXHistoryItem(
                     title: entry.title,

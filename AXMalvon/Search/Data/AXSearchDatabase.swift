@@ -42,10 +42,13 @@ final class AXSearchDatabase {
         }
     }
 
-    /// Top URLs whose prefix matches `prefix` and have been visited at least
-    /// `minOccurrences` times, ordered by frequency. Returns at most `limit`.
+    /// Top URLs whose prefix matches `prefix` and have been visited at
+    /// least `minOccurrences` times, ordered by frequency. Defaults to a
+    /// threshold of 1 so any URL the user has typed before is eligible —
+    /// the previous default of 3 made first-time URLs invisible until
+    /// they'd been visited multiple times across sessions.
     func getRelevantSearchSuggestions(
-        prefix: String, limit: Int = 4, minOccurrences: Int = 3
+        prefix: String, limit: Int = 4, minOccurrences: Int = 1
     ) -> [String] {
         let context = PersistenceController.shared.mainContext
 

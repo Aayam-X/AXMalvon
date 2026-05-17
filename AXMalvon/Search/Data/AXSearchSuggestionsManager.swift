@@ -57,9 +57,10 @@ final class SuggestionsManager {
     private func performSuggestionsUpdate(query: String) {
         // Local lookups touch the SwiftData mainContext, so they have to
         // run on the main actor. Result sets are bounded (~100s of rows)
-        // so the synchronous cost is acceptable.
+        // so the synchronous cost is acceptable. Threshold is 1 — any
+        // URL the user has typed before is fair game for autocomplete.
         let topSearches = AXSearchDatabase.shared
-            .getRelevantSearchSuggestions(prefix: query, minOccurrences: 3)
+            .getRelevantSearchSuggestions(prefix: query, minOccurrences: 1)
         onTopSearchesUpdated?(topSearches)
 
         let historyResults = historyManager.search(query: query)
