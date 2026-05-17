@@ -126,11 +126,15 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
         addSubview(tabBarView)
         addSubview(bottomLine)
 
+        // Push the workspace header down past the traffic-light cluster.
+        // fullSizeContentView means the sidebar's top is at the window's
+        // very top, which previously caused the tab-group title to crash
+        // into the traffic lights.
         gestureView.activateConstraints([
-            .top: .view(self),
+            .top: .view(self, constant: 30),
             .left: .view(self),
             .right: .view(self, constant: 2),
-            .height: .constant(80),
+            .height: .constant(64),
         ])
 
         bottomLine.activateConstraints([
@@ -139,12 +143,14 @@ class AXVerticalTabHostingView: NSView, AXTabHostingViewProtocol,
             .height: .constant(2),
         ])
 
-        // Tab Bar View
+        // Tab Bar View. Anchor the bottom to the TOP of addNewTabButton
+        // (`.bottomTop`) so the scrolling tab list never overlaps the
+        // sidebar's bottom button row.
         tabBarView.activateConstraints([
             .left: .view(self),
             .right: .view(self, constant: -2),
             .top: .view(bottomLine, constant: 8),
-            .bottom: .view(addNewTabButton, constant: -2),
+            .bottomTop: .view(addNewTabButton, constant: -8),
         ])
 
         // Workspace Swapper Button

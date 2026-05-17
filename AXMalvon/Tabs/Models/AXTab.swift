@@ -145,14 +145,25 @@ final class AXTab: NSObject {
             }
     }
 
+    /// Tear down everything the live web view owns so that when the
+    /// strong reference held by ``NSTabViewItem`` drops, ARC can actually
+    /// deallocate it. Without `stopLoading()` and explicit delegate
+    /// clearing, closed tabs keep their JS contexts running and their
+    /// network requests in flight — what surfaced as "the web view is
+    /// still active" after closing a tab.
     func stopAllObservations() {
         titleObserver?.cancel()
         titleObserver = nil
 
-        if let webView = _webView {
-            let controller = webView.configuration.userContentController
-            controller.removeScriptMessageHandler(forName: "faviconChanged")
-        }
+        guard let webView = _webView else { return }
+
+        let controller = webView.configuration.userContentController
+        controller.removeScriptMessageHandler(forName: "faviconChanged")
+        controller.removeAllUserScripts()
+
+        webView.stopLoading()
+        webView.navigationDelegate = nil
+        webView.uiDelegate = nil
     }
 
     private func initializeUserContentController() {

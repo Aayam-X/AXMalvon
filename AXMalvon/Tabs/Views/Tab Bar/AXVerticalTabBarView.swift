@@ -125,33 +125,22 @@ class AXVerticalTabBarView: NSView, AXTabBarViewTemplate {
     }
     
     func removeTabButton(at index: Int) {
-        let button = tabStackView.arrangedSubviews[index] as! AXTabButton
-        
-        // FIXME: HELP
-        /*
-         Removing tabs: When the selectedTabIndex changes, it updates all the views. Only problem is that the VerticalTabBarView has a 0.05 second animation before removing the tabButton from SuperView. Meaning it would have highlighted the incorrect tab. I believe the fix to this is by sending the selectedTabIndex to the tab bar view, who then selects it AFTER the button has been removed from superView.
-         */
-        //button.removeFromSuperview()
-        
-        // Calculate the off-screen position for the slide animation
-        let finalPosition = button.frame.offsetBy(
-            dx: 0, dy: +button.frame.height)
-
-        // Create the slide animation
-        NSAnimationContext.runAnimationGroup { context in
-            context.duration = 0.05
-            context.timingFunction = CAMediaTimingFunction(name: .easeIn)
-
-            // Slide the button down underneath the stack view
-            button.animator().setFrameOrigin(finalPosition.origin)
-            button.animator().alphaValue = 0  // Fade out as it slides
-        } completionHandler: {
-            // NSAnimationContext completion handlers fire on the main thread,
-            // so we can hop to the main actor synchronously to clean up.
-            MainActor.assumeIsolated {
-                button.removeFromSuperview()
-            }
+        guard index >= 0, index < tabStackView.arrangedSubviews.count else {
+            return
         }
+        let button = tabStackView.arrangedSubviews[index]
+
+        // Remove the button from the layout BEFORE the subsequent
+        // selectedTabIndex update touches the bar. Previously this fired a
+        // 0.05s fade-out animation that kept the button in arrangedSubviews
+        // until the animation completed, which raced with
+        // updateTabSelection — the bug was that the in-flight closing
+        // button stayed visually selected, producing a double-highlight.
+        button.removeFromSuperview()
+
+        // Re-tag every button after this index so callers (close button,
+        // selection events) keep agreeing on indices.
+        updateButtonTags(startingAfter: index)
     }
     
     func tabButton(at index: Int) -> AXTabButton {
@@ -176,27 +165,33 @@ extension AXVerticalTabBarView {
 // MARK: - Private Methods
 extension AXVerticalTabBarView {
     private func updateButtonTags(startingAfter index: Int) {
-        for case let (index, button as AXTabButton) in tabStackView
-            .arrangedSubviews.enumerated().dropFirst(index) {
-            mxPrint("DELETATION START INDEX = \(index)")
-            button.tag = index
+        for case let (i, button as AXTabButton) in tabStackView
+            .arrangedSubviews.enumerated()
+            where i >= index
+        {
+            button.tag = i
         }
     }
 
     private func updateTabSelection(from: Int, to index: Int) {
-        let arragedSubviews = tabStackView.arrangedSubviews
-        let arrangedSubviewsCount = arragedSubviews.count
+        let arrangedSubviews = tabStackView.arrangedSubviews
+        let count = arrangedSubviews.count
 
-        guard arrangedSubviewsCount > index else { fatalError("Nigga whattt") }
+        // Rapid closes can leave a stale selectedTabIndex setter pending
+        // for a count that no longer exists; previously this hit a
+        // fatalError. Bail out cleanly when the new index is out of range
+        // — the next valid selection will rebuild state.
+        guard count > 0, index >= 0, index < count else { return }
 
-        if from >= 0 && from < arrangedSubviewsCount {
-            let previousButton =
-                arragedSubviews[from] as! AXTabButton
+        if from >= 0, from < count, from != index,
+            let previousButton = arrangedSubviews[from] as? AXTabButton
+        {
             previousButton.isSelected = false
         }
 
-        let newButton = arragedSubviews[index] as! AXTabButton
-        newButton.isSelected = true
+        if let newButton = arrangedSubviews[index] as? AXTabButton {
+            newButton.isSelected = true
+        }
     }
 
     private func addButtonToTabView(_ button: NSView) {
